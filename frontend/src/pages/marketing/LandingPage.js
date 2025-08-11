@@ -67,13 +67,17 @@ function LandingPage() {
             </button>
           </div>
         </div>
-        <div className="lp-hero__visual">
-          <div className="lp-card-mockup">
-            <div className="lp-card__chip" />
-            <div className="lp-card__brand">giftygen</div>
-            <div className="lp-card__number">•••• •••• •••• 2025</div>
-            <div className="lp-card__badge">Digital</div>
-            <div className="lp-card__pixels" />
+        <div className="lp-hero__visual" aria-hidden>
+          <div className="lp-giftcard" role="img" aria-label="Digital gift card illustration">
+            <div className="lp-giftcard__ribbon" />
+            <div className="lp-giftcard__brand">giftygen</div>
+            <div className="lp-giftcard__title">Digital Gift Card</div>
+            <div className="lp-giftcard__amount">$ 50</div>
+            <div className="lp-giftcard__meta">
+              <span>To: You</span>
+              <span>From: Sender</span>
+            </div>
+            <div className="lp-giftcard__pixels" />
           </div>
         </div>
       </section>

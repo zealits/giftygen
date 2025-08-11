@@ -149,4 +149,14 @@
   .lp-benefits { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* Gift card visual */
+.lp-giftcard { position: relative; width: 360px; height: 220px; border-radius: 20px; border: 1px solid var(--border); background: linear-gradient(135deg, #1b2030, #121826); box-shadow: 0 12px 30px rgba(0,0,0,0.35); overflow: hidden; }
+.lp-root[data-theme='light'] .lp-giftcard { background: linear-gradient(135deg, #ffffff, #f3f6fb); box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08); }
+.lp-giftcard__ribbon { position: absolute; top: -20px; left: -20px; width: 140px; height: 140px; background: radial-gradient(circle at 30% 30%, rgba(255,215,0,0.9), rgba(255,168,0,0.6)); transform: rotate(45deg); opacity: 0.85; filter: blur(0.2px); }
+.lp-giftcard__brand { position: absolute; top: 16px; right: 16px; font-weight: 800; color: var(--primary-2); }
+.lp-giftcard__title { position: absolute; left: 18px; top: 22px; font-weight: 700; color: var(--white); }
+.lp-giftcard__amount { position: absolute; left: 18px; bottom: 22px; font-size: 28px; font-weight: 800; color: var(--white); }
+.lp-giftcard__meta { position: absolute; right: 18px; bottom: 20px; display: grid; gap: 4px; text-align: right; color: var(--muted); font-size: 12px; }
+.lp-giftcard__pixels { position: absolute; inset: 0; background-image: radial-gradient(rgba(147,168,255,.14) 1px, transparent 1px); background-size: 12px 12px; opacity: 0.3; mask-image: linear-gradient(to left, transparent, rgba(0,0,0,.85) 35%, rgba(0,0,0,1)); }
+
 
