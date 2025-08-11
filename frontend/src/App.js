@@ -6,6 +6,7 @@ import Login from "./components/Auth/Login";
 import Register from "./components/Register";
 import AdminDashboard from "./pages/admin/AdminDashboard.js";
 import UserLanding from "./pages/user/UserLanding.js";
+import LandingPage from "./pages/marketing/LandingPage";
 import Sidebar from "./pages/admin/Sidebar.js";
 import GiftCards from "./pages/admin/GiftCards.js"; // GiftCards page
 import Orders from "./pages/admin/Orders.js"; // GiftCards page
@@ -13,7 +14,7 @@ import Customers from "./pages/admin/Customers.js"; // GiftCards page
 import Reports from "./pages/admin/Reports.js"; // GiftCards page
 import Settings from "./pages/admin/Settings.js"; // GiftCards page
 import RedeemGiftCard from "./pages/admin/RedeemGiftCard.js";
-import { LoadingProvider } from './context/LoadingContext';
+import { LoadingProvider } from "./context/LoadingContext";
 import GiftCardDetails from "./pages/user/GiftCardDetails.js";
 import "./App.css";
 // import 'font-awesome/css/font-awesome.min.css';
@@ -29,102 +30,111 @@ function App() {
 
   // const location = useLocation();
 
-  const {user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const userDetails = user?.user; // Safely access user.user
-
-  
 
   return (
     <LoadingProvider>
-    <div className="app">
-    
-      <Router>
-        {/* Conditionally render Sidebar only if the user is an admin */}
-        {userDetails?.role === "Admin" && pathname !== "/" && <Sidebar />}
+      <div className="app">
+        <Router>
+          {/* Conditionally render Sidebar only on admin routes */}
+          {(() => {
+            const currentPathname =
+              typeof window !== "undefined" && window.location ? window.location.pathname : pathname;
+            const adminPaths = [
+              "/dashboard",
+              "/giftcards",
+              "/orders",
+              "/customers",
+              "/reports",
+              "/settings",
+              "/redeem",
+            ];
+            const isAdminRoute = adminPaths.some((p) => currentPathname && currentPathname.startsWith(p));
+            return userDetails?.role === "Admin" && isAdminRoute ? <Sidebar /> : null;
+          })()}
 
-        <Routes>
-          {/* Public routes */}
-          <Route
-            path="/login"
-            element={user ? <Navigate to={userDetails?.role === "Admin" ? "/dashboard" : "/"} /> : <Login />}
-          />
-          <Route path="/register" element={<Register />} />
+          <Routes>
+            {/* Public routes */}
+            <Route
+              path="/login"
+              element={user ? <Navigate to={userDetails?.role === "Admin" ? "/dashboard" : "/explore"} /> : <Login />}
+            />
+            <Route path="/register" element={<Register />} />
 
-          {/* Conditional Admin Routes */}
+            {/* Conditional Admin Routes */}
 
-          {userDetails?.role === "Admin" && (
-            <>
-              <Route
-                path="/dashboard"
-                element={
-                  <div className="content">
-                    <AdminDashboard />
-                  </div>
-                }
-              />
-              <Route
-                path="/giftcards"
-                element={
-                  <div className="content">
-                    <GiftCards />
-                  </div>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <div className="content">
-                    <Orders />
-                  </div>
-                }
-              />
-              <Route
-                path="/customers"
-                element={
-                  <div className="content">
-                    <Customers />
-                  </div>
-                }
-              />
-              <Route
-                path="/reports"
-                element={
-                  <div className="content">
-                    <Reports />
-                  </div>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <div className="content">
-                    <Settings />
-                  </div>
-                }
-              />
-              <Route
-                path="/redeem"
-                element={
-                  <div className="content">
-                    <RedeemGiftCard />
-                  </div>
-                }
-              />
-            </>
-          )}
+            {userDetails?.role === "Admin" && (
+              <>
+                <Route
+                  path="/dashboard"
+                  element={
+                    <div className="content">
+                      <AdminDashboard />
+                    </div>
+                  }
+                />
+                <Route
+                  path="/giftcards"
+                  element={
+                    <div className="content">
+                      <GiftCards />
+                    </div>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <div className="content">
+                      <Orders />
+                    </div>
+                  }
+                />
+                <Route
+                  path="/customers"
+                  element={
+                    <div className="content">
+                      <Customers />
+                    </div>
+                  }
+                />
+                <Route
+                  path="/reports"
+                  element={
+                    <div className="content">
+                      <Reports />
+                    </div>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <div className="content">
+                      <Settings />
+                    </div>
+                  }
+                />
+                <Route
+                  path="/redeem"
+                  element={
+                    <div className="content">
+                      <RedeemGiftCard />
+                    </div>
+                  }
+                />
+              </>
+            )}
 
-          {/* User landing page */}
-          <Route path="/" element={<UserLanding />} />
-          <Route path="/gift-card/:id" element={<GiftCardDetails />} />
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/" />} />
-
-          <Route path="/" element={<AdminDashboard />} />
-      <Route path="/giftcards" element={<GiftCards />} />
-        </Routes>
-      </Router>
-     
-    </div>
+            {/* Marketing landing page */}
+            <Route path="/" element={<LandingPage />} />
+            {/* Explore/buy gift cards */}
+            <Route path="/explore" element={<UserLanding />} />
+            <Route path="/gift-card/:id" element={<GiftCardDetails />} />
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Router>
+      </div>
     </LoadingProvider>
   );
 }
