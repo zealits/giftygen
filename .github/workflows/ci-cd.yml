@@ -42,15 +42,15 @@ jobs:
         run: |
           ssh admin@dev.zealits.com << 'EOF'
             # If repository exists, back up config and pull latest changes; otherwise, clone the repo
-            if [ -d ~/good-gifts ]; then
-              if [ -f ~/good-gifts/config/config.env ]; then
-                cp ~/good-gifts/config/config.env ~/config.env.bak
+            if [ -d ~/giftygen ]; then
+              if [ -f ~/giftygen/config/config.env ]; then
+                cp ~/giftygen/config/config.env ~/config.env.bak
               fi
-              cd ~/good-gifts
+              cd ~/giftygen
               git pull origin main
             else
-              git clone https://github.com/zealits/good-gifts.git ~/good-gifts
-              cd ~/good-gifts
+              git clone https://github.com/zealits/giftygen.git ~/giftygen
+              cd ~/giftygen
             fi
 
             # Restore the config.env file if backup exists
@@ -68,12 +68,12 @@ jobs:
             cd ..
 
             # Restart the application using PM2
-            if pm2 list | grep -q "good-gifts"; then
-              echo "Restarting good-gifts"
-              pm2 restart good-gifts
+            if pm2 list | grep -q "giftygen"; then
+              echo "Restarting giftygen"
+              pm2 restart giftygen
             else
-              echo "Starting good-gifts"
-              pm2 start npm --name "good-gifts" -- run dev
+              echo "Starting giftygen"
+              pm2 start npm --name "giftygen" -- run dev
             fi
 
             # Check the status of PM2 processes
