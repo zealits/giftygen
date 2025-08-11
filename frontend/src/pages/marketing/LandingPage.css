@@ -9,6 +9,23 @@
   --card: #151924;
   --border: #1e2433;
   --success: #22c55e;
+  --nav-bg: rgba(11, 12, 16, 0.7);
+}
+
+/* Light theme overrides */
+.lp-root[data-theme='light'] {
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --muted: #4b5563;
+  --muted-2: #6b7280;
+  --primary: #3b82f6;
+  --primary-2: #60a5fa;
+  --white: #0b0c10; /* text color in light mode */
+  --card: #f8fafc;
+  --border: #e5e7eb;
+  --success: #16a34a;
+  --nav-bg: rgba(255, 255, 255, 0.75);
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 40%, #ffffff 100%);
 }
 
 .lp-root {
@@ -36,7 +53,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px clamp(16px, 6vw, 72px);
-  background: rgba(11, 12, 16, 0.7);
+  background: var(--nav-bg);
   backdrop-filter: saturate(140%) blur(10px);
   border-bottom: 1px solid var(--border);
 }
@@ -46,7 +63,11 @@
 .lp-nav__links { display: none; gap: 10px; }
 .lp-nav__links button { color: var(--muted-2); background: transparent; border: 0; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
 .lp-nav__links button:hover { color: var(--white); background: #161a25; }
-.lp-nav__cta { display: flex; gap: 10px; }
+.lp-nav__cta { display: flex; gap: 10px; align-items: center; }
+
+/* Theme toggle */
+.lp-toggle { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: transparent; color: var(--white); padding: 8px 10px; border-radius: 10px; cursor: pointer; }
+.lp-toggle:hover { border-color: var(--primary); color: var(--primary-2); }
 
 /* Buttons */
 .lp-btn { background: var(--primary); color: var(--white); border: 0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; }
@@ -94,6 +115,9 @@
 .lp-field { display: grid; gap: 6px; }
 .lp-field label { color: var(--muted-2); font-size: 12px; font-weight: 600; }
 .lp-field input, .lp-field select, .lp-field textarea { background: #0f1422; color: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 12px 12px; }
+.lp-root[data-theme='light'] .lp-field input,
+.lp-root[data-theme='light'] .lp-field select,
+.lp-root[data-theme='light'] .lp-field textarea { background: #ffffff; color: #0b0c10; }
 .lp-field input::placeholder, .lp-field textarea::placeholder { color: #6b7280; }
 .lp-field--full { grid-column: 1 / -1; }
 

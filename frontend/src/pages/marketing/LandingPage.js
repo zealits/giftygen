@@ -1,23 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/giftygen_logo.png";
 
 function LandingPage() {
   const navigate = useNavigate();
+  const [theme, setTheme] = useState(() => localStorage.getItem("giftygen_theme") || "dark");
 
   useEffect(() => {
     // Scroll to top on mount for better first impression
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("giftygen_theme", theme);
+  }, [theme]);
+
   const handleScrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+
   return (
-    <div className="lp-root">
+    <div className="lp-root" data-theme={theme}>
       {/* Navbar */}
       <header className="lp-nav">
         <div className="lp-nav__brand" onClick={() => navigate("/")}>
@@ -32,6 +39,9 @@ function LandingPage() {
           <button onClick={() => handleScrollTo("contact")}>Contact</button>
         </nav>
         <div className="lp-nav__cta">
+          <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === "dark" ? "🌙 Dark" : "☀️ Light"}
+          </button>
           <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/login")}>
             Sign in
           </button>
