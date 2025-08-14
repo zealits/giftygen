@@ -46,31 +46,34 @@ export const createGiftCard = (giftCardData) => async (dispatch) => {
 };
 
 // Action to fetch all gift cards
-export const listGiftCards = (keyword = "", page = 1) => async (dispatch) => {
-  try {
-    console.log("amit")
-    dispatch({ type: LIST_GIFTCARDS_REQUEST }); // Dispatch request action
+export const listGiftCards =
+  (keyword = "", businessSlug = "", page = 1) =>
+  async (dispatch) => {
+    try {
+      console.log("amit");
+      dispatch({ type: LIST_GIFTCARDS_REQUEST }); // Dispatch request action
 
-    // Construct the URL with query parameters
-    const url = `/api/v1/admin/list?keyword=${keyword}&page=${page}`;
-    //const url = `/api/v1/admin/list?keyword=${keyword}&page=${page}`;
-    ///api/v1/admin/list?keyword=${keyword}${refreshAll ? "" : `&page=${page}}
+      // Construct the URL with query parameters
+      const slugQuery = businessSlug ? `&businessSlug=${encodeURIComponent(businessSlug)}` : "";
+      const url = `/api/v1/admin/list?keyword=${encodeURIComponent(keyword)}&page=${page}${slugQuery}`;
+      //const url = `/api/v1/admin/list?keyword=${keyword}&page=${page}`;
+      ///api/v1/admin/list?keyword=${keyword}${refreshAll ? "" : `&page=${page}}
 
-    // Fetch gift cards from the backend
-    const { data } = await axios.get(url);
+      // Fetch gift cards from the backend
+      const { data } = await axios.get(url);
 
-    console.log(data);
-    dispatch({
-      type: LIST_GIFTCARDS_SUCCESS,
-      payload: data.giftCards, // Send the fetched gift cards as payload
-    });
-  } catch (error) {
-    dispatch({
-      type: LIST_GIFTCARDS_FAIL,
-      payload: error.response && error.response.data.message ? error.response.data.message : error.message,
-    });
-  }
-};
+      console.log(data);
+      dispatch({
+        type: LIST_GIFTCARDS_SUCCESS,
+        payload: data.giftCards, // Send the fetched gift cards as payload
+      });
+    } catch (error) {
+      dispatch({
+        type: LIST_GIFTCARDS_FAIL,
+        payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+      });
+    }
+  };
 
 // Update Gift Card Action
 export const updateGiftCard = (id, updatedData) => async (dispatch) => {
@@ -80,7 +83,7 @@ export const updateGiftCard = (id, updatedData) => async (dispatch) => {
     // Make a PUT request with proper headers for multipart form data
     const { data } = await axios.put(`/api/v1/admin/update/${id}`, updatedData, {
       headers: {
-        'Content-Type': 'multipart/form-data', // Changed to handle file upload
+        "Content-Type": "multipart/form-data", // Changed to handle file upload
       },
     });
 
@@ -91,9 +94,7 @@ export const updateGiftCard = (id, updatedData) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: UPDATE_GIFTCARD_FAIL,
-      payload: error.response && error.response.data.message 
-        ? error.response.data.message 
-        : error.message,
+      payload: error.response && error.response.data.message ? error.response.data.message : error.message,
     });
   }
 };
@@ -156,6 +157,3 @@ export const getGiftCardDetails = (id) => async (dispatch) => {
     });
   }
 };
-
-
-

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Line } from "react-chartjs-2";
 import {
@@ -16,16 +17,7 @@ import {
 import "./AdminDashboard.css";
 
 // Register chart components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -44,6 +36,8 @@ const AdminDashboard = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  const { user } = useSelector((state) => state.auth);
+  const businessSlug = user?.user?.businessSlug || "";
 
   const hasFetched = useRef(false); // ✅ Prevent duplicate API calls
 
@@ -66,12 +60,12 @@ const AdminDashboard = () => {
           redemptionResponse,
           revenueGraphResponse,
         ] = await Promise.all([
-          axios.get("/api/v1/admin/list"),
-          axios.get("/api/v1/admin/total-sold"),
-          axios.get("/api/v1/admin/total-revenue"),
-          axios.get("/api/v1/admin/sales-data"),
-          axios.get("/api/v1/admin/total-redemption"),
-          axios.get("/api/v1/admin/last-30-days"),
+          axios.get(`/api/v1/admin/list?businessSlug=${encodeURIComponent(businessSlug)}`),
+          axios.get(`/api/v1/admin/total-sold?businessSlug=${encodeURIComponent(businessSlug)}`),
+          axios.get(`/api/v1/admin/total-revenue?businessSlug=${encodeURIComponent(businessSlug)}`),
+          axios.get(`/api/v1/admin/sales-data?businessSlug=${encodeURIComponent(businessSlug)}`),
+          axios.get(`/api/v1/admin/total-redemption?businessSlug=${encodeURIComponent(businessSlug)}`),
+          axios.get(`/api/v1/admin/last-30-days?businessSlug=${encodeURIComponent(businessSlug)}`),
         ]);
 
         console.log("✅ API responses received!");
@@ -122,7 +116,7 @@ const AdminDashboard = () => {
     return () => {
       console.log("🛑 Cleanup function executed (if necessary)");
     };
-  }, []);
+  }, [businessSlug]);
 
   // // Line chart data and options for gift card sales
   // const chartData = {
@@ -237,12 +231,7 @@ const AdminDashboard = () => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
           if (!chartArea) return;
-          const gradient = ctx.createLinearGradient(
-            0,
-            chartArea.bottom,
-            0,
-            chartArea.top
-          );
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
           gradient.addColorStop(0, "rgba(255, 99, 132, 0.2)");
           gradient.addColorStop(1, "rgba(255, 99, 132, 0.05)");
           return gradient;
@@ -256,7 +245,7 @@ const AdminDashboard = () => {
     datasets: [
       {
         label: "Revenue Generated",
-        data: revenueData.revenue ,
+        data: revenueData.revenue,
         borderColor: "rgb(54, 162, 235)", // Different color for revenue
         fill: true,
         tension: 0.3,
@@ -269,12 +258,7 @@ const AdminDashboard = () => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
           if (!chartArea) return;
-          const gradient = ctx.createLinearGradient(
-            0,
-            chartArea.bottom,
-            0,
-            chartArea.top
-          );
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
           gradient.addColorStop(0, "rgba(54, 162, 235, 0.2)");
           gradient.addColorStop(1, "rgba(54, 162, 235, 0.05)");
           return gradient;
@@ -308,7 +292,6 @@ const AdminDashboard = () => {
           color: "rgba(208, 207, 207, 0.1)",
         },
       },
-     
     },
     plugins: {
       tooltip: {
@@ -383,34 +366,20 @@ const AdminDashboard = () => {
 
         <div className="stat-card">
           <h3>Total Redemption</h3>
-          {loading ? (
-            <div className="skeleton" />
-          ) : (
-            <p>${totalRedemption.toFixed(2)}</p>
-          )}
+          {loading ? <div className="skeleton" /> : <p>${totalRedemption.toFixed(2)}</p>}
         </div>
 
         <div className="stat-card">
           <h3>Total Revenue </h3>
-          {loading ? (
-            <div className="skeleton" />
-          ) : (
-            <p>${totalRevenue.toFixed(2)}</p>
-          )}
+          {loading ? <div className="skeleton" /> : <p>${totalRevenue.toFixed(2)}</p>}
         </div>
       </div>
 
       <div className="admin-view-toggle-buttons">
-        <button
-          onClick={handleSalesView}
-          className={view === "sales" ? "active-view-button" : "view-button"}
-        >
+        <button onClick={handleSalesView} className={view === "sales" ? "active-view-button" : "view-button"}>
           Sales
         </button>
-        <button
-          onClick={handleRevenueView}
-          className={view === "revenue" ? "active-view-button" : "view-button"}
-        >
+        <button onClick={handleRevenueView} className={view === "revenue" ? "active-view-button" : "view-button"}>
           Revenue
         </button>
       </div>
@@ -419,11 +388,7 @@ const AdminDashboard = () => {
       {view === "sales" && (
         <div className="graphs-section">
           <h3>Gift Card Sales (Last 30 Days)</h3>
-          {loading ? (
-            <div className="skeleton-graph" />
-          ) : (
-            <Line data={chartData} options={chartOptions} />
-          )}
+          {loading ? <div className="skeleton-graph" /> : <Line data={chartData} options={chartOptions} />}
         </div>
       )}
 
@@ -431,11 +396,7 @@ const AdminDashboard = () => {
       {view === "revenue" && (
         <div className="graphs-section">
           <h3>Gift Card Revenue (Last 30 Days)</h3>
-          {loading ? (
-            <div className="skeleton-graph" />
-          ) : (
-            <Line data={revenueChartData} options={chartOptions} />
-          )}
+          {loading ? <div className="skeleton-graph" /> : <Line data={revenueChartData} options={chartOptions} />}
         </div>
       )}
     </div>

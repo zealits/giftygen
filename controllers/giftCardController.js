@@ -50,6 +50,7 @@ const createGiftCard = async (req, res) => {
       discount,
       expirationDate,
       giftCardImg: giftCardImgUrl,
+      businessSlug: req.user?.businessSlug || req.body.businessSlug || undefined,
     });
 
     console.log(giftCard);
@@ -94,11 +95,15 @@ const getGiftCardById = async (req, res) => {
 // Get all gift cards
 const getAllGiftCards = async (req, res) => {
   try {
-    const giftCardCount = await GiftCard.countDocuments();
+    const { businessSlug } = req.query || {};
+    const filter = businessSlug ? { businessSlug } : {};
+    const giftCardCount = await GiftCard.countDocuments(filter);
     console.log("GiftCard Count:", giftCardCount); // Debugging
     const resultPerPage = 100;
 
-    const apiFeatures = new ApiFeatures(GiftCard.find(), req.query).search().pagination(resultPerPage);
+    const baseQuery = businessSlug ? GiftCard.find({ businessSlug }) : GiftCard.find();
+
+    const apiFeatures = new ApiFeatures(baseQuery, req.query).search().pagination(resultPerPage);
 
     const giftCards = await apiFeatures.query;
 
@@ -115,7 +120,9 @@ const getAllGiftCards = async (req, res) => {
 
 const getTotalGiftCardsSold = async (req, res) => {
   try {
-    const allGiftCards = await GiftCard.find();
+    const { businessSlug } = req.query || {};
+    const filter = businessSlug ? { businessSlug } : {};
+    const allGiftCards = await GiftCard.find(filter);
     const totalSold = allGiftCards.reduce((sum, card) => sum + (card.buyers?.length || 0), 0);
 
     res.status(200).json({ totalSold });
@@ -125,11 +132,12 @@ const getTotalGiftCardsSold = async (req, res) => {
   }
 };
 
-
 const getSoldGiftCards = async (req, res) => {
   try {
+    const { businessSlug } = req.query || {};
+    const filter = businessSlug ? { businessSlug } : {};
     // Fetch only gift cards with buyers (indicating they are sold)
-    const soldGiftCards = await GiftCard.find({ "buyers.0": { $exists: true } });
+    const soldGiftCards = await GiftCard.find({ ...filter, "buyers.0": { $exists: true } });
 
     // Map gift cards to include only relevant details
     const giftCards = soldGiftCards.map((card) => ({
@@ -150,7 +158,9 @@ const getSoldGiftCards = async (req, res) => {
 
 const getTotalRevenue = async (req, res) => {
   try {
-    const allGiftCards = await GiftCard.find();
+    const { businessSlug } = req.query || {};
+    const filter = businessSlug ? { businessSlug } : {};
+    const allGiftCards = await GiftCard.find(filter);
 
     const totalRevenue = allGiftCards.reduce((sum, card) => {
       if (!card.amount || !card.discount) {
@@ -172,6 +182,7 @@ const getTotalRevenue = async (req, res) => {
 const getSalesTrends = async (req, res) => {
   try {
     const { period } = req.query; // period: 'daily', 'weekly', 'monthly'
+    const { businessSlug } = req.query || {};
 
     // Define the start of the time period
     const dateNow = new Date();
@@ -194,7 +205,9 @@ const getSalesTrends = async (req, res) => {
     console.log("Start Date:", startDate); // Log the start date for the given period
 
     // Fetch gift cards with buyers who have purchased after the start date
+    const baseFilter = businessSlug ? { businessSlug } : {};
     const allGiftCards = await GiftCard.find({
+      ...baseFilter,
       "buyers.purchaseDate": { $gte: startDate },
     });
 
@@ -227,6 +240,7 @@ const getSalesTrends = async (req, res) => {
 
 const getSalesData = async (req, res) => {
   try {
+    const { businessSlug } = req.query || {};
     // Get the current date and 30 days ago
     const endDate = new Date();
     const startDate = new Date();
@@ -236,25 +250,18 @@ const getSalesData = async (req, res) => {
     console.log("End Date:", endDate);
 
     // Query the database for sales data in the past 30 days based on the 'purchaseDate' of buyers
-    const salesData = await GiftCard.aggregate([
-      {
-        $unwind: "$buyers", // Unwind the 'buyers' array to work with each individual purchase
-      },
-      {
-        $match: {
-          "buyers.purchaseDate": { $gte: startDate, $lte: endDate },
-        },
-      },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$buyers.purchaseDate" } }, // Group by purchaseDate
-          sales: { $sum: 1 }, // Sum the sales for each day
-        },
-      },
-      {
-        $sort: { _id: 1 }, // Sort by date (ascending)
-      },
-    ]);
+    const pipeline = [];
+    if (businessSlug) {
+      pipeline.push({ $match: { businessSlug } });
+    }
+    pipeline.push(
+      { $unwind: "$buyers" },
+      { $match: { "buyers.purchaseDate": { $gte: startDate, $lte: endDate } } },
+      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$buyers.purchaseDate" } }, sales: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    );
+
+    const salesData = await GiftCard.aggregate(pipeline);
 
     console.log("Sales Data (raw aggregation):", salesData);
 
@@ -345,6 +352,14 @@ const updateGiftCard = async (req, res) => {
       return res.status(404).json({ message: "Gift card not found" });
     }
 
+    // Enforce business ownership for admins
+    if (req.user?.role === "Admin") {
+      const userSlug = req.user.businessSlug;
+      if (existingGiftCard.businessSlug && userSlug && existingGiftCard.businessSlug !== userSlug) {
+        return res.status(403).json({ message: "Not authorized to update this gift card" });
+      }
+    }
+
     let giftCardImgUrl = existingGiftCard.giftCardImg; // Keep existing image by default
 
     if (req.file) {
@@ -361,10 +376,7 @@ const updateGiftCard = async (req, res) => {
 
       // Delete the old image from Cloudinary (optional)
       if (existingGiftCard.giftCardImg) {
-        const oldImagePublicId = existingGiftCard.giftCardImg
-          .split("/")
-          .pop()
-          .split(".")[0]; // Extract public ID from URL
+        const oldImagePublicId = existingGiftCard.giftCardImg.split("/").pop().split(".")[0]; // Extract public ID from URL
         await cloudinary.uploader.destroy(`gift_cards/${oldImagePublicId}`);
       }
 
@@ -377,11 +389,10 @@ const updateGiftCard = async (req, res) => {
     }
 
     // Update the gift card fields
-    const updatedGiftCard = await GiftCard.findByIdAndUpdate(
-      id,
-      { ...req.body, giftCardImg: giftCardImgUrl },
-      { new: true }
-    );
+    const updates = { ...req.body, giftCardImg: giftCardImgUrl };
+    // Preserve businessSlug; do not allow changing businessSlug via update
+    delete updates.businessSlug;
+    const updatedGiftCard = await GiftCard.findByIdAndUpdate(id, updates, { new: true });
     console.log("Updated Gift Card:", updatedGiftCard);
 
     res.status(200).json(updatedGiftCard);
@@ -391,11 +402,20 @@ const updateGiftCard = async (req, res) => {
   }
 };
 
-
 // Delete a gift card
 const deleteGiftCard = async (req, res) => {
   try {
     const { id } = req.params;
+    const existing = await GiftCard.findById(id);
+    if (!existing) {
+      return res.status(404).json({ message: "Gift card not found" });
+    }
+    if (req.user?.role === "Admin") {
+      const userSlug = req.user.businessSlug;
+      if (existing.businessSlug && userSlug && existing.businessSlug !== userSlug) {
+        return res.status(403).json({ message: "Not authorized to delete this gift card" });
+      }
+    }
     const deletedGiftCard = await GiftCard.findByIdAndDelete(id);
     if (!deletedGiftCard) {
       return res.status(404).json({ message: "Gift card not found" });
@@ -1079,17 +1099,19 @@ const getAllBuyers = async (req, res) => {
 
 const totalRedemptionValue = async (req, res) => {
   try {
+    const { businessSlug } = req.query || {};
+    const pipeline = [];
+    if (businessSlug) {
+      pipeline.push({ $match: { businessSlug } });
+    }
     // Use aggregation to sum up the redeemedAmount for all buyers in all gift cards
-    const totalRedemption = await GiftCard.aggregate([
-      { $unwind: "$buyers" }, // Unwind buyers array
-      { $unwind: "$buyers.redemptionHistory" }, // Unwind redemptionHistory array
-      {
-        $group: {
-          _id: null, // Group all data together
-          totalRedemption: { $sum: "$buyers.redemptionHistory.redeemedAmount" }, // Sum the redeemedAmount
-        },
-      },
-    ]);
+    pipeline.push(
+      { $unwind: "$buyers" },
+      { $unwind: "$buyers.redemptionHistory" },
+      { $group: { _id: null, totalRedemption: { $sum: "$buyers.redemptionHistory.redeemedAmount" } } }
+    );
+
+    const totalRedemption = await GiftCard.aggregate(pipeline);
 
     if (totalRedemption.length > 0) {
       res.json({ totalRedemption: totalRedemption[0].totalRedemption });
@@ -1104,13 +1126,16 @@ const totalRedemptionValue = async (req, res) => {
 
 const getRevenueForLast30Days = async (req, res) => {
   try {
+    const { businessSlug } = req.query || {};
     // Calculate the start and end date for the last 30 days
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 30);
 
     // Fetch gift cards sold within the last 30 days
+    const baseFilter = businessSlug ? { businessSlug } : {};
     const giftCards = await GiftCard.find({
+      ...baseFilter,
       "buyers.purchaseDate": { $gte: startDate, $lt: endDate },
     });
 

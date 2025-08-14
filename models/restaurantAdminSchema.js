@@ -10,6 +10,8 @@ const restaurantAdminSchema = new mongoose.Schema(
     password: { type: String, required: true }, // Hashed password
     phone: { type: String },
     restaurantName: { type: String }, // Name of the restaurant
+    businessSlug: { type: String, unique: true, sparse: true }, // URL-friendly business identifier
+    logoUrl: { type: String }, // Business logo stored on Cloudinary
     restaurantAddress: {
       street: { type: String },
       city: { type: String },
@@ -22,6 +24,10 @@ const restaurantAdminSchema = new mongoose.Schema(
     verificationCodeExpire: { type: Date }, // OTP expiration
     resetPasswordToken: { type: String }, // Password reset token
     resetPasswordExpire: { type: Date }, // Password reset expiration
+    // Square (per-business) configuration
+    squareApplicationId: { type: String },
+    squareLocationId: { type: String },
+    squareAccessToken: { type: String },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt fields

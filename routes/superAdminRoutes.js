@@ -7,6 +7,7 @@ const {
   getRegistrationRequest,
   updateRegistrationRequestStatus,
   getRegistrationStats,
+  createBusinessAdmin,
 } = require("../controllers/superAdminController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 
@@ -33,5 +34,8 @@ router.put(
 
 // Statistics (Protected)
 router.get("/stats", isAuthenticatedUser, authorizeRoles("SuperAdmin"), getRegistrationStats);
+
+// Create Business Admin (Protected)
+router.post("/business-admin", isAuthenticatedUser, authorizeRoles("SuperAdmin"), createBusinessAdmin);
 
 module.exports = router;

@@ -40,6 +40,10 @@ const giftCardSchema = new mongoose.Schema(
     giftCardImg: {
       type: String,
     },
+    businessSlug: {
+      type: String, // which business owns this gift card
+      index: true,
+    },
     buyers: [
       {
         purchaseType: {
@@ -155,7 +159,7 @@ const giftCardSchema = new mongoose.Schema(
             remainingAmount: {
               type: Number, // New field for tracking remaining balance
             },
-          }
+          },
         ],
       },
     ],

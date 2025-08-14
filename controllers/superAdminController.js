@@ -1,5 +1,6 @@
 const SuperAdmin = require("../models/superAdminSchema");
 const RegistrationRequest = require("../models/registrationRequestSchema");
+const RestaurantAdmin = require("../models/restaurantAdminSchema");
 const sendToken = require("../utils/jwtToken");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ErrorHander = require("../utils/errorhander");
@@ -134,5 +135,62 @@ exports.getRegistrationStats = catchAsyncErrors(async (req, res, next) => {
       approved,
       rejected,
     },
+  });
+});
+
+// Create Business Admin (generate password and email)
+exports.createBusinessAdmin = catchAsyncErrors(async (req, res, next) => {
+  const { email, restaurantName, name, phone, businessSlug, password } = req.body;
+
+  if (!email || !restaurantName) {
+    return next(new ErrorHander("Email and restaurantName are required", 400));
+  }
+
+  const existing = await RestaurantAdmin.findOne({ email });
+  if (existing) {
+    return next(new ErrorHander("Restaurant admin already exists for this email", 409));
+  }
+
+  // generate slug if not provided
+  const slugFromName = (restaurantName || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const finalSlug = (businessSlug || slugFromName).substring(0, 60);
+
+  // optional: ensure slug uniqueness by appending counter
+  let uniqueSlug = finalSlug;
+  let counter = 1;
+  while (await RestaurantAdmin.findOne({ businessSlug: uniqueSlug })) {
+    uniqueSlug = `${finalSlug}-${counter++}`;
+  }
+
+  const generatedPassword = password || Math.random().toString(36).slice(-10) + "A1!";
+
+  const admin = new RestaurantAdmin({
+    name: name || restaurantName,
+    email,
+    password: generatedPassword,
+    phone: phone || undefined,
+    restaurantName,
+    businessSlug: uniqueSlug,
+    isVerified: true,
+  });
+
+  await admin.save();
+
+  // Optionally email credentials here with sendEmail if desired
+
+  res.status(201).json({
+    success: true,
+    message: "Business admin created",
+    admin: {
+      id: admin._id,
+      email: admin.email,
+      restaurantName: admin.restaurantName,
+      businessSlug: admin.businessSlug,
+    },
+    credentials: { email: admin.email, password: generatedPassword },
   });
 });

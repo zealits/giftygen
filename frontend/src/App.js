@@ -109,6 +109,8 @@ function AppRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/explore" element={<UserLanding />} />
         <Route path="/gift-card/:id" element={<GiftCardDetails />} />
+        <Route path="/:businessSlug/giftcards" element={<UserLanding />} />
+        <Route path="/:businessSlug/gift-card/:id" element={<GiftCardDetails />} />
 
         {/* Super Admin Routes */}
         <Route path="/superlogin" element={<SuperAdminLogin />} />

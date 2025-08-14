@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense, useRef, useCallback } from "react";
 import "./UserLanding.css";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { setLocation } from "../../services/Reducers/locationSlice";
 import { listGiftCards } from "../../services/Actions/giftCardActions";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,6 +41,7 @@ const UserLanding = () => {
 
   const CARDS_PER_PAGE = 6;
   const location = useLocation();
+  const { businessSlug } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const observer = useRef();
@@ -48,27 +49,27 @@ const UserLanding = () => {
 
   const { giftCards, loading, error } = useSelector((state) => state.giftCardList);
 
-  // Fetch initial cards when search term or category changes
+  // Fetch initial cards when search term or business changes
   useEffect(() => {
     // Reset state for new search/filter
     setPage(1);
     setVisibleCards([]);
     setAllCards([]);
     setHasMore(true);
-    
-    dispatch(listGiftCards(searchTerm, filterCategory));
-  }, [dispatch, searchTerm, filterCategory]);
+
+    dispatch(listGiftCards(searchTerm, businessSlug || ""));
+  }, [dispatch, searchTerm, businessSlug]);
 
   // Store all fetched cards
   useEffect(() => {
     if (giftCards && !loading) {
       setAllCards(giftCards);
-      
+
       // Initially show only first batch of cards
       if (page === 1) {
         setVisibleCards(giftCards.slice(0, CARDS_PER_PAGE));
       }
-      
+
       // Determine if there are more cards to load
       setHasMore(giftCards.length > visibleCards.length);
       setIsFetchingMore(false);
@@ -81,46 +82,53 @@ const UserLanding = () => {
   }, [location.pathname, dispatch]);
 
   // Intersection Observer setup for infinite scrolling
-  const lastCardElementRef = useCallback(node => {
-    if (loading || isFetchingMore) return;
-    if (observer.current) observer.current.disconnect();
-    
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        loadMoreCards();
-      }
-    });
-    
-    if (node) observer.current.observe(node);
-  }, [loading, hasMore, isFetchingMore]);
+  const lastCardElementRef = useCallback(
+    (node) => {
+      if (loading || isFetchingMore) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          loadMoreCards();
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore, isFetchingMore]
+  );
 
   // Function to load more cards as user scrolls
   const loadMoreCards = () => {
     if (!hasMore || isFetchingMore) return;
-    
+
     setIsFetchingMore(true);
-    
+
     // Simulate loading delay for better UX
     setTimeout(() => {
       const nextBatch = allCards.slice(visibleCards.length, visibleCards.length + CARDS_PER_PAGE);
-      setVisibleCards(prev => [...prev, ...nextBatch]);
-      setPage(prev => prev + 1);
+      setVisibleCards((prev) => [...prev, ...nextBatch]);
+      setPage((prev) => prev + 1);
       setIsFetchingMore(false);
-      
+
       // Check if we have more cards to load
       setHasMore(visibleCards.length + nextBatch.length < allCards.length);
     }, 800);
   };
 
   const handleCardClick = (cardId, event) => {
-    if (event.target.closest('.purchase-card-button')) return;
-    
+    if (event.target.closest(".purchase-card-button")) return;
+
     // Show loader and delay navigation for visual effect
     setIsLoading(true);
-    
+
     // Navigate after a slight delay to show the loader
     setTimeout(() => {
-      navigate(`/gift-card/${cardId}`);
+      if (businessSlug) {
+        navigate(`/${businessSlug}/gift-card/${cardId}`);
+      } else {
+        navigate(`/gift-card/${cardId}`);
+      }
     }, 1800); // Adjust time as needed for best UX
   };
 
@@ -172,56 +180,55 @@ const UserLanding = () => {
 
       <div className="purchase-card-container">
         {/* Initial loading state */}
-        {loading && visibleCards.length === 0 ? (
-          // Show skeletons for initial load
-          Array(6).fill().map((_, index) => (
-            <GiftCardSkeleton key={`initial-skeleton-${index}`} />
-          ))
-        ) : (
-          // Show loaded cards
-          visibleCards.map((card, index) => {
-            // Add reference to last card for infinite scroll trigger
-            const isLastElement = index === visibleCards.length - 1;
-            
-            return (
-              <div
-                className="purchase-card"
-                key={card._id}
-                ref={isLastElement ? lastCardElementRef : null}
-                onClick={(e) => handleCardClick(card._id, e)}
-              >
-                <div className="purchase-card-image">
-                  <img src={card.giftCardImg} alt="Gift Card" loading="lazy" />
-                  <div className="purchase-card-tag">
-                    <i className={card.icon}></i> {card.giftCardTag}
+        {loading && visibleCards.length === 0
+          ? // Show skeletons for initial load
+            Array(6)
+              .fill()
+              .map((_, index) => <GiftCardSkeleton key={`initial-skeleton-${index}`} />)
+          : // Show loaded cards
+            visibleCards.map((card, index) => {
+              // Add reference to last card for infinite scroll trigger
+              const isLastElement = index === visibleCards.length - 1;
+
+              return (
+                <div
+                  className="purchase-card"
+                  key={card._id}
+                  ref={isLastElement ? lastCardElementRef : null}
+                  onClick={(e) => handleCardClick(card._id, e)}
+                >
+                  <div className="purchase-card-image">
+                    <img src={card.giftCardImg} alt="Gift Card" loading="lazy" />
+                    <div className="purchase-card-tag">
+                      <i className={card.icon}></i> {card.giftCardTag}
+                    </div>
+                  </div>
+                  <div className="purchase-card-content">
+                    <h2 className="purchase-card-title">{card.giftCardName}</h2>
+                    <p className="purchase-card-description">{card.description}</p>
+                    <div className="purchase-card-info">
+                      <span className="purchase-card-price">$ {card.amount}</span>
+                      <span className="purchase-card-discount">{card.discount} % Off</span>
+                    </div>
+                    <button
+                      className="purchase-card-button"
+                      onClick={(e) => handleBuyNow(e, card.giftCardName, card.amount, card.discount, card._id)}
+                    >
+                      Buy Now
+                    </button>
                   </div>
                 </div>
-                <div className="purchase-card-content">
-                  <h2 className="purchase-card-title">{card.giftCardName}</h2>
-                  <p className="purchase-card-description">{card.description}</p>
-                  <div className="purchase-card-info">
-                    <span className="purchase-card-price">$ {card.amount}</span>
-                    <span className="purchase-card-discount">{card.discount} % Off</span>
-                  </div>
-                  <button
-                    className="purchase-card-button"
-                    onClick={(e) => handleBuyNow(e, card.giftCardName, card.amount, card.discount, card._id)}
-                  >
-                    Buy Now
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
-        
+              );
+            })}
+
         {/* Show skeletons when fetching more cards */}
-        {!loading && isFetchingMore && hasMore && (
+        {!loading &&
+          isFetchingMore &&
+          hasMore &&
           // Show skeletons for the next batch as user scrolls
-          Array(3).fill().map((_, index) => (
-            <GiftCardSkeleton key={`more-skeleton-${index}`} />
-          ))
-        )}
+          Array(3)
+            .fill()
+            .map((_, index) => <GiftCardSkeleton key={`more-skeleton-${index}`} />)}
       </div>
 
       <Suspense fallback={<div>Loading Gift Card Form...</div>}>
@@ -252,12 +259,15 @@ const UserLanding = () => {
               <input type="text" placeholder="Recipient's Name" id="recipient-name" />
               <textarea placeholder="Add a personal message..." id="personal-message"></textarea>
               <input type="text" placeholder="Occasion (e.g., Birthday)" id="occasion" />
-              <button id="save-personalization" onClick={() => {
-                const name = document.getElementById("recipient-name").value;
-                const message = document.getElementById("personal-message").value;
-                const occasion = document.getElementById("occasion").value;
-                alert(`Personalization Saved:\nRecipient: ${name}\nMessage: ${message}\nOccasion: ${occasion}`);
-              }}>
+              <button
+                id="save-personalization"
+                onClick={() => {
+                  const name = document.getElementById("recipient-name").value;
+                  const message = document.getElementById("personal-message").value;
+                  const occasion = document.getElementById("occasion").value;
+                  alert(`Personalization Saved:\nRecipient: ${name}\nMessage: ${message}\nOccasion: ${occasion}`);
+                }}
+              >
                 Send Gift Card
               </button>
             </div>

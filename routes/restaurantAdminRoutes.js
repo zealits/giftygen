@@ -7,8 +7,10 @@ const {
   verifyOTP,
   getUserDetails,
   logout,
+  updateBusinessSettings,
 } = require("../controllers/restaurantAdminController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
+const upload = require("../middleware/multer");
 
 const router = express.Router();
 
@@ -33,5 +35,15 @@ const { captureRegistrationInterest } = require("../controllers/restaurantAdminC
 router.post("/registration-interest", captureRegistrationInterest);
 
 router.get("/logout", logout);
+
+// Update business settings
+router.put("/settings", isAuthenticatedUser, authorizeRoles("Admin"), updateBusinessSettings);
+
+// Upload logo
+const { uploadBusinessLogo, generateQrPoster } = require("../controllers/restaurantAdminController");
+router.post("/settings/logo", isAuthenticatedUser, authorizeRoles("Admin"), upload.single("logo"), uploadBusinessLogo);
+
+// Generate QR poster
+router.get("/settings/qr-poster", isAuthenticatedUser, authorizeRoles("Admin"), generateQrPoster);
 
 module.exports = router;

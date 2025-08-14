@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./GiftCards.css";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  createGiftCard,
-  listGiftCards,
-  updateGiftCard,
-  deleteGiftCard,
-} from "../../services/Actions/giftCardActions";
+import { createGiftCard, listGiftCards, updateGiftCard, deleteGiftCard } from "../../services/Actions/giftCardActions";
 import {
   CREATE_GIFTCARD_RESET,
   UPDATE_GIFTCARD_RESET,
@@ -40,18 +35,18 @@ const GiftCards = () => {
   const [cardToDelete, setCardToDelete] = useState(null);
 
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const businessSlug = user?.user?.businessSlug || "";
 
   useEffect(() => {
-    dispatch(listGiftCards(searchTerm)); // Pass searchTerm to the action
-  }, [dispatch, searchTerm]); // Add searchTerm as a dependency
+    dispatch(listGiftCards(searchTerm, businessSlug)); // scope to this business
+  }, [dispatch, searchTerm, businessSlug]);
 
   // Accessing state from the Redux store
   const giftCardCreate = useSelector((state) => state.giftCardCreate);
   const giftCardUpdate = useSelector((state) => state.giftCardUpdate);
   const giftCardDelete = useSelector((state) => state.giftCardDelete);
-  const { giftCards, loading, error } = useSelector(
-    (state) => state.giftCardList
-  );
+  const { giftCards, loading, error } = useSelector((state) => state.giftCardList);
 
   useEffect(() => {
     // This will run when the component unmounts
@@ -63,7 +58,7 @@ const GiftCards = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(listGiftCards(searchTerm));
+    dispatch(listGiftCards(searchTerm, businessSlug));
 
     // Reset all success states on initial mount
     dispatch({ type: CREATE_GIFTCARD_RESET });
@@ -75,7 +70,7 @@ const GiftCards = () => {
     if (giftCardCreate.success && !hasShownCreateSuccess) {
       setCreateSuccessModalOpen(true);
       setModalOpen(false);
-      dispatch(listGiftCards());
+      dispatch(listGiftCards("", businessSlug));
 
       // Mark that we've shown this success modal
       setHasShownCreateSuccess(true);
@@ -111,7 +106,7 @@ const GiftCards = () => {
     if (giftCardDelete.success && !hasShownDeleteSuccess) {
       setDeleteSuccessModalOpen(true);
 
-      dispatch(listGiftCards()); // Refresh the list
+      dispatch(listGiftCards("", businessSlug)); // Refresh the list
 
       // Mark that we've shown this success modal
       setHasShownDeleteSuccess(true);
@@ -156,6 +151,11 @@ const GiftCards = () => {
     // Append new image file if selected
     if (selectedFile.file) {
       formDataToSubmit.append("image", selectedFile.file);
+    }
+
+    // Ensure businessSlug is included for scoping on create
+    if (!isEditing && businessSlug) {
+      formDataToSubmit.append("businessSlug", businessSlug);
     }
 
     if (isEditing) {
@@ -299,10 +299,7 @@ const GiftCards = () => {
       <div>
         <div className="main-content">
           <div className="actions">
-            <button
-              className="create-giftcard cbtn white"
-              onClick={handleOpenModal}
-            >
+            <button className="create-giftcard cbtn white" onClick={handleOpenModal}>
               Create Giftcard
             </button>
             <input
@@ -341,27 +338,15 @@ const GiftCards = () => {
                     <td>{card.giftCardName}</td>
                     <td>$ {card.amount}</td>
                     <td>{card.discount}%</td>
-                    <td>
-                      $ {card.amount - (card.amount * card.discount) / 100}
-                    </td>
+                    <td>$ {card.amount - (card.amount * card.discount) / 100}</td>
+
+                    <td>{new Date(card.expirationDate).toLocaleDateString("en-GB")}</td>
 
                     <td>
-                      {new Date(card.expirationDate).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </td>
-
-                    <td>
-                      <button
-                        className="cbtn edit"
-                        onClick={() => handleEdit(card)}
-                      >
+                      <button className="cbtn edit" onClick={() => handleEdit(card)}>
                         Edit
                       </button>
-                      <button
-                        className="cbtn delete"
-                        onClick={() => handleDelete(card._id)}
-                      >
+                      <button className="cbtn delete" onClick={() => handleDelete(card._id)}>
                         Delete
                       </button>
                     </td>
@@ -380,15 +365,10 @@ const GiftCards = () => {
       {isModalOpen && (
         <div className="modal">
           <div className="creategiftcard-modal-content">
-            <button
-              className="create-update-modal-close-btn"
-              onClick={handleCloseModal}
-            >
+            <button className="create-update-modal-close-btn" onClick={handleCloseModal}>
               &times;
             </button>
-            <h2 className="gc-page-modal-heading">
-              {isEditing ? "Edit Gift Card" : "Create a Gift Card"}
-            </h2>
+            <h2 className="gc-page-modal-heading">{isEditing ? "Edit Gift Card" : "Create a Gift Card"}</h2>
             <form className="giftcard-form" onSubmit={handleSubmit}>
               <div className="giftcards-page-form-group">
                 <label htmlFor="giftCardName">Gift Card Name</label>
@@ -410,16 +390,10 @@ const GiftCards = () => {
                   onChange={handleChange}
                   required
                 >
-                  <option
-                    value="🎂 Birthday Special"
-                    className="option-birthday"
-                  >
+                  <option value="🎂 Birthday Special" className="option-birthday">
                     <i className="react-icons">🎂</i> Birthday Special
                   </option>
-                  <option
-                    value="💍 Anniversary Delight"
-                    className="option-anniversary"
-                  >
+                  <option value="💍 Anniversary Delight" className="option-anniversary">
                     <i className="react-icons">💍</i> Anniversary Delight
                   </option>
                   <option value="🎉 Festive Cheers" className="option-festive">
@@ -428,169 +402,91 @@ const GiftCards = () => {
                   <option value="🙏 Thank You" className="option-thank-you">
                     <i className="react-icons">🙏</i> Thank You
                   </option>
-                  <option
-                    value="🎉 Congratulations"
-                    className="option-congratulations"
-                  >
+                  <option value="🎉 Congratulations" className="option-congratulations">
                     <i className="react-icons">🎉</i> Congratulations
                   </option>
-                  <option
-                    value="💐 Get Well Soon"
-                    className="option-get-well-soon"
-                  >
+                  <option value="💐 Get Well Soon" className="option-get-well-soon">
                     <i className="react-icons">💐</i> Get Well Soon
                   </option>
-                  <option
-                    value="🏠 Housewarming Gift"
-                    className="option-housewarming"
-                  >
+                  <option value="🏠 Housewarming Gift" className="option-housewarming">
                     <i className="react-icons">🏠</i> Housewarming Gift
                   </option>
                   <option value="🍽 Fine Dining" className="option-fine-dining">
                     <i className="react-icons">🍽</i> Fine Dining
                   </option>
-                  <option
-                    value="🍷 Romantic Dinner"
-                    className="option-romantic-dinner"
-                  >
+                  <option value="🍷 Romantic Dinner" className="option-romantic-dinner">
                     <i className="react-icons">🍷</i> Romantic Dinner
                   </option>
-                  <option
-                    value="🥞 Weekend Brunch"
-                    className="option-weekend-brunch"
-                  >
+                  <option value="🥞 Weekend Brunch" className="option-weekend-brunch">
                     <i className="react-icons">🥞</i> Weekend Brunch
                   </option>
-                  <option
-                    value="🍗 Family Feast"
-                    className="option-family-feast"
-                  >
+                  <option value="🍗 Family Feast" className="option-family-feast">
                     <i className="react-icons">🍗</i> Family Feast
                   </option>
-                  <option
-                    value="🍳 Chef's Special"
-                    className="option-chefs-special"
-                  >
+                  <option value="🍳 Chef's Special" className="option-chefs-special">
                     <i className="react-icons">🍳</i> Chef's Special
                   </option>
-                  <option
-                    value="🍴 All-You-Can-Eat Buffet"
-                    className="option-buffet"
-                  >
+                  <option value="🍴 All-You-Can-Eat Buffet" className="option-buffet">
                     <i className="react-icons">🍴</i> All-You-Can-Eat Buffet
                   </option>
-                  <option
-                    value="🏖 Relaxing Staycation"
-                    className="option-staycation"
-                  >
+                  <option value="🏖 Relaxing Staycation" className="option-staycation">
                     <i className="react-icons">🏖</i> Relaxing Staycation
                   </option>
-                  <option
-                    value="💆‍♀ Spa & Dine Combo"
-                    className="option-spa-combo"
-                  >
+                  <option value="💆‍♀ Spa & Dine Combo" className="option-spa-combo">
                     <i className="react-icons">💆‍♀</i> Spa & Dine Combo
                   </option>
-                  <option
-                    value="🌴 Luxury Escape"
-                    className="option-luxury-escape"
-                  >
+                  <option value="🌴 Luxury Escape" className="option-luxury-escape">
                     <i className="react-icons">🌴</i> Luxury Escape
                   </option>
-                  <option
-                    value="🍷 Gourmet Experience"
-                    className="option-gourmet-experience"
-                  >
+                  <option value="🍷 Gourmet Experience" className="option-gourmet-experience">
                     <i className="react-icons">🍷</i> Gourmet Experience
                   </option>
                   <option value="🍇 Wine & Dine" className="option-wine-dine">
                     <i className="react-icons">🍇</i> Wine & Dine
                   </option>
-                  <option
-                    value="🏖 Beachside Bliss"
-                    className="option-beachside-bliss"
-                  >
+                  <option value="🏖 Beachside Bliss" className="option-beachside-bliss">
                     <i className="react-icons">🏖</i> Beachside Bliss
                   </option>
-                  <option
-                    value="🏞 Mountain Retreat"
-                    className="option-mountain-retreat"
-                  >
+                  <option value="🏞 Mountain Retreat" className="option-mountain-retreat">
                     <i className="react-icons">🏞</i> Mountain Retreat
                   </option>
-                  <option
-                    value="🌆 City Lights Dining"
-                    className="option-city-lights"
-                  >
+                  <option value="🌆 City Lights Dining" className="option-city-lights">
                     <i className="react-icons">🌆</i> City Lights Dining
                   </option>
-                  <option
-                    value="🍛 Exotic Flavors"
-                    className="option-exotic-flavors"
-                  >
+                  <option value="🍛 Exotic Flavors" className="option-exotic-flavors">
                     <i className="react-icons">🍛</i> Exotic Flavors
                   </option>
-                  <option
-                    value="👔 Employee Appreciation"
-                    className="option-employee-appreciation"
-                  >
+                  <option value="👔 Employee Appreciation" className="option-employee-appreciation">
                     <i className="react-icons">👔</i> Employee Appreciation
                   </option>
-                  <option
-                    value="🎁 Loyalty Rewards"
-                    className="option-loyalty-rewards"
-                  >
+                  <option value="🎁 Loyalty Rewards" className="option-loyalty-rewards">
                     <i className="react-icons">🎁</i> Loyalty Rewards
                   </option>
-                  <option
-                    value="🧳 Client Gifting"
-                    className="option-client-gifting"
-                  >
+                  <option value="🧳 Client Gifting" className="option-client-gifting">
                     <i className="react-icons">🧳</i> Client Gifting
                   </option>
-                  <option
-                    value="🏢 Corporate Thank You"
-                    className="option-corporate-thank-you"
-                  >
+                  <option value="🏢 Corporate Thank You" className="option-corporate-thank-you">
                     <i className="react-icons">🏢</i> Corporate Thank You
                   </option>
-                  <option
-                    value="💖 Just Because"
-                    className="option-just-because"
-                  >
+                  <option value="💖 Just Because" className="option-just-because">
                     <i className="react-icons">💖</i> Just Because
                   </option>
                   <option value="🍷 Date Night" className="option-date-night">
                     <i className="react-icons">🍷</i> Date Night
                   </option>
-                  <option
-                    value="☀ Summer Treats"
-                    className="option-summer-treats"
-                  >
+                  <option value="☀ Summer Treats" className="option-summer-treats">
                     <i className="react-icons">☀</i> Summer Treats
                   </option>
-                  <option
-                    value="❄ Winter Warmth"
-                    className="option-winter-warmth"
-                  >
+                  <option value="❄ Winter Warmth" className="option-winter-warmth">
                     <i className="react-icons">❄</i> Winter Warmth
                   </option>
-                  <option
-                    value="🌷 Spring Refresh"
-                    className="option-spring-refresh"
-                  >
+                  <option value="🌷 Spring Refresh" className="option-spring-refresh">
                     <i className="react-icons">🌷</i> Spring Refresh
                   </option>
-                  <option
-                    value="🍂 Autumn Flavors"
-                    className="option-autumn-flavors"
-                  >
+                  <option value="🍂 Autumn Flavors" className="option-autumn-flavors">
                     <i className="react-icons">🍂</i> Autumn Flavors
                   </option>
-                  <option
-                    value="🍽 For Food Lovers"
-                    className="option-for-food-lovers"
-                  >
+                  <option value="🍽 For Food Lovers" className="option-for-food-lovers">
                     <i className="react-icons">🍽</i> For Food Lovers
                   </option>
                   <option value="👨 For Him" className="option-for-him">
@@ -599,10 +495,7 @@ const GiftCards = () => {
                   <option value="👩 For Her" className="option-for-her">
                     <i className="react-icons">👩</i> For Her
                   </option>
-                  <option
-                    value="👨‍👩‍👧‍👦 For the Family"
-                    className="option-for-family"
-                  >
+                  <option value="👨‍👩‍👧‍👦 For the Family" className="option-for-family">
                     <i className="react-icons">👨‍👩‍👧‍👦</i> For the Family
                   </option>
                   <option value="👥 For the Team" className="option-for-team">
@@ -661,18 +554,12 @@ const GiftCards = () => {
               </div>
 
               <div className="giftcards-page-form-group">
-                <label htmlFor="image">
-                  {isEditing ? "Edit Image" : "Upload Image"}
-                </label>
+                <label htmlFor="image">{isEditing ? "Edit Image" : "Upload Image"}</label>
                 <div className="file-input-wrapper">
                   {isEditing && (formData.giftCardImg || selectedFile.name) && (
                     <div className="current-file-preview">
                       <Link2 size={16} className="file-icon" />
-                      <span
-                        className="current-file-name"
-                        onClick={handleImagePreviewClick}
-                        title={selectedFile.name}
-                      >
+                      <span className="current-file-name" onClick={handleImagePreviewClick} title={selectedFile.name}>
                         {formatFileName(selectedFile.name)}
                       </span>
                     </div>
@@ -697,18 +584,11 @@ const GiftCards = () => {
               {showImagePreview && (
                 <div className="image-preview-modal">
                   <div className="image-preview-content">
-                    <button
-                      className="close-preview-btn"
-                      onClick={() => setShowImagePreview(false)}
-                    >
+                    <button className="close-preview-btn" onClick={() => setShowImagePreview(false)}>
                       &times;
                     </button>
                     {formData.giftCardImg ? (
-                      <img
-                        src={formData.giftCardImg}
-                        alt="Gift Card Preview"
-                        className="preview-image"
-                      />
+                      <img src={formData.giftCardImg} alt="Gift Card Preview" className="preview-image" />
                     ) : (
                       <p>No image available</p>
                     )}
@@ -729,12 +609,7 @@ const GiftCards = () => {
             <button className="image-modal-close" onClick={closeImageModal}>
               &times;
             </button>
-            <img
-              src={selectedImage}
-              alt="Gift Card"
-              className="image-modal-content"
-              loading="lazy"
-            />
+            <img src={selectedImage} alt="Gift Card" className="image-modal-content" loading="lazy" />
           </div>
         </div>
       )}
@@ -754,9 +629,7 @@ const GiftCards = () => {
                 </svg>
               </div>
               <h2 className="create-success-modal-title">Success!</h2>
-              <p className="create-success-modal-message">
-                Gift Card Created Successfully
-              </p>
+              <p className="create-success-modal-message">Gift Card Created Successfully</p>
               <div className="create-success-modal-confetti"></div>
             </div>
           </div>
@@ -779,9 +652,7 @@ const GiftCards = () => {
                 </svg>
               </div>
               <h2 className="update-success-modal-title">Updated!</h2>
-              <p className="update-success-modal-message">
-                Gift Card Updated Successfully
-              </p>
+              <p className="update-success-modal-message">Gift Card Updated Successfully</p>
               <div className="update-success-modal-ripple"></div>
             </div>
           </div>
@@ -804,9 +675,7 @@ const GiftCards = () => {
                 </svg>
               </div>
               <h2 className="delete-success-modal-title">Deleted!</h2>
-              <p className="delete-success-modal-message">
-                Gift Card Deleted Successfully
-              </p>
+              <p className="delete-success-modal-message">Gift Card Deleted Successfully</p>
               <div className="delete-success-modal-fade"></div>
             </div>
           </div>
@@ -816,20 +685,12 @@ const GiftCards = () => {
       {isDeleteModalOpen && (
         <div className="delete-confirmation-modal-overlay">
           <div className="delete-confirmation-modal-container">
-            <p className="delete-confirmation-modal-text">
-              Are you sure you want to delete this gift card?
-            </p>
+            <p className="delete-confirmation-modal-text">Are you sure you want to delete this gift card?</p>
             <div className="delete-confirmation-button-group">
-              <button
-                className="delete-confirmation-yes-button"
-                onClick={confirmDelete}
-              >
+              <button className="delete-confirmation-yes-button" onClick={confirmDelete}>
                 Yes
               </button>
-              <button
-                className="delete-confirmation-no-button"
-                onClick={() => setDeleteModalOpen(false)}
-              >
+              <button className="delete-confirmation-no-button" onClick={() => setDeleteModalOpen(false)}>
                 No
               </button>
             </div>

@@ -10,6 +10,14 @@ const SuperAdminDashboard = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [statusUpdate, setStatusUpdate] = useState({ status: "", notes: "" });
+  const [adminForm, setAdminForm] = useState({
+    name: "",
+    email: "",
+    restaurantName: "",
+    phone: "",
+    businessSlug: "",
+    password: "",
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -115,6 +123,57 @@ const SuperAdminDashboard = () => {
         <div className="stat-card">
           <h3>Rejected</h3>
           <p style={{ color: "#e74c3c" }}>{stats.rejected || 0}</p>
+        </div>
+      </div>
+
+      <div className="create-admin-section">
+        <h2>Create Business Admin</h2>
+        <div className="create-admin-form">
+          <input
+            placeholder="Restaurant Name"
+            value={adminForm.restaurantName}
+            onChange={(e) => setAdminForm({ ...adminForm, restaurantName: e.target.value })}
+          />
+          <input
+            placeholder="Admin Name"
+            value={adminForm.name}
+            onChange={(e) => setAdminForm({ ...adminForm, name: e.target.value })}
+          />
+          <input
+            placeholder="Email"
+            value={adminForm.email}
+            onChange={(e) => setAdminForm({ ...adminForm, email: e.target.value })}
+          />
+          <input
+            placeholder="Phone"
+            value={adminForm.phone}
+            onChange={(e) => setAdminForm({ ...adminForm, phone: e.target.value })}
+          />
+          <input
+            placeholder="Business Slug (optional)"
+            value={adminForm.businessSlug}
+            onChange={(e) => setAdminForm({ ...adminForm, businessSlug: e.target.value })}
+          />
+          <input
+            placeholder="Password (optional)"
+            value={adminForm.password}
+            onChange={(e) => setAdminForm({ ...adminForm, password: e.target.value })}
+          />
+          <button
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem("superAdminToken");
+                const config = { headers: { Authorization: `Bearer ${token}` } };
+                await axios.post("/api/superadmin/business-admin", adminForm, config);
+                alert("Business admin created");
+                setAdminForm({ name: "", email: "", restaurantName: "", phone: "", businessSlug: "", password: "" });
+              } catch (e) {
+                alert(e?.response?.data?.message || "Failed to create admin");
+              }
+            }}
+          >
+            Create
+          </button>
         </div>
       </div>
 

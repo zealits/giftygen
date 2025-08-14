@@ -5,32 +5,33 @@ class ApiFeatures {
   }
 
   search() {
-    const keyword = this.queryStr.keyword
-      ? {
-          $or: [
-            {
-              giftCardName: {
-                $regex: this.queryStr.keyword,
-                $options: "i",
-              },
+    const hasKeyword = typeof this.queryStr.keyword === "string" && this.queryStr.keyword.trim() !== "";
+    if (hasKeyword) {
+      const keyword = {
+        $or: [
+          {
+            giftCardName: {
+              $regex: this.queryStr.keyword,
+              $options: "i",
             },
-            {
-              description: {
-                $regex: this.queryStr.keyword,
-                $options: "i",
-              },
+          },
+          {
+            description: {
+              $regex: this.queryStr.keyword,
+              $options: "i",
             },
-            {
-              giftCardTag: {
-                $regex: this.queryStr.keyword,
-                $options: "i",
-              },
+          },
+          {
+            giftCardTag: {
+              $regex: this.queryStr.keyword,
+              $options: "i",
             },
-          ],
-        }
-      : {};
+          },
+        ],
+      };
 
-    this.query = this.query.find({ ...keyword });
+      this.query = this.query.find(keyword);
+    }
 
     return this;
   }

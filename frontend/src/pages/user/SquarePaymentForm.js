@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import { CreditCard, GooglePay, CashAppPay, PaymentForm } from "react-square-web-payments-sdk";
 import GpayIcon from "../../assets/paymenticons/google-pay.png";
 import creditcardIcon from "../../assets/paymenticons/credit-card.png";
@@ -12,6 +13,7 @@ const SquarePaymentForm = () => {
   const ENVIRONMENT = "sandbox";
 
   const dispatch = useDispatch();
+  const { businessSlug } = useParams();
 
   // Get the payment status from the state
   const { paymentData } = useSelector((state) => state.payment);
@@ -42,7 +44,7 @@ const SquarePaymentForm = () => {
 
   const handlePaymentComplete = async (token, buyer) => {
     const result = token.token;
-    dispatch(createPayment(result, 1));
+    dispatch(createPayment(result, 1, businessSlug || ""));
   };
 
   // Separate payment requests for different payment methods
