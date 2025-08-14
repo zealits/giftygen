@@ -45,4 +45,28 @@
     margin-bottom: 20px;
     text-align: center;
   }
+
+  /* Form hint styling */
+  .form-hint {
+    display: block;
+    color: #6b7280;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    margin-bottom: 15px;
+    font-style: italic;
+  }
+
+  /* Input field error styling */
+  .register-phone-input:invalid,
+  .register-phone-input.error {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+
+  .register-phone-input:invalid:focus,
+  .register-phone-input.error:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+  }
   

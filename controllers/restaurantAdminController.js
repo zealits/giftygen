@@ -1,23 +1,40 @@
 const RestaurantAdmin = require("../models/restaurantAdminSchema");
+const RegistrationRequest = require("../models/registrationRequestSchema");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const sendEmail = require("../utils/sendEmail"); // Utility for sending emails
 const catchAsyncErrors = require("../middleware/catchAsyncErrors"); // Middleware for handling async errors
 const sendToken = require("../utils/jwtToken");
+const ErrorHander = require("../utils/errorhander");
 
 // Send OTP for email verification
 exports.sendOtp = catchAsyncErrors(async (req, res, next) => {
   const { email } = req.body;
   console.log(email);
-  // Use RestaurantAdmin model here instead of User
+
+  // Check if email already exists in RestaurantAdmin
   let restaurantAdmin = await RestaurantAdmin.findOne({ email });
+
+  // Check if email already exists in RegistrationRequest
+  let registrationRequest = await RegistrationRequest.findOne({ email });
 
   if (!restaurantAdmin) {
     restaurantAdmin = new RestaurantAdmin({ email });
   }
 
+  if (!registrationRequest) {
+    registrationRequest = new RegistrationRequest({ email });
+  }
+
   const otp = restaurantAdmin.generateVerificationCode();
+
+  // Save OTP to both models
   await restaurantAdmin.save({ validateBeforeSave: false });
+
+  // Update registration request with OTP
+  registrationRequest.verificationCode = restaurantAdmin.verificationCode;
+  registrationRequest.verificationCodeExpire = restaurantAdmin.verificationCodeExpire;
+  await registrationRequest.save({ validateBeforeSave: false });
 
   console.log(otp); // Log the OTP for testing purposes (remove in production)
   const message = `Your OTP for email verification is: ${otp}. It will expire in 10 minutes.`;
@@ -37,8 +54,11 @@ exports.sendOtp = catchAsyncErrors(async (req, res, next) => {
   } catch (error) {
     restaurantAdmin.verificationCode = undefined;
     restaurantAdmin.verificationCodeExpire = undefined;
+    registrationRequest.verificationCode = undefined;
+    registrationRequest.verificationCodeExpire = undefined;
 
     await restaurantAdmin.save({ validateBeforeSave: false });
+    await registrationRequest.save({ validateBeforeSave: false });
 
     return next(new ErrorHander(error.message, 500));
   }
@@ -50,6 +70,7 @@ exports.registerRestaurantAdmin = catchAsyncErrors(async (req, res, next) => {
 
   // Check if email already exists in the database
   let admin = await RestaurantAdmin.findOne({ email });
+  let registrationRequest = await RegistrationRequest.findOne({ email });
 
   // If the admin already exists, check if OTP is valid
   if (admin) {
@@ -77,6 +98,18 @@ exports.registerRestaurantAdmin = catchAsyncErrors(async (req, res, next) => {
     admin.restaurantAddress = restaurantAddress;
 
     await admin.save();
+
+    // Update registration request with complete details
+    if (registrationRequest) {
+      registrationRequest.name = name;
+      registrationRequest.phone = phone;
+      registrationRequest.restaurantName = restaurantName;
+      registrationRequest.restaurantAddress = restaurantAddress;
+      registrationRequest.isVerified = true;
+      registrationRequest.status = "pending"; // Set to pending for super admin review
+      await registrationRequest.save();
+    }
+
     const token = admin.getJWTToken(); // Generate JWT token for the updated admin
 
     return res.status(200).json({
@@ -96,6 +129,17 @@ exports.registerRestaurantAdmin = catchAsyncErrors(async (req, res, next) => {
     restaurantName,
     restaurantAddress,
   });
+
+  // Update registration request with complete details
+  if (registrationRequest) {
+    registrationRequest.name = name;
+    registrationRequest.phone = phone;
+    registrationRequest.restaurantName = restaurantName;
+    registrationRequest.restaurantAddress = restaurantAddress;
+    registrationRequest.isVerified = true;
+    registrationRequest.status = "pending"; // Set to pending for super admin review
+    await registrationRequest.save();
+  }
 
   // Generate JWT token
   const token = admin.getJWTToken();
@@ -191,6 +235,49 @@ exports.verifyOTP = async (req, res) => {
     });
   }
 };
+
+// Capture Registration Interest (Landing page: Register your business / Request demo)
+exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) => {
+  const { businessName, businessType, contactName, email, phone, website, notes } = req.body || {};
+
+  if (!email) {
+    return res.status(400).json({ success: false, message: "Email is required" });
+  }
+
+  // Compose notes to include additional fields not present in the schema
+  const composedNotesParts = [];
+  if (businessType) composedNotesParts.push(`Business type: ${businessType}`);
+  if (website) composedNotesParts.push(`Website: ${website}`);
+  if (notes) composedNotesParts.push(`Notes: ${notes}`);
+  const composedNotes = composedNotesParts.join(" | ");
+
+  let registrationRequest = await RegistrationRequest.findOne({ email });
+
+  if (!registrationRequest) {
+    registrationRequest = await RegistrationRequest.create({
+      name: contactName,
+      email,
+      phone,
+      restaurantName: businessName,
+      notes: composedNotes,
+      source: "landing_request_demo",
+      status: "pending",
+    });
+  } else {
+    registrationRequest.name = contactName || registrationRequest.name;
+    registrationRequest.phone = phone || registrationRequest.phone;
+    registrationRequest.restaurantName = businessName || registrationRequest.restaurantName;
+    registrationRequest.source = registrationRequest.source || "landing_request_demo";
+    // Append notes while preserving previous ones
+    const notePieces = [];
+    if (registrationRequest.notes) notePieces.push(registrationRequest.notes);
+    if (composedNotes) notePieces.push(composedNotes);
+    registrationRequest.notes = notePieces.join(" | ");
+    await registrationRequest.save();
+  }
+
+  return res.status(200).json({ success: true, message: "Request received" });
+});
 
 exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
   console.log("triggered");

@@ -1,7 +1,7 @@
 .app {
-    display: flex;
- 
-  }
+    display: block;
+    width: 100%;
+}
   
   .sidebar {
     position: fixed;

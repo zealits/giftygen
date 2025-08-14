@@ -16,6 +16,8 @@ import Settings from "./pages/admin/Settings.js"; // GiftCards page
 import RedeemGiftCard from "./pages/admin/RedeemGiftCard.js";
 import { LoadingProvider } from "./context/LoadingContext";
 import GiftCardDetails from "./pages/user/GiftCardDetails.js";
+import SuperAdminLogin from "./components/SuperAdmin/SuperAdminLogin";
+import SuperAdminDashboard from "./components/SuperAdmin/SuperAdminDashboard";
 import "./App.css";
 // import 'font-awesome/css/font-awesome.min.css';
 
@@ -107,6 +109,11 @@ function AppRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/explore" element={<UserLanding />} />
         <Route path="/gift-card/:id" element={<GiftCardDetails />} />
+
+        {/* Super Admin Routes */}
+        <Route path="/superlogin" element={<SuperAdminLogin />} />
+        <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>

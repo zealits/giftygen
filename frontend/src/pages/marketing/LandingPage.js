@@ -190,9 +190,39 @@ function LandingPage() {
         </div>
         <form
           className="lp-form"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            alert("Thanks! We will reach out shortly.");
+            const form = e.currentTarget;
+            const payload = {
+              businessName: form.businessName?.value,
+              businessType: form.businessType?.value,
+              contactName: form.contactName?.value,
+              email: form.email?.value,
+              phone,
+              website: form.website?.value,
+              notes: form.notes?.value,
+            };
+            try {
+              // Validate phone if provided
+              if (payload.phone) {
+                const phoneRegex = /^\([0-9]{3}\)\s[0-9]{3}-[0-9]{4}$/;
+                if (!phoneRegex.test(payload.phone)) {
+                  alert("Please enter a valid phone number like (555) 123-4567.");
+                  return;
+                }
+              }
+              const res = await fetch("/api/v1/admin/registration-interest", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+              if (!res.ok) throw new Error("Failed to submit");
+              alert("Thanks! We will reach out shortly.");
+              form.reset();
+              setPhone("");
+            } catch (err) {
+              alert("Sorry, something went wrong. Please try again later.");
+            }
           }}
         >
           <div className="lp-form__grid">
@@ -222,8 +252,6 @@ function LandingPage() {
                 placeholder="(555) 123-4567"
                 value={phone}
                 onChange={(e) => setPhone(formatUSPhone(e.target.value))}
-                pattern="^\\(\\d{3}\\) \\d{3}-\\d{4}$"
-                title="Enter a valid US phone number like (555) 123-4567"
                 maxLength={14}
                 aria-label="US phone number"
               />

@@ -162,6 +162,45 @@
     margin-right: 0.5rem;
   }
 
+  /* Input field error styling */
+  input.error,
+  textarea.error {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+
+  /* HTML5 validation styling */
+  input:invalid,
+  textarea:invalid {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+
+  /* Phone number specific validation */
+  input[type="tel"]:invalid {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+
+  /* Focus state for error fields */
+  input.error:focus,
+  textarea.error:focus,
+  input:invalid:focus,
+  textarea:invalid:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+  }
+
+  /* Form hint styling */
+  .form-hint {
+    display: block;
+    color: #6b7280;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+
 
  
 

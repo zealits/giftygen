@@ -103,27 +103,41 @@ function Register() {
             type="password"
             placeholder="Password"
             value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           />
           <input
             className="register-phone-input"
-            type="text"
-            placeholder="Phone"
+            type="tel"
+            placeholder="(123) 456-7890"
+            pattern="[\\(][0-9]{3}[\\)]\\s[0-9]{3}-[0-9]{4}"
+            title="Please enter a valid US phone number like (555) 123-4567"
             value={formData.phone}
-            onChange={(e) =>
-              setFormData({ ...formData, phone: e.target.value })
-            }
+            onChange={(e) => {
+              // Format phone number as user types
+              const value = e.target.value;
+              const digits = value.replace(/\D/g, "").slice(0, 10);
+              let formatted = "";
+
+              if (digits.length > 0) {
+                if (digits.length < 4) {
+                  formatted = `(${digits}`;
+                } else if (digits.length < 7) {
+                  formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+                } else {
+                  formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+                }
+              }
+
+              setFormData({ ...formData, phone: formatted });
+            }}
           />
+          <small className="form-hint">Format: (XXX) XXX-XXXX</small>
           <input
             className="register-restaurant-name-input"
             type="text"
             placeholder="Restaurant Name"
             value={formData.restaurantName}
-            onChange={(e) =>
-              setFormData({ ...formData, restaurantName: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, restaurantName: e.target.value })}
           />
           <input
             className="register-street-input"

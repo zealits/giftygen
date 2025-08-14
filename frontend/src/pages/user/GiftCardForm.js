@@ -132,8 +132,15 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
   const validatePhone = (phone) => {
     if (!phone) return false;
 
-    const digitsOnly = phone.replace(/\D/g, "");
+    // Check if the phone number matches the expected format: (XXX) XXX-XXXX
+    const phonePattern = /^\(\d{3}\)\s\d{3}-\d{4}$/;
 
+    if (phonePattern.test(phone)) {
+      return true;
+    }
+
+    // Fallback: check if it has at least 10 digits
+    const digitsOnly = phone.replace(/\D/g, "");
     return digitsOnly.length >= 10 && digitsOnly.length <= 11;
   };
 
@@ -143,13 +150,18 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
     // Remove all non-digit characters
     const phoneNumber = value.replace(/\D/g, "");
 
+    // Limit to 10 digits
+    const limitedDigits = phoneNumber.slice(0, 10);
+
     // Format the phone number consistently
-    if (phoneNumber.length < 4) {
-      return `(${phoneNumber}`;
-    } else if (phoneNumber.length < 7) {
-      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    if (limitedDigits.length === 0) {
+      return "";
+    } else if (limitedDigits.length < 4) {
+      return `(${limitedDigits}`;
+    } else if (limitedDigits.length < 7) {
+      return `(${limitedDigits.slice(0, 3)}) ${limitedDigits.slice(3)}`;
     } else {
-      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+      return `(${limitedDigits.slice(0, 3)}) ${limitedDigits.slice(3, 6)}-${limitedDigits.slice(6, 10)}`;
     }
   };
   const handleInputChange = (section, field, value) => {
@@ -372,8 +384,6 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
     } catch (error) {
       console.error("Error submitting form:", error);
     }
-
-
   };
 
   const handlePurchaseModal = () => {
@@ -502,6 +512,8 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
                           type="tel"
                           id="self-phone"
                           required
+                          pattern="[\\(][0-9]{3}[\\)]\\s[0-9]{3}-[0-9]{4}"
+                          title="Please enter a valid US phone number like (555) 123-4567"
                           className={showErrors && errors.selfInfo.phone ? "error" : ""}
                           value={formData.selfInfo.phone}
                           onChange={(e) => handleInputChange("selfInfo", "phone", e.target.value)}
@@ -598,12 +610,15 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
                             type="tel"
                             id="self-phone"
                             required
+                            pattern="[\\(][0-9]{3}[\\)]\\s[0-9]{3}-[0-9]{4}"
+                            title="Please enter a valid US phone number like (555) 123-4567"
                             className={showErrors && errors.selfInfo.phone ? "error" : ""}
                             value={formData.selfInfo.phone}
                             onChange={(e) => handleInputChange("selfInfo", "phone", e.target.value)}
-                            placeholder="(123) 456-7890"
+                            placeholder="(123) 123-4567"
                           />
                           <ErrorMessage message={errors.selfInfo.phone} />
+                          <small className="form-hint">Format: (XXX) XXX-XXXX</small>
                         </div>
                       </div>
                     </div>

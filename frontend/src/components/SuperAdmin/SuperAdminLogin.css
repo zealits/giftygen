@@ -1,0 +1,125 @@
+.super-admin-login-container {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  justify-items: center;
+  background: radial-gradient(60% 120% at 80% 20%, #101a3a 0%, #0c1126 70%, #0a0f22 100%);
+  padding: 20px;
+}
+
+.super-admin-login-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(6px);
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  color: #e5e7eb;
+}
+
+.super-admin-login-header h1 {
+  color: #ffffff;
+  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.super-admin-login-header p {
+  color: #cbd5e1;
+  margin-bottom: 30px;
+  font-size: 16px;
+}
+
+.super-admin-login-form {
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #dbe1e7;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: #ffffff;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: border-color 0.3s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #6c8cff;
+  box-shadow: 0 0 0 4px rgba(108, 140, 255, 0.15);
+}
+
+.error-message {
+  background: #fee;
+  color: #c53030;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  border: 1px solid #feb2b2;
+}
+
+.login-button {
+  width: 100%;
+  background: linear-gradient(135deg, #6c8cff 0%, #6f6cf7 100%);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 10px;
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.super-admin-login-footer {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.super-admin-login-footer p {
+  color: #9aa7b4;
+  font-size: 14px;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .super-admin-login-card {
+    padding: 30px 20px;
+    margin: 10px;
+  }
+  
+  .super-admin-login-header h1 {
+    font-size: 24px;
+  }
+}

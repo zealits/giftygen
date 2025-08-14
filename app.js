@@ -10,6 +10,7 @@ const walletRoutes = require("./routes/walletRoutes.js");
 // Import the routes for the API
 const restaurantAdminRoutes = require("./routes/restaurantAdminRoutes");
 const giftCardRoutes = require("./routes/giftCardRoutes");
+const superAdminRoutes = require("./routes/superAdminRoutes");
 
 // Make sure to add your dashboard routes here
 
@@ -25,6 +26,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api/v1/admin", restaurantAdminRoutes); // Your restaurant admin API routes
 app.use("/api/v1/admin", giftCardRoutes); // Your gift card API routes
+app.use("/api/superadmin", superAdminRoutes); // Super admin routes
 app.use("/api/payments", paymentRoutes);
 app.use("/api/wallet", walletRoutes);
 
