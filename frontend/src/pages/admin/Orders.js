@@ -88,8 +88,8 @@ const Orders = () => {
   const fetchGiftCards = async () => {
     setIsLoading(true);
     try {
-      // Use the list endpoint, filtered to this business
-      const response = await axios.get(`/api/v1/admin/list?businessSlug=${encodeURIComponent(businessSlug)}`);
+      // Fetch sold gift cards for this business
+      const response = await axios.get(`/api/v1/admin/giftcards?businessSlug=${encodeURIComponent(businessSlug)}`);
       setAllGiftCards(response.data.giftCards || []);
       setGiftCards(response.data.giftCards || []);
 
@@ -109,7 +109,7 @@ const Orders = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `api/v1/admin/giftcards/${cardId}/buyers` // Fixed template literal syntax
+        `api/v1/admin/giftcards/${cardId}/buyers?businessSlug=${encodeURIComponent(businessSlug)}`
       );
       setBuyers(response.data.buyers);
       setOriginalBuyers(response.data.buyers);
@@ -128,7 +128,7 @@ const Orders = () => {
   const fetchUserBuyers = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get("api/v1/admin/buyers");
+      const response = await axios.get(`api/v1/admin/buyers?businessSlug=${encodeURIComponent(businessSlug)}`);
 
       setAllBuyers(response.data.buyers);
       setBuyers(response.data.buyers);

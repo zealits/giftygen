@@ -1025,10 +1025,16 @@ const fetchGiftCardById = async (req, res) => {
 const getGiftCardBuyers = async (req, res) => {
   try {
     const { id } = req.params; // Gift card ID
+    const { businessSlug } = req.query || {};
     const giftCard = await GiftCard.findById(id);
 
     if (!giftCard) {
       return res.status(404).json({ error: "Gift card not found" });
+    }
+
+    // Optional business scope check
+    if (businessSlug && giftCard.businessSlug && giftCard.businessSlug !== businessSlug) {
+      return res.status(403).json({ error: "Not authorized to view buyers for this gift card" });
     }
 
     // Sort buyers by purchase date and include remaining balance and redemption history
@@ -1061,9 +1067,11 @@ const getGiftCardBuyers = async (req, res) => {
 
 const getAllBuyers = async (req, res) => {
   try {
-    const giftCards = await GiftCard.find({}, "giftCardName buyers"); // Only fetch `giftCardName` and `buyers`
+    const { businessSlug } = req.query || {};
+    const filter = businessSlug ? { businessSlug } : {};
+    const giftCards = await GiftCard.find(filter, "giftCardName buyers businessSlug"); // Only fetch fields needed
 
-    // Extract buyers from all gift cards and sort them by purchaseDate
+    // Extract buyers from filtered gift cards and sort them by purchaseDate
     const buyers = giftCards.flatMap((card) =>
       card.buyers.map((buyer) => ({
         buyerName: buyer.purchaseType === "self" ? buyer.selfInfo.name : buyer.giftInfo.senderName,
@@ -1072,7 +1080,7 @@ const getAllBuyers = async (req, res) => {
         giftCardName: card.giftCardName,
         purchaseDate: buyer.purchaseDate,
         usedAmount: buyer.usedAmount,
-        redemptionHistory: buyer.redemptionHistory.map((entry) => ({
+        redemptionHistory: (buyer.redemptionHistory || []).map((entry) => ({
           redeemedAmount: entry.redeemedAmount,
           redemptionDate: entry.redemptionDate,
           remainingAmount: entry.remainingAmount,
@@ -1081,7 +1089,7 @@ const getAllBuyers = async (req, res) => {
       }))
     );
 
-    // Sort buyers by purchaseDate in ascending order
+    // Sort buyers by purchaseDate in descending order (newest first)
     buyers.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
 
     res.status(200).json({
