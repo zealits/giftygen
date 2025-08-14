@@ -128,6 +128,8 @@ const SuperAdminDashboard = () => {
                 <th>Email</th>
                 <th>Restaurant</th>
                 <th>Phone</th>
+                <th>Business type</th>
+                <th>Website</th>
                 <th>Status</th>
                 <th>Date</th>
                 <th>Actions</th>
@@ -140,6 +142,8 @@ const SuperAdminDashboard = () => {
                   <td>{request.email}</td>
                   <td>{request.restaurantName || "N/A"}</td>
                   <td>{request.phone || "N/A"}</td>
+                  <td>{request.businessType || "N/A"}</td>
+                  <td>{request.website || "N/A"}</td>
                   <td>
                     <span className="status-badge" style={{ backgroundColor: getStatusColor(request.status) }}>
                       {request.status}

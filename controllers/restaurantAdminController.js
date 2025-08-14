@@ -244,13 +244,6 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
     return res.status(400).json({ success: false, message: "Email is required" });
   }
 
-  // Compose notes to include additional fields not present in the schema
-  const composedNotesParts = [];
-  if (businessType) composedNotesParts.push(`Business type: ${businessType}`);
-  if (website) composedNotesParts.push(`Website: ${website}`);
-  if (notes) composedNotesParts.push(`Notes: ${notes}`);
-  const composedNotes = composedNotesParts.join(" | ");
-
   let registrationRequest = await RegistrationRequest.findOne({ email });
 
   if (!registrationRequest) {
@@ -259,7 +252,9 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
       email,
       phone,
       restaurantName: businessName,
-      notes: composedNotes,
+      businessType,
+      website,
+      notes,
       source: "landing_request_demo",
       status: "pending",
     });
@@ -267,12 +262,10 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
     registrationRequest.name = contactName || registrationRequest.name;
     registrationRequest.phone = phone || registrationRequest.phone;
     registrationRequest.restaurantName = businessName || registrationRequest.restaurantName;
+    if (businessType) registrationRequest.businessType = businessType;
+    if (website) registrationRequest.website = website;
     registrationRequest.source = registrationRequest.source || "landing_request_demo";
-    // Append notes while preserving previous ones
-    const notePieces = [];
-    if (registrationRequest.notes) notePieces.push(registrationRequest.notes);
-    if (composedNotes) notePieces.push(composedNotes);
-    registrationRequest.notes = notePieces.join(" | ");
+    if (notes) registrationRequest.notes = notes;
     await registrationRequest.save();
   }
 

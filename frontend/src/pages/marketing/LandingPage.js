@@ -7,6 +7,13 @@ function LandingPage() {
   const navigate = useNavigate();
   const [theme, setTheme] = useState(() => localStorage.getItem("giftygen_theme") || "dark");
   const [phone, setPhone] = useState("");
+  const [notice, setNotice] = useState(null); // { type: 'success' | 'error', text: string }
+  const [errors, setErrors] = useState({
+    businessName: false,
+    businessType: false,
+    contactName: false,
+    email: false,
+  });
 
   useEffect(() => {
     // Scroll to top on mount for better first impression
@@ -202,12 +209,25 @@ function LandingPage() {
               website: form.website?.value,
               notes: form.notes?.value,
             };
+            // Client-side validation displayed only on submit
+            const nextErrors = {
+              businessName: !payload.businessName?.trim(),
+              businessType: !payload.businessType?.trim(),
+              contactName: !payload.contactName?.trim(),
+              email: !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email || ""),
+            };
+            setErrors(nextErrors);
+            if (Object.values(nextErrors).some(Boolean)) {
+              setNotice({ type: "error", text: "Please fix the highlighted fields." });
+              setTimeout(() => setNotice(null), 5000);
+              return;
+            }
             try {
               // Validate phone if provided
               if (payload.phone) {
                 const phoneRegex = /^\([0-9]{3}\)\s[0-9]{3}-[0-9]{4}$/;
                 if (!phoneRegex.test(payload.phone)) {
-                  alert("Please enter a valid phone number like (555) 123-4567.");
+                  setNotice({ type: "error", text: "Please enter a valid phone number like (555) 123-4567." });
                   return;
                 }
               }
@@ -217,30 +237,57 @@ function LandingPage() {
                 body: JSON.stringify(payload),
               });
               if (!res.ok) throw new Error("Failed to submit");
-              alert("Thanks! We will reach out shortly.");
+              setNotice({ type: "success", text: "Thanks! We will reach out shortly." });
               form.reset();
               setPhone("");
+              setErrors({ businessName: false, businessType: false, contactName: false, email: false });
+              setTimeout(() => setNotice(null), 5000);
             } catch (err) {
-              alert("Sorry, something went wrong. Please try again later.");
+              setNotice({ type: "error", text: "Sorry, something went wrong. Please try again later." });
+              setTimeout(() => setNotice(null), 5000);
             }
           }}
         >
           <div className="lp-form__grid">
             <div className="lp-field">
               <label>Business name</label>
-              <input type="text" name="businessName" placeholder="e.g., Ocean View Bistro" required />
+              <input
+                type="text"
+                name="businessName"
+                placeholder="e.g., Ocean View Bistro"
+                className={errors.businessName ? "lp-input--error" : undefined}
+                onInput={() => setErrors((e) => ({ ...e, businessName: false }))}
+              />
             </div>
             <div className="lp-field">
               <label>Business type</label>
-              <input type="text" name="businessType" placeholder="e.g., Restaurant, Salon, Retail" required />
+              <input
+                type="text"
+                name="businessType"
+                placeholder="e.g., Restaurant, Salon, Retail"
+                className={errors.businessType ? "lp-input--error" : undefined}
+                onInput={() => setErrors((e) => ({ ...e, businessType: false }))}
+              />
             </div>
             <div className="lp-field">
               <label>Contact name</label>
-              <input type="text" name="contactName" placeholder="Your name" required />
+              <input
+                type="text"
+                name="contactName"
+                placeholder="Your name"
+                className={errors.contactName ? "lp-input--error" : undefined}
+                onInput={() => setErrors((e) => ({ ...e, contactName: false }))}
+              />
             </div>
             <div className="lp-field">
               <label>Email</label>
-              <input type="email" name="email" placeholder="name@business.com" required />
+              <input
+                type="email"
+                name="email"
+                placeholder="name@business.com"
+                className={errors.email ? "lp-input--error" : undefined}
+                onInput={() => setErrors((e) => ({ ...e, email: false }))}
+              />
             </div>
             <div className="lp-field">
               <label>Phone</label>
@@ -265,6 +312,15 @@ function LandingPage() {
               <textarea name="notes" rows="4" placeholder="Tell us about your gift card goals"></textarea>
             </div>
           </div>
+          {notice && (
+            <div
+              className={`lp-alert ${notice.type === "success" ? "lp-alert--success" : "lp-alert--error"}`}
+              role="status"
+              aria-live="polite"
+            >
+              {notice.text}
+            </div>
+          )}
           <button className="lp-btn lp-btn--block lp-form__submit" type="submit">
             Request demo
           </button>

@@ -6,6 +6,8 @@ const registrationRequestSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     phone: { type: String },
     restaurantName: { type: String },
+    businessType: { type: String },
+    website: { type: String },
     restaurantAddress: {
       street: { type: String },
       city: { type: String },
