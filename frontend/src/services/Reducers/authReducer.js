@@ -10,7 +10,7 @@ import {
 } from "../Constants/authConstants.js";
 
 const initialState = {
-  loading: false,
+  loading: true,
   user: null,
   error: null,
 };
