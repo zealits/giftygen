@@ -6,6 +6,7 @@ import logo from "../../assets/giftygen_logo.png";
 function LandingPage() {
   const navigate = useNavigate();
   const [theme, setTheme] = useState(() => localStorage.getItem("giftygen_theme") || "dark");
+  const [phone, setPhone] = useState("");
 
   useEffect(() => {
     // Scroll to top on mount for better first impression
@@ -22,6 +23,14 @@ function LandingPage() {
   };
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+
+  const formatUSPhone = (value) => {
+    const digits = (value || "").replace(/\D/g, "").slice(0, 10);
+    if (digits.length === 0) return "";
+    if (digits.length < 4) return `(${digits}`;
+    if (digits.length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+  };
 
   return (
     <div className="lp-root" data-theme={theme}>
@@ -40,7 +49,7 @@ function LandingPage() {
         </nav>
         <div className="lp-nav__cta">
           <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-            {theme === "dark" ? "🌙 Dark" : "☀️ Light"}
+            {theme === "dark" ? "☀️ Switch to Light" : "🌙 Switch to Dark"}
           </button>
           <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/login")}>
             Sign in
@@ -193,13 +202,7 @@ function LandingPage() {
             </div>
             <div className="lp-field">
               <label>Business type</label>
-              <select name="businessType" defaultValue="Restaurant">
-                <option>Restaurant</option>
-                <option>Hotel</option>
-                <option>Retail store</option>
-                <option>Spa / Wellness</option>
-                <option>Other</option>
-              </select>
+              <input type="text" name="businessType" placeholder="e.g., Restaurant, Salon, Retail" required />
             </div>
             <div className="lp-field">
               <label>Contact name</label>
@@ -211,7 +214,19 @@ function LandingPage() {
             </div>
             <div className="lp-field">
               <label>Phone</label>
-              <input type="tel" name="phone" placeholder="+1 555 000 0000" />
+              <input
+                type="tel"
+                name="phone"
+                inputMode="numeric"
+                autoComplete="tel"
+                placeholder="(555) 123-4567"
+                value={phone}
+                onChange={(e) => setPhone(formatUSPhone(e.target.value))}
+                pattern="^\\(\\d{3}\\) \\d{3}-\\d{4}$"
+                title="Enter a valid US phone number like (555) 123-4567"
+                maxLength={14}
+                aria-label="US phone number"
+              />
             </div>
             <div className="lp-field">
               <label>Website</label>
@@ -222,7 +237,7 @@ function LandingPage() {
               <textarea name="notes" rows="4" placeholder="Tell us about your gift card goals"></textarea>
             </div>
           </div>
-          <button className="lp-btn lp-btn--block" type="submit">
+          <button className="lp-btn lp-btn--block lp-form__submit" type="submit">
             Request demo
           </button>
         </form>
