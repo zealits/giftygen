@@ -194,6 +194,17 @@ function LandingPage() {
 
       {/* Mobile Navigation Menu */}
       <div className={`lp-mobile-menu ${isMobileMenuOpen ? "lp-mobile-menu--open" : ""}`}>
+        {/* Mobile Menu Header with Close Button */}
+        <div className="lp-mobile-header">
+          <div className="lp-mobile-header__brand">
+            <img src={logo} alt="giftygen logo" className="lp-mobile-header__logo" />
+            <span className="lp-mobile-header__title">giftygen</span>
+          </div>
+          <button className="lp-mobile-close" onClick={closeMobileMenu} aria-label="Close mobile menu">
+            <X size={24} />
+          </button>
+        </div>
+
         <nav className="lp-mobile-nav">
           <button onClick={() => handleMobileNavClick("about")}>About</button>
           <button onClick={() => handleMobileNavClick("highlights")}>Highlights</button>
