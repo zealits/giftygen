@@ -1,0 +1,33 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.com.giftygen.giftcard",
+  "teamIdentifier": "PZZRSDZ86Z",
+  "organizationName": "Prashant Pukale",
+  "serialNumber": "jRCP5RZbBhflF1i2KBBH1MllD5GZY",
+  "description": "Gift Card",
+  "storeCard": {
+    "primaryFields": [
+      {
+        "key": "amount",
+        "label": "Gift Card",
+        "value": "USD 1"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "name",
+        "label": "Recipient",
+        "value": "Prerna Thite"
+      }
+    ],
+    "auxiliaryFields": []
+  },
+  "barcode": {
+    "format": "PKBarcodeFormatQR",
+    "message": "jRCP5RZbBhflF1i2KBBH1MllD5GZY",
+    "messageEncoding": "iso-8859-1"
+  },
+  "backgroundColor": "rgb(65, 88, 208)",
+  "foregroundColor": "rgb(255, 255, 255)",
+  "labelColor": "rgb(255, 255, 255)"
+}

@@ -6,3 +6,4 @@
 /frontend/node_modules
 
 /config/wallet-api-key.json
+/certs/apple/
