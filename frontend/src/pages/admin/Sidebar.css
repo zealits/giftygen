@@ -48,10 +48,10 @@
 }
 
 .sidebar .logo-details .logo-image {
-    width: 35px;
-    height: 35px;
+    width: 50px;
+    height: 50px;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: all 0.3s ease;
     filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
     flex-shrink: 0;
