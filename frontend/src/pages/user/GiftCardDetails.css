@@ -110,13 +110,11 @@
   }
   
   .details-container h1 {
-    font-size: 32px;
-    font-weight: 700;
-    margin: 0 0 15px;
-    background: linear-gradient(135deg, #333333, #5b5b5b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 15px;
+  color: #1e293b;
+}
   
   .rating {
     display: flex;
@@ -158,12 +156,10 @@
   }
   
   .amount {
-    font-size: 32px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #e63946, #ff5983);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+  font-size: 32px;
+  font-weight: 700;
+  color: #dc2626;
+}
   
   .discount {
     margin-left: 15px;

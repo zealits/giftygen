@@ -16,7 +16,7 @@ const RedeemGiftCard = () => {
   const [qrUniqueCode, setqrUniqueCode] = useState(null);
   const [isOtpSuccessModalOpen, setOtpSuccessModalOpen] = useState(false);
   const [isRedeemSuccessModalOpen, setRedeemSuccessModalOpen] = useState(false);
-  
+
   // New state for alert modals
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -65,9 +65,7 @@ const RedeemGiftCard = () => {
 
       console.log("Fetching Gift Card for ID:", cardId);
 
-      const { data: giftCard } = await axios.get(
-        `/api/v1/admin/scan-giftcard/${cardId}`
-      );
+      const { data: giftCard } = await axios.get(`/api/v1/admin/scan-giftcard/${cardId}`);
 
       setGiftCard(giftCard);
 
@@ -75,9 +73,7 @@ const RedeemGiftCard = () => {
       setIsModalOpen(true);
 
       // Search for the buyer matching the scanned QR code
-      const scannedBuyer = giftCard.buyers.find(
-        (buyer) => buyer.qrCode.uniqueCode === data
-      );
+      const scannedBuyer = giftCard.buyers.find((buyer) => buyer.qrCode.uniqueCode === data);
 
       if (scannedBuyer) {
         setSelectedBuyer(scannedBuyer);
@@ -88,8 +84,7 @@ const RedeemGiftCard = () => {
 
       console.log("Gift Card Details:", giftCard);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Gift card not found.";
+      const errorMessage = error.response?.data?.message || "Gift card not found.";
       showAlert(`Error: ${errorMessage}`);
     }
   };
@@ -122,12 +117,7 @@ const RedeemGiftCard = () => {
         return;
       }
 
-      console.log(
-        "Sending OTP to:",
-        emailToSendOtp,
-        "with redeem amount:",
-        redeemAmount
-      );
+      console.log("Sending OTP to:", emailToSendOtp, "with redeem amount:", redeemAmount);
 
       // Make API call to the backend to send OTP
       const response = await axios.post("/api/v1/admin/send-otp-redeem", {
@@ -146,10 +136,9 @@ const RedeemGiftCard = () => {
           setOtpSuccessModalOpen(false);
         }, 3000);
       }
-    }  catch (error) {
+    } catch (error) {
       console.error("Error sending OTP:", error);
-      const errorMessage =
-        error.response?.data?.message || "Failed to send OTP.";
+      const errorMessage = error.response?.data?.message || "Failed to send OTP.";
       showAlert(errorMessage);
     }
   };
@@ -236,9 +225,7 @@ const RedeemGiftCard = () => {
         console.log("Updating gift card state...");
         setGiftCard((prevCard) => {
           const updatedBuyers = prevCard.buyers.map((b) =>
-            b.qrCode.uniqueCode === qrCode
-              ? { ...b, ...buyer, redemptionHistory: buyer.redemptionHistory }
-              : b
+            b.qrCode.uniqueCode === qrCode ? { ...b, ...buyer, redemptionHistory: buyer.redemptionHistory } : b
           );
 
           return {
@@ -256,7 +243,6 @@ const RedeemGiftCard = () => {
           setRedeemSuccessModalOpen(false);
           handleCloseModal(); // Close the main modal after success modal
         }, 3000);
-
       } else {
         showAlert(otpResponse.data.message);
         console.error("OTP verification failed:", otpResponse.data.message);
@@ -266,12 +252,11 @@ const RedeemGiftCard = () => {
       console.error("Error during OTP verification or redemption:", error);
       console.error("Error response from server:", error.response?.data);
 
-      const errorMessage =
-        error.response?.data?.message || "Failed to process redemption.";
+      const errorMessage = error.response?.data?.message || "Failed to process redemption.";
       showAlert(errorMessage);
     }
   };
-  
+
   return (
     <div>
       <h1 className="heading">Redeem GiftCard</h1>
@@ -285,132 +270,124 @@ const RedeemGiftCard = () => {
             <h3 className="redeem-form-heading">Gift Card Details</h3>
             <div className="form-container">
               <form className="redeem-form">
-                <label>
-                  Gift Card Name:
-                  <input type="text" value={giftCard.giftCardName} readOnly />
-                </label>
-                <label>
-                  Tag:
-                  <input type="text" value={giftCard.giftCardTag} readOnly />
-                </label>
-                <label>
-                  Description:
-                  <textarea value={giftCard.description} readOnly />
-                </label>
-                <label>
-                  Amount:
-                  <input type="number" value={giftCard.amount} readOnly />
-                </label>
-                <label>
-                  Remaining Balance:
-                  <input
-                    type="number"
-                    value={selectedBuyer.remainingBalance || giftCard.amount}
-                    readOnly
-                  />
-                </label>
-                <label>
-                  Status:
-                  <input type="text" value={giftCard.status} readOnly />
-                </label>
-                <label>
-                  Expiration Date:
-                  <input
-                    type="text"
-                    value={new Date(giftCard.expirationDate).toLocaleDateString()}
-                    readOnly
-                  />
-                </label>
-                <h4>
-                  {selectedBuyer?.giftInfo?.recipientEmail
-                    ? "Recipient Details"
-                    : "Buyer Details"}
-                </h4>
-  
-                <label>
-                  {selectedBuyer?.giftInfo?.recipientEmail
-                    ? "Recipient Name"
-                    : "Buyer Name"}:
-                  <input
-                    type="text"
-                    value={
-                      selectedBuyer?.giftInfo?.recipientName ||
-                      selectedBuyer?.selfInfo?.name ||
-                      ""
-                    }
-                    readOnly
-                  />
-                </label>
-  
-                <label>
-                  {selectedBuyer?.giftInfo?.recipientEmail
-                    ? "Recipient Email"
-                    : "Buyer Email"}:
-                  <input
-                    type="text"
-                    value={
-                      selectedBuyer?.giftInfo?.recipientEmail ||
-                      selectedBuyer?.selfInfo?.email ||
-                      ""
-                    }
-                    readOnly
-                  />
-                </label>
-  
-                <label>
-                  Enter Amount to Redeem:
-                  <input
-                    type="number"
-                    value={redeemAmount}
-                    onChange={(e) => {
-                      const enteredAmount = Number(e.target.value);
-                      const availableBalance =
-                        selectedBuyer?.remainingBalance ?? giftCard.amount;
-  
-                      if (enteredAmount > 0 && enteredAmount <= availableBalance) {
-                        setRedeemAmount(enteredAmount);
-                      } else if (enteredAmount > availableBalance) {
-                        showAlert("Redeem amount exceeds the available balance.", "error");
-                      } else {
-                        setRedeemAmount("");
-                      }
+                <div className="form-group">
+                  <div className="form-group-title">Card Information</div>
+                  <label>
+                    Gift Card Name:
+                    <input type="text" value={giftCard.giftCardName} readOnly />
+                  </label>
+                  <label>
+                    Tag:
+                    <input type="text" value={giftCard.giftCardTag} readOnly />
+                  </label>
+                  <label>
+                    Description:
+                    <textarea value={giftCard.description} readOnly />
+                  </label>
+                </div>
+
+                <div className="form-group">
+                  <div className="form-group-title">Card Status</div>
+                  <label>
+                    Amount:
+                    <input type="number" value={giftCard.amount} readOnly />
+                  </label>
+                  <label>
+                    Remaining Balance:
+                    <input type="number" value={selectedBuyer.remainingBalance || giftCard.amount} readOnly />
+                  </label>
+                  <label>
+                    Status:
+                    <input type="text" value={giftCard.status} readOnly />
+                  </label>
+                  <label>
+                    Expiration Date:
+                    <input type="text" value={new Date(giftCard.expirationDate).toLocaleDateString()} readOnly />
+                  </label>
+                </div>
+                <div className="form-group">
+                  <div className="form-group-title">
+                    {selectedBuyer?.giftInfo?.recipientEmail ? "Recipient Details" : "Buyer Details"}
+                  </div>
+                  <label>
+                    {selectedBuyer?.giftInfo?.recipientEmail ? "Recipient Name" : "Buyer Name"}:
+                    <input
+                      type="text"
+                      value={selectedBuyer?.giftInfo?.recipientName || selectedBuyer?.selfInfo?.name || ""}
+                      readOnly
+                    />
+                  </label>
+
+                  <label>
+                    {selectedBuyer?.giftInfo?.recipientEmail ? "Recipient Email" : "Buyer Email"}:
+                    <input
+                      type="text"
+                      value={selectedBuyer?.giftInfo?.recipientEmail || selectedBuyer?.selfInfo?.email || ""}
+                      readOnly
+                    />
+                  </label>
+                </div>
+
+                <div className="redeem-amount-group">
+                  <label>
+                    Enter Amount to Redeem:
+                    <input
+                      type="number"
+                      placeholder="Enter amount to redeem"
+                      value={redeemAmount}
+                      onChange={(e) => {
+                        const enteredAmount = Number(e.target.value);
+                        const availableBalance = selectedBuyer?.remainingBalance ?? giftCard.amount;
+
+                        if (enteredAmount > 0 && enteredAmount <= availableBalance) {
+                          setRedeemAmount(enteredAmount);
+                        } else if (enteredAmount > availableBalance) {
+                          showAlert("Redeem amount exceeds the available balance.", "error");
+                        } else {
+                          setRedeemAmount("");
+                        }
+                      }}
+                    />
+                  </label>
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      color: "#856404",
+                      marginTop: "8px",
+                      textAlign: "center",
                     }}
-                  />
-                </label>
-  
-                <button
-                  type="button"
-                  className="send-otp-btn"
-                  onClick={handleSendOTP}
-                >
+                  >
+                    Available Balance: ${selectedBuyer?.remainingBalance ?? giftCard.amount}
+                  </div>
+                </div>
+
+                <button type="button" className="send-otp-btn" onClick={handleSendOTP}>
                   Send OTP
                 </button>
-  
+
                 {isOtpSent && (
-                  <div>
+                  <div className="form-group">
+                    <div className="form-group-title">OTP Verification</div>
                     <label>
                       Enter OTP:
                       <input
                         type="text"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
+                        placeholder="Enter 6-digit OTP"
+                        maxLength="6"
                       />
                     </label>
                   </div>
                 )}
-  
+
                 {isOtpVerified && <p>OTP verified successfully!</p>}
-  
+
                 {isOtpSent && !isOtpVerified && otp && (
                   <button
                     type="button"
                     className="redeem-btn"
-                    onClick={() =>
-                      handleRedeemGiftCard(
-                        selectedBuyer?.qrCode?.uniqueCode,
-                        redeemAmount
-                      )
-                    }
+                    onClick={() => handleRedeemGiftCard(selectedBuyer?.qrCode?.uniqueCode, redeemAmount)}
                   >
                     Redeem Gift Card
                   </button>
@@ -420,7 +397,7 @@ const RedeemGiftCard = () => {
           </div>
         </div>
       )}
-  
+
       {/* OTP Success Modal */}
       {isOtpSuccessModalOpen && (
         <div className="otp-success-modal-overlay">
@@ -438,15 +415,13 @@ const RedeemGiftCard = () => {
                 </svg>
               </div>
               <h2 className="otp-success-modal-title">OTP Sent!</h2>
-              <p className="otp-success-modal-message">
-                OTP has been sent successfully
-              </p>
+              <p className="otp-success-modal-message">OTP has been sent successfully</p>
               <div className="otp-success-modal-ripple"></div>
             </div>
           </div>
         </div>
       )}
-  
+
       {/* Redeem Success Modal */}
       {isRedeemSuccessModalOpen && (
         <div className="redeem-success-modal-overlay">
@@ -464,15 +439,13 @@ const RedeemGiftCard = () => {
                 </svg>
               </div>
               <h2 className="redeem-success-modal-title">Success!</h2>
-              <p className="redeem-success-modal-message">
-                Gift Card Redeemed Successfully
-              </p>
+              <p className="redeem-success-modal-message">Gift Card Redeemed Successfully</p>
               <div className="redeem-success-modal-confetti"></div>
             </div>
           </div>
         </div>
       )}
-      
+
       {/* New Alert Modal */}
       {isAlertModalOpen && (
         <div className="alert-modal-overlay">
@@ -501,9 +474,7 @@ const RedeemGiftCard = () => {
                   </svg>
                 )}
               </div>
-              <h2 className="alert-modal-title">
-                {alertType === "error" ? "Error" : "Warning"}
-              </h2>
+              <h2 className="alert-modal-title">{alertType === "error" ? "Error" : "Warning"}</h2>
               <p className="alert-modal-message">{alertMessage}</p>
               <div className="alert-modal-pulse"></div>
             </div>
@@ -512,6 +483,6 @@ const RedeemGiftCard = () => {
       )}
     </div>
   );
-}
+};
 
 export default RedeemGiftCard;

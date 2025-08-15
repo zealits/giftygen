@@ -15,11 +15,8 @@
   font-size: 2.5rem;
   text-align: center;
   margin-bottom: 2rem;
-  background: linear-gradient(120deg, #60a5fa, #a855f7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Actions Container */
@@ -200,13 +197,9 @@
   font-size: 28px;
   font-weight: bold;
   padding: 20px 0;
-  background: linear-gradient(45deg, #6b46c1, #e74694, #ef4444);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-fill-color: transparent;
+  color: #ffffff;
   margin-bottom: 25px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 #giftCardTag {
@@ -312,7 +305,7 @@
 .giftcards-page-form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #e5e7eb;
+  color: #ffffff;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
@@ -322,10 +315,10 @@
  {
   width: 100%;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 2px solid #ffffff;
   border-radius: 12px;
-  color: rgb(245, 236, 236);
+  color: #000000;
   font-size: 1rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
@@ -334,27 +327,27 @@
 .giftcards-page-form-group input:hover,
 .giftcards-page-form-group textarea:hover
  {
-  border-color: rgba(99, 102, 241, 0.3);
-  background: rgba(255, 255, 255, 0.07);
+  border-color: #e9ecef;
+  background: #f8f9fa;
 }
 
 .giftcards-page-form-group input:focus,
 .giftcards-page-form-group textarea:focus
 {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(99, 102, 241, 0.5);
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1),
-              0 0 20px rgba(99, 102, 241, 0.2);
+  background: #ffffff;
+  border-color: #000000;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1),
+              0 0 20px rgba(0, 0, 0, 0.15);
   outline: none;
 }
 
 .giftcards-page-form-group select {
   width: 100%;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 2px solid #ffffff;
   border-radius: 12px;
-  color: rgb(245, 236, 236);
+  color: #000000;
   font-size: 1rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
@@ -362,29 +355,29 @@
 }
 
 .giftcards-page-form-group select:focus {
-  background: linear-gradient(135deg, #1f2937, #111827);
-  border-color: rgba(99, 102, 241, 0.5);
+  background: #ffffff;
+  border-color: #000000;
   border-radius: 12px;
-  color: rgb(245, 236, 236);
+  color: #000000;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1),
-              0 0 20px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1),
+              0 0 20px rgba(0, 0, 0, 0.15);
   outline: none;
 }
 
 /* Styling for options */
 .giftcards-page-form-group select option {
-  background: rgba(53, 43, 43, 0.05);
-  color: rgb(245, 236, 236);
+  background: #ffffff;
+  color: #000000;
   padding: 10px;
   font-size: 1rem;
 }
 
 .giftcards-page-form-group select option:hover, 
 .giftcards-page-form-group select option:checked {
-  background: linear-gradient(135deg, #1f2937, #111827);
-  color: rgb(245, 236, 236);
+  background: #f8f9fa;
+  color: #000000;
 }
 
 /* Create Success Modal Styles */

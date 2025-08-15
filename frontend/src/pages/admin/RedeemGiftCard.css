@@ -89,24 +89,149 @@
   margin-left: 100px;
   font-size: 24px;
   font-weight: 600;
-  background: linear-gradient(to right, #fff, #7d27ff, #00ccff, #fff);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent !important;
-  animation: shimmer 8s linear infinite;
+  color: #000000 !important;
 }
 
 /* Label Styling */
 .redeem-form label {
   text-align: left;
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   font-size: 14px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600;
+  color: #000000 !important;
   letter-spacing: 0.5px;
   transition: color 0.3s ease;
+}
+
+/* Form Group Styling for better organization */
+.form-group {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.form-group-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #000000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Special styling for redeem amount field */
+.redeem-amount-group {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  margin: 30px 0;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+.redeem-amount-group label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #856404 !important;
+  margin-bottom: 15px;
+}
+
+.redeem-amount-group input {
+  background: #ffffff !important;
+  border: 2px solid #ffc107 !important;
+  color: #000000 !important;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.redeem-amount-group input:focus {
+  border-color: #856404 !important;
+  box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.2);
+}
+
+/* Form Group Styling for better organization */
+.form-group {
+  margin-bottom: 25px;
+  padding: 25px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.form-group:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.form-group-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #000000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* Improve spacing between form groups */
+.form-group:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Special styling for redeem amount field */
+.redeem-amount-group {
+  background: linear-gradient(135deg, #fff3cd, #fff8e1);
+  border: 2px solid #ffc107;
+  margin: 30px 0;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(255, 193, 7, 0.2);
+  transition: all 0.3s ease;
+}
+
+.redeem-amount-group:hover {
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.25);
+  transform: translateY(-2px);
+}
+
+.redeem-amount-group label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #856404 !important;
+  margin-bottom: 15px;
+}
+
+.redeem-amount-group input {
+  background: #ffffff !important;
+  border: 2px solid #ffc107 !important;
+  color: #000000 !important;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.redeem-amount-group input:focus {
+  border-color: #856404 !important;
+  box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.2);
+}
+
+/* Heading Styling */
+.redeem-form h4 {
+  color: #000000 !important;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 25px 0 15px 0;
+  padding: 10px 0;
+  border-bottom: 2px solid #000000;
 }
 
 /* Input Fields */
@@ -115,9 +240,9 @@
 .redeem-form select {
   width: 100%;
   margin-top: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  color: #fff !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #ffffff;
   padding: 12px 16px;
   border-radius: 12px;
   font-size: 16px;
@@ -128,19 +253,35 @@
 .redeem-form input:hover,
 .redeem-form textarea:hover,
 .redeem-form select:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(125, 39, 255, 0.3);
+  background: #f8f9fa !important;
+  border-color: #e9ecef;
 }
 
 .redeem-form input:focus,
 .redeem-form textarea:focus,
 .redeem-form select:focus {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: #7d27ff;
+  background: #ffffff !important;
+  border-color: #000000;
   box-shadow: 
-    0 0 0 4px rgba(125, 39, 255, 0.15),
-    0 0 20px rgba(125, 39, 255, 0.2);
+    0 0 0 4px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(0, 0, 0, 0.15);
   outline: none;
+}
+
+/* OTP Input Styling */
+.redeem-form input[type="text"][placeholder*="OTP"] {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.redeem-form input[type="text"][placeholder*="OTP"]:focus {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -207,12 +348,12 @@
 }
 
 .redeem-form-close-btn {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff !important;
+  background: #ffffff;
+  color: #000000 !important;
   font-size: 22px;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 50%;
   position: absolute;
   top: 20px;
   right: 20px;
@@ -220,10 +361,11 @@
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid #ffffff;
   transition: all 0.3s ease;
   cursor: pointer;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .redeem-form-close-btn::before {
@@ -237,19 +379,20 @@
 }
 
 .redeem-form-close-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: #f8f9fa;
   transform: rotate(90deg) scale(1.1);
   box-shadow: 
-    0 0 20px rgba(103, 58, 183, 0.3),
-    0 0 40px rgba(3, 169, 244, 0.2);
+    0 6px 20px rgba(0, 0, 0, 0.3),
+    0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .redeem-form-close-btn:hover::before {
-  opacity: 1;
+  opacity: 0;
 }
 
 .redeem-form-close-btn:active {
   transform: rotate(90deg) scale(0.95);
+  background: #e9ecef;
 }
 
 /* Textarea */
