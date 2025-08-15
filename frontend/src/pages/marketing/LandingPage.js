@@ -2,12 +2,35 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/giftygen_logo.png";
+import {
+  Zap,
+  Smartphone,
+  Shield,
+  Palette,
+  ArrowRight,
+  Star,
+  CheckCircle,
+  TrendingUp,
+  Users,
+  Repeat,
+  Target,
+  BarChart3,
+  Eye,
+  DollarSign,
+  Gift,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  X,
+} from "lucide-react";
 
 function LandingPage() {
   const navigate = useNavigate();
   const [theme, setTheme] = useState(() => localStorage.getItem("giftygen_theme") || "dark");
   const [phone, setPhone] = useState("");
-  const [notice, setNotice] = useState(null); // { type: 'success' | 'error', text: string }
+  const [notice, setNotice] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [errors, setErrors] = useState({
     businessName: false,
     businessType: false,
@@ -15,8 +38,72 @@ function LandingPage() {
     email: false,
   });
 
+  const benefitsData = [
+    {
+      icon: <TrendingUp size={24} />,
+      title: "Seasonal Promotions",
+      description: "Perfect for holidays and events with targeted campaigns.",
+      color: "var(--success)",
+    },
+    {
+      icon: <DollarSign size={24} />,
+      title: "Boosts Revenue",
+      description: "Upfront cash flow; often redeemed for more than face value.",
+      color: "var(--primary)",
+    },
+    {
+      icon: <Users size={24} />,
+      title: "Improves Loyalty",
+      description: "Power referral and rewards programs for customer retention.",
+      color: "var(--primary-2)",
+    },
+    {
+      icon: <Repeat size={24} />,
+      title: "Encourages Repeat Visits",
+      description: "Drives return traffic and upsell opportunities.",
+      color: "var(--success)",
+    },
+    {
+      icon: <Target size={24} />,
+      title: "Attracts New Customers",
+      description: "Gifts bring first-time buyers and brand discovery.",
+      color: "var(--primary)",
+    },
+    {
+      icon: <BarChart3 size={24} />,
+      title: "Trackable",
+      description: "Usage data for smarter forecasting and insights.",
+      color: "var(--primary-2)",
+    },
+    {
+      icon: <Eye size={24} />,
+      title: "Enhances Visibility",
+      description: "Branded cards act as mini ads for your business.",
+      color: "var(--success)",
+    },
+    {
+      icon: <DollarSign size={24} />,
+      title: "Higher Order Value",
+      description: "Customers spend beyond the card amount.",
+      color: "var(--primary)",
+    },
+    {
+      icon: <Gift size={24} />,
+      title: "Flexible Marketing",
+      description: "Promotions, contests, and refunds for various campaigns.",
+      color: "var(--primary-2)",
+    },
+  ];
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % Math.ceil(benefitsData.length / 3));
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + Math.ceil(benefitsData.length / 3)) % Math.ceil(benefitsData.length / 3));
+  };
+
   useEffect(() => {
-    // Scroll to top on mount for better first impression
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
@@ -39,14 +126,45 @@ function LandingPage() {
     return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleMobileNavClick = (scrollToId) => {
+    handleScrollTo(scrollToId);
+    closeMobileMenu();
+  };
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.classList.add("mobile-menu-open");
+    } else {
+      document.body.style.overflow = "unset";
+      document.documentElement.classList.remove("mobile-menu-open");
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = "unset";
+      document.documentElement.classList.remove("mobile-menu-open");
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <div className="lp-root" data-theme={theme}>
       {/* Navbar */}
       <header className="lp-nav">
         <div className="lp-nav__brand" onClick={() => navigate("/")}>
           <img src={logo} alt="giftygen logo" className="lp-nav__logo" />
-          {/* <span className="lp-nav__name">giftygen</span> */}
         </div>
+
+        {/* Desktop Navigation */}
         <nav className="lp-nav__links">
           <button onClick={() => handleScrollTo("about")}>About</button>
           <button onClick={() => handleScrollTo("highlights")}>Highlights</button>
@@ -54,9 +172,11 @@ function LandingPage() {
           <button onClick={() => handleScrollTo("register")}>Register</button>
           <button onClick={() => handleScrollTo("contact")}>Contact</button>
         </nav>
+
+        {/* Desktop CTA */}
         <div className="lp-nav__cta">
           <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-            {theme === "dark" ? "☀️ Switch to Light" : "🌙 Switch to Dark"}
+            {theme === "dark" ? "☀️" : "🌙"}
           </button>
           <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/login")}>
             Sign in
@@ -65,7 +185,39 @@ function LandingPage() {
             Explore gift cards
           </button>
         </div>
+
+        {/* Mobile Menu Button */}
+        <button className="lp-nav__mobile-toggle" onClick={toggleMobileMenu} aria-label="Toggle mobile menu">
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </header>
+
+      {/* Mobile Navigation Menu */}
+      <div className={`lp-mobile-menu ${isMobileMenuOpen ? "lp-mobile-menu--open" : ""}`}>
+        <nav className="lp-mobile-nav">
+          <button onClick={() => handleMobileNavClick("about")}>About</button>
+          <button onClick={() => handleMobileNavClick("highlights")}>Highlights</button>
+          <button onClick={() => handleMobileNavClick("benefits")}>Benefits</button>
+          <button onClick={() => handleMobileNavClick("register")}>Register</button>
+          <button onClick={() => handleMobileNavClick("contact")}>Contact</button>
+        </nav>
+        <div className="lp-mobile-cta">
+          <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/login")}>
+            Sign in
+          </button>
+          <button className="lp-btn" onClick={() => navigate("/explore")}>
+            Explore gift cards
+          </button>
+        </div>
+        <div className="lp-mobile-theme">
+          <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === "dark" ? "☀️ Switch to Light" : "🌙 Switch to Dark"}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && <div className="lp-mobile-overlay" onClick={closeMobileMenu} />}
 
       {/* Hero */}
       <section className="lp-hero" id="about">
@@ -100,7 +252,6 @@ function LandingPage() {
 
       {/* Business Offer */}
       <section className="lp-offer">
-        <div className="lp-section__kicker">Business Offer</div>
         <h2 className="lp-section__title lp-h2">A complete platform for creating and selling gift cards</h2>
         <p className="lp-lead">
           Transform the way you engage customers with our innovative Digital Gift Card platform – designed for easy
@@ -112,84 +263,141 @@ function LandingPage() {
 
       {/* Product Highlights */}
       <section className="lp-section" id="highlights">
-        <div className="lp-section__kicker">Product</div>
-        <h2 className="lp-section__title lp-h2">Product Highlights</h2>
-        <div className="lp-grid lp-grid--3">
-          <div className="lp-card">
-            <h3 className="lp-h3">Modern Design</h3>
-            <p>Debit-card inspired layout with a minimalist aesthetic.</p>
+        <div className="lp-section__header">
+          <h2 className="lp-section__title lp-h2">Product Highlights</h2>
+        </div>
+
+        <div className="lp-grid lp-grid--4">
+          <div className="lp-feature-card">
+            <div className="lp-feature-card__icon">
+              <Zap className="lp-feature-icon" />
+            </div>
+            <div className="lp-feature-card__content">
+              <h3 className="lp-h3">Smart Delivery</h3>
+              <p>
+                Send and receive gift cards instantly via email or messaging with our lightning-fast delivery system.
+              </p>
+              <div className="lp-feature-card__benefits">
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  Instant delivery
+                </span>
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  Multiple channels
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="lp-card">
-            <h3 className="lp-h3">Smart Delivery</h3>
-            <p>Send and receive gift cards instantly via email or messaging.</p>
+
+          <div className="lp-feature-card">
+            <div className="lp-feature-card__icon">
+              <Smartphone className="lp-feature-icon" />
+            </div>
+            <div className="lp-feature-card__content">
+              <h3 className="lp-h3">Seamless Integration</h3>
+              <p>Works across all platforms and devices with our responsive design and cross-platform compatibility.</p>
+              <div className="lp-feature-card__benefits">
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  Cross-platform
+                </span>
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  Responsive design
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="lp-card">
-            <h3 className="lp-h3">Seamless Integration</h3>
-            <p>Works across platforms and devices.</p>
+
+          <div className="lp-feature-card">
+            <div className="lp-feature-card__icon">
+              <Shield className="lp-feature-icon" />
+            </div>
+            <div className="lp-feature-card__content">
+              <h3 className="lp-h3">Secure Redemption</h3>
+              <p>Advanced QR code technology and fraud-resistant flows ensure your gift cards are always secure.</p>
+              <div className="lp-feature-card__benefits">
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  QR technology
+                </span>
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  Fraud protection
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="lp-card">
-            <h3 className="lp-h3">Digital Pixel Effect</h3>
-            <p>Symbolizing the transition from physical to digital gifting.</p>
-          </div>
-          <div className="lp-card">
-            <h3 className="lp-h3">Secure Redemption</h3>
-            <p>QR code redemption and fraud-resistant flows.</p>
-          </div>
-          <div className="lp-card">
-            <h3 className="lp-h3">Custom Branding</h3>
-            <p>Your logo, colors, and themes on every card.</p>
+
+          <div className="lp-feature-card">
+            <div className="lp-feature-card__icon">
+              <Palette className="lp-feature-icon" />
+            </div>
+            <div className="lp-feature-card__content">
+              <h3 className="lp-h3">Custom Branding</h3>
+              <p>Your business logo, colors, and themes on every card for a professional, branded experience.</p>
+              <div className="lp-feature-card__benefits">
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  Brand customization
+                </span>
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  Professional look
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Why giftygen / Benefits */}
       <section className="lp-section" id="benefits">
-        <div className="lp-section__kicker">Why giftygen?</div>
-        <h2 className="lp-section__title lp-h2">Business benefits of gift card promotions</h2>
-        <ul className="lp-benefits">
-          <li>
-            <strong>Boosts Revenue:</strong> Upfront cash flow; often redeemed for more than face value.
-          </li>
-          <li>
-            <strong>Attracts New Customers:</strong> Gifts bring first-time buyers and brand discovery.
-          </li>
-          <li>
-            <strong>Encourages Repeat Visits:</strong> Drives return traffic and upsell opportunities.
-          </li>
-          <li>
-            <strong>Reduces Returns:</strong> Recipients choose what they love.
-          </li>
-          <li>
-            <strong>Enhances Visibility:</strong> Branded cards act as mini ads.
-          </li>
-          <li>
-            <strong>Improves Loyalty:</strong> Power referral and rewards programs.
-          </li>
-          <li>
-            <strong>Seasonal Promotions:</strong> Perfect for holidays and events.
-          </li>
-          <li>
-            <strong>Higher Order Value:</strong> Customers spend beyond the card amount.
-          </li>
-          <li>
-            <strong>Flexible Marketing:</strong> Promotions, contests, and refunds.
-          </li>
-          <li>
-            <strong>Low Overhead:</strong> Digital distribution, minimal maintenance.
-          </li>
-          <li>
-            <strong>Trackable:</strong> Usage data for smarter forecasting.
-          </li>
-          <li>
-            <strong>Delightful UX:</strong> Convenient, personalized gifting.
-          </li>
-        </ul>
+        <div className="lp-section__header">
+          <h2 className="lp-section__title lp-h2">Why giftygen? Business benefits of gift card promotions</h2>
+          <p className="lp-section__subtitle">Discover how digital gift cards can transform your business strategy</p>
+        </div>
+
+        <div className="lp-benefits-slider">
+          <button className="lp-slider-btn lp-slider-btn--prev" onClick={prevSlide} aria-label="Previous slide">
+            <ChevronLeft size={24} />
+          </button>
+
+          <div className="lp-benefits-container">
+            <div className="lp-benefits-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+              {benefitsData.map((benefit, index) => (
+                <div key={index} className="lp-benefit-card">
+                  <div className="lp-benefit-icon" style={{ color: benefit.color }}>
+                    {benefit.icon}
+                  </div>
+                  <h3 className="lp-benefit-title">{benefit.title}</h3>
+                  <p className="lp-benefit-description">{benefit.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button className="lp-slider-btn lp-slider-btn--next" onClick={nextSlide} aria-label="Next slide">
+            <ChevronRight size={24} />
+          </button>
+        </div>
+
+        <div className="lp-slider-dots">
+          {Array.from({ length: Math.ceil(benefitsData.length / 3) }).map((_, index) => (
+            <button
+              key={index}
+              className={`lp-dot ${index === currentSlide ? "lp-dot--active" : ""}`}
+              onClick={() => setCurrentSlide(index)}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
       </section>
 
       {/* Registration */}
       <section className="lp-section lp-register" id="register">
         <div className="lp-register__intro">
-          <div className="lp-section__kicker">Get started</div>
           <h2 className="lp-section__title lp-h2">Register your business</h2>
           <p className="lp-lead">
             Restaurants, hotels, and stores can create and manage digital gift cards on giftygen.
