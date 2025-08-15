@@ -315,10 +315,10 @@
  {
   width: 100%;
   padding: 12px 16px;
-  background: #ffffff;
-  border: 2px solid #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  color: #000000;
+  color: #f8fafc;
   font-size: 1rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
@@ -327,27 +327,27 @@
 .giftcards-page-form-group input:hover,
 .giftcards-page-form-group textarea:hover
  {
-  border-color: #e9ecef;
-  background: #f8f9fa;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .giftcards-page-form-group input:focus,
 .giftcards-page-form-group textarea:focus
 {
-  background: #ffffff;
-  border-color: #000000;
-  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1),
-              0 0 20px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1),
+              0 0 20px rgba(99, 102, 241, 0.15);
   outline: none;
 }
 
 .giftcards-page-form-group select {
   width: 100%;
   padding: 12px 16px;
-  background: #ffffff;
-  border: 2px solid #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  color: #000000;
+  color: #f8fafc;
   font-size: 1rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
@@ -355,29 +355,29 @@
 }
 
 .giftcards-page-form-group select:focus {
-  background: #ffffff;
-  border-color: #000000;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #6366f1;
   border-radius: 12px;
-  color: #000000;
+  color: #f8fafc;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
-  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1),
-              0 0 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1),
+              0 0 20px rgba(99, 102, 241, 0.15);
   outline: none;
 }
 
 /* Styling for options */
 .giftcards-page-form-group select option {
-  background: #ffffff;
-  color: #000000;
+  background: #1e293b;
+  color: #f8fafc;
   padding: 10px;
   font-size: 1rem;
 }
 
 .giftcards-page-form-group select option:hover, 
 .giftcards-page-form-group select option:checked {
-  background: #f8f9fa;
-  color: #000000;
+  background: rgba(99, 102, 241, 0.2);
+  color: #ffffff;
 }
 
 /* Create Success Modal Styles */
