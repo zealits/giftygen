@@ -37,9 +37,10 @@ const restaurantAdminSchema = new mongoose.Schema(
 // Hash password before saving
 restaurantAdminSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
-    next();
+    return next();
   }
   this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
 // JWT Token generation
@@ -51,7 +52,6 @@ restaurantAdminSchema.methods.getJWTToken = function () {
 
 // Compare password
 restaurantAdminSchema.methods.comparePassword = async function (password) {
-  console.log(password);
   return await bcrypt.compare(password, this.password);
 };
 

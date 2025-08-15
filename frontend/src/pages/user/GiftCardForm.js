@@ -443,7 +443,7 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
               ))}
             </div>
 
-            <form id="gift-card-form" onSubmit={handleSubmit}>
+            <form id="gift-card-form" className={showErrors ? "show-errors" : ""} onSubmit={handleSubmit}>
               {currentStep === 1 && (
                 <div className="form-section">
                   <h2>Select Purchase Type</h2>
@@ -512,7 +512,6 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
                           type="tel"
                           id="self-phone"
                           required
-                          pattern="[\\(][0-9]{3}[\\)]\\s[0-9]{3}-[0-9]{4}"
                           title="Please enter a valid US phone number like (555) 123-4567"
                           className={showErrors && errors.selfInfo.phone ? "error" : ""}
                           value={formData.selfInfo.phone}
@@ -610,7 +609,6 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
                             type="tel"
                             id="self-phone"
                             required
-                            pattern="[\\(][0-9]{3}[\\)]\\s[0-9]{3}-[0-9]{4}"
                             title="Please enter a valid US phone number like (555) 123-4567"
                             className={showErrors && errors.selfInfo.phone ? "error" : ""}
                             value={formData.selfInfo.phone}

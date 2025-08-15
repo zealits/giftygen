@@ -449,3 +449,40 @@ exports.generateQrPoster = catchAsyncErrors(async (req, res, next) => {
   // Return SVG directly so frontend can trigger download as PNG via canvas
   return res.status(200).json({ success: true, svg: `data:image/svg+xml;base64,${svgBase64}` });
 });
+
+// Change password for restaurant admin users
+exports.changePassword = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user._id;
+
+    console.log("Change password request:", { userId, hasUser: !!req.user });
+
+    // Find the admin
+    const admin = await RestaurantAdmin.findById(userId);
+    if (!admin) {
+      console.log("Admin not found");
+      return next(new ErrorHander("Admin not found", 404));
+    }
+
+    console.log("Admin found:", admin.email);
+
+    // Verify current password using the model's comparePassword method
+    const isCurrentPasswordValid = await admin.comparePassword(currentPassword);
+    console.log("Password validation result:", isCurrentPasswordValid);
+
+    if (!isCurrentPasswordValid) {
+      return next(new ErrorHander("Current password is incorrect", 400));
+    }
+
+    // Update password - the pre-save hook will hash it automatically
+    admin.password = newPassword;
+    await admin.save();
+
+    console.log("Password updated successfully");
+    res.json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Password change error:", error);
+    return next(new ErrorHander(error.message, 500));
+  }
+});

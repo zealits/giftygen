@@ -165,28 +165,34 @@
   /* Input field error styling */
   input.error,
   textarea.error {
-    border-color: #dc2626 !important;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-  }
-
-  /* HTML5 validation styling */
-  input:invalid,
-  textarea:invalid {
     border-color: #dc2626;
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
   }
 
-  /* Phone number specific validation */
-  input[type="tel"]:invalid {
+  /* HTML5 validation styling - only show when form has been submitted or errors are shown */
+  .show-errors input:invalid,
+  .show-errors textarea:invalid {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+
+  /* Phone number specific validation - only show when form has been submitted or errors are shown */
+  .show-errors input[type="tel"]:invalid {
     border-color: #dc2626;
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
   }
 
   /* Focus state for error fields */
   input.error:focus,
-  textarea.error:focus,
-  input:invalid:focus,
-  textarea:invalid:focus {
+  textarea.error:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+  }
+
+  /* Focus state for invalid fields when errors are shown */
+  .show-errors input:invalid:focus,
+  .show-errors textarea:invalid:focus {
     outline: none;
     border-color: #dc2626;
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
@@ -286,18 +292,28 @@ label {
 input, textarea, select {
     width: 100%;
     padding: 0.8rem;
-    border: 2px solid #ddd;
+    border: 2px solid #e5e7eb;
     border-radius: var(--border-radius);
     font-size: 1rem;
     background-color: white; /* Set the background color to white */
     transition: var(--transition);
+    color: #374151;
+}
+
+input::placeholder, textarea::placeholder {
+    color: #9ca3af;
+    opacity: 1;
+}
+
+input:hover, textarea:hover, select:hover {
+    border-color: #d1d5db;
 }
 
 input:focus, textarea:focus, select:focus {
     background-color: white; /* Keep background white even on focus */
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 5px rgba(44, 62, 80, 0.2);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 

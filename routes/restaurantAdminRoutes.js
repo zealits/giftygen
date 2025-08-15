@@ -9,6 +9,7 @@ const {
   logout,
   updateBusinessSettings,
   captureRegistrationInterest,
+  changePassword,
 } = require("../controllers/restaurantAdminController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const upload = require("../middleware/multer");
@@ -38,6 +39,9 @@ router.get("/logout", logout);
 
 // Update business settings
 router.put("/settings", isAuthenticatedUser, authorizeRoles("Admin"), updateBusinessSettings);
+
+// Change password
+router.put("/change-password", isAuthenticatedUser, authorizeRoles("Admin"), changePassword);
 
 // Upload logo
 const { uploadBusinessLogo, generateQrPoster } = require("../controllers/restaurantAdminController");

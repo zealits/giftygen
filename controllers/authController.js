@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const { generateSecret, generateQRCode, verifyToken } = require("../config/totpConfig");
+const bcrypt = require("bcryptjs");
 
 exports.enable2FA = async (req, res) => {
   try {
