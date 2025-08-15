@@ -40,10 +40,35 @@
     height: 60px;
     display: flex;
     align-items: center;
+    justify-content: center;
     position: relative;
     padding: 0 5px;
     margin-bottom: 10px;
     border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar .logo-details .logo-image {
+    width: 35px;
+    height: 35px;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+    flex-shrink: 0;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.sidebar .logo-details .logo-image:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.5));
+}
+
+/* Ensure logo is centered when sidebar is collapsed */
+.sidebar:not(.open) .logo-details .logo-image {
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .sidebar .logo-details .icon {
