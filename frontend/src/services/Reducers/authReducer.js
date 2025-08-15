@@ -7,6 +7,7 @@ import {
   LOAD_USER_FAIL,
   LOGOUT_SUCCESS,
   LOGOUT_FAIL,
+  CLEAR_ERRORS,
 } from "../Constants/authConstants.js";
 
 const initialState = {
@@ -39,7 +40,7 @@ const authReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        error: action.payload,
+        error: action.payload, // This can be null when no token exists
       };
     case LOGOUT_SUCCESS:
       return {
@@ -52,6 +53,11 @@ const authReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         error: action.payload,
+      };
+    case CLEAR_ERRORS:
+      return {
+        ...state,
+        error: null,
       };
     default:
       return state;

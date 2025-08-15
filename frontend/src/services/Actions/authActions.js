@@ -8,6 +8,7 @@ import {
   LOAD_USER_FAIL,
   LOGOUT_SUCCESS,
   LOGOUT_FAIL,
+  CLEAR_ERRORS,
 } from "../Constants/authConstants.js";
 
 export const loginUser = (email, password, navigate) => async (dispatch) => {
@@ -41,13 +42,37 @@ export const loginUser = (email, password, navigate) => async (dispatch) => {
 // Load User
 export const loadUser = () => async (dispatch) => {
   try {
+    // Check if there's a token in cookies or localStorage before making the API call
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+      return null;
+    };
+
+    const token = getCookie("token") || localStorage.getItem("superAdminToken");
+
+    if (!token) {
+      // No token found, user is not authenticated
+      dispatch({ type: LOAD_USER_FAIL, payload: null });
+      return;
+    }
+
     dispatch({ type: LOAD_USER_REQUEST });
 
     const { data } = await axios.get(`/api/v1/admin/me`);
 
     dispatch({ type: LOAD_USER_SUCCESS, payload: data });
   } catch (error) {
-    dispatch({ type: LOAD_USER_FAIL, payload: error.response.data.message });
+    // For loadUser failures, don't set error messages that would show modals
+    // This prevents showing "Please Login to access this resource" on the login page
+    if (error.response?.status === 401) {
+      // Token expired or invalid, just clear the user state without error
+      dispatch({ type: LOAD_USER_FAIL, payload: null });
+    } else {
+      // Other errors (network, server errors) - set error but don't show modal
+      dispatch({ type: LOAD_USER_FAIL, payload: null });
+    }
   }
 };
 
@@ -57,6 +82,12 @@ export const logout = () => async (dispatch) => {
 
     dispatch({ type: LOGOUT_SUCCESS });
   } catch (error) {
-    dispatch({ type: LOGOUT_FAIL, payload: error.response.data.message });
+    // Even if logout fails on the backend, clear the local state
+    dispatch({ type: LOGOUT_SUCCESS });
   }
+};
+
+// Clear Errors
+export const clearErrors = () => async (dispatch) => {
+  dispatch({ type: CLEAR_ERRORS });
 };

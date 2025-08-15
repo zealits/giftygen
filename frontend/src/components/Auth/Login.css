@@ -420,6 +420,35 @@
   max-width: 480px;
 }
 
+/* Prevent form validation styling until user interaction */
+.login-form:not(.touched) .login-input-field:invalid {
+  border-color: rgba(148, 163, 184, 0.1);
+  box-shadow: none;
+}
+
+.login-form:not(.touched) .login-input-field:valid {
+  border-color: rgba(148, 163, 184, 0.1);
+}
+
+/* Only show validation styling after form has been touched */
+.login-form.touched .login-input-field:invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.login-form.touched .login-input-field:valid {
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* Ensure form validation is completely controlled */
+.login-form {
+  /* Disable browser validation styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 .login-input-group {
   margin-bottom: 1.5rem;
   position: relative;
@@ -441,6 +470,66 @@
   background: rgba(30, 41, 59, 0.7);
   border-color: #6366f1;
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* Override browser default validation styles */
+.login-input-field:invalid {
+  border-color: rgba(148, 163, 184, 0.1) !important;
+  box-shadow: none !important;
+}
+
+.login-input-field:valid {
+  border-color: rgba(148, 163, 184, 0.1) !important;
+}
+
+/* Only show red border when there's an actual error (not on required empty fields) */
+.login-input-field.error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Remove browser default validation styling */
+.login-input-field::-webkit-validation-bubble-message {
+  display: none;
+}
+
+.login-input-field::-webkit-validation-bubble-icon {
+  display: none;
+}
+
+/* Additional browser-specific overrides */
+.login-input-field:-moz-ui-invalid {
+  border-color: rgba(148, 163, 184, 0.1) !important;
+  box-shadow: none !important;
+}
+
+.login-input-field:-moz-ui-valid {
+  border-color: rgba(148, 163, 184, 0.1) !important;
+}
+
+/* Ensure no outline on invalid state */
+.login-input-field:invalid:focus {
+  outline: none;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Ensure focus state works properly */
+.login-input-field:focus {
+  outline: none !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Override any remaining browser styles */
+.login-input-field,
+.login-input-field:invalid,
+.login-input-field:valid,
+.login-input-field:required,
+.login-input-field:optional {
+  border-color: rgba(148, 163, 184, 0.1) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .password-wrapper {

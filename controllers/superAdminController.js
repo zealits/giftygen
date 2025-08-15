@@ -351,9 +351,7 @@ exports.createBusinessAdmin = catchAsyncErrors(async (req, res, next) => {
                   </div>
                   
                   <div style="text-align: center;">
-                      <a href="${
-                        process.env.FRONTEND_URL || "https://yourdomain.com"
-                      }/admin/login" class="login-button">
+                      <a href="https://giftygen.com/login" class="login-button">
                           🚀 Access Your Dashboard
                       </a>
                   </div>
