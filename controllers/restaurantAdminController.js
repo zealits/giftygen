@@ -2,7 +2,7 @@ const RestaurantAdmin = require("../models/restaurantAdminSchema");
 const RegistrationRequest = require("../models/registrationRequestSchema");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
-const sendEmail = require("../utils/sendEmail"); // Utility for sending emails
+const { sendEmail, sendRegistrationConfirmationEmail } = require("../utils/sendEmail"); // Utility for sending emails
 const catchAsyncErrors = require("../middleware/catchAsyncErrors"); // Middleware for handling async errors
 const sendToken = require("../utils/jwtToken");
 const ErrorHander = require("../utils/errorhander");
@@ -152,6 +152,14 @@ exports.registerRestaurantAdmin = catchAsyncErrors(async (req, res, next) => {
   // Generate JWT token
   const token = admin.getJWTToken();
 
+  // Send professional registration confirmation email
+  try {
+    await sendRegistrationConfirmationEmail(email, restaurantName, name);
+  } catch (emailError) {
+    console.error("Failed to send registration confirmation email:", emailError);
+    // Don't fail the registration if email fails
+  }
+
   sendToken(admin, 200, res);
 });
 
@@ -274,6 +282,14 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
     registrationRequest.source = registrationRequest.source || "landing_request_demo";
     if (notes) registrationRequest.notes = notes;
     await registrationRequest.save();
+  }
+
+  // Send professional registration confirmation email for interest capture
+  try {
+    await sendRegistrationConfirmationEmail(email, businessName, contactName);
+  } catch (emailError) {
+    console.error("Failed to send registration confirmation email:", emailError);
+    // Don't fail the request if email fails
   }
 
   return res.status(200).json({ success: true, message: "Request received" });

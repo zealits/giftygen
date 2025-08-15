@@ -8,6 +8,7 @@ const {
   getUserDetails,
   logout,
   updateBusinessSettings,
+  captureRegistrationInterest,
 } = require("../controllers/restaurantAdminController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const upload = require("../middleware/multer");
@@ -31,7 +32,6 @@ router.post("/password-reset", requestPasswordReset);
 router.post("/verify-otp", verifyOTP);
 
 // Public endpoint for landing page to capture registration/demo interest
-const { captureRegistrationInterest } = require("../controllers/restaurantAdminController");
 router.post("/registration-interest", captureRegistrationInterest);
 
 router.get("/logout", logout);

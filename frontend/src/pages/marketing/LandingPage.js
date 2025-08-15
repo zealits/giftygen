@@ -438,7 +438,7 @@ function LandingPage() {
             setErrors(nextErrors);
             if (Object.values(nextErrors).some(Boolean)) {
               setNotice({ type: "error", text: "Please fix the highlighted fields." });
-              setTimeout(() => setNotice(null), 5000);
+              setTimeout(() => setNotice(null), 8000); // Show error for 8 seconds
               return;
             }
             try {
@@ -447,6 +447,7 @@ function LandingPage() {
                 const phoneRegex = /^\([0-9]{3}\)\s[0-9]{3}-[0-9]{4}$/;
                 if (!phoneRegex.test(payload.phone)) {
                   setNotice({ type: "error", text: "Please enter a valid phone number like (555) 123-4567." });
+                  setTimeout(() => setNotice(null), 8000); // Show error for 8 seconds
                   return;
                 }
               }
@@ -456,14 +457,17 @@ function LandingPage() {
                 body: JSON.stringify(payload),
               });
               if (!res.ok) throw new Error("Failed to submit");
-              setNotice({ type: "success", text: "Thanks! We will reach out shortly." });
+              setNotice({
+                type: "success",
+                text: "✅ Registration submitted successfully! Please check your email for confirmation and next steps. We'll be in touch within 24 hours.",
+              });
               form.reset();
               setPhone("");
               setErrors({ businessName: false, businessType: false, contactName: false, email: false });
-              setTimeout(() => setNotice(null), 5000);
+              setTimeout(() => setNotice(null), 60000); // Show for 1 minute (60 seconds)
             } catch (err) {
               setNotice({ type: "error", text: "Sorry, something went wrong. Please try again later." });
-              setTimeout(() => setNotice(null), 5000);
+              setTimeout(() => setNotice(null), 8000); // Show error for 8 seconds
             }
           }}
         >
@@ -541,7 +545,7 @@ function LandingPage() {
             </div>
           )}
           <button className="lp-btn lp-btn--block lp-form__submit" type="submit">
-            Request demo
+            Register
           </button>
         </form>
       </section>
