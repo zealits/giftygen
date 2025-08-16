@@ -126,15 +126,24 @@ min-width: 100vw;
   
   .business-logo-name {
     gap: 16px;
+    width: 100%; /* Ensure full width on mobile */
+    justify-content: flex-start; /* Align items to start */
   }
   
   .business-logo {
-    width: 65px;
-    height: 65px;
+    width: 75px; /* Increased from 65px */
+    height: 75px; /* Increased from 65px */
+    flex-shrink: 0; /* Prevent logo from shrinking */
+  }
+  
+  .business-title-section {
+    flex: 1; /* Allow title section to take remaining space */
+    min-width: 0; /* Allow text to wrap properly */
   }
   
   .business-name {
-    font-size: 1.8em;
+    font-size: 1.6em; /* Reduced from 1.8em */
+    word-wrap: break-word; /* Ensure long names wrap properly */
   }
   
   .business-subtitle {
@@ -144,6 +153,7 @@ min-width: 100vw;
   .business-address-section {
     align-self: stretch;
     justify-content: center;
+    width: 100%; /* Full width on mobile */
   }
 }
 
@@ -154,19 +164,71 @@ min-width: 100vw;
   
   .business-logo-name {
     gap: 12px;
+    width: 100%; /* Ensure full width on mobile */
+    justify-content: flex-start; /* Align items to start */
   }
   
   .business-logo {
-    width: 55px;
-    height: 55px;
+    width: 70px; /* Increased from 55px */
+    height: 70px; /* Increased from 55px */
+    flex-shrink: 0; /* Prevent logo from shrinking */
+  }
+  
+  .business-title-section {
+    flex: 1; /* Allow title section to take remaining space */
+    min-width: 0; /* Allow text to wrap properly */
   }
   
   .business-name {
-    font-size: 1.6em;
+    font-size: 1.4em; /* Reduced from 1.6em */
+    word-wrap: break-word; /* Ensure long names wrap properly */
   }
   
   .business-subtitle {
     font-size: 0.85em;
+  }
+  
+  .business-address-section {
+    width: 100%; /* Full width on mobile */
+  }
+}
+
+/* Additional mobile improvements for very small screens */
+@media (max-width: 360px) {
+  .business-header {
+    padding: 14px 16px;
+  }
+  
+  .business-logo-name {
+    gap: 10px;
+    width: 100%; /* Ensure full width on mobile */
+    justify-content: flex-start; /* Align items to start */
+  }
+  
+  .business-logo {
+    width: 65px;
+    height: 65px;
+    flex-shrink: 0; /* Prevent logo from shrinking */
+  }
+  
+  .business-title-section {
+    flex: 1; /* Allow title section to take remaining space */
+    min-width: 0; /* Allow text to wrap properly */
+  }
+  
+  .business-name {
+    font-size: 1.3em;
+    word-wrap: break-word; /* Ensure long names wrap properly */
+  }
+  
+  .business-subtitle {
+    font-size: 0.8em;
+  }
+  
+  .business-address-section {
+    padding: 10px 12px;
+    font-size: 0.85em;
+    width: 100%; /* Full width on mobile */
   }
 }
 

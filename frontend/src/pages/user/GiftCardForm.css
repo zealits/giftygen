@@ -1,14 +1,16 @@
+/* CSS Variables */
 :root {
-    --primary-color: #2c3e50;
-    --secondary-color: #e74c3c;
-    --accent-color: #f1c40f;
-    --text-color: #333;
-    --light-gray: #f5f6fa;
-    --border-radius: 8px;
-    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
+  --border-radius: 8px;
+  --transition: all 0.3s ease;
+  --primary-color: #e95746;
+  --secondary-color: #e95746;
+  --text-color: #000000;
+  --light-gray: #f5f5f5;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --gradient-bg: linear-gradient(135deg, #e95746 0%, #ff6b5b 100%);
 }
 
+/* General Reset */
 /* Blur overlay */
 /* Blur overlay */
 .purchase-modal-open-overlay {
@@ -292,28 +294,255 @@ label {
 input, textarea, select {
     width: 100%;
     padding: 0.8rem;
-    border: 2px solid #e5e7eb;
+    border: 2px solid #000000 !important; /* Force black border with !important */
     border-radius: var(--border-radius);
     font-size: 1rem;
-    background-color: white; /* Set the background color to white */
+    background-color: white !important; /* Force white background */
     transition: var(--transition);
-    color: #374151;
+    color: #000000 !important; /* Force black text color */
+}
+
+/* Ensure all input types have black text and borders */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+    border: 2px solid #000000 !important;
+    background-color: white !important;
+    color: #000000 !important;
 }
 
 input::placeholder, textarea::placeholder {
-    color: #9ca3af;
+    color: #6b7280 !important; /* Force darker placeholder color */
     opacity: 1;
 }
 
 input:hover, textarea:hover, select:hover {
-    border-color: #d1d5db;
+    border-color: #374151 !important; /* Force darker border on hover */
 }
 
 input:focus, textarea:focus, select:focus {
-    background-color: white; /* Keep background white even on focus */
+    background-color: white !important; /* Keep background white even on focus */
     outline: none;
-    border-color: #3b82f6;
+    border-color: #3b82f6 !important;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    color: #000000 !important; /* Ensure text remains black on focus */
+}
+
+/* Override browser autofill styles */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-text-fill-color: #000000 !important;
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    background-color: white !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+}
+
+/* Firefox autofill override */
+input:-moz-autofill {
+    background-color: white !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+}
+
+/* Ensure all states maintain black text */
+input:valid,
+input:invalid,
+input:required,
+input:optional {
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    background-color: white !important;
+}
+
+/* Additional input styling to ensure black borders and text */
+#gift-purchase-form input,
+#gift-purchase-form textarea,
+#gift-purchase-form select,
+.form-group input,
+.form-group textarea,
+.form-group select {
+    border: 2px solid #000000 !important;
+    background-color: white !important;
+    color: #000000 !important;
+}
+
+/* Force black text on all input states */
+#gift-purchase-form input[type="text"],
+#gift-purchase-form input[type="email"],
+#gift-purchase-form input[type="tel"],
+#gift-purchase-form input[type="password"],
+#gift-purchase-form input[type="number"],
+#gift-purchase-form input[type="url"],
+#gift-purchase-form input[type="search"],
+#gift-purchase-form textarea,
+#gift-purchase-form select {
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    background-color: white !important;
+}
+
+/* Ensure focus states maintain black text */
+#gift-purchase-form input:focus,
+#gift-purchase-form textarea:focus,
+#gift-purchase-form select:focus {
+    color: #000000 !important;
+    border: 2px solid #3b82f6 !important;
+    background-color: white !important;
+}
+
+/* Maximum specificity selectors to override any other styles */
+body #gift-purchase-form input,
+body #gift-purchase-form textarea,
+body #gift-purchase-form select,
+body .form-group input,
+body .form-group textarea,
+body .form-group select,
+html body #gift-purchase-form input,
+html body #gift-purchase-form textarea,
+html body #gift-purchase-form select {
+    border: 2px solid #000000 !important;
+    background-color: white !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+}
+
+/* Override any potential global input styles */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+    border: 2px solid #000000 !important;
+    background-color: white !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+}
+
+/* Handle any potential dynamic styling */
+input[style*="color"],
+textarea[style*="color"],
+select[style*="color"] {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+}
+
+input[style*="border"],
+textarea[style*="border"],
+select[style*="border"] {
+    border: 2px solid #000000 !important;
+}
+
+input[style*="background"],
+textarea[style*="background"],
+select[style*="background"] {
+    background-color: white !important;
+}
+
+/* Ensure these styles are applied even after DOM manipulation */
+input:not([style*="color"]),
+textarea:not([style*="color"]),
+select:not([style*="color"]) {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+}
+
+/* Ensure styles are maintained during animations and transitions */
+input,
+textarea,
+select {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+    /* Don't transition color to maintain black text */
+}
+
+/* Debug styles - make borders very visible */
+input,
+textarea,
+select {
+    border-width: 2px !important;
+    border-style: solid !important;
+    border-color: #000000 !important;
+    outline: none !important;
+}
+
+/* Force black text on all pseudo-elements */
+input::placeholder,
+textarea::placeholder {
+    color: #6b7280 !important;
+    opacity: 1 !important;
+}
+
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+    color: #6b7280 !important;
+    opacity: 1 !important;
+}
+
+input::-moz-placeholder,
+textarea::-moz-placeholder {
+    color: #6b7280 !important;
+    opacity: 1 !important;
+}
+
+/* Additional enforcement of black borders and text */
+#gift-purchase-form .form-group input,
+#gift-purchase-form .form-group textarea,
+#gift-purchase-form .form-group select {
+    border: 3px solid #000000 !important; /* Thicker border for visibility */
+    background-color: white !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-weight: 500 !important; /* Make text slightly bolder */
+}
+
+/* Ensure all input types in the form have black text */
+#gift-purchase-form input[type="text"] { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
+#gift-purchase-form input[type="email"] { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
+#gift-purchase-form input[type="tel"] { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
+#gift-purchase-form input[type="password"] { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
+#gift-purchase-form input[type="number"] { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
+#gift-purchase-form textarea { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
+#gift-purchase-form select { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
+
+/* Mobile-specific input improvements */
+@media (max-width: 768px) {
+  input, textarea, select {
+    padding: 1rem; /* Slightly larger padding for mobile touch */
+    font-size: 16px; /* Prevent zoom on iOS */
+    border-width: 2px; /* Ensure border is visible */
+  }
+  
+  .form-group {
+    margin-bottom: 1.2rem; /* Slightly reduced spacing for mobile */
+  }
+  
+  label {
+    font-size: 0.95rem; /* Slightly smaller labels for mobile */
+    margin-bottom: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  input, textarea, select {
+    padding: 0.9rem;
+    border-width: 2px;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
 }
 
 
