@@ -8,6 +8,8 @@ const {
   getUserDetails,
   logout,
   updateBusinessSettings,
+  uploadBusinessLogo,
+  generateQrPoster,
   captureRegistrationInterest,
   changePassword,
   getBusinessBySlug,
@@ -45,7 +47,6 @@ router.put("/settings", isAuthenticatedUser, authorizeRoles("Admin"), updateBusi
 router.put("/change-password", isAuthenticatedUser, authorizeRoles("Admin"), changePassword);
 
 // Upload logo
-const { uploadBusinessLogo, generateQrPoster } = require("../controllers/restaurantAdminController");
 router.post("/settings/logo", isAuthenticatedUser, authorizeRoles("Admin"), upload.single("logo"), uploadBusinessLogo);
 
 // Generate QR poster

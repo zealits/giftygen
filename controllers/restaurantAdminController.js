@@ -380,13 +380,12 @@ exports.generateQrPoster = catchAsyncErrors(async (req, res, next) => {
   }
 
   const derivedBase = `${req.protocol}://${req.get("host")}`;
-  const baseUrl = process.env.PUBLIC_BASE_URL || derivedBase; // absolute fallback
+  const baseUrl = process.env.PUBLIC_BASE_URL || derivedBase;
   const link = `${baseUrl}/${slug}/giftcards`;
 
-  // Build a simple branded poster in SVG; embed assets as data URIs to avoid CORS issues
   const businessName = admin.restaurantName || "Our Gift Cards";
 
-  // Generate QR Data URL (higher margin to ensure quiet zone)
+  // Generate QR Data URL
   const qrSizePx = 760;
   const qrDataUrl = await QRCode.toDataURL(link, {
     errorCorrectionLevel: "M",
@@ -408,8 +407,9 @@ exports.generateQrPoster = catchAsyncErrors(async (req, res, next) => {
     }
   }
 
+  // Centered SVG layout
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600">
   <defs>
     <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#6366F1"/>
@@ -419,34 +419,60 @@ exports.generateQrPoster = catchAsyncErrors(async (req, res, next) => {
       <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.3"/>
     </filter>
   </defs>
+  
+  <!-- Background -->
   <rect width="100%" height="100%" fill="url(#bgGrad)"/>
-  <g transform="translate(100,100)">
-    <rect width="1000" height="1400" rx="32" ry="32" fill="#ffffff" opacity="0.95" filter="url(#shadow)"/>
-    ${
-      embeddedLogo
-        ? `<image href="${embeddedLogo}" x="180" y="120" height="100" width="280" preserveAspectRatio="xMidYMid meet"/>`
-        : ""
-    }
-    <text x="${
-      embeddedLogo ? 480 : 180
-    }" y="190" font-size="56" font-family="Arial, Helvetica, sans-serif" font-weight="700" fill="#111827">${businessName.replace(
+  
+  <!-- Centered content container -->
+  <g transform="translate(600, 800)">
+    <!-- White background card - centered at 0,0 -->
+    <rect x="-500" y="-700" width="1000" height="1400" rx="32" ry="32" fill="#ffffff" opacity="0.95" filter="url(#shadow)"/>
+    
+         <!-- Logo (if available) -->
+     ${
+       embeddedLogo
+         ? `<image href="${embeddedLogo}" x="-140" y="-620" height="100" width="280" preserveAspectRatio="xMidYMid meet"/>`
+         : ""
+     }
+     
+     <!-- Business name - centered -->
+     <text x="0" y="${
+       embeddedLogo ? "-480" : "-580"
+     }" font-size="56" font-family="Arial, Helvetica, sans-serif" font-weight="700" fill="#111827" text-anchor="middle">${businessName.replace(
     /&/g,
     "&amp;"
   )}</text>
-    <text x="180" y="270" font-size="28" font-family="Arial, Helvetica, sans-serif" fill="#374151">Scan to view and buy our gift cards</text>
-    <rect x="180" y="320" width="840" height="840" rx="24" ry="24" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="6"/>
-    <image href="${qrDataUrl}" x="220" y="360" height="${qrSizePx}" width="${qrSizePx}"/>
-    <text x="180" y="1220" font-size="24" font-family="Arial, Helvetica, sans-serif" fill="#6B7280">Link: ${link.replace(
+    
+         <!-- Subtitle - centered -->
+     <text x="0" y="${
+       embeddedLogo ? "-400" : "-500"
+     }" font-size="28" font-family="Arial, Helvetica, sans-serif" fill="#374151" text-anchor="middle">Scan to view and buy our gift cards</text>
+     
+     <!-- QR code background -->
+     <rect x="-420" y="${
+       embeddedLogo ? "-350" : "-450"
+     }" width="840" height="840" rx="24" ry="24" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="6"/>
+     
+     <!-- QR code - centered -->
+     <image href="${qrDataUrl}" x="${-qrSizePx / 2}" y="${
+    embeddedLogo ? "-330" : "-430"
+  }" height="${qrSizePx}" width="${qrSizePx}"/>
+    
+    <!-- Link text - centered -->
+    <text x="0" y="520" font-size="24" font-family="Arial, Helvetica, sans-serif" fill="#6B7280" text-anchor="middle">${link.replace(
       /&/g,
       "&amp;"
     )}</text>
-    <rect x="180" y="1260" width="840" height="4" fill="#E5E7EB"/>
-    <text x="180" y="1320" font-size="20" font-family="Arial, Helvetica, sans-serif" fill="#111827">Powered by Giftygen</text>
+    
+    <!-- Divider line -->
+    <rect x="-420" y="560" width="840" height="4" fill="#E5E7EB"/>
+    
+    <!-- Powered by text - centered -->
+    <text x="0" y="620" font-size="20" font-family="Arial, Helvetica, sans-serif" fill="#111827" text-anchor="middle">Powered by Giftygen</text>
   </g>
 </svg>`;
 
   const svgBase64 = Buffer.from(svg).toString("base64");
-  // Return SVG directly so frontend can trigger download as PNG via canvas
   return res.status(200).json({ success: true, svg: `data:image/svg+xml;base64,${svgBase64}` });
 });
 
