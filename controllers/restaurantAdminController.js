@@ -486,3 +486,36 @@ exports.changePassword = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHander(error.message, 500));
   }
 });
+
+// Get business information by slug (public endpoint)
+exports.getBusinessBySlug = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const { businessSlug } = req.params;
+
+    if (!businessSlug) {
+      return next(new ErrorHander("Business slug is required", 400));
+    }
+
+    const business = await RestaurantAdmin.findOne({
+      businessSlug,
+      isVerified: true,
+    }).select("restaurantName logoUrl businessSlug restaurantAddress");
+
+    if (!business) {
+      return next(new ErrorHander("Business not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      business: {
+        name: business.restaurantName,
+        logoUrl: business.logoUrl,
+        businessSlug: business.businessSlug,
+        address: business.restaurantAddress,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching business by slug:", error);
+    return next(new ErrorHander(error.message, 500));
+  }
+});

@@ -9,6 +9,7 @@ import {
 import authReducer from "./services/Reducers/authReducer.js";
 import locationReducer from "./services/Reducers/locationSlice";
 import { paymentReducer } from "./services/Reducers/paymentReducer.js";
+import { businessReducer } from "./services/Reducers/businessReducer.js";
 
 // Configure the store
 const store = configureStore({
@@ -21,6 +22,7 @@ const store = configureStore({
     auth: authReducer,
     location: locationReducer,
     payment: paymentReducer,
+    business: businessReducer,
   },
 });
 

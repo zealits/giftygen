@@ -10,6 +10,7 @@ const {
   updateBusinessSettings,
   captureRegistrationInterest,
   changePassword,
+  getBusinessBySlug,
 } = require("../controllers/restaurantAdminController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const upload = require("../middleware/multer");
@@ -49,5 +50,8 @@ router.post("/settings/logo", isAuthenticatedUser, authorizeRoles("Admin"), uplo
 
 // Generate QR poster
 router.get("/settings/qr-poster", isAuthenticatedUser, authorizeRoles("Admin"), generateQrPoster);
+
+// Public endpoint to get business information by slug
+router.get("/business/:businessSlug", getBusinessBySlug);
 
 module.exports = router;

@@ -3,6 +3,7 @@ import "./UserLanding.css";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { setLocation } from "../../services/Reducers/locationSlice";
 import { listGiftCards } from "../../services/Actions/giftCardActions";
+import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import { useDispatch, useSelector } from "react-redux";
 import GiftCardLoader from "./GiftCardLoader";
 const GiftCardForm = lazy(() => import("./GiftCardForm"));
@@ -48,6 +49,14 @@ const UserLanding = () => {
   const loadMoreRef = useRef(null);
 
   const { giftCards, loading, error } = useSelector((state) => state.giftCardList);
+  const { business, loading: businessLoading } = useSelector((state) => state.business);
+
+  // Fetch business information when businessSlug changes
+  useEffect(() => {
+    if (businessSlug) {
+      dispatch(fetchBusinessBySlug(businessSlug));
+    }
+  }, [dispatch, businessSlug]);
 
   // Fetch initial cards when search term or business changes
   useEffect(() => {
@@ -154,8 +163,51 @@ const UserLanding = () => {
   return (
     <div className="body">
       <div className="header">
-        <h1>🍽️ Restaurant Gift Cards</h1>
-        <p>Choose a gift card to share unforgettable dining experiences!</p>
+        {businessSlug && business ? (
+          <div className="business-header">
+            <div className="business-header-content">
+              <div className="business-logo-name">
+                {business.logoUrl && (
+                  <img src={business.logoUrl} alt={`${business.name} Logo`} className="business-logo" />
+                )}
+                <div className="business-title-section">
+                  <h1 className="business-name">{business.name}</h1>
+                  <p className="business-subtitle">Discover our exclusive gift card collection</p>
+                </div>
+              </div>
+              {business.address && (
+                <div className="business-address-section">
+                  <span className="location-icon">📍</span>
+                  <span className="address-text">
+                    {business.address.street && `${business.address.street}, `}
+                    {business.address.city && `${business.address.city}, `}
+                    {business.address.state && `${business.address.state}`}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : businessSlug && businessLoading ? (
+          <div className="business-header business-header-skeleton">
+            <div className="business-header-content">
+              <div className="business-logo-name">
+                <div className="business-logo skeleton-logo"></div>
+                <div className="business-title-section">
+                  <div className="skeleton-business-name"></div>
+                  <div className="skeleton-business-subtitle"></div>
+                </div>
+              </div>
+              <div className="business-address-section">
+                <div className="skeleton-business-address"></div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h1>🍽️ Restaurant Gift Cards</h1>
+            <p>Choose a gift card to share unforgettable dining experiences!</p>
+          </>
+        )}
       </div>
 
       <div className="filters">
@@ -202,6 +254,11 @@ const UserLanding = () => {
                     <div className="purchase-card-tag">
                       <i className={card.icon}></i> {card.giftCardTag}
                     </div>
+                    {businessSlug && business && (
+                      <div className="business-card-badge">
+                        <span className="business-badge-text">{business.name}</span>
+                      </div>
+                    )}
                   </div>
                   <div className="purchase-card-content">
                     <h2 className="purchase-card-title">{card.giftCardName}</h2>
@@ -277,7 +334,14 @@ const UserLanding = () => {
 
       <footer className="footer">
         <div className="footer-bottom">
-          <p>&copy; 2025 Restaurant Gift Cards. All rights reserved.</p>
+          {businessSlug && business ? (
+            <div className="business-footer">
+              <p>&copy; 2025 {business.name}. All rights reserved.</p>
+              <p className="footer-powered-by">Powered by Giftygen</p>
+            </div>
+          ) : (
+            <p>&copy; 2025 Restaurant Gift Cards. All rights reserved.</p>
+          )}
         </div>
       </footer>
     </div>

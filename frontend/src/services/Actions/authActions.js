@@ -10,6 +10,7 @@ import {
   LOGOUT_FAIL,
   CLEAR_ERRORS,
 } from "../Constants/authConstants.js";
+import { FETCH_BUSINESS_REQUEST, FETCH_BUSINESS_SUCCESS, FETCH_BUSINESS_FAIL } from "../Constants/businessConstants.js";
 
 export const loginUser = (email, password, navigate) => async (dispatch) => {
   try {
@@ -90,4 +91,26 @@ export const logout = () => async (dispatch) => {
 // Clear Errors
 export const clearErrors = () => async (dispatch) => {
   dispatch({ type: CLEAR_ERRORS });
+};
+
+// Fetch business information by slug
+export const fetchBusinessBySlug = (businessSlug) => async (dispatch) => {
+  try {
+    dispatch({ type: FETCH_BUSINESS_REQUEST });
+
+    const { data } = await axios.get(`/api/v1/admin/business/${businessSlug}`);
+
+    dispatch({
+      type: FETCH_BUSINESS_SUCCESS,
+      payload: data.business,
+    });
+
+    return data.business;
+  } catch (error) {
+    dispatch({
+      type: FETCH_BUSINESS_FAIL,
+      payload: error.response?.data?.message || "Failed to fetch business information",
+    });
+    throw error;
+  }
 };
