@@ -4,6 +4,7 @@ import { purchaseGiftCard } from "../../services/Actions/giftCardActions";
 import { useDispatch, useSelector } from "react-redux";
 import SquarePaymentForm from "./SquarePaymentForm.js";
 import GoogleWalletIcon from "../../assets/paymenticons/google-wallet.png";
+import AppleWalletIcon from "../../assets/paymenticons/64px-Apple_Wallet_Icon.svg.png";
 
 const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -655,15 +656,19 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
               <div className="purchase-modal-content">
                 <h2>Purchase Completed Successfully!</h2>
                 <p>Thank you for your purchase. A confirmation email has been sent to your inbox.</p>
-                {/* <div className="button-container"> */}
-                <a href={walletUrl} target="_blank" rel="noopener noreferrer" className="wallet-button">
-                  <img src={GoogleWalletIcon} alt="Google Wallet" className="wallet-icon" />
-                  <span>Add to Google Wallet</span>
-                </a>
+                <div className="wallet-buttons-container">
+                  <a href={walletUrl} target="_blank" rel="noopener noreferrer" className="wallet-button">
+                    <img src={GoogleWalletIcon} alt="Google Wallet" className="wallet-icon" />
+                    <span>Add to Google Wallet</span>
+                  </a>
+                  <a href={walletUrl} target="_blank" rel="noopener noreferrer" className="wallet-button">
+                    <img src={AppleWalletIcon} alt="Apple Wallet" className="wallet-icon" />
+                    <span>Add to Apple Wallet</span>
+                  </a>
+                </div>
                 <button className="purchase-modal-close-btn" onClick={handlePurchaseModal}>
                   Close
                 </button>
-                {/* </div> */}
               </div>
             </div>
           )

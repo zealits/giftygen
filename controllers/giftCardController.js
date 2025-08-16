@@ -665,6 +665,36 @@ const addBuyer = async (req, res) => {
             vertical-align: middle;
         }
 
+        /* Apple Wallet Button Styling */
+        .wallet-button.apple-wallet {
+            background-color: #000000;
+            border-color: #000000;
+            margin-top: 10px;
+        }
+
+        .wallet-button.apple-wallet .wallet-text {
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .wallet-button.apple-wallet:hover {
+            background-color: #333333;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        /* Wallet buttons container styling */
+        .qr-section .wallet-button {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 15px auto;
+            text-align: center;
+        }
+
+        .qr-section .wallet-button:first-child {
+            margin-top: 0;
+        }
+
         /* Instructions section */
         .instructions {
             margin-top: 25px;
@@ -768,6 +798,13 @@ const addBuyer = async (req, res) => {
                          alt="Google Wallet" 
                          class="wallet-icon" />
                     <span class="wallet-text">Add to Google Wallet</span>
+                </a>
+                
+                <a href="${walletUrl}" target="_blank" rel="noopener noreferrer" class="wallet-button apple-wallet">
+                    <img src="https://res.cloudinary.com/dzmn9lnk5/image/upload/v1755349111/gift_cards/64px-Apple_Wallet_Icon.svg_tk8gzq.png" 
+                         alt="Apple Wallet" 
+                         class="wallet-icon" />
+                    <span class="wallet-text">Add to Apple Wallet</span>
                 </a>
             </div>
         </div>
