@@ -1,23 +1,20 @@
 const nodemailer = require("nodemailer");
 
 const sendEmail = async (options) => {
-  // Create transporter
+  // Create transporter for IONOS SMTP
   const transporter = nodemailer.createTransport({
-    host: process.env.SMPT_HOST,
-    port: process.env.SMPT_PORT,
-    service: process.env.SMPT_SERVICE,
+    host: "smtp.ionos.com",
+    port: 587,
+    secure: false, // true for 465, false for other ports like 587
     auth: {
-      user: process.env.SMPT_MAIL,
-      pass: process.env.SMPT_PASSWORD,
-    },
-    tls: {
-      rejectUnauthorized: false, // Only for development
+      user: "contact@giftygen.com",
+      pass: "@u9aG!pX7Fb#",
     },
   });
 
   // Create email content with embedded image using cid
   const mailOptions = {
-    from: process.env.SMPT_MAIL,
+    from: `"GiftyGen" <contact@giftygen.com>`, // Use your domain email as sender
     to: options.email,
     subject: options.subject,
     text: options.message,

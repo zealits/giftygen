@@ -7,10 +7,10 @@ async function testEmails() {
   console.log("Testing email functionality...");
 
   try {
-    // Test 1: Basic email
+    // Test 1: Basic email (using your own email for testing)
     console.log("Test 1: Sending basic email...");
     await sendEmail({
-      email: "test@example.com",
+      email: "contact@giftygen.com", // Using your own email for testing
       subject: "Test Email from GiftyGen",
       html: "<h1>This is a test email</h1><p>If you receive this, the email system is working!</p>",
     });
@@ -18,13 +18,14 @@ async function testEmails() {
 
     // Test 2: Registration confirmation email
     console.log("Test 2: Sending registration confirmation email...");
-    await sendRegistrationConfirmationEmail("test@example.com", "Test Restaurant", "John Doe");
+    await sendRegistrationConfirmationEmail("contact@giftygen.com", "Test Restaurant", "John Doe");
     console.log("✅ Registration confirmation email sent successfully");
 
     console.log("\n🎉 All email tests passed!");
   } catch (error) {
     console.error("❌ Email test failed:", error.message);
-    console.error("Make sure your SMTP settings are correct in config/config.env");
+    console.error("Make sure your IONOS SMTP settings are correct in config/config.env");
+    console.error("Check that your IONOS email credentials are valid and SMTP is enabled");
   }
 }
 
