@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { loadUser } from "./services/Actions/authActions.js";
@@ -18,6 +18,7 @@ import { LoadingProvider } from "./context/LoadingContext";
 import GiftCardDetails from "./pages/user/GiftCardDetails.js";
 import SuperAdminLogin from "./components/SuperAdmin/SuperAdminLogin";
 import SuperAdminDashboard from "./components/SuperAdmin/SuperAdminDashboard";
+import VideoModal from "./components/VideoModal/VideoModal";
 import "./App.css";
 // import 'font-awesome/css/font-awesome.min.css';
 
@@ -124,10 +125,22 @@ function AppRoutes() {
 
 function App() {
   const dispatch = useDispatch();
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   useEffect(() => {
     dispatch(loadUser());
+
+    // Show video modal after a short delay when the app loads
+    const timer = setTimeout(() => {
+      setShowVideoModal(true);
+    }, 1000); // 1 second delay to ensure the app is fully loaded
+
+    return () => clearTimeout(timer);
   }, [dispatch]);
+
+  const handleCloseVideoModal = () => {
+    setShowVideoModal(false);
+  };
 
   return (
     <LoadingProvider>
@@ -135,6 +148,7 @@ function App() {
         <Router>
           <AppRoutes />
         </Router>
+        <VideoModal isOpen={showVideoModal} onClose={handleCloseVideoModal} />
       </div>
     </LoadingProvider>
   );
