@@ -47,6 +47,7 @@ jobs:
                 cp ~/giftygen/config/config.env ~/config.env.bak
               fi
               cd ~/giftygen
+              git reset --hard origin/main
               git pull origin main
             else
               git clone https://github.com/zealits/giftygen.git ~/giftygen
