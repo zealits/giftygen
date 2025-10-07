@@ -49,3 +49,5 @@ console.log("   - Make sure to use the app password for that account");
 
 console.log("\n✅ Ready to test? Run: node test-email.js");
 
+
+
