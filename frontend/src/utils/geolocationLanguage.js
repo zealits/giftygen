@@ -241,7 +241,7 @@ export const detectLanguageFromLocation = async (countryCode, regionCode = null)
 export const getDetailedLocation = async () => {
   try {
     // Try to get location from IP geolocation service
-    const response = await fetch('https://ipapi.co/88.198.0.0/json/');
+    const response = await fetch('https://ipapi.co/json/');
     if (!response.ok) {
       throw new Error('Failed to fetch location data');
     }
