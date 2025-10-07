@@ -5,7 +5,9 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux"; 
 import store from "./store"; 
-
+// Giriraj Code
+import "./i18n"; // 🔥 import i18n setup
+// End Giriraj Code
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(

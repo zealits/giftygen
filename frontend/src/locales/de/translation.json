@@ -1,0 +1,132 @@
+{
+  "nav": {
+    "about": "Über uns",
+    "highlights": "Highlights",
+    "benefits": "Vorteile",
+    "register": "Registrieren",
+    "contact": "Kontakt",
+    "signIn": "Anmelden",
+    "explore": "Geschenkkarten erkunden"
+  },
+  "hero": {
+    "kicker": "Einführung von giftygen",
+    "title": "Die Zukunft des Schenkens ist digital",
+    "subtitle": "Elegant. Sofort. Unvergesslich.",
+    "description": "giftygen verwandelt traditionelle Geschenkkarten in elegante digitale Erlebnisse.",
+    "getStarted": "Loslegen",
+    "buyGiftCard": "Geschenkkarte kaufen"
+  },
+  "offer": {
+    "title": "Eine komplette Plattform zum Erstellen und Verkaufen von Geschenkkarten",
+    "description": "Transformieren Sie Ihre Kundenbindung mit unserer innovativen Digital-Gift-Card-Plattform – entwickelt für die einfache Erstellung, den Verkauf und die Einlösung von Geschenkkartenaktionen. Perfekt, um den Umsatz zu steigern, neue Kunden zu gewinnen und die Markentreue zu stärken. Funktioniert nahtlos für stationäre und Online-Geschäfte. Schnell, sicher und anpassbar."
+  },
+  "highlights": {
+    "title": "Produkt-Highlights",
+    "smartDelivery": {
+      "title": "Smarte Zustellung",
+      "description": "Senden und empfangen Sie Geschenkkarten sofort per E-Mail oder Nachricht mit unserem blitzschnellen Liefersystem.",
+      "benefit1": "Sofortige Zustellung",
+      "benefit2": "Mehrere Kanäle"
+    },
+    "integration": {
+      "title": "Nahtlose Integration",
+      "description": "Funktioniert auf allen Plattformen und Geräten mit unserem responsiven Design und plattformübergreifender Kompatibilität.",
+      "benefit1": "Plattformübergreifend",
+      "benefit2": "Responsives Design"
+    },
+    "security": {
+      "title": "Sichere Einlösung",
+      "description": "Fortschrittliche QR-Code-Technologie und betrugssichere Abläufe stellen sicher, dass Ihre Geschenkkarten immer geschützt sind.",
+      "benefit1": "QR-Technologie",
+      "benefit2": "Betrugsschutz"
+    },
+    "branding": {
+      "title": "Individuelles Branding",
+      "description": "Ihr Logo, Ihre Farben und Ihr Design auf jeder Karte für ein professionelles Markenerlebnis.",
+      "benefit1": "Markenanpassung",
+      "benefit2": "Professionelles Erscheinungsbild"
+    }
+  },
+  "benefits": {
+    "title": "Warum giftygen? Geschäftliche Vorteile von Geschenkkartenaktionen",
+    "subtitle": "Entdecken Sie, wie digitale Geschenkkarten Ihre Geschäftsstrategie verändern können",
+    "items": {
+      "seasonal": {
+        "title": "Saisonale Aktionen",
+        "description": "Perfekt für Feiertage und Events mit gezielten Kampagnen."
+      },
+      "revenue": {
+        "title": "Steigert den Umsatz",
+        "description": "Sofortiger Cashflow; oft über dem Nennwert eingelöst."
+      },
+      "loyalty": {
+        "title": "Verbessert die Kundentreue",
+        "description": "Unterstützt Empfehlungs- und Bonusprogramme für Kundenbindung."
+      },
+      "repeat": {
+        "title": "Fördert Wiederholungsbesuche",
+        "description": "Treibt Rückkehrbesuche und Upselling-Möglichkeiten an."
+      },
+      "attract": {
+        "title": "Gewinnt neue Kunden",
+        "description": "Geschenke bringen Erstkäufer und Markenentdeckung."
+      },
+      "trackable": {
+        "title": "Nachverfolgbar",
+        "description": "Nutzungsdaten für bessere Prognosen und Insights."
+      },
+      "visibility": {
+        "title": "Erhöht die Sichtbarkeit",
+        "description": "Gebrandete Karten wirken wie kleine Anzeigen für Ihr Geschäft."
+      },
+      "orderValue": {
+        "title": "Höherer Bestellwert",
+        "description": "Kunden geben oft mehr aus als den Kartenwert."
+      },
+      "flexible": {
+        "title": "Flexible Vermarktung",
+        "description": "Aktionen, Wettbewerbe und Rückerstattungen für verschiedene Kampagnen."
+      }
+    }
+  },
+  "register": {
+    "title": "Registrieren Sie Ihr Unternehmen",
+    "subtitle": "Restaurants, Hotels und Geschäfte können auf giftygen digitale Geschenkkarten erstellen und verwalten.",
+    "form": {
+      "businessName": "Unternehmensname",
+      "businessNamePlaceholder": "z. B. Ocean View Bistro",
+      "businessType": "Unternehmensart",
+      "businessTypePlaceholder": "z. B. Restaurant, Salon, Einzelhandel",
+      "contactName": "Kontaktname",
+      "contactNamePlaceholder": "Ihr Name",
+      "email": "E-Mail",
+      "emailPlaceholder": "name@business.com",
+      "phone": "Telefon",
+      "phonePlaceholder": "(555) 123-4567",
+      "website": "Webseite",
+      "websitePlaceholder": "https://",
+      "notes": "Notizen",
+      "notesPlaceholder": "Teilen Sie uns Ihre Ziele mit Geschenkkarten mit",
+      "submit": "Registrieren",
+      "errorFix": "Bitte korrigieren Sie die markierten Felder.",
+      "errorPhone": "Bitte geben Sie eine gültige Telefonnummer wie (555) 123-4567 ein.",
+      "success": "✅ Registrierung erfolgreich eingereicht! Bitte überprüfen Sie Ihre E-Mail für die Bestätigung und nächste Schritte. Wir melden uns innerhalb von 24 Stunden.",
+      "error": "Entschuldigung, etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut."
+    }
+  },
+  "contact": {
+    "title": "Kontaktieren Sie uns",
+    "description": "Besuchen Sie giftygen.com, um mehr zu erfahren, oder scannen Sie den QR-Code unten.",
+    "visitWebsite": "Webseite besuchen",
+    "exploreCards": "Geschenkkarten erkunden",
+    "scanText": "Scannen, um mehr zu erfahren"
+  },
+  "footer": {
+    "rights": "Alle Rechte vorbehalten."
+  },
+  "giftCard": {
+    "digitalGiftCard": "Digitale Geschenkkarte",
+    "to": "An: Sie",
+    "from": "Von: Absender"
+  }
+}

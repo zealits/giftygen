@@ -1,0 +1,134 @@
+{
+  "nav": {
+    "about": "About",
+    "highlights": "Highlights",
+    "benefits": "Benefits",
+    "register": "Register",
+    "contact": "Contact",
+    "signIn": "Sign in",
+    "explore": "Explore gift cards"
+  },
+  "hero": {
+    "kicker": "Introducing giftygen",
+    "title": "The Future of Gifting Is Digital",
+    "subtitle": "Elegant. Instant. Memorable.",
+    "description": "giftygen transforms traditional gift cards into sleek, digital experiences.",
+    "getStarted": "Get started",
+    "buyGiftCard": "Buy a gift card"
+  },
+  "offer": {
+    "title": "A complete platform for creating and selling gift cards",
+    "description": "Transform the way you engage customers with our innovative Digital Gift Card platform – designed for easy creation, sale, and redemption of gift card promotions. Perfect for boosting sales, attracting new customers, and enhancing brand loyalty. Works seamlessly for in-store and online businesses. Fast, secure, and customizable."
+  },
+  "highlights": {
+    "title": "Product Highlights",
+    "smartDelivery": {
+      "title": "Smart Delivery",
+      "description": "Send and receive gift cards instantly via email or messaging with our lightning-fast delivery system.",
+      "benefit1": "Instant delivery",
+      "benefit2": "Multiple channels"
+    },
+    "integration": {
+      "title": "Seamless Integration",
+      "description": "Works across all platforms and devices with our responsive design and cross-platform compatibility.",
+      "benefit1": "Cross-platform",
+      "benefit2": "Responsive design"
+    },
+    "security": {
+      "title": "Secure Redemption",
+      "description": "Advanced QR code technology and fraud-resistant flows ensure your gift cards are always secure.",
+      "benefit1": "QR technology",
+      "benefit2": "Fraud protection"
+    },
+    "branding": {
+      "title": "Custom Branding",
+      "description": "Your business logo, colors, and themes on every card for a professional, branded experience.",
+      "benefit1": "Brand customization",
+      "benefit2": "Professional look"
+    }
+  },
+  "benefits": {
+    "title": "Why giftygen? Business benefits of gift card promotions",
+    "subtitle": "Discover how digital gift cards can transform your business strategy",
+    "items": {
+      "seasonal": {
+        "title": "Seasonal Promotions",
+        "description": "Perfect for holidays and events with targeted campaigns."
+      },
+      "revenue": {
+        "title": "Boosts Revenue",
+        "description": "Upfront cash flow; often redeemed for more than face value."
+      },
+      "loyalty": {
+        "title": "Improves Loyalty",
+        "description": "Power referral and rewards programs for customer retention."
+      },
+      "repeat": {
+        "title": "Encourages Repeat Visits",
+        "description": "Drives return traffic and upsell opportunities."
+      },
+      "attract": {
+        "title": "Attracts New Customers",
+        "description": "Gifts bring first-time buyers and brand discovery."
+      },
+      "trackable": {
+        "title": "Trackable",
+        "description": "Usage data for smarter forecasting and insights."
+      },
+      "visibility": {
+        "title": "Enhances Visibility",
+        "description": "Branded cards act as mini ads for your business."
+      },
+      "orderValue": {
+        "title": "Higher Order Value",
+        "description": "Customers spend beyond the card amount."
+      },
+      "flexible": {
+        "title": "Flexible Marketing",
+        "description": "Promotions, contests, and refunds for various campaigns."
+      }
+    }
+  },
+  "register": {
+    "title": "Register your business",
+    "subtitle": "Restaurants, hotels, and stores can create and manage digital gift cards on giftygen.",
+    "form": {
+      "businessName": "Business name",
+      "businessNamePlaceholder": "e.g., Ocean View Bistro",
+      "businessType": "Business type",
+      "businessTypePlaceholder": "e.g., Restaurant, Salon, Retail",
+      "contactName": "Contact name",
+      "contactNamePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "name@business.com",
+      "phone": "Phone",
+      "phonePlaceholder": "(555) 123-4567",
+      "website": "Website",
+      "websitePlaceholder": "https://",
+      "notes": "Notes",
+      "notesPlaceholder": "Tell us about your gift card goals",
+      "submit": "Register",
+      "errorFix": "Please fix the highlighted fields.",
+      "errorPhone": "Please enter a valid phone number like (555) 123-4567.",
+      "success": "✅ Registration submitted successfully! Please check your email for confirmation and next steps. We'll be in touch within 24 hours.",
+      "error": "Sorry, something went wrong. Please try again later."
+    }
+  },
+  "contact": {
+    "title": "Contact us",
+    "description": "Visit giftygen.com to learn more or scan the QR code below to explore our platform.",
+    "visitWebsite": "Visit website",
+    "exploreCards": "Explore gift cards",
+    "scanText": "Scan to learn more"
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  },
+  "giftCard": {
+    "digitalGiftCard": "Digital Gift Card",
+    "to": "To: You",
+    "from": "From: Sender"
+  }
+}
+
+

@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/giftygen_logo.png";
+import { useTranslation } from "react-i18next";
+import "../../i18n";
+import LanguageDropdown from "../../components/LanguageDropdown";
+import { detectAndSetLanguage, getDetailedLocation } from "../../utils/geolocationLanguage";
 import {
   Zap,
   Smartphone,
@@ -29,8 +33,11 @@ function LandingPage() {
   const [theme, setTheme] = useState(() => localStorage.getItem("giftygen_theme") || "dark");
   const [phone, setPhone] = useState("");
   const [notice, setNotice] = useState(null);
+  const { t, i18n } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoadingLanguage, setIsLoadingLanguage] = useState(true);
+  const [userLocation, setUserLocation] = useState(null);
   const [errors, setErrors] = useState({
     businessName: false,
     businessType: false,
@@ -38,59 +45,86 @@ function LandingPage() {
     email: false,
   });
 
+  // Detect and set language based on geolocation
+  useEffect(() => {
+    const initializeLanguage = async () => {
+      try {
+        setIsLoadingLanguage(true);
+        
+        // Detect and set language based on user's location
+        const detectedLang = await detectAndSetLanguage(i18n);
+        console.log('Detected language:', detectedLang);
+
+        // Optionally get detailed location info
+        const locationData = await getDetailedLocation();
+        setUserLocation(locationData);
+        
+        if (locationData) {
+          console.log('User location:', locationData.country, locationData.city);
+        }
+      } catch (error) {
+        console.error('Error initializing language:', error);
+      } finally {
+        setIsLoadingLanguage(false);
+      }
+    };
+
+    initializeLanguage();
+  }, [i18n]);
+
   const benefitsData = [
     {
       icon: <TrendingUp size={24} />,
-      title: "Seasonal Promotions",
-      description: "Perfect for holidays and events with targeted campaigns.",
+      title: t("benefits.items.seasonal.title"),
+      description: t("benefits.items.seasonal.description"),
       color: "var(--success)",
     },
     {
       icon: <DollarSign size={24} />,
-      title: "Boosts Revenue",
-      description: "Upfront cash flow; often redeemed for more than face value.",
+      title: t("benefits.items.revenue.title"),
+      description: t("benefits.items.revenue.description"),
       color: "var(--primary)",
     },
     {
       icon: <Users size={24} />,
-      title: "Improves Loyalty",
-      description: "Power referral and rewards programs for customer retention.",
+      title: t("benefits.items.loyalty.title"),
+      description: t("benefits.items.loyalty.description"),
       color: "var(--primary-2)",
     },
     {
       icon: <Repeat size={24} />,
-      title: "Encourages Repeat Visits",
-      description: "Drives return traffic and upsell opportunities.",
+      title: t("benefits.items.repeat.title"),
+      description: t("benefits.items.repeat.description"),
       color: "var(--success)",
     },
     {
       icon: <Target size={24} />,
-      title: "Attracts New Customers",
-      description: "Gifts bring first-time buyers and brand discovery.",
+      title: t("benefits.items.attract.title"),
+      description: t("benefits.items.attract.description"),
       color: "var(--primary)",
     },
     {
       icon: <BarChart3 size={24} />,
-      title: "Trackable",
-      description: "Usage data for smarter forecasting and insights.",
+      title: t("benefits.items.trackable.title"),
+      description: t("benefits.items.trackable.description"),
       color: "var(--primary-2)",
     },
     {
       icon: <Eye size={24} />,
-      title: "Enhances Visibility",
-      description: "Branded cards act as mini ads for your business.",
+      title: t("benefits.items.visibility.title"),
+      description: t("benefits.items.visibility.description"),
       color: "var(--success)",
     },
     {
       icon: <DollarSign size={24} />,
-      title: "Higher Order Value",
-      description: "Customers spend beyond the card amount.",
+      title: t("benefits.items.orderValue.title"),
+      description: t("benefits.items.orderValue.description"),
       color: "var(--primary)",
     },
     {
       icon: <Gift size={24} />,
-      title: "Flexible Marketing",
-      description: "Promotions, contests, and refunds for various campaigns.",
+      title: t("benefits.items.flexible.title"),
+      description: t("benefits.items.flexible.description"),
       color: "var(--primary-2)",
     },
   ];
@@ -139,7 +173,6 @@ function LandingPage() {
     closeMobileMenu();
   };
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -149,12 +182,28 @@ function LandingPage() {
       document.documentElement.classList.remove("mobile-menu-open");
     }
 
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = "unset";
       document.documentElement.classList.remove("mobile-menu-open");
     };
   }, [isMobileMenuOpen]);
+
+  // Show loading state while detecting language
+  if (isLoadingLanguage) {
+    return (
+      <div className="lp-root" data-theme={theme}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          fontSize: '1.2rem'
+        }}>
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="lp-root" data-theme={theme}>
@@ -166,23 +215,24 @@ function LandingPage() {
 
         {/* Desktop Navigation */}
         <nav className="lp-nav__links">
-          <button onClick={() => handleScrollTo("about")}>About</button>
-          <button onClick={() => handleScrollTo("highlights")}>Highlights</button>
-          <button onClick={() => handleScrollTo("benefits")}>Benefits</button>
-          <button onClick={() => handleScrollTo("register")}>Register</button>
-          <button onClick={() => handleScrollTo("contact")}>Contact</button>
+          <button onClick={() => handleScrollTo("about")}>{t("nav.about")}</button>
+          <button onClick={() => handleScrollTo("highlights")}>{t("nav.highlights")}</button>
+          <button onClick={() => handleScrollTo("benefits")}>{t("nav.benefits")}</button>
+          <button onClick={() => handleScrollTo("register")}>{t("nav.register")}</button>
+          <button onClick={() => handleScrollTo("contact")}>{t("nav.contact")}</button>
         </nav>
 
         {/* Desktop CTA */}
         <div className="lp-nav__cta">
+          <LanguageDropdown />
           <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === "dark" ? "☀️" : "🌙"}
           </button>
           <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/login")}>
-            Sign in
+            {t("nav.signIn")}
           </button>
           <button className="lp-btn" onClick={() => navigate("/explore")}>
-            Explore gift cards
+            {t("nav.explore")}
           </button>
         </div>
 
@@ -194,7 +244,6 @@ function LandingPage() {
 
       {/* Mobile Navigation Menu */}
       <div className={`lp-mobile-menu ${isMobileMenuOpen ? "lp-mobile-menu--open" : ""}`}>
-        {/* Mobile Menu Header with Close Button */}
         <div className="lp-mobile-header">
           <div className="lp-mobile-header__brand">
             <img src={logo} alt="giftygen logo" className="lp-mobile-header__logo" />
@@ -206,18 +255,18 @@ function LandingPage() {
         </div>
 
         <nav className="lp-mobile-nav">
-          <button onClick={() => handleMobileNavClick("about")}>About</button>
-          <button onClick={() => handleMobileNavClick("highlights")}>Highlights</button>
-          <button onClick={() => handleMobileNavClick("benefits")}>Benefits</button>
-          <button onClick={() => handleMobileNavClick("register")}>Register</button>
-          <button onClick={() => handleMobileNavClick("contact")}>Contact</button>
+          <button onClick={() => handleMobileNavClick("about")}>{t("nav.about")}</button>
+          <button onClick={() => handleMobileNavClick("highlights")}>{t("nav.highlights")}</button>
+          <button onClick={() => handleMobileNavClick("benefits")}>{t("nav.benefits")}</button>
+          <button onClick={() => handleMobileNavClick("register")}>{t("nav.register")}</button>
+          <button onClick={() => handleMobileNavClick("contact")}>{t("nav.contact")}</button>
         </nav>
         <div className="lp-mobile-cta">
           <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/login")}>
-            Sign in
+            {t("nav.signIn")}
           </button>
           <button className="lp-btn" onClick={() => navigate("/explore")}>
-            Explore gift cards
+            {t("nav.explore")}
           </button>
         </div>
         <div className="lp-mobile-theme">
@@ -233,28 +282,28 @@ function LandingPage() {
       {/* Hero */}
       <section className="lp-hero" id="about">
         <div className="lp-hero__content">
-          <div className="lp-kicker">Introducing giftygen</div>
-          <h1 className="lp-hero__title">The Future of Gifting Is Digital</h1>
-          <p className="lp-hero__subtitle">Elegant. Instant. Memorable.</p>
-          <p className="lp-hero__desc">giftygen transforms traditional gift cards into sleek, digital experiences.</p>
+          <div className="lp-kicker">{t("hero.kicker")}</div>
+          <h1 className="lp-hero__title">{t("hero.title")}</h1>
+          <p className="lp-hero__subtitle">{t("hero.subtitle")}</p>
+          <p className="lp-hero__desc">{t("hero.description")}</p>
           <div className="lp-hero__actions">
             <button className="lp-btn" onClick={() => handleScrollTo("register")}>
-              Get started
+              {t("hero.getStarted")}
             </button>
             <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/explore")}>
-              Buy a gift card
+              {t("hero.buyGiftCard")}
             </button>
           </div>
         </div>
         <div className="lp-hero__visual" aria-hidden>
           <div className="lp-giftcard" role="img" aria-label="Digital gift card illustration">
             <div className="lp-giftcard__ribbon" />
-            <div className="lp-giftcard__brand">giftygen</div>
-            <div className="lp-giftcard__title">Digital Gift Card</div>
+            <div className="lp-giftcard__brand">{t("giftCard.giftygen")}</div>
+            <div className="lp-giftcard__title">{t("giftCard.digitalGiftCard")}</div>
             <div className="lp-giftcard__amount">$ 50</div>
             <div className="lp-giftcard__meta">
-              <span>To: You</span>
-              <span>From: Sender</span>
+              <span>{t("giftCard.to")}</span>
+              <span>{t("giftCard.from")}</span>
             </div>
             <div className="lp-giftcard__pixels" />
           </div>
@@ -263,19 +312,14 @@ function LandingPage() {
 
       {/* Business Offer */}
       <section className="lp-offer">
-        <h2 className="lp-section__title lp-h2">A complete platform for creating and selling gift cards</h2>
-        <p className="lp-lead">
-          Transform the way you engage customers with our innovative Digital Gift Card platform – designed for easy
-          creation, sale, and redemption of gift card promotions. Perfect for boosting sales, attracting new customers,
-          and enhancing brand loyalty. Works seamlessly for in-store and online businesses. Fast, secure, and
-          customizable.
-        </p>
+        <h2 className="lp-section__title lp-h2">{t("offer.title")}</h2>
+        <p className="lp-lead">{t("offer.description")}</p>
       </section>
 
       {/* Product Highlights */}
       <section className="lp-section" id="highlights">
         <div className="lp-section__header">
-          <h2 className="lp-section__title lp-h2">Product Highlights</h2>
+          <h2 className="lp-section__title lp-h2">{t("highlights.title")}</h2>
         </div>
 
         <div className="lp-grid lp-grid--4">
@@ -284,18 +328,16 @@ function LandingPage() {
               <Zap className="lp-feature-icon" />
             </div>
             <div className="lp-feature-card__content">
-              <h3 className="lp-h3">Smart Delivery</h3>
-              <p>
-                Send and receive gift cards instantly via email or messaging with our lightning-fast delivery system.
-              </p>
+              <h3 className="lp-h3">{t("highlights.smartDelivery.title")}</h3>
+              <p>{t("highlights.smartDelivery.description")}</p>
               <div className="lp-feature-card__benefits">
                 <span className="lp-feature-benefit">
                   <CheckCircle size={16} />
-                  Instant delivery
+                  {t("highlights.smartDelivery.benefit1")}
                 </span>
                 <span className="lp-feature-benefit">
                   <CheckCircle size={16} />
-                  Multiple channels
+                  {t("highlights.smartDelivery.benefit2")}
                 </span>
               </div>
             </div>
@@ -306,16 +348,16 @@ function LandingPage() {
               <Smartphone className="lp-feature-icon" />
             </div>
             <div className="lp-feature-card__content">
-              <h3 className="lp-h3">Seamless Integration</h3>
-              <p>Works across all platforms and devices with our responsive design and cross-platform compatibility.</p>
+              <h3 className="lp-h3">{t("highlights.integration.title")}</h3>
+              <p>{t("highlights.integration.description")}</p>
               <div className="lp-feature-card__benefits">
                 <span className="lp-feature-benefit">
                   <CheckCircle size={16} />
-                  Cross-platform
+                  {t("highlights.integration.benefit1")}
                 </span>
                 <span className="lp-feature-benefit">
                   <CheckCircle size={16} />
-                  Responsive design
+                  {t("highlights.integration.benefit2")}
                 </span>
               </div>
             </div>
@@ -326,16 +368,16 @@ function LandingPage() {
               <Shield className="lp-feature-icon" />
             </div>
             <div className="lp-feature-card__content">
-              <h3 className="lp-h3">Secure Redemption</h3>
-              <p>Advanced QR code technology and fraud-resistant flows ensure your gift cards are always secure.</p>
+              <h3 className="lp-h3">{t("highlights.security.title")}</h3>
+              <p>{t("highlights.security.description")}</p>
               <div className="lp-feature-card__benefits">
                 <span className="lp-feature-benefit">
                   <CheckCircle size={16} />
-                  QR technology
+                  {t("highlights.security.benefit1")}
                 </span>
                 <span className="lp-feature-benefit">
                   <CheckCircle size={16} />
-                  Fraud protection
+                  {t("highlights.security.benefit2")}
                 </span>
               </div>
             </div>
@@ -346,16 +388,16 @@ function LandingPage() {
               <Palette className="lp-feature-icon" />
             </div>
             <div className="lp-feature-card__content">
-              <h3 className="lp-h3">Custom Branding</h3>
-              <p>Your business logo, colors, and themes on every card for a professional, branded experience.</p>
+              <h3 className="lp-h3">{t("highlights.branding.title")}</h3>
+              <p>{t("highlights.branding.description")}</p>
               <div className="lp-feature-card__benefits">
                 <span className="lp-feature-benefit">
                   <CheckCircle size={16} />
-                  Brand customization
+                  {t("highlights.branding.benefit1")}
                 </span>
                 <span className="lp-feature-benefit">
                   <CheckCircle size={16} />
-                  Professional look
+                  {t("highlights.branding.benefit2")}
                 </span>
               </div>
             </div>
@@ -366,8 +408,8 @@ function LandingPage() {
       {/* Why giftygen / Benefits */}
       <section className="lp-section" id="benefits">
         <div className="lp-section__header">
-          <h2 className="lp-section__title lp-h2">Why giftygen? Business benefits of gift card promotions</h2>
-          <p className="lp-section__subtitle">Discover how digital gift cards can transform your business strategy</p>
+          <h2 className="lp-section__title lp-h2">{t("benefits.title")}</h2>
+          <p className="lp-section__subtitle">{t("benefits.subtitle")}</p>
         </div>
 
         <div className="lp-benefits-slider">
@@ -409,10 +451,8 @@ function LandingPage() {
       {/* Registration */}
       <section className="lp-section lp-register" id="register">
         <div className="lp-register__intro">
-          <h2 className="lp-section__title lp-h2">Register your business</h2>
-          <p className="lp-lead">
-            Restaurants, hotels, and stores can create and manage digital gift cards on giftygen.
-          </p>
+          <h2 className="lp-section__title lp-h2">{t("register.title")}</h2>
+          <p className="lp-lead">{t("register.subtitle")}</p>
         </div>
         <form
           className="lp-form"
@@ -428,7 +468,6 @@ function LandingPage() {
               website: form.website?.value,
               notes: form.notes?.value,
             };
-            // Client-side validation displayed only on submit
             const nextErrors = {
               businessName: !payload.businessName?.trim(),
               businessType: !payload.businessType?.trim(),
@@ -438,16 +477,15 @@ function LandingPage() {
             setErrors(nextErrors);
             if (Object.values(nextErrors).some(Boolean)) {
               setNotice({ type: "error", text: "Please fix the highlighted fields." });
-              setTimeout(() => setNotice(null), 8000); // Show error for 8 seconds
+              setTimeout(() => setNotice(null), 8000);
               return;
             }
             try {
-              // Validate phone if provided
               if (payload.phone) {
                 const phoneRegex = /^\([0-9]{3}\)\s[0-9]{3}-[0-9]{4}$/;
                 if (!phoneRegex.test(payload.phone)) {
                   setNotice({ type: "error", text: "Please enter a valid phone number like (555) 123-4567." });
-                  setTimeout(() => setNotice(null), 8000); // Show error for 8 seconds
+                  setTimeout(() => setNotice(null), 8000);
                   return;
                 }
               }
@@ -464,62 +502,62 @@ function LandingPage() {
               form.reset();
               setPhone("");
               setErrors({ businessName: false, businessType: false, contactName: false, email: false });
-              setTimeout(() => setNotice(null), 60000); // Show for 1 minute (60 seconds)
+              setTimeout(() => setNotice(null), 60000);
             } catch (err) {
               setNotice({ type: "error", text: "Sorry, something went wrong. Please try again later." });
-              setTimeout(() => setNotice(null), 8000); // Show error for 8 seconds
+              setTimeout(() => setNotice(null), 8000);
             }
           }}
         >
           <div className="lp-form__grid">
             <div className="lp-field">
-              <label>Business name</label>
+              <label>{t("register.form.businessName")}</label>
               <input
                 type="text"
                 name="businessName"
-                placeholder="e.g., Ocean View Bistro"
+                placeholder={t("register.form.businessNamePlaceholder")}
                 className={errors.businessName ? "lp-input--error" : undefined}
                 onInput={() => setErrors((e) => ({ ...e, businessName: false }))}
               />
             </div>
             <div className="lp-field">
-              <label>Business type</label>
+              <label>{t("register.form.businessType")}</label>
               <input
                 type="text"
                 name="businessType"
-                placeholder="e.g., Restaurant, Salon, Retail"
+                placeholder={t("register.form.businessTypePlaceholder")}
                 className={errors.businessType ? "lp-input--error" : undefined}
                 onInput={() => setErrors((e) => ({ ...e, businessType: false }))}
               />
             </div>
             <div className="lp-field">
-              <label>Contact name</label>
+              <label>{t("register.form.contactName")}</label>
               <input
                 type="text"
                 name="contactName"
-                placeholder="Your name"
+                placeholder={t("register.form.contactNamePlaceholder")}
                 className={errors.contactName ? "lp-input--error" : undefined}
                 onInput={() => setErrors((e) => ({ ...e, contactName: false }))}
               />
             </div>
             <div className="lp-field">
-              <label>Email</label>
+              <label>{t("register.form.email")}</label>
               <input
                 type="email"
                 name="email"
-                placeholder="name@business.com"
+                placeholder={t("register.form.emailPlaceholder")}
                 className={errors.email ? "lp-input--error" : undefined}
                 onInput={() => setErrors((e) => ({ ...e, email: false }))}
               />
             </div>
             <div className="lp-field">
-              <label>Phone</label>
+              <label>{t("register.form.phone")}</label>
               <input
                 type="tel"
                 name="phone"
                 inputMode="numeric"
                 autoComplete="tel"
-                placeholder="(555) 123-4567"
+                placeholder={t("register.form.phonePlaceholder")}
                 value={phone}
                 onChange={(e) => setPhone(formatUSPhone(e.target.value))}
                 maxLength={14}
@@ -527,12 +565,12 @@ function LandingPage() {
               />
             </div>
             <div className="lp-field">
-              <label>Website</label>
-              <input type="url" name="website" placeholder="https://" />
+              <label>{t("register.form.website")}</label>
+              <input type="url" name="website" placeholder={t("register.form.websitePlaceholder")} />
             </div>
             <div className="lp-field lp-field--full">
-              <label>Notes</label>
-              <textarea name="notes" rows="4" placeholder="Tell us about your gift card goals"></textarea>
+              <label>{t("register.form.notes")}</label>
+              <textarea name="notes" rows="4" placeholder={t("register.form.notesPlaceholder")}></textarea>
             </div>
           </div>
           {notice && (
@@ -545,7 +583,7 @@ function LandingPage() {
             </div>
           )}
           <button className="lp-btn lp-btn--block lp-form__submit" type="submit">
-            Register
+            {t("register.form.submit")}
           </button>
         </form>
       </section>
@@ -554,16 +592,16 @@ function LandingPage() {
       <section className="lp-section lp-contact" id="contact">
         <div className="lp-contact__content">
           <div>
-            <h2>Contact us</h2>
+            <h2>{t("nav.contact")}</h2>
             <p className="lp-contact__lead">
-              Visit giftygen.com to learn more or scan the QR code below to explore our platform.
+              {t("contact.description")}
             </p>
             <div className="lp-contact__actions">
               <a className="lp-btn" href="https://giftygen.com" target="_blank" rel="noreferrer">
-                Visit website
+                {t("contact.visitWebsite")}
               </a>
               <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/explore")}>
-                Explore gift cards
+                {t("contact.exploreCards")}
               </button>
             </div>
           </div>
@@ -574,7 +612,7 @@ function LandingPage() {
               )}&size=160x160`}
               alt="QR code for giftygen.com"
             />
-            <span>Scan to learn more</span>
+            <span>{t("contact.scanText")}</span>
           </div>
         </div>
       </section>
@@ -585,7 +623,7 @@ function LandingPage() {
           <img src={logo} alt="giftygen logo" />
           <span>giftygen</span>
         </div>
-        <div className="lp-footer__right">© {new Date().getFullYear()} giftygen. All rights reserved.</div>
+        <div className="lp-footer__right">© {new Date().getFullYear()} {t("footer.rights")}</div>
       </footer>
     </div>
   );
