@@ -6,6 +6,15 @@ const LANGS = [
   { code: "hi", label: "हिन्दी" },
   { code: "mr", label: "मराठी" },
   { code: "de", label: "Deutsch" },
+  { code: "Guja", label: "ગુજરાતી" },
+  { code: "panja", label: "ਪੰਜਾਬੀ" },
+  { code: "Tamil", label: "தமிழ்" },
+  { code: "telu", label: "తెలుగు" },
+  { code: "kan", label: "ಕನ್ನಡ" },
+  { code: "Malay", label: "മലയാളം" },
+  { code: "ben", label: "বাংলা" },
+  { code: "Odi", label: "ଓଡ଼ିଆ" },
+  { code: "urdu", label: "اردو" }
 ];
 
 export default function LanguageDropdown() {

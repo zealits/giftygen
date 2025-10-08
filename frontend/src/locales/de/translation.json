@@ -126,6 +126,7 @@
   },
   "giftCard": {
     "digitalGiftCard": "Digitale Geschenkkarte",
+    "Brand" : "giftygen",
     "to": "An: Sie",
     "from": "Von: Absender"
   }

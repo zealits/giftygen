@@ -224,7 +224,7 @@ function LandingPage() {
 
         {/* Desktop CTA */}
         <div className="lp-nav__cta">
-          <LanguageDropdown />
+          
           <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === "dark" ? "☀️" : "🌙"}
           </button>
@@ -234,6 +234,7 @@ function LandingPage() {
           <button className="lp-btn" onClick={() => navigate("/explore")}>
             {t("nav.explore")}
           </button>
+          <LanguageDropdown />
         </div>
 
         {/* Mobile Menu Button */}
@@ -298,7 +299,7 @@ function LandingPage() {
         <div className="lp-hero__visual" aria-hidden>
           <div className="lp-giftcard" role="img" aria-label="Digital gift card illustration">
             <div className="lp-giftcard__ribbon" />
-            <div className="lp-giftcard__brand">{t("giftCard.giftygen")}</div>
+            <div className="lp-giftcard__brand">{t("giftCard.Brand")}</div>
             <div className="lp-giftcard__title">{t("giftCard.digitalGiftCard")}</div>
             <div className="lp-giftcard__amount">$ 50</div>
             <div className="lp-giftcard__meta">
