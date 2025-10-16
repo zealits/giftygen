@@ -234,7 +234,7 @@ function LandingPage() {
           <button className="lp-btn" onClick={() => navigate("/explore")}>
             {t("nav.explore")}
           </button>
-          <LanguageDropdown />
+          <LanguageDropdown variant="desktop" />
         </div>
 
         {/* Mobile Menu Button */}

@@ -1,0 +1,133 @@
+{
+  "nav": {
+    "about": "关于我们",
+    "highlights": "亮点",
+    "benefits": "益处",
+    "register": "注册",
+    "contact": "联系",
+    "signIn": "登录",
+    "explore": "探索礼品卡"
+  },
+  "hero": {
+    "kicker": "介绍 giftygen",
+    "title": "礼赠的未来是数字化",
+    "subtitle": "精致 · 即时 · 难忘",
+    "description": "giftygen 将传统礼品卡转变为优雅的数字体验。",
+    "getStarted": "开始使用",
+    "buyGiftCard": "购买礼品卡"
+  },
+  "offer": {
+    "title": "一个完整的平台，用于创建和销售礼品卡",
+    "description": "用我们的创新数字礼品卡平台改变你与客户互动的方式 —— 专为轻松创建、销售和兑换礼品卡促销活动而设计。非常适合线上和线下业务。快速、安全、可定制。"
+  },
+  "highlights": {
+    "title": "产品亮点",
+    "smartDelivery": {
+      "title": "智能投递",
+      "description": "通过电子邮件或消息即时发送和接收礼品卡，使用我们的闪电投递系统。",
+      "benefit1": "即时送达",
+      "benefit2": "多个渠道"
+    },
+    "integration": {
+      "title": "无缝整合",
+      "description": "跨平台设备都能使用，响应式设计兼容性强。",
+      "benefit1": "跨平台",
+      "benefit2": "响应式设计"
+    },
+    "security": {
+      "title": "安全兑换",
+      "description": "先进的二维码技术和防欺诈流程确保你的礼品卡始终安全。",
+      "benefit1": "二维码技术",
+      "benefit2": "防欺诈保护"
+    },
+    "branding": {
+      "title": "自定义品牌",
+      "description": "在每张卡片上展示你的品牌标志、色彩和主题，呈现专业品牌体验。",
+      "benefit1": "品牌定制",
+      "benefit2": "专业外观"
+    }
+  },
+  "benefits": {
+    "title": "为什么选择 giftygen? 礼品卡促销对商业的好处",
+    "subtitle": "发现数字礼品卡如何改变你的商业策略",
+    "items": {
+      "seasonal": {
+        "title": "季节性促销",
+        "description": "非常适合节假日和活动，进行有针对性的活动。"
+      },
+      "revenue": {
+        "title": "提升营收",
+        "description": "提前收款；通常使用时超出卡面金额。"
+      },
+      "loyalty": {
+        "title": "增强忠诚度",
+        "description": "支持推荐与奖励计划以留住客户。"
+      },
+      "repeat": {
+        "title": "鼓励重复光顾",
+        "description": "推动回头客和追加销售机会。"
+      },
+      "attract": {
+        "title": "吸引新客户",
+        "description": "礼物带来首次购买者并提升品牌认知。"
+      },
+      "trackable": {
+        "title": "可追踪",
+        "description": "使用数据助力更智能的预测与洞察。"
+      },
+      "visibility": {
+        "title": "提升能见度",
+        "description": "品牌礼品卡成为你业务的迷你广告。"
+      },
+      "orderValue": {
+        "title": "提高订单价值",
+        "description": "客户花费经常超过卡面金额。"
+      },
+      "flexible": {
+        "title": "灵活营销",
+        "description": "适用于促销、竞赛及退款等各种活动。"
+      }
+    }
+  },
+  "register": {
+    "title": "注册您的企业",
+    "subtitle": "餐厅、酒店和商店可以在 giftygen 创建并管理数字礼品卡。",
+    "form": {
+      "businessName": "企业名称",
+      "businessNamePlaceholder": "例如 Ocean View Bistro",
+      "businessType": "企业类型",
+      "businessTypePlaceholder": "例如 餐厅、美容院、零售",
+      "contactName": "联系人姓名",
+      "contactNamePlaceholder": "您的姓名",
+      "email": "电子邮件",
+      "emailPlaceholder": "name@business.com",
+      "phone": "电话",
+      "phonePlaceholder": "(555) 123-4567",
+      "website": "网站",
+      "websitePlaceholder": "https://",
+      "notes": "备注",
+      "notesPlaceholder": "告诉我们你关于礼品卡的目标",
+      "submit": "注册",
+      "errorFix": "请修复高亮显示的字段。",
+      "errorPhone": "请输入有效的电话号码，例如 (555) 123-4567。",
+      "success": "✅ 注册提交成功！请检查您的电子邮件以获取确认和下一步操作。我们将在24小时内与您联系。",
+      "error": "抱歉，出了些问题。请稍后再试。"
+    }
+  },
+  "contact": {
+    "title": "联系我们",
+    "description": "访问 giftygen.com 了解更多，或扫描下面的二维码以探索我们的平台。",
+    "visitWebsite": "访问网站",
+    "exploreCards": "探索礼品卡",
+    "scanText": "扫描以了解更多"
+  },
+  "footer": {
+    "rights": "版权所有。"
+  },
+  "giftCard": {
+    "digitalGiftCard": "数字礼品卡",
+    "Brand": "giftygen",
+    "to": "收件人：您",
+    "from": "寄件人：发送者"
+  }
+}

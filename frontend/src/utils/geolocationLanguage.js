@@ -242,7 +242,10 @@ export const getDetailedLocation = async () => {
   try {
     // Try to get location from IP geolocation service
     const response = await fetch('https://ipapi.co/json/');
+   /*  const response = "109.172.80.0"; */
     if (!response.ok) {
+
+
       throw new Error('Failed to fetch location data');
     }
     
