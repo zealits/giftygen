@@ -408,17 +408,59 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
     onClose(false);
   };
 
+  // Detect if user is on iOS Safari
+  const isIOSSafari = () => {
+    const userAgent = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+    return isIOS && isSafari;
+  };
+
   const handleAppleWalletDownload = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     console.log("========== APPLE WALLET BUTTON CLICKED ==========");
     console.log("Apple Wallet URL:", appleWalletUrl);
+    console.log("Is iOS Safari:", isIOSSafari());
 
     if (appleWalletUrl) {
       setIsDownloadingApplePass(true);
       console.log("✅ Downloading Apple Wallet pass:", appleWalletUrl);
 
       try {
+        // For iOS Safari, use direct navigation instead of programmatic download
+        if (isIOSSafari()) {
+          console.log("📱 iOS Safari detected - using direct navigation");
+
+          // Add cache-busting parameters
+          const timestamp = Date.now();
+          const randomSuffix = Math.random().toString(36).substring(2, 8);
+          const cacheBustedUrl = `${appleWalletUrl}?t=${timestamp}&r=${randomSuffix}`;
+
+          // Open in new tab/window for iOS Safari
+          const newWindow = window.open(cacheBustedUrl, "_blank");
+
+          if (!newWindow) {
+            // If popup blocked, fall back to direct navigation
+            console.log("Popup blocked, using direct navigation");
+            window.location.href = cacheBustedUrl;
+          }
+
+          console.log("✅ iOS Safari download initiated via direct navigation");
+
+          // Show user-friendly message for iOS
+          setTimeout(() => {
+            alert(
+              "The Apple Wallet pass should open in a new tab. If it doesn't download automatically, tap and hold the link and select 'Download Linked File'."
+            );
+          }, 500);
+
+          setIsDownloadingApplePass(false);
+          return;
+        }
+
+        // For other browsers, use the original programmatic download method
+        console.log("🖥️ Desktop/Android browser - using programmatic download");
         // Add a small delay to prevent browser blocking rapid downloads
         await new Promise((resolve) => setTimeout(resolve, 100));
 

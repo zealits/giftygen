@@ -159,6 +159,20 @@ async function downloadApplePass(req, res) {
         res.setHeader("Last-Modified", new Date().toUTCString());
         res.setHeader("ETag", `"${uniqueCode}-${Date.now()}"`);
 
+        // iOS Safari specific headers
+        res.setHeader("X-Content-Type-Options", "nosniff");
+        res.setHeader("X-Download-Options", "noopen");
+
+        // Check if request is from iOS Safari
+        const userAgent = req.headers["user-agent"] || "";
+        const isIOSSafari = /iPad|iPhone|iPod/.test(userAgent) && /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+
+        if (isIOSSafari) {
+          console.log("📱 iOS Safari detected - adjusting headers for better compatibility");
+          // For iOS Safari, we might need to adjust the content disposition
+          res.setHeader("Content-Disposition", `inline; filename="${uniqueCode}.pkpass"`);
+        }
+
         console.log("✅ Sending .pkpass file response");
         res.send(zipBuffer);
         console.log("========================================");
