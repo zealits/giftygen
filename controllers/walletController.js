@@ -7,6 +7,9 @@ const credentials = require("../config/wallet-api-key.json");
 const issuerId = process.env.GOOGLE_WALLET_ISSUER_ID; // Replace with actual issuer ID
 const baseUrl = "https://walletobjects.googleapis.com/walletobjects/v1";
 
+// In-memory store for Apple Wallet passes (in production, use database)
+const applePassStore = new Map();
+
 // Initialize Google Auth Client
 const httpClient = new GoogleAuth({
   credentials: credentials,
@@ -94,7 +97,6 @@ async function generateWalletPass(req, res) {
     const classId = await createGiftCardClass(walletGiftCardName);
     const uniqueSuffix = `${giftCardDetails._id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     const objectId = `${issuerId}.${userEmail.replace(/[^\w.-]/g, "_")}_${uniqueSuffix}`;
-    
 
     let giftCardObject = {
       id: objectId,
@@ -177,10 +179,60 @@ async function generateWalletPass(req, res) {
 
     // console.log("Generated Save URL:", saveUrl);
     console.log("unicode generated:", uniqueCode);
-    res.json({ saveUrl, uniqueCode });
+
+    // Store Apple Wallet pass data
+    const applePassId = uniqueCode;
+    applePassStore.set(applePassId, {
+      id,
+      giftCardDetails,
+      purchaseType,
+      selfInfo,
+      giftInfo,
+      paymentDetails,
+      uniqueCode,
+      walletGiftCardName,
+      userName,
+      amount,
+      currency,
+      expiryDate,
+    });
+
+    // Set expiration for stored data (24 hours)
+    setTimeout(() => {
+      applePassStore.delete(applePassId);
+    }, 24 * 60 * 60 * 1000);
+
+    const appleWalletUrl = `/api/wallet/download-apple-pass/${applePassId}`;
+
+    res.json({
+      googleWalletUrl: saveUrl,
+      appleWalletUrl: appleWalletUrl,
+      uniqueCode,
+    });
   } catch (error) {
     console.error("Error generating wallet pass:", error);
-    res.status(500).json({ error: "Failed to generate Google Wallet pass." });
+    res.status(500).json({ error: "Failed to generate wallet pass." });
   }
 }
-module.exports = generateWalletPass;
+
+function getApplePassData(req, res) {
+  try {
+    const { passId } = req.params;
+    const passData = applePassStore.get(passId);
+
+    if (!passData) {
+      return res.status(404).json({ error: "Pass not found or expired" });
+    }
+
+    res.json(passData);
+  } catch (error) {
+    console.error("Error retrieving Apple pass data:", error);
+    res.status(500).json({ error: "Failed to retrieve pass data" });
+  }
+}
+
+module.exports = {
+  generateWalletPass,
+  getApplePassData,
+  applePassStore, // Export the store so appleWalletController can access it
+};

@@ -12,7 +12,9 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
   const [showModal, setShowModal] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [walletUrl, setWalletUrl] = useState("");
+  const [appleWalletUrl, setAppleWalletUrl] = useState("");
   const [showErrors, setShowErrors] = useState(false);
+  const [isDownloadingApplePass, setIsDownloadingApplePass] = useState(false);
 
   const [errors, setErrors] = useState({
     selfInfo: {
@@ -357,13 +359,21 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Wallet pass generated:", data);
+        console.log("========== WALLET PASS RESPONSE ==========");
+        console.log("Full response:", data);
+        console.log("Google Wallet URL:", data.googleWalletUrl);
+        console.log("Apple Wallet URL:", data.appleWalletUrl);
+        console.log("Unique Code:", data.uniqueCode);
+        console.log("===========================================");
 
-        // Update formData only if API is successful
-        updatedFormData.walletUrl = data.saveUrl;
+        // Update formData with both URLs
+        updatedFormData.walletUrl = data.googleWalletUrl;
+        updatedFormData.appleWalletUrl = data.appleWalletUrl;
         updatedFormData.barcodeUnicode = data.uniqueCode;
       } else {
-        console.error("Wallet pass generation failed, proceeding without it.");
+        console.error("❌ Wallet pass generation failed, proceeding without it.");
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
       }
     } catch (error) {
       console.error("Error generating wallet pass, proceeding anyway:", error);
@@ -376,8 +386,14 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
       console.log("Updated formData: ", updatedFormData);
       dispatch(purchaseGiftCard(updatedFormData));
 
+      // Set both wallet URLs
       if (updatedFormData.walletUrl) {
+        console.log("Setting Google Wallet URL:", updatedFormData.walletUrl);
         setWalletUrl(updatedFormData.walletUrl);
+      }
+      if (updatedFormData.appleWalletUrl) {
+        console.log("Setting Apple Wallet URL:", updatedFormData.appleWalletUrl);
+        setAppleWalletUrl(updatedFormData.appleWalletUrl);
       }
 
       setShowModal(true);
@@ -390,6 +406,90 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
   const handlePurchaseModal = () => {
     setShowModal(false);
     onClose(false);
+  };
+
+  const handleAppleWalletDownload = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("========== APPLE WALLET BUTTON CLICKED ==========");
+    console.log("Apple Wallet URL:", appleWalletUrl);
+
+    if (appleWalletUrl) {
+      setIsDownloadingApplePass(true);
+      console.log("✅ Downloading Apple Wallet pass:", appleWalletUrl);
+
+      try {
+        // Add a small delay to prevent browser blocking rapid downloads
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Use fetch to download the file with cache-busting
+        const timestamp = Date.now();
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const cacheBustedUrl = `${appleWalletUrl}?t=${timestamp}&r=${randomSuffix}`;
+
+        const response = await fetch(cacheBustedUrl, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        });
+        console.log("Fetch response status:", response.status);
+        console.log("Fetch response headers:", response.headers);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("❌ Download failed:", errorData);
+          alert(`Failed to download: ${errorData.error}`);
+          return;
+        }
+
+        // Get the blob
+        const blob = await response.blob();
+        console.log("✅ Blob received, size:", blob.size);
+
+        // Create download link with unique filename
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.style.display = "none";
+
+        // Create more unique filename with timestamp
+        try {
+          const passIdFromUrl = (appleWalletUrl.split("/").pop() || "").split("?")[0] || "giftcard";
+          const uniqueFilename = `giftcard-${passIdFromUrl}-${timestamp}.pkpass`;
+          link.download = uniqueFilename;
+        } catch (_) {
+          link.download = `giftcard-${timestamp}.pkpass`;
+        }
+
+        document.body.appendChild(link);
+        console.log("Triggering download...");
+
+        // Trigger download
+        link.click();
+
+        // Clean up with a delay to ensure download starts
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          console.log("✅ Download completed and cleaned up!");
+        }, 1000);
+
+        // Show success message
+        console.log("✅ Apple Wallet pass download initiated successfully!");
+      } catch (error) {
+        console.error("❌ Error downloading file:", error);
+        alert("Failed to download Apple Wallet pass. Please try again.");
+      } finally {
+        setIsDownloadingApplePass(false);
+      }
+    } else {
+      console.error("❌ Apple Wallet URL is missing!");
+      alert("Apple Wallet pass is not available. Please contact support.");
+    }
+    console.log("========================================");
   };
 
   const ErrorMessage = ({ message }) =>
@@ -652,19 +752,35 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
           </div>
         ) : (
           showModal && (
-            <div className="purchase-modal-overlay">
-              <div className="purchase-modal-content">
+            <div className="purchase-modal-overlay" onClick={handlePurchaseModal}>
+              <div className="purchase-modal-content" onClick={(e) => e.stopPropagation()}>
                 <h2>Purchase Completed Successfully!</h2>
                 <p>Thank you for your purchase. A confirmation email has been sent to your inbox.</p>
                 <div className="wallet-buttons-container">
-                  <a href={walletUrl} target="_blank" rel="noopener noreferrer" className="wallet-button">
+                  <a
+                    href={walletUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="wallet-button"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <img src={GoogleWalletIcon} alt="Google Wallet" className="wallet-icon" />
                     <span>Add to Google Wallet</span>
                   </a>
-                  <a href={walletUrl} target="_blank" rel="noopener noreferrer" className="wallet-button">
+                  <button
+                    className="wallet-button"
+                    onClick={handleAppleWalletDownload}
+                    disabled={isDownloadingApplePass}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: isDownloadingApplePass ? "not-allowed" : "pointer",
+                      opacity: isDownloadingApplePass ? 0.7 : 1,
+                    }}
+                  >
                     <img src={AppleWalletIcon} alt="Apple Wallet" className="wallet-icon" />
-                    <span>Add to Apple Wallet</span>
-                  </a>
+                    <span>{isDownloadingApplePass ? "Downloading..." : "Add to Apple Wallet"}</span>
+                  </button>
                 </div>
                 <button className="purchase-modal-close-btn" onClick={handlePurchaseModal}>
                   Close
