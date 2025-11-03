@@ -236,20 +236,21 @@ const GiftCards = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const previewUrl = URL.createObjectURL(file);
       setSelectedFile({
         file: file,
         name: file.name,
       });
 
-      // Create a preview URL for the new image
-      const previewUrl = URL.createObjectURL(file);
       setFormData((prev) => ({
         ...prev,
-        giftCardImg: previewUrl, // Update the preview
+        giftCardImg: previewUrl,
       }));
+
+      // Automatically open the preview
+      setShowImagePreview(true);
     }
   };
-
   const handleImagePreviewClick = () => {
     if (formData.giftCardImg) {
       setShowImagePreview(true);
@@ -550,6 +551,7 @@ const GiftCards = () => {
                   value={formData.expirationDate}
                   onChange={handleChange}
                   required
+                  min={new Date().toISOString().split("T")[0]}
                 />
               </div>
 
@@ -582,19 +584,24 @@ const GiftCards = () => {
               </div>
 
               {showImagePreview && (
-                <div className="image-preview-modal">
-                  <div className="image-preview-content">
-                    <button className="close-preview-btn" onClick={() => setShowImagePreview(false)}>
-                      &times;
-                    </button>
-                    {formData.giftCardImg ? (
-                      <img src={formData.giftCardImg} alt="Gift Card Preview" className="preview-image" />
-                    ) : (
-                      <p>No image available</p>
-                    )}
-                  </div>
-                </div>
-              )}
+  <div className="image-preview-modal">
+    <div className="image-preview-content">
+      <button className="close-preview-btn" onClick={() => setShowImagePreview(false)}>
+        &times;
+      </button>
+      {formData.giftCardImg ? (
+        <img
+          src={formData.giftCardImg}
+          alt="Gift Card Preview"
+          className="preview-image"
+          style={{ maxWidth: "100%", borderRadius: "10px" }}
+        />
+      ) : (
+        <p>No image available</p>
+      )}
+    </div>
+  </div>
+)}
               <button type="submit" className="sub-updt-btn">
                 {isEditing ? "Update" : "Submit"}
               </button>

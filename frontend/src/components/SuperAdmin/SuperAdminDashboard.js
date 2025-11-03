@@ -9,7 +9,6 @@ const SuperAdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [statusUpdate, setStatusUpdate] = useState({ status: "", notes: "" });
   const [adminForm, setAdminForm] = useState({
     name: "",
     email: "",
@@ -21,13 +20,11 @@ const SuperAdminDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if super admin is logged in
     const token = localStorage.getItem("superAdminToken");
     if (!token) {
       navigate("/superlogin");
       return;
     }
-
     fetchData();
   }, [navigate]);
 
@@ -56,22 +53,66 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  const handleStatusUpdate = async () => {
+  const handleApprove = async () => {
+    if (!selectedRequest) return;
+    
     try {
       const token = localStorage.getItem("superAdminToken");
       const config = {
         headers: { Authorization: `Bearer ${token}` },
       };
 
-      await axios.put(`/api/superadmin/registration-requests/${selectedRequest._id}/status`, statusUpdate, config);
+      await axios.put(
+        `/api/superadmin/registration-requests/${selectedRequest._id}/status`,
+        { status: "approved", notes: "" },
+        config
+      );
 
-      // Refresh data
+      const adminData = {
+        name: selectedRequest.name || "",
+        email: selectedRequest.email || "",
+        restaurantName: selectedRequest.restaurantName || "",
+        phone: selectedRequest.phone || "",
+        businessSlug: selectedRequest.businessSlug || "",
+        password: "",
+      };
+
+      await axios.post("/api/superadmin/business-admin", adminData, config);
+
+      alert(`Request approved! Credentials have been sent to ${selectedRequest.email}`);
+      
       fetchData();
       setShowModal(false);
       setSelectedRequest(null);
-      setStatusUpdate({ status: "", notes: "" });
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Error approving request:", error);
+      alert(error?.response?.data?.message || "Failed to approve request");
+    }
+  };
+
+  const handleReject = async () => {
+    if (!selectedRequest) return;
+    
+    try {
+      const token = localStorage.getItem("superAdminToken");
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
+
+      await axios.put(
+        `/api/superadmin/registration-requests/${selectedRequest._id}/status`,
+        { status: "rejected", notes: "" },
+        config
+      );
+
+      alert("Request rejected successfully");
+      
+      fetchData();
+      setShowModal(false);
+      setSelectedRequest(null);
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+      alert(error?.response?.data?.message || "Failed to reject request");
     }
   };
 
@@ -227,7 +268,6 @@ const SuperAdminDashboard = () => {
         </div>
       </div>
 
-      {/* Status Update Modal */}
       {showModal && selectedRequest && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -252,35 +292,15 @@ const SuperAdminDashboard = () => {
               </p>
             </div>
 
-            <div className="form-group">
-              <label>Status:</label>
-              <select
-                value={statusUpdate.status}
-                onChange={(e) => setStatusUpdate({ ...statusUpdate, status: e.target.value })}
-              >
-                <option value="">Select Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Notes:</label>
-              <textarea
-                value={statusUpdate.notes}
-                onChange={(e) => setStatusUpdate({ ...statusUpdate, notes: e.target.value })}
-                placeholder="Add any notes..."
-                rows="3"
-              />
-            </div>
-
             <div className="modal-actions">
               <button onClick={() => setShowModal(false)} className="cancel-button">
                 Cancel
               </button>
-              <button onClick={handleStatusUpdate} className="update-button" disabled={!statusUpdate.status}>
-                Update Status
+              <button onClick={handleReject} className="update-button">
+                Reject
+              </button>
+              <button onClick={handleApprove} className="update-button">
+                Approve
               </button>
             </div>
           </div>

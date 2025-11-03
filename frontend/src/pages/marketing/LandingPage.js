@@ -44,6 +44,30 @@ function LandingPage() {
     contactName: false,
     email: false,
   });
+  const SuccessModal = ({ isOpen, onClose, message, type = "success" }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="lp-modal-overlay" onClick={onClose}>
+      <div className="lp-modal" onClick={(e) => e.stopPropagation()}>
+        <div className={`lp-modal__icon lp-modal__icon--${type}`}>
+          {type === "success" ? (
+            <CheckCircle size={48} />
+          ) : (
+            <X size={48} />
+          )}
+        </div>
+        <h3 className="lp-modal__title">
+          {type === "success" ? t("modal.successTitle") : t("modal.errorTitle")}
+        </h3>
+        <p className="lp-modal__message">{message}</p>
+        <button className="lp-btn lp-modal__btn" onClick={onClose}>
+          {t("modal.close")}
+        </button>
+      </div>
+    </div>
+  );
+};
 
   // Detect and set language based on geolocation
   useEffect(() => {
@@ -71,6 +95,12 @@ function LandingPage() {
 
     initializeLanguage();
   }, [i18n]);
+  
+  const [modalState, setModalState] = useState({
+  isOpen: false,
+  message: "",
+  type: "success"
+});
 
   const benefitsData = [
     {
@@ -496,16 +526,22 @@ function LandingPage() {
                 body: JSON.stringify(payload),
               });
               if (!res.ok) throw new Error("Failed to submit");
-              setNotice({
-                type: "success",
-                text: "✅ Registration submitted successfully! Please check your email for confirmation and next steps. We'll be in touch within 24 hours.",
-              });
-              form.reset();
+              setModalState({    
+                 isOpen: true,
+                 type: "success",
+                 message: "Registration submitted successfully! Please check your email for confirmation and next steps. We'll be in touch within 24 hours."
+               });            
+               form.reset();
               setPhone("");
               setErrors({ businessName: false, businessType: false, contactName: false, email: false });
               setTimeout(() => setNotice(null), 60000);
             } catch (err) {
-              setNotice({ type: "error", text: "Sorry, something went wrong. Please try again later." });
+              setModalState({
+                isOpen: true,
+                type: "error",
+                message: "Sorry, something went wrong. Please try again later."
+              });
+
               setTimeout(() => setNotice(null), 8000);
             }
           }}
@@ -626,6 +662,12 @@ function LandingPage() {
         </div>
         <div className="lp-footer__right">© {new Date().getFullYear()} {t("footer.rights")}</div>
       </footer>
+      <SuccessModal
+      isOpen={modalState.isOpen}
+      onClose={() => setModalState({ ...modalState, isOpen: false })}
+      message={modalState.message}
+      type={modalState.type}
+/>
     </div>
   );
 }

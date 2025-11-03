@@ -41,7 +41,8 @@ i18n
       urdu: { translation: urdu },
       ru: { translation: ru },
       th: { translation: th },
-      ch: { translation: ch }
+      ch: { translation: ch },
+      
 
 
     },

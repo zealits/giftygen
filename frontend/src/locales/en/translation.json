@@ -129,7 +129,12 @@
     "Brand" : "giftygen",
     "to": "To: You",
     "from": "From: Sender"
-  }
+  },
+  "modal": {
+  "successTitle": "Success!",
+  "errorTitle": "Error",
+  "close": "Close"
+}
 }
 
 
