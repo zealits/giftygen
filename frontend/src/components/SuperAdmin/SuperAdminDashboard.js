@@ -9,6 +9,8 @@ const SuperAdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [rejectNotes, setRejectNotes] = useState("");
   const [adminForm, setAdminForm] = useState({
     name: "",
     email: "",
@@ -20,11 +22,13 @@ const SuperAdminDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if super admin is logged in
     const token = localStorage.getItem("superAdminToken");
     if (!token) {
       navigate("/superlogin");
       return;
     }
+
     fetchData();
   }, [navigate]);
 
@@ -53,66 +57,78 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  const handleApprove = async () => {
+  const handleApproveRequest = async () => {
     if (!selectedRequest) return;
     
+    setActionLoading(true);
     try {
       const token = localStorage.getItem("superAdminToken");
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      // Create business admin with data from the registration request
+      const adminData = {
+        name: selectedRequest.name,
+        email: selectedRequest.email,
+        restaurantName: selectedRequest.restaurantName,
+        phone: selectedRequest.phone,
+        businessSlug: selectedRequest.businessSlug || "",
+        password: "", // Let backend generate password
+        restaurantAddress: selectedRequest.restaurantAddress,
+        businessType: selectedRequest.businessType,
+        website: selectedRequest.website
       };
 
+      // Create business admin (this will send credentials via email)
+      await axios.post("/api/superadmin/business-admin", adminData, config);
+
+      // Update request status to approved
       await axios.put(
         `/api/superadmin/registration-requests/${selectedRequest._id}/status`,
-        { status: "approved", notes: "" },
+        { status: "approved", notes: "Request approved and credentials sent via email" },
         config
       );
 
-      const adminData = {
-        name: selectedRequest.name || "",
-        email: selectedRequest.email || "",
-        restaurantName: selectedRequest.restaurantName || "",
-        phone: selectedRequest.phone || "",
-        businessSlug: selectedRequest.businessSlug || "",
-        password: "",
-      };
-
-      await axios.post("/api/superadmin/business-admin", adminData, config);
-
-      alert(`Request approved! Credentials have been sent to ${selectedRequest.email}`);
+      alert("Request approved! Login credentials have been sent to the registered email.");
       
+      // Refresh data and close modal
       fetchData();
       setShowModal(false);
       setSelectedRequest(null);
     } catch (error) {
       console.error("Error approving request:", error);
       alert(error?.response?.data?.message || "Failed to approve request");
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const handleReject = async () => {
+  const handleRejectRequest = async () => {
     if (!selectedRequest) return;
     
+    setActionLoading(true);
     try {
       const token = localStorage.getItem("superAdminToken");
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
-      };
+      const config = { headers: { Authorization: `Bearer ${token}` } };
 
+      // Update request status to rejected
       await axios.put(
         `/api/superadmin/registration-requests/${selectedRequest._id}/status`,
-        { status: "rejected", notes: "" },
+        { status: "rejected", notes: rejectNotes || "Request rejected" },
         config
       );
 
-      alert("Request rejected successfully");
+      alert("Request rejected successfully.");
       
+      // Refresh data and close modal
       fetchData();
       setShowModal(false);
       setSelectedRequest(null);
+      setRejectNotes("");
     } catch (error) {
       console.error("Error rejecting request:", error);
       alert(error?.response?.data?.message || "Failed to reject request");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -168,7 +184,7 @@ const SuperAdminDashboard = () => {
       </div>
 
       <div className="create-admin-section">
-        <h2>Create Business Admin</h2>
+        <h2>Create Business Admin (Manual)</h2>
         <div className="create-admin-form">
           <input
             placeholder="Restaurant Name"
@@ -255,10 +271,11 @@ const SuperAdminDashboard = () => {
                       onClick={() => {
                         setSelectedRequest(request);
                         setShowModal(true);
+                        setRejectNotes("");
                       }}
                       className="view-button"
                     >
-                      View/Update
+                      View/Action
                     </button>
                   </td>
                 </tr>
@@ -268,10 +285,11 @@ const SuperAdminDashboard = () => {
         </div>
       </div>
 
+      {/* Action Modal */}
       {showModal && selectedRequest && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Update Request Status</h3>
+            <h3>Request Details & Actions</h3>
             <div className="request-details">
               <p>
                 <strong>Name:</strong> {selectedRequest.name || "N/A"}
@@ -286,23 +304,67 @@ const SuperAdminDashboard = () => {
                 <strong>Phone:</strong> {selectedRequest.phone || "N/A"}
               </p>
               <p>
-                <strong>Address:</strong> {selectedRequest.restaurantAddress?.street},{" "}
-                {selectedRequest.restaurantAddress?.city}, {selectedRequest.restaurantAddress?.state}{" "}
-                {selectedRequest.restaurantAddress?.zipCode}
+                <strong>Business Type:</strong> {selectedRequest.businessType || "N/A"}
+              </p>
+              <p>
+                <strong>Website:</strong> {selectedRequest.website || "N/A"}
+              </p>
+              <p>
+                <strong>Address:</strong>{" "}
+                {selectedRequest.restaurantAddress
+                  ? `${selectedRequest.restaurantAddress.street}, ${selectedRequest.restaurantAddress.city}, ${selectedRequest.restaurantAddress.state} ${selectedRequest.restaurantAddress.zipCode}`
+                  : "N/A"}
+              </p>
+              <p>
+                <strong>Current Status:</strong>{" "}
+                <span style={{ color: getStatusColor(selectedRequest.status), fontWeight: "bold" }}>
+                  {selectedRequest.status}
+                </span>
               </p>
             </div>
 
-            <div className="modal-actions">
-              <button onClick={() => setShowModal(false)} className="cancel-button">
-                Cancel
-              </button>
-              <button onClick={handleReject} className="update-button">
-                Reject
-              </button>
-              <button onClick={handleApprove} className="update-button">
-                Approve
-              </button>
-            </div>
+            {selectedRequest.status === "pending" && (
+              <>
+                <div className="form-group">
+                  <label>Notes (optional):</label>
+                  <textarea
+                    value={rejectNotes}
+                    onChange={(e) => setRejectNotes(e.target.value)}
+                    placeholder="Add any notes"
+                    rows="3"
+                  />
+                </div>
+
+                <div className="modal-actions">
+                  <button onClick={() => setShowModal(false)} className="cancel-button" disabled={actionLoading}>
+                    Cancel
+                  </button>
+                   <button
+                  onClick={handleRejectRequest}
+                  className="reject-button"
+                  disabled={actionLoading}
+               >
+                  {actionLoading ? "Processing..." : "Reject"}
+                   </button>
+
+                  <button
+                   onClick={handleApproveRequest}
+                   className="approve-button"
+                   disabled={actionLoading}
+                  >
+                    {actionLoading ? "Processing..." : "Approve Request"}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {selectedRequest.status !== "pending" && (
+              <div className="modal-actions">
+                <button onClick={() => setShowModal(false)} className="cancel-button">
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
