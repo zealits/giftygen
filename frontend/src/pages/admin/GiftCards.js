@@ -67,7 +67,7 @@ const GiftCards = () => {
   }, [dispatch, searchTerm]);
 
   useEffect(() => {
-    if (giftCardCreate.success && !hasShownCreateSuccess) {
+    if (giftCardCreate.success && !hasShownUpdateSuccess) {
       setCreateSuccessModalOpen(true);
       setModalOpen(false);
       dispatch(listGiftCards("", businessSlug));
@@ -81,14 +81,14 @@ const GiftCards = () => {
     } else if (giftCardCreate.error) {
       // Handle create error
     }
-  }, [giftCardCreate, dispatch, hasShownCreateSuccess]);
+  }, [giftCardCreate, dispatch, hasShownUpdateSuccess,businessSlug]);
 
   // Modified update success handler with flag
   useEffect(() => {
     if (giftCardUpdate.success && !hasShownUpdateSuccess) {
       setUpdateSuccessModalOpen(true);
       setModalOpen(false);
-      dispatch(listGiftCards());
+      dispatch(listGiftCards("", businessSlug)); // Refresh the list
 
       // Mark that we've shown this success modal
       setHasShownUpdateSuccess(true);
