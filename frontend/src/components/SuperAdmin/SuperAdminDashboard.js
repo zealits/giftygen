@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./SuperAdminDashboard.css";
+import Modal from "../Notification/Modal";
 
 const SuperAdminDashboard = () => {
   const [requests, setRequests] = useState([]);
@@ -11,6 +12,8 @@ const SuperAdminDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectNotes, setRejectNotes] = useState("");
+  const [notifyVisible, setNotifyVisible] = useState(false);
+  const [notifyMessage, setNotifyMessage] = useState("");
   const [adminForm, setAdminForm] = useState({
     name: "",
     email: "",
@@ -88,7 +91,8 @@ const SuperAdminDashboard = () => {
         config
       );
 
-      alert("Request approved! Login credentials have been sent to the registered email.");
+      setNotifyMessage("Request approved! Login credentials have been sent to the registered email.");
+      setNotifyVisible(true);
       
       // Refresh data and close modal
       fetchData();
@@ -96,7 +100,8 @@ const SuperAdminDashboard = () => {
       setSelectedRequest(null);
     } catch (error) {
       console.error("Error approving request:", error);
-      alert(error?.response?.data?.message || "Failed to approve request");
+      setNotifyMessage(error?.response?.data?.message || "Failed to approve request");
+      setNotifyVisible(true);
     } finally {
       setActionLoading(false);
     }
@@ -117,7 +122,8 @@ const SuperAdminDashboard = () => {
         config
       );
 
-      alert("Request rejected successfully.");
+      setNotifyMessage("Request rejected successfully.");
+      setNotifyVisible(true);
       
       // Refresh data and close modal
       fetchData();
@@ -126,7 +132,8 @@ const SuperAdminDashboard = () => {
       setRejectNotes("");
     } catch (error) {
       console.error("Error rejecting request:", error);
-      alert(error?.response?.data?.message || "Failed to reject request");
+      setNotifyMessage(error?.response?.data?.message || "Failed to reject request");
+      setNotifyVisible(true);
     } finally {
       setActionLoading(false);
     }
@@ -183,7 +190,7 @@ const SuperAdminDashboard = () => {
         </div>
       </div>
 
-      <div className="create-admin-section">
+      {/* <div className="create-admin-section">
         <h2>Create Business Admin (Manual)</h2>
         <div className="create-admin-form">
           <input
@@ -222,17 +229,19 @@ const SuperAdminDashboard = () => {
                 const token = localStorage.getItem("superAdminToken");
                 const config = { headers: { Authorization: `Bearer ${token}` } };
                 await axios.post("/api/superadmin/business-admin", adminForm, config);
-                alert("Business admin created");
+                setNotifyMessage("Business admin created");
+                setNotifyVisible(true);
                 setAdminForm({ name: "", email: "", restaurantName: "", phone: "", businessSlug: "", password: "" });
               } catch (e) {
-                alert(e?.response?.data?.message || "Failed to create admin");
+                setNotifyMessage(e?.response?.data?.message || "Failed to create admin");
+                setNotifyVisible(true);
               }
             }}
           >
             Create
           </button>
         </div>
-      </div>
+      </div> */}
 
       <div className="requests-section">
         <h2>Registration Requests</h2>
@@ -339,12 +348,12 @@ const SuperAdminDashboard = () => {
                   <button onClick={() => setShowModal(false)} className="cancel-button" disabled={actionLoading}>
                     Cancel
                   </button>
-                   <button
+                  <button
                   onClick={handleRejectRequest}
                   className="reject-button"
                   disabled={actionLoading}
                >
-                  {actionLoading ? "Processing..." : "Reject"}
+                  Reject
                    </button>
 
                   <button
@@ -352,7 +361,7 @@ const SuperAdminDashboard = () => {
                    className="approve-button"
                    disabled={actionLoading}
                   >
-                    {actionLoading ? "Processing..." : "Approve Request"}
+                    Approve Request
                   </button>
                 </div>
               </>
@@ -367,6 +376,10 @@ const SuperAdminDashboard = () => {
             )}
           </div>
         </div>
+      )}
+
+      {notifyVisible && (
+        <Modal message={notifyMessage} onClose={() => setNotifyVisible(false)} />
       )}
     </div>
   );
