@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { encrypt, decrypt } = require("../utils/encryption");
 
 const restaurantAdminSchema = new mongoose.Schema(
   {
@@ -24,10 +25,13 @@ const restaurantAdminSchema = new mongoose.Schema(
     verificationCodeExpire: { type: Date }, // OTP expiration
     resetPasswordToken: { type: String }, // Password reset token
     resetPasswordExpire: { type: Date }, // Password reset expiration
-    // Square (per-business) configuration
-    squareApplicationId: { type: String },
-    squareLocationId: { type: String },
-    squareAccessToken: { type: String },
+    // SQUARE API COMMENTED OUT - Square (per-business) configuration
+    // squareApplicationId: { type: String },
+    // squareLocationId: { type: String },
+    // squareAccessToken: { type: String },
+    // Razorpay (per-business) configuration
+    razorpayKeyId: { type: String },
+    razorpayKeySecret: { type: String },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt fields
@@ -40,6 +44,26 @@ restaurantAdminSchema.pre("save", async function (next) {
     return next();
   }
   this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+// Encrypt Razorpay keys before saving
+restaurantAdminSchema.pre("save", async function (next) {
+  // Encrypt razorpayKeySecret if it's modified and not already encrypted
+  if (this.isModified("razorpayKeySecret") && this.razorpayKeySecret) {
+    // Check if already encrypted (contains colons from our encryption format)
+    if (!this.razorpayKeySecret.includes(":")) {
+      try {
+        this.razorpayKeySecret = encrypt(this.razorpayKeySecret);
+      } catch (error) {
+        console.error("Error encrypting razorpayKeySecret:", error);
+        return next(error);
+      }
+    }
+  }
+  
+  // Note: razorpayKeyId doesn't need encryption as it's not sensitive (public key)
+  // But we can encrypt it too for consistency if needed
   next();
 });
 
@@ -93,6 +117,32 @@ restaurantAdminSchema.methods.verifyOTP = async function (enteredOtp) {
     return true;
   } else {
     return false;
+  }
+};
+
+// Method to get decrypted Razorpay Key Secret
+restaurantAdminSchema.methods.getDecryptedRazorpayKeySecret = function () {
+  if (!this.razorpayKeySecret) {
+    return null;
+  }
+  try {
+    return decrypt(this.razorpayKeySecret);
+  } catch (error) {
+    console.error("Error decrypting razorpayKeySecret:", error);
+    return this.razorpayKeySecret; // Return as-is if decryption fails (backward compatibility)
+  }
+};
+
+// Method to get decrypted Razorpay Key ID (if encrypted)
+restaurantAdminSchema.methods.getDecryptedRazorpayKeyId = function () {
+  if (!this.razorpayKeyId) {
+    return null;
+  }
+  // Key ID is typically not encrypted, but we'll handle it if it is
+  try {
+    return decrypt(this.razorpayKeyId);
+  } catch (error) {
+    return this.razorpayKeyId; // Return as-is if not encrypted
   }
 };
 

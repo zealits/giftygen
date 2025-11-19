@@ -86,7 +86,7 @@ async function generateWalletPass(req, res) {
     const userEmail = purchaseType === "self" ? selfInfo.email : giftInfo.recipientEmail || "default@example.com";
     const userName = purchaseType === "self" ? selfInfo.name : giftInfo.recipientName || "Gift Card Holder";
     const amount = giftCardDetails.amount || "0";
-    const currency = paymentDetails.currency || "USD";
+    const currency = paymentDetails.currency || "INR";
 
     // Generate the same unique QR code as used in email
     const uniqueCode = `${id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;

@@ -6,6 +6,7 @@ import { listGiftCards } from "../../services/Actions/giftCardActions";
 import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import { useDispatch, useSelector } from "react-redux";
 import GiftCardLoader from "./GiftCardLoader";
+import { formatCurrency } from "../../utils/currency";
 const GiftCardForm = lazy(() => import("./GiftCardForm"));
 
 // Skeleton component for gift cards
@@ -264,7 +265,7 @@ const UserLanding = () => {
                     <h2 className="purchase-card-title">{card.giftCardName}</h2>
                     <p className="purchase-card-description">{card.description}</p>
                     <div className="purchase-card-info">
-                      <span className="purchase-card-price">$ {card.amount}</span>
+                      <span className="purchase-card-price">{formatCurrency(card.amount, 'INR')}</span>
                       <span className="purchase-card-discount">{card.discount} % Off</span>
                     </div>
                     <button

@@ -300,9 +300,25 @@ exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
   console.log(req.cookies);
   const user = await RestaurantAdmin.findById(req.user.id);
   console.log("adfd df : ", user);
+  
+  // Create a safe user object for frontend (decrypt keys for display)
+  const userObj = user.toObject();
+  
+  // Decrypt Razorpay keys for display (if they exist)
+  if (userObj.razorpayKeyId) {
+    userObj.razorpayKeyId = user.getDecryptedRazorpayKeyId() || userObj.razorpayKeyId;
+  }
+  
+  // For security, only show masked version of key secret (or decrypted if user is viewing settings)
+  if (userObj.razorpayKeySecret) {
+    const decryptedSecret = user.getDecryptedRazorpayKeySecret();
+    // Show decrypted version for settings page (user needs to see what they entered)
+    userObj.razorpayKeySecret = decryptedSecret || userObj.razorpayKeySecret;
+  }
+  
   res.status(200).json({
     success: true,
-    user,
+    user: userObj,
   });
 });
 
@@ -319,9 +335,10 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// Update business settings (name, slug, square config)
+// Update business settings (name, slug, square config, razorpay config)
 exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
-  const { restaurantName, businessSlug, squareApplicationId, squareLocationId, squareAccessToken } = req.body;
+  // SQUARE FIELDS COMMENTED OUT
+  const { restaurantName, businessSlug, razorpayKeyId, razorpayKeySecret /* , squareApplicationId, squareLocationId, squareAccessToken */ } = req.body;
   const admin = await RestaurantAdmin.findById(req.user.id);
   if (!admin) {
     return next(new ErrorHander("Admin not found", 404));
@@ -329,13 +346,29 @@ exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
 
   if (restaurantName) admin.restaurantName = restaurantName;
   if (businessSlug) admin.businessSlug = businessSlug;
-  if (squareApplicationId !== undefined) admin.squareApplicationId = squareApplicationId;
-  if (squareLocationId !== undefined) admin.squareLocationId = squareLocationId;
-  if (squareAccessToken !== undefined) admin.squareAccessToken = squareAccessToken;
+  // SQUARE API COMMENTED OUT
+  // if (squareApplicationId !== undefined) admin.squareApplicationId = squareApplicationId;
+  // if (squareLocationId !== undefined) admin.squareLocationId = squareLocationId;
+  // if (squareAccessToken !== undefined) admin.squareAccessToken = squareAccessToken;
+  
+  // Razorpay (per-business) configuration
+  if (razorpayKeyId !== undefined) admin.razorpayKeyId = razorpayKeyId;
+  if (razorpayKeySecret !== undefined) admin.razorpayKeySecret = razorpayKeySecret;
 
   await admin.save();
 
-  res.status(200).json({ success: true, user: admin });
+  // Create a safe user object for response (decrypt keys for display)
+  const userObj = admin.toObject();
+  
+  // Decrypt Razorpay keys for display
+  if (userObj.razorpayKeyId) {
+    userObj.razorpayKeyId = admin.getDecryptedRazorpayKeyId() || userObj.razorpayKeyId;
+  }
+  if (userObj.razorpayKeySecret) {
+    userObj.razorpayKeySecret = admin.getDecryptedRazorpayKeySecret() || userObj.razorpayKeySecret;
+  }
+
+  res.status(200).json({ success: true, user: userObj });
 });
 
 // Upload business logo to Cloudinary and save URL

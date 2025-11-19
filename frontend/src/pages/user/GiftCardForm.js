@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import "./GiftCardForm.css";
 import { purchaseGiftCard } from "../../services/Actions/giftCardActions";
 import { useDispatch, useSelector } from "react-redux";
-import SquarePaymentForm from "./SquarePaymentForm.js";
+// SQUARE API COMMENTED OUT
+// import SquarePaymentForm from "./SquarePaymentForm.js";
+import RazorpayPaymentForm from "./RazorpayPaymentForm.js";
 import GoogleWalletIcon from "../../assets/paymenticons/google-wallet.png";
 import AppleWalletIcon from "../../assets/paymenticons/64px-Apple_Wallet_Icon.svg.png";
 
 const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
+  const { businessSlug } = useParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [purchaseType, setPurchaseType] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -15,6 +19,8 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
   const [appleWalletUrl, setAppleWalletUrl] = useState("");
   const [showErrors, setShowErrors] = useState(false);
   const [isDownloadingApplePass, setIsDownloadingApplePass] = useState(false);
+  // SQUARE API COMMENTED OUT - Default to razorpay now
+  const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("razorpay"); // "square" or "razorpay"
 
   const [errors, setErrors] = useState({
     selfInfo: {
@@ -37,17 +43,26 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
 
   useEffect(() => {
     if (paymentData?.payment) {
+      const payment = paymentData.payment;
+      // Handle both Square and Razorpay payment formats
+      const isRazorpay = payment.sourceType === "razorpay" || payment.method;
+      const isSquare = payment.amountMoney || payment.sourceType !== "razorpay";
+      
       setFormData((prevFormData) => ({
         ...prevFormData,
         paymentDetails: {
-          transactionId: paymentData.payment.id || "",
-          paymentMethod: paymentData.payment.sourceType || "",
-          paymentamount: paymentData.payment.amountMoney?.amount || "",
-          currency: paymentData.payment.amountMoney?.currency || "",
-          status: paymentData.payment.status || "",
-          receiptNumber: paymentData.payment.receiptNumber || "",
-          receiptUrl: paymentData.payment.receiptUrl || "",
-          paymentdAt: paymentData.payment.updatedAt || "",
+          transactionId: payment.id || "",
+          paymentMethod: payment.sourceType || payment.method || "",
+          paymentamount: isRazorpay 
+            ? (payment.amount / 100).toString() // Razorpay amount is in paise
+            : (payment.amountMoney?.amount || payment.amount || "").toString(),
+          currency: isRazorpay 
+            ? (payment.currency || "INR")
+            : (payment.amountMoney?.currency || "USD"),
+          status: payment.status || "",
+          receiptNumber: payment.receiptNumber || payment.receipt || "",
+          receiptUrl: payment.receiptUrl || "",
+          paymentdAt: payment.updatedAt || payment.createdAt || "",
         },
       }));
     }
@@ -132,41 +147,19 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
     return emailRegex.test(email);
   };
 
-  const validatePhone = (phone) => {
-    if (!phone) return false;
-
-    // Check if the phone number matches the expected format: (XXX) XXX-XXXX
-    const phonePattern = /^\(\d{3}\)\s\d{3}-\d{4}$/;
-
-    if (phonePattern.test(phone)) {
-      return true;
-    }
-
-    // Fallback: check if it has at least 10 digits
-    const digitsOnly = phone.replace(/\D/g, "");
-    return digitsOnly.length >= 10 && digitsOnly.length <= 11;
-  };
+const validatePhone = (phone) => {
+  if (!phone) return false;
+  const digits = phone.replace(/\D/g, "");
+  // Indian mobile: must start 6-9 and be 10 digits
+  return /^[6-9]\d{9}$/.test(digits);
+};
 
   const formatPhoneNumber = (value) => {
-    if (!value) return value;
+  if (!value) return "";
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  return digits;  // no formatting, just clean digits
+};
 
-    // Remove all non-digit characters
-    const phoneNumber = value.replace(/\D/g, "");
-
-    // Limit to 10 digits
-    const limitedDigits = phoneNumber.slice(0, 10);
-
-    // Format the phone number consistently
-    if (limitedDigits.length === 0) {
-      return "";
-    } else if (limitedDigits.length < 4) {
-      return `(${limitedDigits}`;
-    } else if (limitedDigits.length < 7) {
-      return `(${limitedDigits.slice(0, 3)}) ${limitedDigits.slice(3)}`;
-    } else {
-      return `(${limitedDigits.slice(0, 3)}) ${limitedDigits.slice(3, 6)}-${limitedDigits.slice(6, 10)}`;
-    }
-  };
   const handleInputChange = (section, field, value) => {
     if (field === "phone" || field === "senderPhone") {
       // For phone fields, format the input
@@ -655,11 +648,11 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
                           type="tel"
                           id="self-phone"
                           required
-                          title="Please enter a valid US phone number like (555) 123-4567"
+                          title="Please enter a valid IN phone number like 9876543210"
                           className={showErrors && errors.selfInfo.phone ? "error" : ""}
                           value={formData.selfInfo.phone}
                           onChange={(e) => handleInputChange("selfInfo", "phone", e.target.value)}
-                          placeholder="(123) 456-7890"
+                          placeholder="9876543210"
                         />
                         <ErrorMessage message={errors.selfInfo.phone} />
                       </div>
@@ -752,14 +745,14 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
                             type="tel"
                             id="self-phone"
                             required
-                            title="Please enter a valid US phone number like (555) 123-4567"
+                            title="Please enter a valid IN phone number like 9876543210"
                             className={showErrors && errors.selfInfo.phone ? "error" : ""}
                             value={formData.selfInfo.phone}
                             onChange={(e) => handleInputChange("selfInfo", "phone", e.target.value)}
-                            placeholder="(123) 123-4567"
+                            placeholder="9876543210"
                           />
                           <ErrorMessage message={errors.selfInfo.phone} />
-                          <small className="form-hint">Format: (XXX) XXX-XXXX</small>
+                          <small className="form-hint"></small>
                         </div>
                       </div>
                     </div>
@@ -769,7 +762,42 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
 
               {currentStep === 3 && (
                 <div className="form-section">
-                  <SquarePaymentForm />
+                  <div className="payment-gateway-selector">
+                    <h3 className="payment-gateway-title">Select Payment Gateway</h3>
+                    <div className="payment-gateway-options">
+                      {/* SQUARE API COMMENTED OUT */}
+                      {/* <button
+                        type="button"
+                        className={`payment-gateway-option ${selectedPaymentGateway === "square" ? "active" : ""}`}
+                        onClick={() => setSelectedPaymentGateway("square")}
+                      >
+                        <span>Square</span>
+                      </button> */}
+                      <button
+                        type="button"
+                        className={`payment-gateway-option ${selectedPaymentGateway === "razorpay" ? "active" : ""}`}
+                        onClick={() => setSelectedPaymentGateway("razorpay")}
+                      >
+                        <span>Razorpay</span>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* SQUARE API COMMENTED OUT */}
+                  {/* {selectedPaymentGateway === "square" && <SquarePaymentForm />} */}
+                  {selectedPaymentGateway === "razorpay" && (
+                    <RazorpayPaymentForm
+                      amount={parseFloat(discount ? (amount - (amount * discount) / 100).toFixed(2) : amount)}
+                      currency="INR"
+                      businessSlug={businessSlug}
+                      onPaymentSuccess={(payment) => {
+                        console.log("Razorpay payment successful:", payment);
+                      }}
+                      onPaymentError={(error) => {
+                        console.error("Razorpay payment error:", error);
+                      }}
+                    />
+                  )}
                 </div>
               )}
 

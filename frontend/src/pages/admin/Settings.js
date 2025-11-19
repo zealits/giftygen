@@ -9,9 +9,13 @@ const Settings = () => {
   const [form, setForm] = useState({
     restaurantName: initial.restaurantName || "",
     businessSlug: initial.businessSlug || "",
-    squareApplicationId: initial.squareApplicationId || "",
-    squareLocationId: initial.squareLocationId || "",
-    squareAccessToken: initial.squareAccessToken || "",
+    // SQUARE API COMMENTED OUT
+    // squareApplicationId: initial.squareApplicationId || "",
+    // squareLocationId: initial.squareLocationId || "",
+    // squareAccessToken: initial.squareAccessToken || "",
+    // Razorpay (per-business) configuration
+    razorpayKeyId: initial.razorpayKeyId || "",
+    razorpayKeySecret: initial.razorpayKeySecret || "",
   });
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -22,10 +26,13 @@ const Settings = () => {
   const [passwordMessage, setPasswordMessage] = useState("");
   const [settingsMessage, setSettingsMessage] = useState("");
   const [showToken, setShowToken] = useState(false);
+  const [showRazorpayToken, setShowRazorpayToken] = useState(false);
   const [logoUrl, setLogoUrl] = useState(initial.logoUrl || "");
   const [downloading, setDownloading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [showSquareInstructions, setShowSquareInstructions] = useState(false);
+  // SQUARE API COMMENTED OUT
+  // const [showSquareInstructions, setShowSquareInstructions] = useState(false);
+  const [showRazorpayInstructions, setShowRazorpayInstructions] = useState(false);
 
   const publicUrl = useMemo(() => {
     const slug = (form.businessSlug || "").trim();
@@ -37,17 +44,24 @@ const Settings = () => {
     setForm({
       restaurantName: initial.restaurantName || "",
       businessSlug: initial.businessSlug || "",
-      squareApplicationId: initial.squareApplicationId || "",
-      squareLocationId: initial.squareLocationId || "",
-      squareAccessToken: initial.squareAccessToken || "",
+      // SQUARE API COMMENTED OUT
+      // squareApplicationId: initial.squareApplicationId || "",
+      // squareLocationId: initial.squareLocationId || "",
+      // squareAccessToken: initial.squareAccessToken || "",
+      // Razorpay (per-business) configuration
+      razorpayKeyId: initial.razorpayKeyId || "",
+      razorpayKeySecret: initial.razorpayKeySecret || "",
     });
     setLogoUrl(initial.logoUrl || "");
   }, [
     initial.restaurantName,
     initial.businessSlug,
-    initial.squareApplicationId,
-    initial.squareLocationId,
-    initial.squareAccessToken,
+    // SQUARE API COMMENTED OUT
+    // initial.squareApplicationId,
+    // initial.squareLocationId,
+    // initial.squareAccessToken,
+    initial.razorpayKeyId,
+    initial.razorpayKeySecret,
     initial.logoUrl,
   ]);
 
@@ -219,8 +233,8 @@ const Settings = () => {
               <p className="card-subtitle">Update your login password for enhanced security</p>
 
               <div className="form-grid">
-                <div className="form-group">
-                  <label className="form-label">Current Password</label>
+                <div className="form_group">
+                  <label className="form_label">Current Password</label>
                   <input
                     type="password"
                     name="currentPassword"
@@ -231,8 +245,8 @@ const Settings = () => {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">New Password</label>
+                <div className="form_group">
+                  <label className="form_label">New Password</label>
                   <input
                     type="password"
                     name="newPassword"
@@ -243,8 +257,8 @@ const Settings = () => {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Confirm New Password</label>
+                <div className="form_group">
+                  <label className="form_label">Confirm New Password</label>
                   <input
                     type="password"
                     name="confirmPassword"
@@ -282,7 +296,7 @@ const Settings = () => {
                 <h3 className="card-title">Branding & Identity</h3>
 
                 <div className="logo-section">
-                  <label className="form-label">Business Logo</label>
+                  <label className="form_label">Business Logo</label>
                   <div className="logo-upload">
                     <div className="logo-preview">
                       {logoUrl ? (
@@ -318,8 +332,8 @@ const Settings = () => {
                   <p className="form-hint">PNG/JPG preferred. Stored securely on Cloudinary.</p>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Business Name</label>
+                <div className="form_group">
+                  <label className="form_label">Business Name</label>
                   <input
                     name="restaurantName"
                     value={form.restaurantName}
@@ -329,8 +343,8 @@ const Settings = () => {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Business Slug (Auto-generated)</label>
+                <div className="form_group">
+                  <label className="form_label">Business Slug (Auto-generated)</label>
                   <input
                     name="businessSlug"
                     value={form.businessSlug}
@@ -349,7 +363,7 @@ const Settings = () => {
                   <h3 className="card-title">Public Access</h3>
                   <div className="url-display">
                     <div className="url-info">
-                      <label className="form-label">Public Gift Cards Page</label>
+                      <label className="form_label">Public Gift Cards Page</label>
                       <div className="url-text">{publicUrl}</div>
                     </div>
                     <button type="button" className="btn btn-outline" onClick={copyPublicLink}>
@@ -377,8 +391,95 @@ const Settings = () => {
           </div>
         </div>
 
-        {/* Payment Configuration Section */}
+        {/* Razorpay Payment Configuration Section */}
         <div className="settings-section">
+          <div className="section-header">
+            <div className="section-icon">💳</div>
+            <div>
+              <h2 className="section-title">Payment Configuration</h2>
+              <p className="section-description">Set up Razorpay payments to receive customer payments directly</p>
+            </div>
+          </div>
+
+          <div className="settings-card payment-card">
+            <div className="card-content">
+              <div className="setup-header">
+                <h3 className="card-title">Razorpay Payments Setup</h3>
+                <button
+                  type="button"
+                  className="btn btn-info"
+                  onClick={() => setShowRazorpayInstructions(!showRazorpayInstructions)}
+                >
+                  {showRazorpayInstructions ? "Hide" : "Show"} Setup Guide
+                </button>
+              </div>
+
+              {showRazorpayInstructions && (
+                <div className="setup-guide">
+                  <h4>How to get your Razorpay credentials:</h4>
+                  <ol className="setup-steps">
+                    <li>
+                      Log into your{" "}
+                      <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer">
+                        Razorpay Dashboard
+                      </a>
+                    </li>
+                    <li>Go to "Settings" → "API Keys"</li>
+                    <li>Copy your Key ID (e.g., rzp_test_... or rzp_live_...)</li>
+                    <li>Click "Reveal Key Secret" to get your Key Secret</li>
+                    <li>Copy both Key ID and Key Secret (keep them secure)</li>
+                    <li>Paste them below to use your own Razorpay account</li>
+                  </ol>
+                  <p className="form-hint">
+                    <strong>Note:</strong> If you leave these empty, the system will use global Razorpay credentials from environment variables.
+                  </p>
+                </div>
+              )}
+
+              <div className="form-grid">
+                <div className="form_group">
+                  <label className="form_label">Razorpay Key ID</label>
+                  <input
+                    name="razorpayKeyId"
+                    value={form.razorpayKeyId}
+                    onChange={handleChange}
+                    placeholder="rzp_test_... or rzp_live_..."
+                    className="form-input"
+                  />
+                  <p className="form-hint">Your Razorpay Key ID (starts with rzp_test_ or rzp_live_)</p>
+                </div>
+
+                <div className="form_group">
+                  <label className="form_label">Razorpay Key Secret</label>
+                  <div className="input-with-action">
+                    <input
+                      name="razorpayKeySecret"
+                      type={showRazorpayToken ? "text" : "password"}
+                      value={form.razorpayKeySecret}
+                      onChange={handleChange}
+                      placeholder="Enter your Razorpay Key Secret"
+                      className="form-input"
+                    />
+                    <button type="button" className="btn btn-outline" onClick={() => setShowRazorpayToken((s) => !s)}>
+                      {showRazorpayToken ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                  <p className="form-hint">We store this key securely and use it only to process your sales.</p>
+                </div>
+              </div>
+
+              <div className="action-row">
+                <button onClick={handleSaveSettings} disabled={saving} className="btn btn-primary">
+                  {saving ? "Saving..." : "Save Payment Settings"}
+                </button>
+                {settingsMessage && <span className="message success">{settingsMessage}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SQUARE API COMMENTED OUT - Payment Configuration Section */}
+        {/* <div className="settings-section">
           <div className="section-header">
             <div className="section-icon">💳</div>
             <div>
@@ -420,8 +521,8 @@ const Settings = () => {
               )}
 
               <div className="form-grid">
-                <div className="form-group">
-                  <label className="form-label">Square Application ID</label>
+                <div className="form_group">
+                  <label className="form_label">Square Application ID</label>
                   <input
                     name="squareApplicationId"
                     value={form.squareApplicationId}
@@ -431,8 +532,8 @@ const Settings = () => {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Square Location ID</label>
+                <div className="form_group">
+                  <label className="form_label">Square Location ID</label>
                   <input
                     name="squareLocationId"
                     value={form.squareLocationId}
@@ -442,8 +543,8 @@ const Settings = () => {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Square Access Token</label>
+                <div className="form_group">
+                  <label className="form_label">Square Access Token</label>
                   <div className="input-with-action">
                     <input
                       name="squareAccessToken"
@@ -469,7 +570,7 @@ const Settings = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

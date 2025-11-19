@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
 import "../pages/marketing/LandingPage.css";
@@ -18,58 +18,58 @@ const LANGS = [
   { code: "Odi", label: "ଓଡ଼ିଆ" },
   { code: "urdu", label: "اردو" },
   { code: "ru", label: "Russia" },
-  { code: "th", label: "thiland" },
-  { code: "ch", label: "chinese" },
+  { code: "th", label: "Thailand" },
+  { code: "ch", label: "Chinese" },
 ];
 
-export default function LanguageDropdown({ variant = "desktop" }) {
+export default function LanguageDropdown() {
   const { i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
   const current = i18n.language;
+  const ref = useRef();
 
-  const changeLang = (e) => {
-    const lang = e.target.value;
+  const changeLang = (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("language", lang);
+    setOpen(false);
   };
 
-  if (variant === "mobile") {
-    return (
-      <div className="lp-mobile-language">
-        <label className="lp-mobile-language__label">
-          <Globe size={18} />
-          Language / भाषा
-        </label>
-        <select 
-          onChange={changeLang} 
-          value={current}
-          className="lp-mobile-language-dropdown"
-          aria-label="Select language"
-        >
-          {LANGS.map((l) => (
-            <option key={l.code} value={l.code}>
-              {l.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const closeOnOutsideClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, []);
 
-  // Desktop variant
   return (
-    <div className="lp-language-selector">
-      <select 
-        onChange={changeLang} 
-        value={current}
-        className="lp-language-dropdown"
-        aria-label="Select language"
+    <div className="lp-language-selector" ref={ref}>
+      <button
+        className="lp-language-dropdown-trigger"
+        onClick={() => setOpen((o) => !o)}
       >
-        {LANGS.map((l) => (
-          <option key={l.code} value={l.code}>
-            {l.label}
-          </option>
-        ))}
-      </select>
+        <Globe size={16} style={{ marginRight: "6px" }} />
+        {LANGS.find((l) => l.code === current)?.label || "Language"}
+        <span className={`arrow ${open ? "up" : ""}`}>▾</span>
+      </button>
+
+      {open && (
+        <div className="lp-language-dropdown-menu">
+          {LANGS.map((lang) => (
+            <div
+              key={lang.code}
+              className={`dropdown-item ${
+                current === lang.code ? "active" : ""
+              }`}
+              onClick={() => changeLang(lang.code)}
+            >
+              {lang.label}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

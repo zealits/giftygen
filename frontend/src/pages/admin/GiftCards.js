@@ -8,6 +8,7 @@ import {
   DELETE_GIFTCARD_RESET,
 } from "../../services/Constants/giftCardConstants";
 import { Link2 } from "lucide-react";
+import { formatCurrency } from "../../utils/currency";
 
 const GiftCards = () => {
   const [isMessageModalOpen, setMessageModalOpen] = useState(false);
@@ -337,9 +338,9 @@ const GiftCards = () => {
                 giftCards.map((card) => (
                   <tr key={card._id}>
                     <td>{card.giftCardName}</td>
-                    <td>$ {card.amount}</td>
+                    <td>{formatCurrency(card.amount, 'INR')}</td>
                     <td>{card.discount}%</td>
-                    <td>$ {card.amount - (card.amount * card.discount) / 100}</td>
+                    <td>{formatCurrency(card.amount - (card.amount * card.discount) / 100, 'INR')}</td>
 
                     <td>{new Date(card.expirationDate).toLocaleDateString("en-GB")}</td>
 

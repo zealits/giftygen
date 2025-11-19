@@ -116,13 +116,13 @@
 	gap: 16px;
 }
 
-.form-group {
+.form_group {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 }
 
-.form-label {
+.form_label {
 	font-size: 0.9rem;
 	font-weight: 500;
 	color: #e2e8f0;

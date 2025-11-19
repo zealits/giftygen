@@ -1227,7 +1227,7 @@ const addGiftCardToWallet = async (req, res) => {
       state: "active",
       cardNumber: cardNumber,
       balance: {
-        currencyCode: "USD",
+        currencyCode: "INR",
         micros: microsValue, // Use only micros
       },
       barcode: {

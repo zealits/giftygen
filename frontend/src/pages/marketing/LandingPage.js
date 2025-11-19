@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import "../../i18n";
 import LanguageDropdown from "../../components/LanguageDropdown";
 import { detectAndSetLanguage, getDetailedLocation } from "../../utils/geolocationLanguage";
+import { formatCurrency } from "../../utils/currency";
 import {
   Zap,
   Smartphone,
@@ -331,7 +332,7 @@ function LandingPage() {
             <div className="lp-giftcard__ribbon" />
             <div className="lp-giftcard__brand">{t("giftCard.Brand")}</div>
             <div className="lp-giftcard__title">{t("giftCard.digitalGiftCard")}</div>
-            <div className="lp-giftcard__amount">$ 50</div>
+            <div className="lp-giftcard__amount">{formatCurrency(50, 'INR')}</div>
             <div className="lp-giftcard__meta">
               <span>{t("giftCard.to")}</span>
               <span>{t("giftCard.from")}</span>

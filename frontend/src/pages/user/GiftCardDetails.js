@@ -3,11 +3,12 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getGiftCardDetails } from "../../services/Actions/giftCardActions";
 import GiftCardForm from "./GiftCardForm";
+import { formatCurrency } from "../../utils/currency";
 
 import "./GiftCardDetails.css";
 
 const GiftCardDetails = () => {
-  const { id } = useParams();
+  const { id, businessSlug } = useParams();
   const dispatch = useDispatch();
   const [showGiftCardForm, setShowGiftCardForm] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -161,11 +162,11 @@ if (loading) return (
 
           <div className="price-container fade-in-up delay-4">
             <div className="price">
-              <span className="amount">${giftCard.amount}</span>
+              <span className="amount">{formatCurrency(giftCard.amount, 'INR')}</span>
               <span className="discount pulse-animation">{giftCard.discount}% Off</span>
             </div>
             <div className="saved-amount highlight-text">
-              Save ${(giftCard.amount * giftCard.discount / 100).toFixed(2)}
+              Save {formatCurrency((giftCard.amount * giftCard.discount / 100), 'INR')}
             </div>
           </div>
 
