@@ -8,6 +8,45 @@ const cloudinary = require("cloudinary");
 const fs = require("fs");
 const { google } = require("googleapis");
 const auth = require("../config/googleConfig");
+const { sendGiftCardTemplateMessage } = require("../services/whatsappService");
+
+const formatPhoneNumberForWhatsApp = (input = "") => {
+  if (!input) return null;
+  const digitsOnly = String(input).replace(/\D/g, "");
+  if (!digitsOnly) return null;
+  if (digitsOnly.length === 10) {
+    return `91${digitsOnly}`;
+  }
+  if (digitsOnly.startsWith("91") && digitsOnly.length === 12) {
+    return digitsOnly;
+  }
+  return digitsOnly.length > 8 ? digitsOnly : null;
+};
+
+const formatExpiryDateForDisplay = (value) => {
+  if (!value) return "No expiry";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "No expiry";
+  }
+  return parsed.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatAmountDisplay = (value) => {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return value ? String(value) : "";
+  }
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(numericValue);
+};
 
 // Create a new gift card
 // const cloudinary = require("cloudinary").v2;
@@ -493,6 +532,7 @@ const addBuyer = async (req, res) => {
         isUsed: false,
       },
       remainingBalance,
+      walletUrl: walletUrl || null,
     };
 
     // Add buyer to gift card
@@ -863,6 +903,31 @@ const addBuyer = async (req, res) => {
       }
     } catch (emailError) {
       console.error("Error sending emails:", emailError);
+    }
+
+    const whatsappNumber = formatPhoneNumberForWhatsApp(selfInfo?.phone);
+    const whatsappRecipientName = purchaseType === "gift" ? giftInfo?.recipientName || selfInfo?.name : selfInfo?.name;
+    const whatsappMessage =
+      purchaseType === "gift"
+        ? giftInfo?.message || `You just sent a ${giftCardName} gift card`
+        : `Thanks for purchasing ${giftCardName}!`;
+
+    if (whatsappNumber) {
+      try {
+        await sendGiftCardTemplateMessage({
+          to: whatsappNumber,
+          recipientName: whatsappRecipientName || "Customer",
+          greetingText: whatsappMessage,
+          amountText: formatAmountDisplay(giftCardDetails.amount),
+          expirationDateText: formatExpiryDateForDisplay(expirationDate),
+          walletUrl,
+          headerImageUrl: giftCardDetails.giftCardImg,
+        });
+      } catch (whatsappError) {
+        console.error("Error sending WhatsApp template message:", whatsappError.message);
+      }
+    } else {
+      console.warn("Skipping WhatsApp notification due to missing or invalid phone number.");
     }
 
     res.status(200).json({
