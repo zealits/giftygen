@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const paymentRoutes = require("./routes/paymentRoutes");
 const walletRoutes = require("./routes/walletRoutes.js");
-
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
 // Import the routes for the API
 const restaurantAdminRoutes = require("./routes/restaurantAdminRoutes");
 const giftCardRoutes = require("./routes/giftCardRoutes");
@@ -28,6 +28,8 @@ app.use("/api/v1/admin", restaurantAdminRoutes); // Your restaurant admin API ro
 app.use("/api/v1/admin", giftCardRoutes); // Your gift card API routes
 app.use("/api/superadmin", superAdminRoutes); // Super admin routes
 app.use("/api/payments", paymentRoutes);
+app.use("/api/v1/payment", paymentRoutes); // Alias for new subscription module
+app.use("/api/v1/subscription", subscriptionRoutes);
 app.use("/api/wallet", walletRoutes);
 
 const { GoogleAuth } = require("google-auth-library");

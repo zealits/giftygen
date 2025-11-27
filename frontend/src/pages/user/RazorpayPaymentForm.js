@@ -3,6 +3,20 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import "./RazorpayPaymentForm.css";
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 const RazorpayPaymentForm = ({ amount, currency = "INR", onPaymentSuccess, onPaymentError, businessSlug }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,6 +47,20 @@ const RazorpayPaymentForm = ({ amount, currency = "INR", onPaymentSuccess, onPay
     fetchRazorpayKey();
   }, [businessSlug]);
 
+  useEffect(() => {
+    let isMounted = true;
+    const ensureScript = async () => {
+      const loaded = await loadRazorpayScript();
+      if (!loaded && isMounted) {
+        setError("Failed to load payment gateway. Please refresh the page.");
+      }
+    };
+    ensureScript();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // If payment status is COMPLETED or authorized, do not show payment button
   if (paymentStatus === "COMPLETED" || paymentStatus === "authorized" || paymentStatus === "captured") {
     return (
@@ -60,6 +88,12 @@ const RazorpayPaymentForm = ({ amount, currency = "INR", onPaymentSuccess, onPay
     setError("");
 
     try {
+      const scriptReady = await loadRazorpayScript();
+      if (!scriptReady || !window.Razorpay) {
+        setError("Payment gateway is not available right now. Please try again.");
+        setLoading(false);
+        return;
+      }
       // Step 1: Create order on backend (with businessSlug if available)
       const orderResponse = await axios.post("/api/payments/razorpay/create-order", {
         amount: amount,

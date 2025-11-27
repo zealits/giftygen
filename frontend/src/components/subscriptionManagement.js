@@ -1,0 +1,360 @@
+import { useEffect, useState, useRef, useCallback } from "react";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import "./subscriptionManagement.css";
+
+const SubscriptionManagement = () => {
+  const [plans, setPlans] = useState(null);
+  const [currentSubscription, setCurrentSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [razorpayKey, setRazorpayKey] = useState("");
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+  const businessSlug = user?.user?.businessSlug || "";
+  const hasFetched = useRef(false);
+
+  const fetchSubscriptionData = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      // Fetch plans
+      const plansResponse = await axios.get("/api/v1/subscription/plans");
+      setPlans(plansResponse.data.plans);
+
+      // Fetch current subscription (200 even when empty)
+      const subResponse = await axios.get(
+        `/api/v1/subscription/${businessSlug}/current`
+      );
+      setCurrentSubscription(subResponse.data.subscription || null);
+
+      // Fetch Razorpay key
+      const keyResponse = await axios.get(
+        `/api/v1/payment/razorpay/key?businessSlug=${businessSlug}`
+      );
+      setRazorpayKey(keyResponse.data.keyId);
+    } catch (error) {
+      console.error("Error fetching subscription data:", error);
+      // Previously showed an alert to the user; now just logs the error
+    } finally {
+      setLoading(false);
+    }
+  }, [businessSlug]);
+
+  useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+    fetchSubscriptionData();
+  }, [businessSlug, fetchSubscriptionData]);
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleSubscribe = async (planType) => {
+    if (processingPayment) return;
+
+    try {
+      setProcessingPayment(true);
+
+      // Load Razorpay script
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        console.error("Failed to load payment gateway. Please try again.");
+        setProcessingPayment(false);
+        return;
+      }
+
+      // Create order
+      const orderResponse = await axios.post(
+        "/api/v1/subscription/create-order",
+        {
+          planType,
+          businessSlug,
+        }
+      );
+
+      const { order, subscription } = orderResponse.data;
+
+      // Initialize Razorpay
+      const options = {
+        key: razorpayKey,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Gift Card Platform",
+        description: `${planType.charAt(0).toUpperCase() + planType.slice(1)} Subscription`,
+        order_id: order.id,
+        handler: async (response) => {
+          try {
+            // Verify payment
+            const verifyResponse = await axios.post(
+              "/api/v1/subscription/verify-payment",
+              {
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                // Use Mongo _id explicitly; some serializers omit the virtual id field
+                subscriptionId: subscription._id,
+                businessSlug,
+              }
+            );
+
+            if (verifyResponse.data.success) {
+              console.log("Subscription activated successfully");
+              hasFetched.current = false;
+              fetchSubscriptionData();
+            } else {
+              console.error(
+                "Payment verification failed on server:",
+                verifyResponse.data.message || "Unknown error"
+              );
+            }
+          } catch (error) {
+            console.error("Payment verification failed:", error);
+            const serverMessage =
+              error.response?.data?.message ||
+              error.response?.data?.error ||
+              error.message;
+            console.error(
+              "Payment verification failed.",
+              serverMessage,
+              "Payment ID:",
+              response.razorpay_payment_id
+            );
+          } finally {
+            setProcessingPayment(false);
+          }
+        },
+        prefill: {
+          name: user?.user?.name || "",
+          email: user?.user?.email || "",
+          contact: user?.user?.phone || "",
+        },
+        theme: {
+          color: "#6366f1",
+        },
+        modal: {
+          ondismiss: () => {
+            setProcessingPayment(false);
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error("Error initiating subscription:", error);
+      alert("Failed to initiate subscription. Please try again.");
+      setProcessingPayment(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to cancel your subscription? You will still have access until the end of your billing period."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await axios.put(`/api/v1/subscription/${currentSubscription._id}/cancel`);
+      console.log(
+        "Subscription cancelled successfully. Access until",
+        new Date(currentSubscription.endDate).toLocaleDateString()
+      );
+      hasFetched.current = false;
+      fetchSubscriptionData();
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      // Previously showed an alert; now just logs the error
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const getDaysRemaining = (endDate) => {
+    const end = new Date(endDate);
+    const now = new Date();
+    const diffTime = end - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  if (loading) {
+    return (
+      <div className="subscription-container">
+        <h1 className="subscription-heading">Subscription Management</h1>
+        <div className="loading-container">
+          <div className="skeleton-loader"></div>
+          <div className="skeleton-loader"></div>
+          <div className="skeleton-loader"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="subscription-container">
+      <h1 className="subscription-heading">Subscription Management</h1>
+
+      {/* Current Subscription Status */}
+      {currentSubscription && currentSubscription.isActive && (
+        <div className="current-subscription-card">
+          <div className="subscription-header">
+            <h2>Current Subscription</h2>
+            <span className={`status-badge ${currentSubscription.status}`}>
+              {currentSubscription.status.toUpperCase()}
+            </span>
+          </div>
+          
+          <div className="subscription-details">
+            <div className="detail-item">
+              <span className="detail-label">Plan Type</span>
+              <span className="detail-value">
+                {currentSubscription.planType.charAt(0).toUpperCase() + currentSubscription.planType.slice(1)}
+              </span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Amount</span>
+              <span className="detail-value">₹{currentSubscription.amount}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Start Date</span>
+              <span className="detail-value">{formatDate(currentSubscription.startDate)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">End Date</span>
+              <span className="detail-value">{formatDate(currentSubscription.endDate)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Days Remaining</span>
+              <span className="detail-value days-remaining">
+                {getDaysRemaining(currentSubscription.endDate)} days
+              </span>
+            </div>
+          </div>
+
+          {currentSubscription.status !== "cancelled" && (
+            <button
+              onClick={handleCancelSubscription}
+              className="cancel-subscription-btn"
+            >
+              Cancel Subscription
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* No Active Subscription Message */}
+      {(!currentSubscription || !currentSubscription.isActive) && (
+        <div className="no-subscription-message">
+          <h3>No Active Subscription</h3>
+          <p>Choose a plan below to get started with our gift card platform.</p>
+        </div>
+      )}
+
+      {/* Subscription Plans */}
+      <div className="plans-section">
+        <h2 className="plans-heading">Available Plans</h2>
+        <div className="plans-grid">
+          {plans &&
+            Object.entries(plans).map(([key, plan]) => {
+              const isCurrentPlan = currentSubscription?.isActive && currentSubscription?.planType === key;
+              const isMostPopular = key === "quarterly";
+              
+              return (
+                <div
+                  key={key}
+                  className={`plan-card ${isMostPopular ? "popular" : ""} ${isCurrentPlan ? "current-plan" : ""}`}
+                >
+                  {isMostPopular && <div className="popular-badge">Most Popular</div>}
+                  {isCurrentPlan && <div className="current-plan-badge">Current Plan</div>}
+                  
+                  <h3 className="plan-name">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </h3>
+                  
+                  <div className="plan-price">
+                    <span className="currency">₹</span>
+                    <span className="amount">{plan.amount}</span>
+                    <span className="period">
+                      /{plan.duration} {plan.durationType === "months" ? (plan.duration === 1 ? "month" : "months") : "year"}
+                    </span>
+                  </div>
+
+                  <ul className="plan-features">
+                    <li>✓ Unlimited gift cards</li>
+                    <li>✓ Full dashboard access</li>
+                    <li>✓ Real-time analytics</li>
+                    <li>✓ Email support</li>
+                    <li>✓ Order management</li>
+                    {key === "yearly" && <li>✓ Priority support</li>}
+                  </ul>
+
+                  <button
+                    onClick={() => handleSubscribe(key)}
+                    disabled={isCurrentPlan || processingPayment}
+                    className={`subscribe-btn ${isCurrentPlan || processingPayment ? "disabled" : ""}`}
+                  >
+                    {isCurrentPlan ? "Current Plan" : "Subscribe Now"}
+                  </button>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+
+      {/* Payment History */}
+      {currentSubscription && currentSubscription.paymentHistory && currentSubscription.paymentHistory.length > 0 && (
+        <div className="payment-history-section">
+          <h2>Payment History</h2>
+          <div className="payment-history-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Payment ID</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentSubscription.paymentHistory.map((payment, index) => (
+                  <tr key={index}>
+                    <td>{formatDate(payment.date)}</td>
+                    <td className="payment-id">{payment.paymentId}</td>
+                    <td>₹{payment.amount}</td>
+                    <td>
+                      <span className={`payment-status ${payment.status}`}>
+                        {payment.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SubscriptionManagement;

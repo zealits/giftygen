@@ -19,6 +19,7 @@ import GiftCardDetails from "./pages/user/GiftCardDetails.js";
 import SuperAdminLogin from "./components/SuperAdmin/SuperAdminLogin";
 import SuperAdminDashboard from "./components/SuperAdmin/SuperAdminDashboard";
 import VideoModal from "./components/VideoModal/VideoModal";
+import SubscriptionManagement from "./components/subscriptionManagement";
 import "./App.css";
 // import 'font-awesome/css/font-awesome.min.css';
 
@@ -32,7 +33,7 @@ function AppRoutes() {
   }
 
   const currentPathname = location.pathname;
-  const adminPaths = ["/dashboard", "/giftcards", "/orders", "/customers", "/reports", "/settings", "/redeem"];
+  const adminPaths = ["/dashboard", "/giftcards", "/orders", "/customers", "/reports", "/settings", "/redeem", "/subscription"];
   const isAdminRoute = adminPaths.some((p) => currentPathname && currentPathname.startsWith(p));
 
   return (
@@ -88,6 +89,12 @@ function AppRoutes() {
                 </div>
               }
             />
+             <Route path="/subscription" element={
+              <div className="content">
+                <SubscriptionManagement />
+              </div>
+             } 
+             />
             <Route
               path="/settings"
               element={

@@ -338,6 +338,17 @@ const validatePhone = (phone) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate that payment has been completed
+    const paymentStatus = paymentData?.payment?.status;
+    const isValidPaymentStatus = paymentStatus === "COMPLETED" || 
+                                  paymentStatus === "authorized" || 
+                                  paymentStatus === "captured";
+    
+    if (!paymentData?.payment || !isValidPaymentStatus) {
+      alert("Please complete the payment before submitting the form.");
+      return;
+    }
+
     let updatedFormData = { ...formData }; // Start with existing formData
 
     try {
@@ -812,11 +823,39 @@ const validatePhone = (phone) => {
                     Next
                   </button>
                 )}
-                {currentStep === totalSteps && (
-                  <button type="submit" className="giftFormBtn">
-                    Complete Purchase
-                  </button>
-                )}
+                {currentStep === totalSteps && (() => {
+                  const paymentStatus = paymentData?.payment?.status;
+                  const isValidPaymentStatus = paymentStatus === "COMPLETED" || 
+                                                paymentStatus === "authorized" || 
+                                                paymentStatus === "captured";
+                  const isPaymentCompleted = paymentData?.payment && isValidPaymentStatus;
+                  
+                  return (
+                    <>
+                      {!isPaymentCompleted && (
+                        <p style={{ 
+                          color: "#ff6b6b", 
+                          fontSize: "14px", 
+                          marginBottom: "10px",
+                          textAlign: "center"
+                        }}>
+                          Please complete the payment to proceed with your purchase.
+                        </p>
+                      )}
+                      <button 
+                        type="submit" 
+                        className="giftFormBtn"
+                        disabled={!isPaymentCompleted}
+                        style={{
+                          opacity: isPaymentCompleted ? 1 : 0.6,
+                          cursor: isPaymentCompleted ? "pointer" : "not-allowed"
+                        }}
+                      >
+                        Complete Purchase
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             </form>
           </div>
@@ -842,7 +881,7 @@ const validatePhone = (phone) => {
                     onClick={handleAppleWalletDownload}
                     disabled={isDownloadingApplePass}
                     style={{
-                      background: "transparent",
+                     /*  background: "transparent", */
                       border: "none",
                       cursor: isDownloadingApplePass ? "not-allowed" : "pointer",
                       opacity: isDownloadingApplePass ? 0.7 : 1,
