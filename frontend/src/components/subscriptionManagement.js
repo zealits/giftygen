@@ -8,7 +8,7 @@ const SubscriptionManagement = () => {
   const [currentSubscription, setCurrentSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [razorpayKey, setRazorpayKey] = useState("");
-  const [processingPayment, setProcessingPayment] = useState(false);
+  const [processingPaymentPlan, setProcessingPaymentPlan] = useState(null);
   const { user } = useSelector((state) => state.auth);
   const businessSlug = user?.user?.businessSlug || "";
   const hasFetched = useRef(false);
@@ -61,16 +61,16 @@ const SubscriptionManagement = () => {
   };
 
   const handleSubscribe = async (planType) => {
-    if (processingPayment) return;
+    if (processingPaymentPlan) return;
 
     try {
-      setProcessingPayment(true);
+      setProcessingPaymentPlan(planType);
 
       // Load Razorpay script
       const loaded = await loadRazorpayScript();
       if (!loaded) {
         console.error("Failed to load payment gateway. Please try again.");
-        setProcessingPayment(false);
+        setProcessingPaymentPlan(null);
         return;
       }
 
@@ -131,7 +131,7 @@ const SubscriptionManagement = () => {
               response.razorpay_payment_id
             );
           } finally {
-            setProcessingPayment(false);
+            setProcessingPaymentPlan(null);
           }
         },
         prefill: {
@@ -144,7 +144,7 @@ const SubscriptionManagement = () => {
         },
         modal: {
           ondismiss: () => {
-            setProcessingPayment(false);
+            setProcessingPaymentPlan(null);
           },
         },
       };
@@ -154,7 +154,7 @@ const SubscriptionManagement = () => {
     } catch (error) {
       console.error("Error initiating subscription:", error);
       alert("Failed to initiate subscription. Please try again.");
-      setProcessingPayment(false);
+      setProcessingPaymentPlan(null);
     }
   };
 
@@ -310,8 +310,8 @@ const SubscriptionManagement = () => {
 
                   <button
                     onClick={() => handleSubscribe(key)}
-                    disabled={isCurrentPlan || processingPayment}
-                    className={`subscribe-btn ${isCurrentPlan || processingPayment ? "disabled" : ""}`}
+                    disabled={isCurrentPlan || processingPaymentPlan === key}
+                    className={`subscribe-btn ${isCurrentPlan || processingPaymentPlan === key ? "disabled" : ""}`}
                   >
                     {isCurrentPlan ? "Current Plan" : "Subscribe Now"}
                   </button>
