@@ -7,6 +7,8 @@ import Register from "./components/Register";
 import AdminDashboard from "./pages/admin/AdminDashboard.js";
 import UserLanding from "./pages/user/UserLanding.js";
 import LandingPage from "./pages/marketing/LandingPage";
+import PrivacyPolicy from "./pages/marketing/PrivacyPolicy";
+import TermsOfService from "./pages/marketing/TermsOfService";
 import Sidebar from "./pages/admin/Sidebar.js";
 import GiftCards from "./pages/admin/GiftCards.js"; // GiftCards page
 import Orders from "./pages/admin/Orders.js"; // GiftCards page
@@ -115,6 +117,8 @@ function AppRoutes() {
         )}
 
         <Route path="/" element={<LandingPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/explore" element={<UserLanding />} />
         <Route path="/gift-card/:id" element={<GiftCardDetails />} />
         <Route path="/:businessSlug/giftcards" element={<UserLanding />} />
