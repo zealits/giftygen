@@ -146,6 +146,47 @@ const getAllGiftCards = async (req, res) => {
 
     const giftCards = await apiFeatures.query;
 
+    // Check and update expired cards
+    const now = new Date();
+    const updatePromises = [];
+    
+    for (const card of giftCards) {
+      // Only update if card has expirationDate and status is not already expired/redeemed/sold
+      if (
+        card.expirationDate &&
+        new Date(card.expirationDate) < now &&
+        card.status !== "expired" &&
+        card.status !== "redeemed" &&
+        card.status !== "sold"
+      ) {
+        updatePromises.push(
+          GiftCard.findByIdAndUpdate(
+            card._id,
+            { status: "expired" },
+            { new: true }
+          )
+        );
+      }
+    }
+
+    // Wait for all updates to complete and update the status in the response
+    if (updatePromises.length > 0) {
+      await Promise.all(updatePromises);
+      console.log(`Updated ${updatePromises.length} gift cards to expired status`);
+      // Update the status in the current giftCards array
+      giftCards.forEach((card) => {
+        if (
+          card.expirationDate &&
+          new Date(card.expirationDate) < now &&
+          card.status !== "expired" &&
+          card.status !== "redeemed" &&
+          card.status !== "sold"
+        ) {
+          card.status = "expired";
+        }
+      });
+    }
+
     console.log("Gift Cards Retrieved:", giftCards.length); // Debugging
     res.status(200).json({
       giftCardCount,

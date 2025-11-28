@@ -335,25 +335,47 @@ const GiftCards = () => {
                   <td colSpan="7">Error: {error}</td>
                 </tr>
               ) : giftCards && giftCards.length > 0 ? (
-                giftCards.map((card) => (
-                  <tr key={card._id}>
-                    <td>{card.giftCardName}</td>
-                    <td>{formatCurrency(card.amount, 'INR')}</td>
-                    <td>{card.discount}%</td>
-                    <td>{formatCurrency(card.amount - (card.amount * card.discount) / 100, 'INR')}</td>
+                giftCards.map((card) => {
+                  const expirationDate = new Date(card.expirationDate);
+                  const now = new Date();
+                  const isExpired = expirationDate < now || card.status === "expired";
+                  
+                  return (
+                    <tr key={card._id} className={isExpired ? "expired-row" : ""}>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          {card.giftCardName}
+                          {isExpired && (
+                            <span className="expired-badge">Expired</span>
+                          )}
+                        </div>
+                      </td>
+                      <td>{formatCurrency(card.amount, 'INR')}</td>
+                      <td>{card.discount}%</td>
+                      <td>{formatCurrency(card.amount - (card.amount * card.discount) / 100, 'INR')}</td>
 
-                    <td>{new Date(card.expirationDate).toLocaleDateString("en-GB")}</td>
+                      <td>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                          <span>{new Date(card.expirationDate).toLocaleDateString("en-GB")}</span>
+                          {isExpired && (
+                            <span style={{ fontSize: "0.75rem", color: "#ef4444", fontWeight: "600" }}>
+                              (Expired)
+                            </span>
+                          )}
+                        </div>
+                      </td>
 
-                    <td>
-                      <button className="cbtn edit" onClick={() => handleEdit(card)}>
-                        Edit
-                      </button>
-                      <button className="cbtn delete" onClick={() => handleDelete(card._id)}>
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      <td>
+                        <button className="cbtn edit" onClick={() => handleEdit(card)}>
+                          Edit
+                        </button>
+                        <button className="cbtn delete" onClick={() => handleDelete(card._id)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="7">No gift cards found</td>
