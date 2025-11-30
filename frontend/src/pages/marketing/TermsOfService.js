@@ -58,11 +58,6 @@ function TermsOfService() {
                 <li>All actions taken under your account</li>
               </ul>
             </div>
-
-            <div className="terms-of-service__subsection">
-              <h3>Super Admin Accounts</h3>
-              <p>Super admin access is limited to authorized personnel only.</p>
-            </div>
           </section>
 
           <section className="terms-of-service__section">

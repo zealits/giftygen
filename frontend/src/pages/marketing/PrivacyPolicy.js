@@ -62,18 +62,7 @@ function PrivacyPolicy() {
             </div>
 
             <div className="privacy-policy__subsection">
-              <h3>1.2 When a Super Admin Uses the Platform</h3>
-              <p>We collect:</p>
-              <ul>
-                <li>Name</li>
-                <li>Email</li>
-                <li>Login details</li>
-                <li>Account status and activity</li>
-              </ul>
-            </div>
-
-            <div className="privacy-policy__subsection">
-              <h3>1.3 When You Submit a Registration or Inquiry Form</h3>
+              <h3>1.2 When You Submit a Registration or Inquiry Form</h3>
               <p>We may collect:</p>
               <ul>
                 <li>Name</li>
@@ -86,7 +75,7 @@ function PrivacyPolicy() {
             </div>
 
             <div className="privacy-policy__subsection">
-              <h3>1.4 When You Buy a Gift Card</h3>
+              <h3>1.3 When You Buy a Gift Card</h3>
               <p>We collect:</p>
               <ul>
                 <li>Buyer’s name, email, phone</li>
@@ -104,7 +93,7 @@ function PrivacyPolicy() {
             </div>
 
             <div className="privacy-policy__subsection">
-              <h3>1.5 Subscriptions &amp; Billing</h3>
+              <h3>1.4 Subscriptions &amp; Billing</h3>
               <p>If a restaurant subscribes to a plan, we collect:</p>
               <ul>
                 <li>Plan type</li>
@@ -115,7 +104,7 @@ function PrivacyPolicy() {
             </div>
 
             <div className="privacy-policy__subsection">
-              <h3>1.6 Website Usage Information</h3>
+              <h3>1.5 Website Usage Information</h3>
               <p>We may collect basic details about how you use the website, such as:</p>
               <ul>
                 <li>Pages visited</li>
