@@ -11,6 +11,7 @@ const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const restaurantAdminRoutes = require("./routes/restaurantAdminRoutes");
 const giftCardRoutes = require("./routes/giftCardRoutes");
 const superAdminRoutes = require("./routes/superAdminRoutes");
+const reportRoutes = require("./routes/reportRoutes");
 
 // Make sure to add your dashboard routes here
 
@@ -26,6 +27,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api/v1/admin", restaurantAdminRoutes); // Your restaurant admin API routes
 app.use("/api/v1/admin", giftCardRoutes); // Your gift card API routes
+app.use("/api/v1/admin/reports", reportRoutes); // Report routes
 app.use("/api/superadmin", superAdminRoutes); // Super admin routes
 app.use("/api/payments", paymentRoutes);
 app.use("/api/v1/payment", paymentRoutes); // Alias for new subscription module
