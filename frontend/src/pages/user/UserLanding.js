@@ -70,18 +70,29 @@ const UserLanding = () => {
     dispatch(listGiftCards(searchTerm, businessSlug || ""));
   }, [dispatch, searchTerm, businessSlug]);
 
-  // Store all fetched cards
+  // Store all fetched cards (exclude expired ones)
   useEffect(() => {
     if (giftCards && !loading) {
-      setAllCards(giftCards);
+      const now = new Date();
 
-      // Initially show only first batch of cards
+      // Filter out expired gift cards (by status or expirationDate)
+      const activeCards = giftCards.filter((card) => {
+        const isExplicitlyExpired = card.status === "expired";
+        const isDateExpired =
+          card.expirationDate && new Date(card.expirationDate) < now;
+
+        return !isExplicitlyExpired && !isDateExpired;
+      });
+
+      setAllCards(activeCards);
+
+      // Initially show only first batch of active cards
       if (page === 1) {
-        setVisibleCards(giftCards.slice(0, CARDS_PER_PAGE));
+        setVisibleCards(activeCards.slice(0, CARDS_PER_PAGE));
       }
 
       // Determine if there are more cards to load
-      setHasMore(giftCards.length > visibleCards.length);
+      setHasMore(activeCards.length > visibleCards.length);
       setIsFetchingMore(false);
     }
   }, [giftCards, loading]);

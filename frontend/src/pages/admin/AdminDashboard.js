@@ -14,6 +14,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
+import { formatCurrency } from "../../utils/currency";
 import "./AdminDashboard.css";
 
 // Register chart components
@@ -366,12 +367,12 @@ const AdminDashboard = () => {
 
         <div className="stat-card">
           <h3>Total Redemption</h3>
-          {loading ? <div className="skeleton" /> : <p>${totalRedemption.toFixed(2)}</p>}
+          {loading ? <div className="skeleton" /> : <p>{formatCurrency(totalRedemption, 'INR')}</p>}
         </div>
 
         <div className="stat-card">
           <h3>Total Revenue </h3>
-          {loading ? <div className="skeleton" /> : <p>${totalRevenue.toFixed(2)}</p>}
+          {loading ? <div className="skeleton" /> : <p>{formatCurrency(totalRevenue, 'INR')}</p>}
         </div>
       </div>
 

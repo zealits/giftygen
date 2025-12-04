@@ -58,7 +58,7 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose }) => {
             : (payment.amountMoney?.amount || payment.amount || "").toString(),
           currency: isRazorpay 
             ? (payment.currency || "INR")
-            : (payment.amountMoney?.currency || "USD"),
+            : (payment.amountMoney?.currency || "INR"),
           status: payment.status || "",
           receiptNumber: payment.receiptNumber || payment.receipt || "",
           receiptUrl: payment.receiptUrl || "",

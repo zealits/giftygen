@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { formatCurrency } from "../../utils/currency";
 import "./RazorpayPaymentForm.css";
 
 const loadRazorpayScript = () => {
@@ -211,7 +212,7 @@ const RazorpayPaymentForm = ({ amount, currency = "INR", onPaymentSuccess, onPay
         <div className="razorpay-amount-display">
           <span className="razorpay-amount-label">Amount:</span>
           <span className="razorpay-amount-value">
-            {currency} {amount}
+            {formatCurrency(amount, currency)}
           </span>
         </div>
 
@@ -227,7 +228,7 @@ const RazorpayPaymentForm = ({ amount, currency = "INR", onPaymentSuccess, onPay
           disabled={loading || !razorpayKeyId}
           className="razorpay-pay-button"
         >
-          {loading ? "Processing..." : `Pay ${currency} ${amount}`}
+          {loading ? "Processing..." : `Pay ${formatCurrency(amount, currency)}`}
         </button>
 
         <p className="razorpay-security-note">

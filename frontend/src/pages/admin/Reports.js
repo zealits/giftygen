@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { formatCurrency } from "../../utils/currency";
 import "./Reports.css";
 
 const Reports = () => {
@@ -8,11 +9,14 @@ const Reports = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [groupBy, setGroupBy] = useState("day");
-  const [loadingCSV, setLoadingCSV] = useState(false);
   const [loadingPDF, setLoadingPDF] = useState(false);
+  const [loadingExcel, setLoadingExcel] = useState(false);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [error, setError] = useState("");
   const [previewData, setPreviewData] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 25;
 
   const { user } = useSelector((state) => state.auth);
   const businessSlug = user?.user?.businessSlug || "";
@@ -56,6 +60,18 @@ const Reports = () => {
     },
   ];
 
+  const handleReportSelect = (reportId) => {
+    setSelectedReport(reportId);
+    // Reset form fields and state when switching reports
+    setStartDate("");
+    setEndDate("");
+    setGroupBy("day");
+    setError("");
+    setPreviewData(null);
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
+
   const handleGenerateReport = async (format) => {
     if (!selectedReport) {
       setError("Please select a report type");
@@ -75,10 +91,10 @@ const Reports = () => {
     }
 
     // Set loading state for the specific action
-    if (format === "csv") {
-      setLoadingCSV(true);
-    } else if (format === "pdf") {
+    if (format === "pdf") {
       setLoadingPDF(true);
+    } else if (format === "xlsx") {
+      setLoadingExcel(true);
     } else {
       setLoadingPreview(true);
     }
@@ -100,19 +116,23 @@ const Reports = () => {
       }
 
       const response = await axios.get(`/api/v1/admin/reports/${selectedReport}?${params.toString()}`, {
-        responseType: format === "csv" || format === "pdf" ? "blob" : "json",
+        responseType: format === "pdf" || format === "xlsx" ? "blob" : "json",
       });
 
-      if (format === "csv" || format === "pdf") {
+      if (format === "pdf" || format === "xlsx") {
         // Download file
         const blob = new Blob([response.data], {
-          type: format === "csv" ? "text/csv" : "application/pdf",
+          type:
+            format === "pdf"
+              ? "application/pdf"
+              : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
         const timestamp = new Date().toISOString().split("T")[0];
-        link.download = `${selectedReport}-report-${timestamp}.${format === "csv" ? "csv" : "pdf"}`;
+        const extension = format === "pdf" ? "pdf" : "xlsx";
+        link.download = `${selectedReport}-report-${timestamp}.${extension}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -126,10 +146,10 @@ const Reports = () => {
       setError(err.response?.data?.message || "Failed to generate report. Please try again.");
     } finally {
       // Reset loading state for the specific action
-      if (format === "csv") {
-        setLoadingCSV(false);
-      } else if (format === "pdf") {
+      if (format === "pdf") {
         setLoadingPDF(false);
+      } else if (format === "xlsx") {
+        setLoadingExcel(false);
       } else {
         setLoadingPreview(false);
       }
@@ -146,7 +166,7 @@ const Reports = () => {
           <ul>
             <li>Daily, weekly, and monthly sales reports.</li>
             <li>Performance metrics for each gift card type.</li>
-            <li>Downloadable CSV or PDF reports.</li>
+            <li>Downloadable Excel or PDF reports.</li>
           </ul>
         </div>
 
@@ -157,7 +177,7 @@ const Reports = () => {
               <div
                 key={report.id}
                 className={`report-type-card ${selectedReport === report.id ? "selected" : ""}`}
-                onClick={() => setSelectedReport(report.id)}
+                onClick={() => handleReportSelect(report.id)}
               >
                 <div className="report-icon">{report.icon}</div>
                 <h3>{report.name}</h3>
@@ -211,11 +231,11 @@ const Reports = () => {
 
             <div className="action-buttons">
               <button
-                onClick={() => handleGenerateReport("csv")}
-                disabled={loadingCSV}
+                onClick={() => handleGenerateReport("xlsx")}
+                disabled={loadingExcel}
                 className="download-btn csv-btn"
               >
-                {loadingCSV ? "Generating..." : "📥 Download CSV"}
+                {loadingExcel ? "Generating..." : "📊 Download Excel"}
               </button>
               <button
                 onClick={() => handleGenerateReport("pdf")}
@@ -245,12 +265,12 @@ const Reports = () => {
                 <div className="preview-stats">
                   {previewData.totalRevenue && (
                     <div className="stat-item">
-                      <strong>Total Revenue:</strong> ${previewData.totalRevenue}
+                      <strong>Total Revenue:</strong> {formatCurrency(parseFloat(previewData.totalRevenue), 'INR')}
                     </div>
                   )}
                   {previewData.totalRedeemed && (
                     <div className="stat-item">
-                      <strong>Total Redeemed:</strong> ${previewData.totalRedeemed}
+                      <strong>Total Redeemed:</strong> {formatCurrency(parseFloat(previewData.totalRedeemed), 'INR')}
                     </div>
                   )}
                   {previewData.totalRecords && (
@@ -265,32 +285,101 @@ const Reports = () => {
                   )}
                   {previewData.netProfit && (
                     <div className="stat-item">
-                      <strong>Net Profit:</strong> ${previewData.netProfit}
+                      <strong>Net Profit:</strong> {formatCurrency(parseFloat(previewData.netProfit), 'INR')}
                     </div>
                   )}
                 </div>
+                <div className="preview-table-controls">
+                  <div className="preview-search">
+                    <input
+                      type="text"
+                      placeholder="Search in results..."
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                    />
+                  </div>
+                </div>
+
                 <div className="preview-table-container">
-                  <table className="preview-table">
-                    <thead>
-                      <tr>
-                        {Object.keys(previewData.data[0]).map((key) => (
-                          <th key={key}>{key}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {previewData.data.slice(0, 50).map((row, index) => (
-                        <tr key={index}>
-                          {Object.values(row).map((value, cellIndex) => (
-                            <td key={cellIndex}>{String(value)}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {previewData.data.length > 50 && (
-                    <p className="preview-note">Showing first 50 of {previewData.data.length} records</p>
-                  )}
+                  {(() => {
+                    const allRows = previewData.data || [];
+                    const filteredRows = searchTerm
+                      ? allRows.filter((row) =>
+                          Object.values(row).some((value) =>
+                            String(value || "")
+                              .toLowerCase()
+                              .includes(searchTerm.toLowerCase())
+                          )
+                        )
+                      : allRows;
+
+                    const totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
+                    const safeCurrentPage = Math.min(currentPage, totalPages);
+                    const startIndex = (safeCurrentPage - 1) * rowsPerPage;
+                    const pageRows = filteredRows.slice(startIndex, startIndex + rowsPerPage);
+
+                    const headers =
+                      (filteredRows[0] && Object.keys(filteredRows[0])) ||
+                      (allRows[0] && Object.keys(allRows[0])) ||
+                      [];
+
+                    return (
+                      <>
+                        <table className="preview-table">
+                          <thead>
+                            <tr>
+                              {headers.map((key) => (
+                                <th key={key}>{key}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {pageRows.map((row, index) => {
+                              // Create a unique key from row data
+                              const rowKey = row.Date
+                                ? `${row.Date}-${row["Buyer Email"] || row["Customer Email"] || ""}-${index}`
+                                : `${index}-${JSON.stringify(row).substring(0, 50)}`;
+                              return (
+                                <tr key={rowKey}>
+                                  {Object.values(row).map((value, cellIndex) => (
+                                    <td key={cellIndex}>{String(value || "")}</td>
+                                  ))}
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+
+                        <div className="preview-pagination">
+                          <button
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={safeCurrentPage === 1}
+                          >
+                            Previous
+                          </button>
+                          <span>
+                            Page {safeCurrentPage} of {totalPages}
+                          </span>
+                          <button
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={safeCurrentPage === totalPages}
+                          >
+                            Next
+                          </button>
+                        </div>
+
+                        <p className="preview-note">
+                          Showing {pageRows.length} of {filteredRows.length} matching records
+                          {searchTerm && filteredRows.length !== allRows.length
+                            ? ` (filtered from ${allRows.length} total)`
+                            : ""}
+                        </p>
+                      </>
+                    );
+                  })()}
                 </div>
               </>
             ) : (
