@@ -2,12 +2,27 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./PrivacyPolicy.css";
 import { ArrowLeft } from "lucide-react";
+import SEO from "../../components/SEO";
+import { getBreadcrumbSchema } from "../../utils/structuredData";
 
 function PrivacyPolicy() {
   const navigate = useNavigate();
+  
+  const breadcrumbs = [
+    { name: 'Home', url: 'https://giftygen.com' },
+    { name: 'Privacy Policy', url: 'https://giftygen.com/privacy-policy' }
+  ];
+  const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
   return (
     <div className="privacy-policy">
+      <SEO
+        title="Privacy Policy - GiftyGen"
+        description="Read GiftyGen's privacy policy to understand how we collect, use, and protect your personal information when using our digital gift card platform."
+        keywords="privacy policy, data protection, user privacy, GiftyGen privacy"
+        url="https://giftygen.com/privacy-policy"
+        structuredData={breadcrumbSchema}
+      />
       <div className="privacy-policy__container">
         <button className="privacy-policy__back-btn" onClick={() => navigate(-1)}>
           <ArrowLeft size={20} />

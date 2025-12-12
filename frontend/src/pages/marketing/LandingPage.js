@@ -7,6 +7,8 @@ import "../../i18n";
 import LanguageDropdown from "../../components/LanguageDropdown";
 import { detectAndSetLanguage, getDetailedLocation } from "../../utils/geolocationLanguage";
 import { formatCurrency } from "../../utils/currency";
+import SEO from "../../components/SEO";
+import { getOrganizationSchema, getWebsiteSchema } from "../../utils/structuredData";
 import {
   Zap,
   Smartphone,
@@ -236,8 +238,21 @@ function LandingPage() {
     );
   }
 
+  // SEO structured data
+  const structuredData = [
+    getOrganizationSchema(),
+    getWebsiteSchema()
+  ];
+
   return (
     <div className="lp-root" data-theme={theme}>
+      <SEO
+        title="GiftyGen - Digital Gift Cards for Restaurants & Businesses"
+        description="Create, manage, and sell digital gift cards for your restaurant or business. Increase revenue, build customer loyalty, and offer flexible gift card solutions with GiftyGen."
+        keywords="digital gift cards, restaurant gift cards, business gift cards, gift card platform, gift card management, e-gift cards, digital vouchers"
+        url="https://giftygen.com"
+        structuredData={structuredData}
+      />
       {/* Navbar */}
       <header className="lp-nav">
         <div className="lp-nav__brand" onClick={() => navigate("/")}>

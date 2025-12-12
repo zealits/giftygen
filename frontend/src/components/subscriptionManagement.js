@@ -9,6 +9,8 @@ const SubscriptionManagement = () => {
   const [loading, setLoading] = useState(true);
   const [razorpayKey, setRazorpayKey] = useState("");
   const [processingPaymentPlan, setProcessingPaymentPlan] = useState(null);
+  const [invoices, setInvoices] = useState([]);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(null);
   const { user } = useSelector((state) => state.auth);
   const businessSlug = user?.user?.businessSlug || "";
   const hasFetched = useRef(false);
@@ -32,6 +34,16 @@ const SubscriptionManagement = () => {
         `/api/v1/payment/razorpay/key?businessSlug=${businessSlug}`
       );
       setRazorpayKey(keyResponse.data.keyId);
+
+      // Fetch invoices
+      try {
+        const invoicesResponse = await axios.get(`/api/v1/invoices/business/${businessSlug}`);
+        if (invoicesResponse.data.success) {
+          setInvoices(invoicesResponse.data.invoices || []);
+        }
+      } catch (error) {
+        console.error("Error fetching invoices:", error);
+      }
     } catch (error) {
       console.error("Error fetching subscription data:", error);
       // Previously showed an alert to the user; now just logs the error
@@ -190,11 +202,60 @@ const SubscriptionManagement = () => {
   };
 
   const getDaysRemaining = (endDate) => {
+    if (!endDate) return 0;
+    
+    // Set both dates to midnight to avoid time-of-day issues
     const end = new Date(endDate);
+    end.setHours(0, 0, 0, 0);
+    
     const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    // Calculate difference in milliseconds
     const diffTime = end - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
+    
+    // Convert to days and round down (don't count partial days)
+    // This gives us the number of full days remaining until the end date
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    // If end date is today or in the past, return 0
+    // Otherwise return the number of days (this includes the end date as a remaining day)
+    return diffDays >= 0 ? diffDays : 0;
+  };
+
+  const handleDownloadInvoice = async (invoiceId, invoiceNumber) => {
+    try {
+      setDownloadingInvoice(invoiceId);
+      const response = await axios.get(`/api/v1/invoices/${invoiceId}/download`, {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `invoice-${invoiceNumber || invoiceId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error downloading invoice:", err);
+      alert("Failed to download invoice. Please try again.");
+    } finally {
+      setDownloadingInvoice(null);
+    }
+  };
+
+  // Get invoice for current subscription
+  const getCurrentSubscriptionInvoice = () => {
+    if (!currentSubscription || !invoices.length) return null;
+    // Find invoice that matches the current subscription
+    return invoices.find(inv => 
+      inv.subscriptionId && 
+      (inv.subscriptionId._id === currentSubscription._id || 
+       inv.subscriptionId.toString() === currentSubscription._id.toString())
+    ) || invoices[0]; // Fallback to most recent invoice
   };
 
   if (loading) {
@@ -251,14 +312,30 @@ const SubscriptionManagement = () => {
             </div>
           </div>
 
-          {currentSubscription.status !== "cancelled" && (
-            <button
-              onClick={handleCancelSubscription}
-              className="cancel-subscription-btn"
-            >
-              Cancel Subscription
-            </button>
-          )}
+          <div className="subscription-actions">
+            {getCurrentSubscriptionInvoice() && (
+              <button
+                onClick={() => handleDownloadInvoice(
+                  getCurrentSubscriptionInvoice()._id,
+                  getCurrentSubscriptionInvoice().invoiceNumber
+                )}
+                disabled={downloadingInvoice === getCurrentSubscriptionInvoice()._id}
+                className="download-invoice-btn"
+              >
+                {downloadingInvoice === getCurrentSubscriptionInvoice()._id 
+                  ? "Downloading..." 
+                  : "📥 Download Invoice"}
+              </button>
+            )}
+            {currentSubscription.status !== "cancelled" && (
+              <button
+                onClick={handleCancelSubscription}
+                className="cancel-subscription-btn"
+              >
+                Cancel Subscription
+              </button>
+            )}
+          </div>
         </div>
       )}
 

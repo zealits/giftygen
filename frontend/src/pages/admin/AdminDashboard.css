@@ -234,21 +234,21 @@ body::after {
 
 /* Graphs Section */
 .graphs-section {
-  background: #1e293b;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   border-radius: 16px;
   padding: 32px;
   margin: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(168, 85, 247, 0.1);
 }
 
 .graphs-section h3 {
   font-size: 1.5rem;
-  color: #fff;
+  color: rgb(168, 85, 247);
   margin-bottom: 24px;
   text-align: center;
-  background: linear-gradient(120deg, #60a5fa, #a855f7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 /* Loading Skeletons */
@@ -296,10 +296,17 @@ body::after {
 
 canvas {
   border-radius: 12px;
-  background: #1e293b;
+  background: transparent;
   transition: transform 0.3s ease;
   max-width: 100%;
   height: auto !important;
+}
+
+.chart-wrapper {
+  position: relative;
+  padding: 20px;
+  background: transparent;
+  border-radius: 12px;
 }
 
 /* Responsive Design */

@@ -1,3 +1,19 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /dashboard
+Disallow: /giftcards
+Disallow: /orders
+Disallow: /customers
+Disallow: /reports
+Disallow: /settings
+Disallow: /redeem
+Disallow: /subscription
+Disallow: /invoices
+Disallow: /superadmin
+Disallow: /superlogin
+Disallow: /login
+Disallow: /register
+
+# Sitemap
+Sitemap: https://giftygen.com/sitemap.xml

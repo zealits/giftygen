@@ -15,7 +15,9 @@ const subscriptionSchema = new mongoose.Schema(
   {
     businessSlug: { type: String, required: true, index: true },
     planType: { type: String, required: true },
-    amount: { type: Number, required: true },
+    amount: { type: Number, required: true }, // Base amount before tax
+    taxAmount: { type: Number, default: 0 }, // Tax amount
+    totalAmount: { type: Number }, // Total amount including tax (calculated if not provided)
     currency: { type: String, default: "INR" },
     status: {
       type: String,

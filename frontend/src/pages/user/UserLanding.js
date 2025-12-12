@@ -7,6 +7,9 @@ import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import { useDispatch, useSelector } from "react-redux";
 import GiftCardLoader from "./GiftCardLoader";
 import { formatCurrency } from "../../utils/currency";
+import SEO from "../../components/SEO";
+import { getBreadcrumbSchema } from "../../utils/structuredData";
+import { useTranslation } from "react-i18next";
 const GiftCardForm = lazy(() => import("./GiftCardForm"));
 
 // Skeleton component for gift cards
@@ -51,6 +54,7 @@ const UserLanding = () => {
 
   const { giftCards, loading, error } = useSelector((state) => state.giftCardList);
   const { business, loading: businessLoading } = useSelector((state) => state.business);
+  const { t, i18n } = useTranslation();
 
   // Fetch business information when businessSlug changes
   useEffect(() => {
@@ -172,8 +176,34 @@ const UserLanding = () => {
     return <GiftCardLoader />;
   }
 
+  // SEO data
+  const pageTitle = businessSlug && business 
+    ? `${business.name} - Gift Cards | GiftyGen`
+    : 'Explore Gift Cards - GiftyGen';
+  const pageDescription = businessSlug && business
+    ? `Browse and purchase digital gift cards from ${business.name}. Perfect gifts for any occasion.`
+    : 'Browse and purchase digital gift cards from restaurants and businesses. Find the perfect gift for any occasion with GiftyGen.';
+  const pageUrl = businessSlug 
+    ? `https://giftygen.com/${businessSlug}/giftcards`
+    : 'https://giftygen.com/explore';
+  
+  const breadcrumbs = [
+    { name: 'Home', url: 'https://giftygen.com' },
+    { name: businessSlug && business ? business.name : 'Explore Gift Cards', url: pageUrl }
+  ];
+  const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
+
   return (
     <div className="body">
+      <SEO
+        title={pageTitle}
+        description={pageDescription}
+        keywords={businessSlug && business 
+          ? `${business.name}, gift cards, ${business.name} gift cards, digital gift cards`
+          : 'gift cards, digital gift cards, restaurant gift cards, buy gift cards online'}
+        url={pageUrl}
+        structuredData={breadcrumbSchema}
+      />
       <div className="header">
         {businessSlug && business ? (
           <div className="business-header">

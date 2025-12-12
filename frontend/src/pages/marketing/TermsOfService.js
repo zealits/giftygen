@@ -2,12 +2,27 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./TermsOfService.css";
 import { ArrowLeft } from "lucide-react";
+import SEO from "../../components/SEO";
+import { getBreadcrumbSchema } from "../../utils/structuredData";
 
 function TermsOfService() {
   const navigate = useNavigate();
+  
+  const breadcrumbs = [
+    { name: 'Home', url: 'https://giftygen.com' },
+    { name: 'Terms of Service', url: 'https://giftygen.com/terms-of-service' }
+  ];
+  const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
   return (
     <div className="terms-of-service">
+      <SEO
+        title="Terms of Service - GiftyGen"
+        description="Read GiftyGen's terms and conditions to understand the rules and guidelines for using our digital gift card platform and services."
+        keywords="terms of service, terms and conditions, user agreement, GiftyGen terms"
+        url="https://giftygen.com/terms-of-service"
+        structuredData={breadcrumbSchema}
+      />
       <div className="terms-of-service__container">
         <button className="terms-of-service__back-btn" onClick={() => navigate(-1)}>
           <ArrowLeft size={20} />

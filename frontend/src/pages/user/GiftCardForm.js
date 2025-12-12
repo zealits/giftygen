@@ -305,13 +305,8 @@ const validatePhone = (phone) => {
         break;
 
       case 3:
-        const cardNumber = document.getElementById("card-number")?.value;
-        const expiryDate = document.getElementById("expiry-date")?.value;
-        const cvv = document.getElementById("cvv")?.value;
-        if (!cardNumber || !expiryDate || !cvv) {
-          isValid = false;
-          alert("Please fill in all payment details");
-        }
+        // Payment validation is handled by payment gateway components
+        // No inline card details validation needed
         break;
 
       default:

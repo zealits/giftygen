@@ -3,6 +3,8 @@ const Razorpay = require("razorpay");
 const Subscription = require("../models/subscriptionSchema");
 const RestaurantAdmin = require("../models/restaurantAdminSchema");
 const razorpay = require("../config/razorpay");
+const { createInvoice, sendInvoiceEmail } = require("../controllers/invoiceController");
+const { getTaxBreakdown } = require("../utils/taxCalculator");
 
 const PLAN_DEFINITIONS = {
   monthly: { amount: 1499, currency: "INR", duration: 1, durationType: "months" },
@@ -50,7 +52,20 @@ const getRazorpayKeySecret = async (businessSlug) => {
 };
 
 exports.getPlans = (req, res) => {
-  res.status(200).json({ plans: PLAN_DEFINITIONS });
+  // Calculate amounts with tax for display
+  const plansWithTax = {};
+  Object.keys(PLAN_DEFINITIONS).forEach((planType) => {
+    const plan = PLAN_DEFINITIONS[planType];
+    const taxBreakdown = getTaxBreakdown(plan.amount);
+    plansWithTax[planType] = {
+      ...plan,
+      baseAmount: plan.amount,
+      taxAmount: taxBreakdown.taxAmount,
+      totalAmount: taxBreakdown.totalAmount,
+      taxRate: taxBreakdown.taxRate,
+    };
+  });
+  res.status(200).json({ plans: plansWithTax });
 };
 
 exports.getCurrentSubscription = async (req, res) => {
@@ -92,22 +107,31 @@ exports.createSubscriptionOrder = async (req, res) => {
       return res.status(400).json({ message: "Invalid plan type" });
     }
 
+    // Calculate tax breakdown
+    const taxBreakdown = getTaxBreakdown(plan.amount);
+
     const razorpayInstance = await getRazorpayInstance(businessSlug);
 
+    // Create Razorpay order with total amount (including tax)
     const order = await razorpayInstance.orders.create({
-      amount: plan.amount * 100,
+      amount: Math.round(taxBreakdown.totalAmount * 100), // Convert to paise
       currency: plan.currency || "INR",
       receipt: `sub_${businessSlug}_${Date.now()}`,
       notes: {
         planType,
         businessSlug,
+        baseAmount: plan.amount.toString(),
+        taxAmount: taxBreakdown.taxAmount.toString(),
+        totalAmount: taxBreakdown.totalAmount.toString(),
       },
     });
 
     const subscription = await Subscription.create({
       businessSlug,
       planType,
-      amount: plan.amount,
+      amount: plan.amount, // Base amount
+      taxAmount: taxBreakdown.taxAmount,
+      totalAmount: taxBreakdown.totalAmount, // Total with tax
       currency: plan.currency || "INR",
       status: "pending",
       isActive: false,
@@ -182,10 +206,14 @@ exports.verifySubscriptionPayment = async (req, res) => {
     subscription.startDate = startDate;
     subscription.endDate = endDate;
     subscription.razorpayPaymentId = paymentId;
+    
+    // Use the stored totalAmount from subscription (which includes tax)
+    const paymentAmount = subscription.totalAmount || subscription.amount;
+    
     subscription.paymentHistory.push({
       paymentId,
       orderId: effectiveOrderId,
-      amount: plan.amount,
+      amount: paymentAmount, // Total amount including tax
       status: "success",
       date: new Date(),
     });
@@ -201,6 +229,26 @@ exports.verifySubscriptionPayment = async (req, res) => {
       },
       { status: "expired", isActive: false }
     );
+
+    // Generate and send invoice after successful subscription
+    try {
+      const businessInfo = await RestaurantAdmin.findOne({
+        businessSlug: subscription.businessSlug,
+      });
+
+      if (businessInfo) {
+        const invoice = await createInvoice(subscription, businessInfo);
+        // Send invoice via email (non-blocking - don't fail subscription if email fails)
+        sendInvoiceEmail(invoice, businessInfo).catch((emailError) => {
+          console.error("Error sending invoice email:", emailError);
+          // Don't throw - invoice is created, just email failed
+        });
+      }
+    } catch (invoiceError) {
+      console.error("Error creating invoice:", invoiceError);
+      // Don't fail the subscription verification if invoice creation fails
+      // The subscription is already active, invoice can be generated later if needed
+    }
 
     res.status(200).json({ success: true, subscription });
   } catch (error) {

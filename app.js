@@ -12,6 +12,7 @@ const restaurantAdminRoutes = require("./routes/restaurantAdminRoutes");
 const giftCardRoutes = require("./routes/giftCardRoutes");
 const superAdminRoutes = require("./routes/superAdminRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const invoiceRoutes = require("./routes/invoiceRoutes");
 
 // Make sure to add your dashboard routes here
 
@@ -28,6 +29,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/api/v1/admin", restaurantAdminRoutes); // Your restaurant admin API routes
 app.use("/api/v1/admin", giftCardRoutes); // Your gift card API routes
 app.use("/api/v1/admin/reports", reportRoutes); // Report routes
+app.use("/api/v1/invoices", invoiceRoutes); // Invoice routes
 app.use("/api/superadmin", superAdminRoutes); // Super admin routes
 app.use("/api/payments", paymentRoutes);
 app.use("/api/v1/payment", paymentRoutes); // Alias for new subscription module
@@ -243,6 +245,82 @@ app.post("/generate-wallet-pass", async (req, res) => {
 
   console.log(saveUrl);
   res.json({ saveUrl });
+});
+
+// Dynamic Sitemap Generation
+const GiftCard = require('./models/giftCardSchema');
+const RestaurantAdmin = require('./models/restaurantAdminSchema');
+
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    // 1. Get real data from Database
+    const giftCards = await GiftCard.find({ status: 'active' }).select('_id updatedAt businessSlug');
+    const businesses = await RestaurantAdmin.find({ 
+      isVerified: true,
+      businessSlug: { $exists: true, $ne: null }
+    }).select('businessSlug updatedAt');
+
+    // 2. Start the XML
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+    // 3. Add Static Pages
+    const staticUrls = [
+      { url: 'https://giftygen.com/', changefreq: 'daily', priority: '1.0' },
+      { url: 'https://giftygen.com/explore', changefreq: 'daily', priority: '0.9' },
+      { url: 'https://giftygen.com/register', changefreq: 'monthly', priority: '0.7' },
+      { url: 'https://giftygen.com/privacy-policy', changefreq: 'yearly', priority: '0.3' },
+      { url: 'https://giftygen.com/terms-of-service', changefreq: 'yearly', priority: '0.3' }
+    ];
+
+    staticUrls.forEach(item => {
+      xml += `
+    <url>
+        <loc>${item.url}</loc>
+        <changefreq>${item.changefreq}</changefreq>
+        <priority>${item.priority}</priority>
+    </url>`;
+    });
+
+    // 4. Add Dynamic Business Pages
+    businesses.forEach(business => {
+      if (business.businessSlug) {
+        const lastmod = business.updatedAt ? new Date(business.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        xml += `
+    <url>
+        <loc>https://giftygen.com/${business.businessSlug}/giftcards</loc>
+        <lastmod>${lastmod}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>`;
+      }
+    });
+
+    // 5. Add Dynamic Gift Cards
+    giftCards.forEach(card => {
+      const lastmod = card.updatedAt ? new Date(card.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      const url = card.businessSlug 
+        ? `https://giftygen.com/${card.businessSlug}/gift-card/${card._id}`
+        : `https://giftygen.com/gift-card/${card._id}`;
+      
+      xml += `
+    <url>
+        <loc>${url}</loc>
+        <lastmod>${lastmod}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>`;
+    });
+
+    xml += '\n</urlset>';
+
+    // 6. Send it
+    res.header('Content-Type', 'text/xml');
+    res.send(xml);
+  } catch (error) {
+    console.error("Sitemap Error:", error);
+    res.status(500).send("Error generating sitemap");
+  }
 });
 
 // Serve React app (if you're serving a frontend from the backend)

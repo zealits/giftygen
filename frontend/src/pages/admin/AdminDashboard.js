@@ -220,21 +220,25 @@ const AdminDashboard = () => {
       {
         label: "Gift Cards Sold",
         data: salesData.sales,
-        borderColor: "rgb(255, 99, 132)", // Different color for sales
+        borderColor: "rgb(236, 72, 153)", // Pink color matching the image
         fill: true,
-        tension: 0.3,
-        pointRadius: 6,
-        pointBackgroundColor: "rgb(255, 99, 132)",
+        tension: 0.4,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: "rgb(236, 72, 153)",
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
         borderWidth: 3,
         hoverBorderWidth: 4,
-        hoverBackgroundColor: "rgba(255, 99, 132, 0.6)",
+        hoverBackgroundColor: "rgb(236, 72, 153)",
         backgroundColor: (context) => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
           if (!chartArea) return;
           const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-          gradient.addColorStop(0, "rgba(255, 99, 132, 0.2)");
-          gradient.addColorStop(1, "rgba(255, 99, 132, 0.05)");
+          gradient.addColorStop(0, "rgba(236, 72, 153, 0.4)"); // Stronger pink at bottom
+          gradient.addColorStop(0.5, "rgba(168, 85, 247, 0.3)"); // Purple in middle
+          gradient.addColorStop(1, "rgba(236, 72, 153, 0.05)"); // Fade to transparent at top
           return gradient;
         },
       },
@@ -247,21 +251,25 @@ const AdminDashboard = () => {
       {
         label: "Revenue Generated",
         data: revenueData.revenue,
-        borderColor: "rgb(54, 162, 235)", // Different color for revenue
+        borderColor: "rgb(59, 130, 246)", // Blue color for revenue
         fill: true,
-        tension: 0.3,
-        pointRadius: 6,
-        pointBackgroundColor: "rgb(54, 162, 235)",
+        tension: 0.4,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: "rgb(59, 130, 246)",
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
         borderWidth: 3,
         hoverBorderWidth: 4,
-        hoverBackgroundColor: "rgba(54, 162, 235, 0.6)",
+        hoverBackgroundColor: "rgb(59, 130, 246)",
         backgroundColor: (context) => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
           if (!chartArea) return;
           const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-          gradient.addColorStop(0, "rgba(54, 162, 235, 0.2)");
-          gradient.addColorStop(1, "rgba(54, 162, 235, 0.05)");
+          gradient.addColorStop(0, "rgba(59, 130, 246, 0.4)");
+          gradient.addColorStop(0.5, "rgba(14, 165, 233, 0.3)");
+          gradient.addColorStop(1, "rgba(59, 130, 246, 0.05)");
           return gradient;
         },
       },
@@ -270,45 +278,78 @@ const AdminDashboard = () => {
 
   const chartOptions = {
     responsive: true,
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: "Date",
-          color: "rgba(168, 163, 163, 0.6)",
-        },
-        grid: {
-          display: true,
-          color: "rgba(0, 0, 0, 0.1)",
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: "top",
+        labels: {
+          color: "rgb(168, 85, 247)", // Purple text matching the image
+          font: {
+            size: 14,
+            weight: "500",
+          },
+          padding: 15,
+          usePointStyle: true,
+          pointStyle: "rect",
         },
       },
-      y: {
-        title: {
-          display: true,
-          text: "Sales",
-          color: "rgba(223, 216, 216, 0.6)",
+      tooltip: {
+        backgroundColor: "rgba(30, 41, 59, 0.95)",
+        titleColor: "rgb(168, 85, 247)",
+        bodyColor: "#fff",
+        borderColor: "rgba(168, 85, 247, 0.3)",
+        borderWidth: 1,
+        padding: 12,
+        displayColors: true,
+        boxPadding: 6,
+        cornerRadius: 8,
+        titleFont: {
+          size: 14,
+          weight: "600",
         },
-        beginAtZero: true,
-        grid: {
-          color: "rgba(208, 207, 207, 0.1)",
+        bodyFont: {
+          size: 13,
         },
       },
     },
-    plugins: {
-      tooltip: {
-        backgroundColor: "rgba(142, 139, 139, 0.8)",
-        titleColor: "#fff",
-        bodyColor: "#fff",
-        borderColor: "rgb(8, 77, 81)",
-        borderWidth: 2,
-        padding: 10,
-        displayColors: false,
+    scales: {
+      x: {
+        ticks: {
+          color: "rgba(148, 163, 184, 0.8)",
+          font: {
+            size: 11,
+          },
+        },
+        grid: {
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
+        },
+        title: {
+          display: false,
+        },
       },
-      legend: {
-        position: "top",
-        labels: {
-          fontColor: "rgba(0, 0, 0, 0.7)",
-          fontSize: 14,
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: "rgba(148, 163, 184, 0.8)",
+          font: {
+            size: 11,
+          },
+          stepSize: 1,
+        },
+        grid: {
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
+        },
+        title: {
+          display: true,
+          text: "Sales",
+          color: "rgba(148, 163, 184, 0.9)",
+          font: {
+            size: 12,
+            weight: "500",
+          },
         },
       },
     },
@@ -319,18 +360,47 @@ const AdminDashboard = () => {
     elements: {
       line: {
         borderWidth: 3,
-        borderColor: "rgb(0, 0, 0)",
-        tension: 0.3,
+        tension: 0.4,
       },
       point: {
-        radius: 6,
+        radius: 5,
+        hoverRadius: 7,
         hitRadius: 10,
-        backgroundColor: "rgb(0, 0, 0)",
+        borderWidth: 2,
       },
     },
     animation: {
-      duration: 1500,
-      easing: "easeInOutCubic",
+      duration: 1200,
+      easing: "easeInOutQuart",
+    },
+  };
+
+  const revenueChartOptions = {
+    ...chartOptions,
+    plugins: {
+      ...chartOptions.plugins,
+      legend: {
+        ...chartOptions.plugins.legend,
+        labels: {
+          ...chartOptions.plugins.legend.labels,
+          color: "rgb(59, 130, 246)", // Blue for revenue
+        },
+      },
+      tooltip: {
+        ...chartOptions.plugins.tooltip,
+        titleColor: "rgb(59, 130, 246)",
+        borderColor: "rgba(59, 130, 246, 0.3)",
+      },
+    },
+    scales: {
+      ...chartOptions.scales,
+      y: {
+        ...chartOptions.scales.y,
+        title: {
+          ...chartOptions.scales.y.title,
+          text: "Revenue",
+        },
+      },
     },
   };
 
@@ -389,15 +459,19 @@ const AdminDashboard = () => {
       {view === "sales" && (
         <div className="graphs-section">
           <h3>Gift Card Sales (Last 30 Days)</h3>
-          {loading ? <div className="skeleton-graph" /> : <Line data={chartData} options={chartOptions} />}
+          <div className="chart-wrapper">
+            {loading ? <div className="skeleton-graph" /> : <Line data={chartData} options={chartOptions} />}
+          </div>
         </div>
       )}
 
-      {/* Sales View */}
+      {/* Revenue View */}
       {view === "revenue" && (
         <div className="graphs-section">
           <h3>Gift Card Revenue (Last 30 Days)</h3>
-          {loading ? <div className="skeleton-graph" /> : <Line data={revenueChartData} options={chartOptions} />}
+          <div className="chart-wrapper">
+            {loading ? <div className="skeleton-graph" /> : <Line data={revenueChartData} options={revenueChartOptions} />}
+          </div>
         </div>
       )}
     </div>

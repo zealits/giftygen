@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getGiftCardDetails } from "../../services/Actions/giftCardActions";
 import GiftCardForm from "./GiftCardForm";
 import { formatCurrency } from "../../utils/currency";
-
+import SEO from "../../components/SEO";
+import { getGiftCardProductSchema, getBreadcrumbSchema } from "../../utils/structuredData";
 import "./GiftCardDetails.css";
 
 const GiftCardDetails = () => {
@@ -132,8 +133,45 @@ if (loading) return (
     setShowGiftCardForm(false);
   };
 
+  // SEO data
+  const pageUrl = businessSlug 
+    ? `https://giftygen.com/${businessSlug}/gift-card/${id}`
+    : `https://giftygen.com/gift-card/${id}`;
+  
+  const productSchema = giftCard ? getGiftCardProductSchema({
+    id: giftCard._id,
+    title: giftCard.giftCardName,
+    description: giftCard.description || `${giftCard.giftCardName} - Digital gift card`,
+    price: giftCard.amount,
+    currency: giftCard.currency || 'USD',
+    image: giftCard.giftCardImg,
+    businessName: giftCard.businessName || 'GiftyGen'
+  }) : null;
+
+  const breadcrumbs = [
+    { name: 'Home', url: 'https://giftygen.com' },
+    { name: 'Explore Gift Cards', url: businessSlug ? `https://giftygen.com/${businessSlug}/giftcards` : 'https://giftygen.com/explore' },
+    { name: giftCard?.giftCardName || 'Gift Card', url: pageUrl }
+  ];
+  const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
+  
+  const structuredData = productSchema && breadcrumbSchema 
+    ? [productSchema, breadcrumbSchema]
+    : productSchema || breadcrumbSchema;
+
   return (
     <div className={`gift-card-details-container ${isVisible ? 'visible' : ''}`} ref={containerRef}>
+      {giftCard && (
+        <SEO
+          title={`${giftCard.giftCardName} - ${giftCard.businessName || 'GiftyGen'}`}
+          description={giftCard.description || `${giftCard.giftCardName} digital gift card. Perfect gift for any occasion.`}
+          keywords={`${giftCard.giftCardName}, ${giftCard.businessName}, gift card, digital gift card, ${giftCard.amount} gift card`}
+          image={giftCard.giftCardImg}
+          url={pageUrl}
+          type="product"
+          structuredData={structuredData}
+        />
+      )}
       <div className="gift-card-details">
         <div className={`image-container slide-in-left ${isVisible ? 'active' : ''}`}>
           <div className={`image-wrapper ${isFlipped ? 'flipped' : ''}`} 

@@ -131,8 +131,38 @@
   text-shadow: none;
 }
 
+.subscription-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.download-invoice-btn {
+  background: radial-gradient(circle at top left, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  padding: 0.7rem 1.75rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.download-invoice-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  opacity: 0.95;
+}
+
+.download-invoice-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .cancel-subscription-btn {
-  margin-top: 0.75rem;
   background: radial-gradient(circle at top left, #f97316, #b91c1c);
   color: #fff7ed;
   border: none;

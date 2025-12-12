@@ -69,8 +69,104 @@ const downloadExcel = async (res, data, headers, filename, sheetName = "Report")
   res.send(Buffer.from(buffer));
 };
 
-// Build HTML string for a clean, professional-looking report
-const buildReportHtml = (title, data, headers) => {
+// Helper function to prepare chart data for Revenue Report
+const prepareRevenueChartData = (data) => {
+  const filteredData = data.filter(item => item.Period !== "TOTAL");
+  if (filteredData.length === 0) return null;
+
+  return {
+    labels: filteredData.map(item => item.Period),
+    values: filteredData.map(item => parseFloat(item["Total Revenue"] || 0)),
+  };
+};
+
+// Helper function to prepare chart data for Sales Report
+const prepareSalesChartData = (data) => {
+  const salesByDate = {};
+  data.forEach(item => {
+    const date = item.Date || "";
+    if (date) {
+      if (!salesByDate[date]) salesByDate[date] = 0;
+      salesByDate[date] += 1;
+    }
+  });
+  const dates = Object.keys(salesByDate).sort();
+  if (dates.length === 0) return null;
+
+  return {
+    labels: dates,
+    values: dates.map(date => salesByDate[date]),
+  };
+};
+
+// Helper function to prepare chart data for Customer Purchase Report
+const prepareCustomerChartData = (data) => {
+  const sortedCustomers = [...data]
+    .sort((a, b) => parseFloat(b["Total Spent"] || 0) - parseFloat(a["Total Spent"] || 0))
+    .slice(0, 10);
+  if (sortedCustomers.length === 0) return null;
+
+  return {
+    labels: sortedCustomers.map(item => {
+      const name = item["Customer Name"] || "Unknown";
+      return name.length > 20 ? name.substring(0, 20) + "..." : name;
+    }),
+    values: sortedCustomers.map(item => parseFloat(item["Total Spent"] || 0)),
+  };
+};
+
+// Helper function to prepare chart data for Gift Card Performance Report
+const prepareGiftCardPerformanceChartData = (data) => {
+  const sortedCards = [...data]
+    .sort((a, b) => parseFloat(b["Total Revenue"] || 0) - parseFloat(a["Total Revenue"] || 0))
+    .slice(0, 10);
+  if (sortedCards.length === 0) return null;
+
+  return {
+    labels: sortedCards.map(item => {
+      const name = item["Gift Card Name"] || "Unknown";
+      return name.length > 20 ? name.substring(0, 20) + "..." : name;
+    }),
+    revenue: sortedCards.map(item => parseFloat(item["Total Revenue"] || 0)),
+    sales: sortedCards.map(item => parseInt(item["Total Sales"] || 0)),
+  };
+};
+
+// Helper function to prepare chart data for Redemption Report
+const prepareRedemptionChartData = (data) => {
+  const redemptionByDate = {};
+  data.forEach(item => {
+    const date = item.Date || "";
+    if (date) {
+      if (!redemptionByDate[date]) redemptionByDate[date] = 0;
+      redemptionByDate[date] += parseFloat(item["Redeemed Amount"] || 0);
+    }
+  });
+  const dates = Object.keys(redemptionByDate).sort();
+  if (dates.length === 0) return null;
+
+  return {
+    labels: dates,
+    values: dates.map(date => redemptionByDate[date]),
+  };
+};
+
+// Helper function to prepare chart data for Financial Summary Report
+const prepareFinancialSummaryChartData = (data, totalRevenue, totalRedemption, netProfit) => {
+  if (!totalRevenue && !totalRedemption && !netProfit) return null;
+
+  return {
+    labels: ["Total Revenue", "Total Redemption", "Net Profit"],
+    values: [
+      parseFloat(totalRevenue || 0),
+      parseFloat(totalRedemption || 0),
+      parseFloat(netProfit || 0),
+    ],
+  };
+};
+
+// Build HTML string for a clean, professional-looking report with charts
+const buildReportHtml = (title, data, headers, reportType = null, chartData = null, financialMetrics = null) => {
   const currentDate = formatDate(new Date());
 
   const headerCells = headers
@@ -91,21 +187,37 @@ const buildReportHtml = (title, data, headers) => {
     })
     .join("");
 
+  // Generate chart HTML if chart data is provided
+  let chartHtml = "";
+  let chartId = null;
+  if ((chartData || financialMetrics) && reportType) {
+    chartId = `chart-${reportType}`;
+    chartHtml = `
+      <div style="margin: 8px 0; page-break-inside: avoid; page-break-after: avoid; height: 240px; overflow: hidden;">
+        <h3 style="font-size: 11px; margin-bottom: 4px; color: #333; font-weight: 600;">${getChartTitle(reportType)}</h3>
+        <div style="width: 100%; height: 220px; position: relative;">
+          <canvas id="${chartId}" width="900" height="220" style="max-width: 100%; max-height: 220px; width: 100% !important; height: 220px !important;"></canvas>
+        </div>
+      </div>
+    `;
+  }
+
   return `<!DOCTYPE html>
   <html>
     <head>
       <meta charset="utf-8" />
       <title>${escapeHtml(title)}</title>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
       <style>
         * {
           box-sizing: border-box;
         }
         body {
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-          font-size: 11px;
+          font-size: 10px;
           color: #222;
           margin: 0;
-          padding: 24px 24px 40px 24px;
+          padding: 10px 10px 10px 10px;
         }
         .report-header {
           display: flex;
@@ -163,6 +275,7 @@ const buildReportHtml = (title, data, headers) => {
           <div>Generated on: ${escapeHtml(currentDate)}</div>
         </div>
       </div>
+      ${chartHtml}
       <table>
         <thead>
           <tr>${headerCells}</tr>
@@ -171,12 +284,402 @@ const buildReportHtml = (title, data, headers) => {
           ${rowsHtml}
         </tbody>
       </table>
+      ${chartId && (chartData || financialMetrics) ? generateChartScript(chartId, reportType, chartData || financialMetrics) : ""}
     </body>
   </html>`;
 };
 
+// Helper function to get chart title based on report type
+const getChartTitle = (reportType) => {
+  const titles = {
+    revenue: "Revenue Trend",
+    sales: "Sales Over Time",
+    customers: "Top Customers by Spending",
+    "giftcard-performance": "Gift Card Performance",
+    redemption: "Redemption Trend",
+    "financial-summary": "Financial Overview",
+  };
+  return titles[reportType] || "Chart";
+};
+
+// Helper function to generate Chart.js script for rendering charts
+const generateChartScript = (chartId, reportType, chartData) => {
+  if (!chartData) return "";
+
+  let chartConfig = "";
+
+  switch (reportType) {
+    case "revenue":
+      chartConfig = `{
+        type: 'line',
+        data: {
+          labels: ${JSON.stringify(chartData.labels)},
+          datasets: [{
+            label: 'Total Revenue',
+            data: ${JSON.stringify(chartData.values)},
+            borderColor: 'rgb(168, 85, 247)',
+            backgroundColor: 'rgba(168, 85, 247, 0.2)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: { top: 5, bottom: 5, left: 5, right: 5 }
+          },
+          plugins: {
+            legend: { 
+              display: true, 
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 8,
+                font: { size: 10 }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0 },
+              grid: { display: false }
+            },
+            y: { 
+              beginAtZero: true,
+              ticks: { font: { size: 9 } },
+              grid: { color: 'rgba(0,0,0,0.1)' }
+            }
+          }
+        }
+      }`;
+      break;
+
+    case "sales":
+      chartConfig = `{
+        type: 'bar',
+        data: {
+          labels: ${JSON.stringify(chartData.labels)},
+          datasets: [{
+            label: 'Number of Sales',
+            data: ${JSON.stringify(chartData.values)},
+            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+            borderColor: 'rgb(59, 130, 246)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: { top: 5, bottom: 5, left: 5, right: 5 }
+          },
+          plugins: {
+            legend: { 
+              display: true, 
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 8,
+                font: { size: 10 }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0 },
+              grid: { display: false }
+            },
+            y: { 
+              beginAtZero: true,
+              ticks: { font: { size: 9 } },
+              grid: { color: 'rgba(0,0,0,0.1)' }
+            }
+          }
+        }
+      }`;
+      break;
+
+    case "customers":
+      chartConfig = `{
+        type: 'bar',
+        data: {
+          labels: ${JSON.stringify(chartData.labels)},
+          datasets: [{
+            label: 'Total Spent',
+            data: ${JSON.stringify(chartData.values)},
+            backgroundColor: 'rgba(16, 185, 129, 0.6)',
+            borderColor: 'rgb(16, 185, 129)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: { top: 5, bottom: 5, left: 5, right: 5 }
+          },
+          plugins: {
+            legend: { 
+              display: true, 
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 8,
+                font: { size: 10 }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0 },
+              grid: { display: false }
+            },
+            y: { 
+              beginAtZero: true,
+              ticks: { font: { size: 9 } },
+              grid: { color: 'rgba(0,0,0,0.1)' }
+            }
+          }
+        }
+      }`;
+      break;
+
+    case "giftcard-performance":
+      chartConfig = `{
+        type: 'bar',
+        data: {
+          labels: ${JSON.stringify(chartData.labels)},
+          datasets: [
+            {
+              label: 'Total Revenue',
+              data: ${JSON.stringify(chartData.revenue)},
+              backgroundColor: 'rgba(251, 191, 36, 0.6)',
+              borderColor: 'rgb(251, 191, 36)',
+              borderWidth: 1
+            },
+            {
+              label: 'Total Sales',
+              data: ${JSON.stringify(chartData.sales)},
+              backgroundColor: 'rgba(239, 68, 68, 0.6)',
+              borderColor: 'rgb(239, 68, 68)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: { top: 5, bottom: 5, left: 5, right: 5 }
+          },
+          plugins: {
+            legend: { 
+              display: true, 
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 8,
+                font: { size: 10 }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0 },
+              grid: { display: false }
+            },
+            y: { 
+              beginAtZero: true,
+              ticks: { font: { size: 9 } },
+              grid: { color: 'rgba(0,0,0,0.1)' }
+            }
+          }
+        }
+      }`;
+      break;
+
+    case "redemption":
+      chartConfig = `{
+        type: 'line',
+        data: {
+          labels: ${JSON.stringify(chartData.labels)},
+          datasets: [{
+            label: 'Redeemed Amount',
+            data: ${JSON.stringify(chartData.values)},
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: { top: 5, bottom: 5, left: 5, right: 5 }
+          },
+          plugins: {
+            legend: { 
+              display: true, 
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 8,
+                font: { size: 10 }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0 },
+              grid: { display: false }
+            },
+            y: { 
+              beginAtZero: true,
+              ticks: { font: { size: 9 } },
+              grid: { color: 'rgba(0,0,0,0.1)' }
+            }
+          }
+        }
+      }`;
+      break;
+
+    case "financial-summary":
+      chartConfig = `{
+        type: 'bar',
+        data: {
+          labels: ${JSON.stringify(chartData.labels)},
+          datasets: [{
+            label: 'Amount',
+            data: ${JSON.stringify(chartData.values)},
+            backgroundColor: [
+              'rgba(16, 185, 129, 0.6)',
+              'rgba(239, 68, 68, 0.6)',
+              'rgba(59, 130, 246, 0.6)'
+            ],
+            borderColor: [
+              'rgb(16, 185, 129)',
+              'rgb(239, 68, 68)',
+              'rgb(59, 130, 246)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: { top: 5, bottom: 5, left: 5, right: 5 }
+          },
+          plugins: {
+            legend: { 
+              display: true, 
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 8,
+                font: { size: 10 }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0 },
+              grid: { display: false }
+            },
+            y: { 
+              beginAtZero: true,
+              ticks: { font: { size: 9 } },
+              grid: { color: 'rgba(0,0,0,0.1)' }
+            }
+          }
+        }
+      }`;
+      break;
+
+    default:
+      return "";
+  }
+
+  return `
+    <script>
+      (function() {
+        function initChart() {
+          if (typeof Chart === 'undefined') {
+            setTimeout(initChart, 100);
+            return;
+          }
+          const ctx = document.getElementById('${chartId}');
+          if (ctx) {
+            try {
+              new Chart(ctx, ${chartConfig});
+            } catch (error) {
+              console.error('Chart initialization error:', error);
+            }
+          }
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initChart);
+        } else {
+          initChart();
+        }
+      })();
+    </script>
+  `;
+};
+
+// Helper function to generate PDF with financial chart data
+const generatePDFWithFinancialChart = async (title, data, headers, chartData, totalRevenue, totalRedemption, netProfit) => {
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--disable-software-rasterizer",
+      "--disable-extensions",
+    ],
+  });
+
+  try {
+    const page = await browser.newPage();
+    const html = buildReportHtml(title, data, headers, "financial-summary", null, chartData);
+    await page.setContent(html, { waitUntil: "domcontentloaded" });
+    
+    // Quick chart rendering wait for financial summary
+    if (chartData) {
+      try {
+        await page.waitForFunction(() => typeof Chart !== 'undefined', { timeout: 3000 }).catch(() => {});
+        await page.waitForSelector('#chart-financial-summary', { timeout: 2000 }).catch(() => {});
+        await page.waitForTimeout(500);
+      } catch (e) {
+        // Continue anyway
+      }
+    }
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      landscape: true,
+      printBackground: true,
+      margin: {
+        top: "15px",
+        right: "15px",
+        bottom: "15px",
+        left: "15px",
+      },
+      preferCSSPageSize: false,
+    });
+    return pdfBuffer;
+  } finally {
+    await browser.close();
+  }
+};
+
 // Helper function to generate PDF using Puppeteer (HTML to PDF)
-const generatePDF = async (title, data, headers) => {
+const generatePDF = async (title, data, headers, reportType = null) => {
   const browser = await puppeteer.launch({
     headless: "new",
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -184,20 +687,85 @@ const generatePDF = async (title, data, headers) => {
 
   try {
     const page = await browser.newPage();
-    const html = buildReportHtml(title, data, headers);
+    
+    // Prepare chart data if report type is provided
+    let chartData = null;
+    let financialMetrics = null;
+    if (reportType) {
+      switch (reportType) {
+        case "revenue":
+          chartData = prepareRevenueChartData(data);
+          break;
+        case "sales":
+          chartData = prepareSalesChartData(data);
+          break;
+        case "customers":
+          chartData = prepareCustomerChartData(data);
+          break;
+        case "giftcard-performance":
+          chartData = prepareGiftCardPerformanceChartData(data);
+          break;
+        case "redemption":
+          chartData = prepareRedemptionChartData(data);
+          break;
+        default:
+          chartData = null;
+      }
+    }
 
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    const html = buildReportHtml(title, data, headers, reportType, chartData, financialMetrics);
+
+    await page.setContent(html, { waitUntil: "domcontentloaded" });
+    
+    // Optimized chart rendering wait (reduced timeouts)
+    if (reportType && chartData) {
+      try {
+        // Wait for Chart.js library to load (reduced timeout to 5 seconds)
+        await page.waitForFunction(() => {
+          return typeof Chart !== 'undefined';
+        }, { timeout: 5000 }).catch(() => {
+          console.warn("Chart.js did not load in time, proceeding without chart");
+        });
+        
+        // Wait for chart canvas element to exist (reduced timeout)
+        await page.waitForSelector(`#chart-${reportType}`, { timeout: 2000 }).catch(() => {
+          console.warn("Chart canvas not found, proceeding without chart");
+        });
+        
+        // Wait for chart to initialize (reduced timeout and simplified check)
+        await page.waitForFunction(
+          (chartId) => {
+            const canvas = document.getElementById(chartId);
+            if (!canvas) return false;
+            // Check if chart has been created (Chart.js sets chart property)
+            return canvas.chart || (canvas.getContext && canvas.getContext('2d'));
+          },
+          { timeout: 3000 },
+          `chart-${reportType}`
+        ).catch(() => {
+          // If chart doesn't initialize quickly, proceed anyway
+          console.warn("Chart initialization check timeout, proceeding...");
+        });
+        
+        // Reduced wait time for chart rendering
+        await page.waitForTimeout(500);
+      } catch (chartError) {
+        console.warn("Chart rendering warning:", chartError.message);
+        // Continue even if chart doesn't render - PDF will still be generated
+      }
+    }
 
     const pdfBuffer = await page.pdf({
       format: "A4",
       landscape: true,
       printBackground: true,
       margin: {
-        top: "40px",
-        right: "20px",
-        bottom: "40px",
-        left: "20px",
+        top: "15px",
+        right: "15px",
+        bottom: "15px",
+        left: "15px",
       },
+      preferCSSPageSize: false,
     });
 
     return pdfBuffer;
@@ -264,10 +832,19 @@ const getSalesReport = async (req, res) => {
     const headers = ["Date", "Gift Card Name", "Gift Card Tag", "Amount", "Discount", "Revenue", "Buyer Name", "Buyer Email", "Transaction ID"];
 
     if (format === "pdf") {
-      const pdfBytes = await generatePDF("Sales Report", salesData, headers);
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename=sales-report-${Date.now()}.pdf`);
-      res.send(Buffer.from(pdfBytes));
+      try {
+        const pdfBytes = await generatePDF("Sales Report", salesData, headers, "sales");
+        if (!pdfBytes || pdfBytes.length === 0) {
+          throw new Error("PDF generation returned empty buffer");
+        }
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename=sales-report-${Date.now()}.pdf`);
+        res.setHeader("Content-Length", pdfBytes.length);
+        res.send(Buffer.from(pdfBytes));
+      } catch (pdfError) {
+        console.error("Error generating PDF:", pdfError);
+        return res.status(500).json({ success: false, message: "Failed to generate PDF: " + pdfError.message });
+      }
     } else if (format === "xlsx") {
       await downloadExcel(res, salesData, headers, `sales-report-${Date.now()}.xlsx`, "Sales Report");
     } else {
@@ -388,7 +965,7 @@ const getRevenueReport = async (req, res) => {
     const headers = ["Period", "Total Revenue", "Number of Sales", "Average Revenue"];
 
     if (format === "pdf") {
-      const pdfBytes = await generatePDF("Revenue Report", revenueData, headers);
+      const pdfBytes = await generatePDF("Revenue Report", revenueData, headers, "revenue");
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename=revenue-report-${Date.now()}.pdf`);
       res.send(Buffer.from(pdfBytes));
@@ -475,7 +1052,7 @@ const getCustomerReport = async (req, res) => {
     const headers = ["Customer Name", "Customer Email", "Total Purchases", "Total Spent", "Gift Cards Purchased"];
 
     if (format === "pdf") {
-      const pdfBytes = await generatePDF("Customer Purchase Report", customerData, headers);
+      const pdfBytes = await generatePDF("Customer Purchase Report", customerData, headers, "customers");
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename=customer-report-${Date.now()}.pdf`);
       res.send(Buffer.from(pdfBytes));
@@ -533,7 +1110,7 @@ const getGiftCardPerformanceReport = async (req, res) => {
     const headers = ["Gift Card Name", "Gift Card Tag", "Amount", "Discount", "Total Sales", "Total Revenue", "Total Redeemed", "Redemption Rate", "Status"];
 
     if (format === "pdf") {
-      const pdfBytes = await generatePDF("Gift Card Performance Report", performanceData, headers);
+      const pdfBytes = await generatePDF("Gift Card Performance Report", performanceData, headers, "giftcard-performance");
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename=giftcard-performance-report-${Date.now()}.pdf`);
       res.send(Buffer.from(pdfBytes));
@@ -602,7 +1179,7 @@ const getRedemptionReport = async (req, res) => {
     const headers = ["Date", "Gift Card Name", "Customer Name", "Customer Email", "Redeemed Amount", "Remaining Balance", "Original Amount"];
 
     if (format === "pdf") {
-      const pdfBytes = await generatePDF("Redemption Report", redemptionData, headers);
+      const pdfBytes = await generatePDF("Redemption Report", redemptionData, headers, "redemption");
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename=redemption-report-${Date.now()}.pdf`);
       res.send(Buffer.from(pdfBytes));
@@ -692,7 +1269,9 @@ const getFinancialSummaryReport = async (req, res) => {
     const headers = ["Metric", "Value"];
 
     if (format === "pdf") {
-      const pdfBytes = await generatePDF("Financial Summary Report", summaryData, headers);
+      // For financial summary, prepare chart data with summary metrics
+      const financialChartData = prepareFinancialSummaryChartData(summaryData, totalRevenue, totalRedemption, netProfit);
+      const pdfBytes = await generatePDFWithFinancialChart("Financial Summary Report", summaryData, headers, financialChartData, totalRevenue, totalRedemption, netProfit);
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename=financial-summary-report-${Date.now()}.pdf`);
       res.send(Buffer.from(pdfBytes));
@@ -721,4 +1300,3 @@ module.exports = {
   getRedemptionReport,
   getFinancialSummaryReport,
 };
-
