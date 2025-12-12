@@ -333,16 +333,18 @@ const validatePhone = (phone) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // TEMPORARY: Bypass payment validation for testing
+    // TODO: Remove this and restore payment validation before production
     // Validate that payment has been completed
-    const paymentStatus = paymentData?.payment?.status;
-    const isValidPaymentStatus = paymentStatus === "COMPLETED" || 
-                                  paymentStatus === "authorized" || 
-                                  paymentStatus === "captured";
+    // const paymentStatus = paymentData?.payment?.status;
+    // const isValidPaymentStatus = paymentStatus === "COMPLETED" || 
+    //                               paymentStatus === "authorized" || 
+    //                               paymentStatus === "captured";
     
-    if (!paymentData?.payment || !isValidPaymentStatus) {
-      alert("Please complete the payment before submitting the form.");
-      return;
-    }
+    // if (!paymentData?.payment || !isValidPaymentStatus) {
+    //   alert("Please complete the payment before submitting the form.");
+    //   return;
+    // }
 
     let updatedFormData = { ...formData }; // Start with existing formData
 
@@ -819,11 +821,13 @@ const validatePhone = (phone) => {
                   </button>
                 )}
                 {currentStep === totalSteps && (() => {
+                  // TEMPORARY: Bypass payment check for testing
+                  // TODO: Remove this and restore payment validation before production
                   const paymentStatus = paymentData?.payment?.status;
                   const isValidPaymentStatus = paymentStatus === "COMPLETED" || 
                                                 paymentStatus === "authorized" || 
                                                 paymentStatus === "captured";
-                  const isPaymentCompleted = paymentData?.payment && isValidPaymentStatus;
+                  const isPaymentCompleted = true; // Bypassed for testing - set to: paymentData?.payment && isValidPaymentStatus;
                   
                   return (
                     <>

@@ -1,0 +1,41 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.com.giftygen.giftcard",
+  "teamIdentifier": "PZZRSDZ86Z",
+  "organizationName": "GiftyGen",
+  "serialNumber": "6777ed80f15bfd72cd3f2ae9-1763661374702-cvbmkk05ngw",
+  "description": "Flavors of the World",
+  "storeCard": {
+    "primaryFields": [
+      {
+        "key": "amount",
+        "label": "Gift Card",
+        "value": "INR 400"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "name",
+        "label": "Recipient",
+        "value": "Aniket Arjun Khillare"
+      }
+    ],
+    "auxiliaryFields": []
+  },
+  "barcode": {
+    "format": "PKBarcodeFormatQR",
+    "message": "jRCP5RZbBhflF1i2KBBH1MllD5GZY",
+    "messageEncoding": "iso-8859-1"
+  },
+  "backgroundColor": "rgb(65, 88, 208)",
+  "foregroundColor": "rgb(255, 255, 255)",
+  "labelColor": "rgb(255, 255, 255)",
+  "barcodes": [
+    {
+      "format": "PKBarcodeFormatQR",
+      "message": "6777ed80f15bfd72cd3f2ae9-1763661374702-cvbmkk05ngw",
+      "messageEncoding": "iso-8859-1"
+    }
+  ],
+  "logoText": "Flavors of the World"
+}
