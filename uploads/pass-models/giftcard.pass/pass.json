@@ -10,14 +10,14 @@
       {
         "key": "amount",
         "label": "Gift Card",
-        "value": "USD 1"
+        "value": ""
       }
     ],
     "secondaryFields": [
       {
         "key": "name",
         "label": "Recipient",
-        "value": "Prerna Thite"
+        "value": ""
       }
     ],
     "auxiliaryFields": []
