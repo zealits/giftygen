@@ -5,28 +5,56 @@
   "organizationName": "Prashant Pukale",
   "serialNumber": "jRCP5RZbBhflF1i2KBBH1MllD5GZY",
   "description": "Gift Card",
+  "logoText": "Gift Card Purchase",
   "storeCard": {
+    "headerFields": [
+      {
+        "key": "title",
+        "label": "",
+        "value": "Gift Card Purchase"
+      }
+    ],
     "primaryFields": [
       {
         "key": "amount",
-        "label": "Gift Card",
+        "label": "",
         "value": ""
       }
     ],
     "secondaryFields": [
       {
-        "key": "name",
-        "label": "Recipient",
+        "key": "recipient",
+        "label": "To:",
+        "value": ""
+      },
+      {
+        "key": "giftCardType",
+        "label": "Gift Card Type",
+        "value": ""
+      },
+      {
+        "key": "validUntil",
+        "label": "Valid Until",
         "value": ""
       }
     ],
-    "auxiliaryFields": []
+    "auxiliaryFields": [],
+    "backFields": []
   },
   "barcode": {
     "format": "PKBarcodeFormatQR",
     "message": "jRCP5RZbBhflF1i2KBBH1MllD5GZY",
-    "messageEncoding": "iso-8859-1"
+    "messageEncoding": "iso-8859-1",
+    "altText": "Scan to Redeem"
   },
+  "barcodes": [
+    {
+      "format": "PKBarcodeFormatQR",
+      "message": "jRCP5RZbBhflF1i2KBBH1MllD5GZY",
+      "messageEncoding": "iso-8859-1",
+      "altText": "Scan to Redeem"
+    }
+  ],
   "backgroundColor": "rgb(65, 88, 208)",
   "foregroundColor": "rgb(255, 255, 255)",
   "labelColor": "rgb(255, 255, 255)"

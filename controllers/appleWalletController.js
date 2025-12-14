@@ -3,6 +3,8 @@ const fs = require("fs");
 const fsPromises = require("fs").promises;
 const path = require("path");
 const crypto = require("crypto");
+const https = require("https");
+const http = require("http");
 const { PKPass } = require("passkit-generator");
 
 // Helper function to detect certificate type
@@ -147,6 +149,47 @@ function loadCertificates() {
 
   return { key, cert, wwdr, certPath };
 }
+
+// Helper function to fetch image buffer from URL or local path
+async function fetchImageBuffer(imageSource) {
+  if (!imageSource) {
+    return null;
+  }
+
+  try {
+    // Check if it's a URL
+    if (imageSource.startsWith("http://") || imageSource.startsWith("https://")) {
+      return new Promise((resolve, reject) => {
+        const client = imageSource.startsWith("https://") ? https : http;
+        client
+          .get(imageSource, (response) => {
+            if (response.statusCode !== 200) {
+              reject(new Error(`Failed to fetch image: ${response.statusCode}`));
+              return;
+            }
+
+            const chunks = [];
+            response.on("data", (chunk) => chunks.push(chunk));
+            response.on("end", () => resolve(Buffer.concat(chunks)));
+            response.on("error", reject);
+          })
+          .on("error", reject);
+      });
+    } else {
+      // Local file path
+      if (fs.existsSync(imageSource)) {
+        return fs.readFileSync(imageSource);
+      } else {
+        console.warn(`Image file not found: ${imageSource}`);
+        return null;
+      }
+    }
+  } catch (error) {
+    console.error(`Error fetching image from ${imageSource}:`, error.message);
+    return null;
+  }
+}
+
 // Generate Apple Wallet .pkpass file with proper signing
 async function downloadApplePass(req, res) {
   try {
@@ -337,9 +380,29 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
       userName: passData.userName,
     });
 
-    // Prepare dynamic values
-    const amountValue = `${passData.currency || "INR"} ${passData.amount || "0"}`;
-    const nameValue = passData.userName || "Recipient";
+    // Prepare dynamic values with proper formatting
+    // Currency: If USD use $, otherwise default to ₹ (Indian Rupee)
+    const currencySymbol = passData.currency === "INR" ? "$" : "₹";
+    const amountValue = `${currencySymbol} ${passData.amount || "0"}`;
+    const recipientValue = passData.userName || "Recipient";
+    const giftCardTypeValue = passData.walletGiftCardName || "Gift Card";
+    
+    // Format expiry date
+    let validUntilValue = "No Expiry";
+    if (passData.expiryDate) {
+      try {
+        const expiryDate = new Date(passData.expiryDate);
+        if (!isNaN(expiryDate.getTime())) {
+          // Format as M/D/YYYY (e.g., 5/7/2026)
+          validUntilValue = `${expiryDate.getMonth() + 1}/${expiryDate.getDate()}/${expiryDate.getFullYear()}`;
+        }
+      } catch (e) {
+        console.warn("Could not format expiry date:", e);
+      }
+    }
+    
+    // Format Card ID (use a shortened version of uniqueCode for display)
+    const cardIdValue = passData.uniqueCode ? passData.uniqueCode.substring(0, 20) + "..." : "N/A";
 
     // Debug: Inspect pass object structure
     console.log("🔍 Pass object keys:", Object.keys(pass));
@@ -398,15 +461,44 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
       }
       const secondaryIndex = internalPass.storeCard.secondaryFields.findIndex((f) => f && f.key === "name");
       if (secondaryIndex >= 0) {
-        internalPass.storeCard.secondaryFields[secondaryIndex].value = nameValue;
+        internalPass.storeCard.secondaryFields[secondaryIndex].value = recipientValue;
         console.log(`✅ Updated internal secondaryField[${secondaryIndex}]`);
       } else {
         internalPass.storeCard.secondaryFields.push({
           key: "name",
           label: "Recipient",
-          value: nameValue,
+          value: recipientValue,
         });
         console.log("✅ Added internal secondaryField");
+      }
+
+      // Add or update giftCardType field in internal structure
+      const giftCardTypeIndex = internalPass.storeCard.secondaryFields.findIndex((f) => f && f.key === "giftCardType");
+      if (giftCardTypeIndex >= 0) {
+        internalPass.storeCard.secondaryFields[giftCardTypeIndex].value = giftCardTypeValue;
+        console.log(`✅ Updated internal secondaryField giftCardType[${giftCardTypeIndex}]`);
+      } else {
+        internalPass.storeCard.secondaryFields.push({
+          key: "giftCardType",
+          label: "Gift Card Type",
+          value: giftCardTypeValue,
+        });
+        console.log("✅ Added internal secondaryField giftCardType");
+      }
+
+      // Add or update validUntil field in internal structure
+      const validUntilIndex = internalPass.storeCard.secondaryFields.findIndex((f) => f && f.key === "validUntil");
+      if (validUntilIndex >= 0) {
+        internalPass.storeCard.secondaryFields[validUntilIndex].value = validUntilValue;
+        console.log(`✅ Updated internal secondaryField validUntil[${validUntilIndex}]`);
+      } else {
+        internalPass.storeCard.secondaryFields.push({
+          key: "validUntil",
+          label: "Valid Until",
+          value: validUntilValue,
+          textAlignment: "PKTextAlignmentRight"
+        });
+        console.log("✅ Added internal secondaryField validUntil");
       }
     }
 
@@ -433,12 +525,37 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
     }
     const secondaryFieldIndex = pass.storeCard.secondaryFields.findIndex((f) => f && f.key === "name");
     if (secondaryFieldIndex >= 0) {
-      pass.storeCard.secondaryFields[secondaryFieldIndex].value = nameValue;
+      pass.storeCard.secondaryFields[secondaryFieldIndex].value = recipientValue;
     } else {
       pass.storeCard.secondaryFields.push({
         key: "name",
         label: "Recipient",
-        value: nameValue,
+        value: recipientValue,
+      });
+    }
+
+    // Add or update giftCardType field
+    const giftCardTypeFieldIndex = pass.storeCard.secondaryFields.findIndex((f) => f && f.key === "giftCardType");
+    if (giftCardTypeFieldIndex >= 0) {
+      pass.storeCard.secondaryFields[giftCardTypeFieldIndex].value = giftCardTypeValue;
+    } else {
+      pass.storeCard.secondaryFields.push({
+        key: "giftCardType",
+        label: "Gift Card Type",
+        value: giftCardTypeValue,
+      });
+    }
+
+    // Add or update validUntil field
+    const validUntilFieldIndex = pass.storeCard.secondaryFields.findIndex((f) => f && f.key === "validUntil");
+    if (validUntilFieldIndex >= 0) {
+      pass.storeCard.secondaryFields[validUntilFieldIndex].value = validUntilValue;
+    } else {
+      pass.storeCard.secondaryFields.push({
+        key: "validUntil",
+        label: "Valid Until",
+        value: validUntilValue,
+        textAlignment: "PKTextAlignmentRight"
       });
     }
 
@@ -460,6 +577,16 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
 
       // Update the storeCard fields in the modified template
       if (modifiedPassJson.storeCard) {
+        // Update header fields
+        if (modifiedPassJson.storeCard.headerFields) {
+          const titleField = modifiedPassJson.storeCard.headerFields.find((f) => f && f.key === "title");
+          if (titleField) {
+            titleField.value = "Gift Card Purchase";
+            console.log("✅ Updated template headerField title");
+          }
+        }
+        
+        // Update primary fields (amount)
         if (modifiedPassJson.storeCard.primaryFields) {
           const amountField = modifiedPassJson.storeCard.primaryFields.find((f) => f && f.key === "amount");
           if (amountField) {
@@ -467,11 +594,52 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
             console.log("✅ Updated template primaryField amount:", amountField);
           }
         }
+        
+        // Update secondary fields (recipient, giftCardType, cardId, validUntil)
         if (modifiedPassJson.storeCard.secondaryFields) {
-          const nameField = modifiedPassJson.storeCard.secondaryFields.find((f) => f && f.key === "name");
-          if (nameField) {
-            nameField.value = nameValue;
-            console.log("✅ Updated template secondaryField name:", nameField);
+          // Update recipient field
+          const recipientField = modifiedPassJson.storeCard.secondaryFields.find((f) => f && f.key === "recipient");
+          if (recipientField) {
+            recipientField.value = recipientValue;
+            console.log("✅ Updated template secondaryField recipient");
+          }
+          
+          // Update or add gift card type field
+          const giftCardTypeField = modifiedPassJson.storeCard.secondaryFields.find((f) => f && f.key === "giftCardType");
+          if (giftCardTypeField) {
+            giftCardTypeField.value = giftCardTypeValue;
+            console.log("✅ Updated template secondaryField giftCardType");
+          } else {
+            // Add giftCardType field if it doesn't exist
+            modifiedPassJson.storeCard.secondaryFields.push({
+              key: "giftCardType",
+              label: "Gift Card Type",
+              value: giftCardTypeValue,
+            });
+            console.log("✅ Added template secondaryField giftCardType");
+          }
+          
+          // Update card ID field
+          const cardIdField = modifiedPassJson.storeCard.secondaryFields.find((f) => f && f.key === "cardId");
+          if (cardIdField) {
+            cardIdField.value = cardIdValue;
+            console.log("✅ Updated template secondaryField cardId");
+          }
+          
+          // Update or add valid until field
+          const validUntilField = modifiedPassJson.storeCard.secondaryFields.find((f) => f && f.key === "validUntil");
+          if (validUntilField) {
+            validUntilField.value = validUntilValue;
+            console.log("✅ Updated template secondaryField validUntil");
+          } else {
+            // Add validUntil field if it doesn't exist
+            modifiedPassJson.storeCard.secondaryFields.push({
+              key: "validUntil",
+              label: "Valid Until",
+              value: validUntilValue,
+              textAlignment: "PKTextAlignmentRight"
+            });
+            console.log("✅ Added template secondaryField validUntil");
           }
         }
 
@@ -496,6 +664,29 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
               fs.copyFileSync(srcPath, destPath);
             }
           }
+        }
+
+        // Add dynamic gift card image to temporary directory if available
+        try {
+          // Get image source from passData - prioritize passData.image
+          const imageSource = passData.image || 
+            passData.giftCardDetails?.giftCardImg || 
+            passData.giftCardImg || 
+            passData.giftCardImage;
+
+          if (imageSource) {
+            console.log("📥 Fetching image for temporary template:", imageSource);
+            const imageBuffer = await fetchImageBuffer(imageSource);
+            
+            if (imageBuffer) {
+              // Write strip.png to the temporary template directory
+              const stripImagePath = path.join(tempPassModelDir, "strip.png");
+              fs.writeFileSync(stripImagePath, imageBuffer);
+              console.log("✅ Added strip.png to temporary template directory");
+            }
+          }
+        } catch (imageError) {
+          console.warn("⚠️ Could not add image to temporary template:", imageError.message);
         }
 
         console.log("✅ Created temporary pass model with dynamic values");
@@ -525,12 +716,13 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
             format: "PKBarcodeFormatQR",
             message: passData.uniqueCode,
             messageEncoding: "iso-8859-1",
+            altText: "Scan to Redeem",
           },
         ];
         pass.backgroundColor = "rgb(65, 88, 208)";
         pass.foregroundColor = "rgb(255, 255, 255)";
         pass.labelColor = "rgb(255, 255, 255)";
-        pass.logoText = passData.walletGiftCardName || "Gift Card";
+        pass.logoText = "Gift Card Purchase";
 
         console.log("✅ Recreated pass with dynamic template");
         passRecreated = true;
@@ -538,6 +730,34 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
     } catch (templateError) {
       console.error("⚠️ Error creating temporary template:", templateError.message);
       // Continue with the original pass object modifications as fallback
+    }
+
+    // Add dynamic gift card image (strip.png)
+    console.log("🖼️ Adding dynamic gift card image...");
+    try {
+      // Get image source from passData - prioritize passData.image
+      const imageSource = passData.image || 
+        passData.giftCardDetails?.giftCardImg || 
+        passData.giftCardImg || 
+        passData.giftCardImage;
+
+      if (imageSource) {
+        console.log("📥 Fetching image from:", imageSource);
+        const imageBuffer = await fetchImageBuffer(imageSource);
+        
+        if (imageBuffer) {
+          // Add the image as strip.png to override the template's default image
+          pass.addBuffer("strip.png", imageBuffer);
+          console.log("✅ Added dynamic gift card image (strip.png)");
+        } else {
+          console.warn("⚠️ Could not fetch image buffer, using template default");
+        }
+      } else {
+        console.log("ℹ️ No image source found in passData, using template default");
+      }
+    } catch (imageError) {
+      console.error("⚠️ Error adding gift card image:", imageError.message);
+      // Continue without the image - template default will be used
     }
 
     // Set barcode and colors (only if we didn't recreate the pass above)

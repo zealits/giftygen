@@ -350,6 +350,7 @@ const validatePhone = (phone) => {
 
     try {
       console.log("Started wallet pass generation...");
+    
 
       // Step 1: Try to generate wallet pass
       const response = await fetch("/api/wallet/generate-wallet-pass", {
@@ -357,6 +358,8 @@ const validatePhone = (phone) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+
+
 
       if (response.ok) {
         const data = await response.json();
@@ -368,16 +371,38 @@ const validatePhone = (phone) => {
         console.log("===========================================");
 
         // Update formData with both URLs
-        updatedFormData.walletUrl = data.googleWalletUrl;
-        updatedFormData.appleWalletUrl = data.appleWalletUrl;
-        updatedFormData.barcodeUnicode = data.uniqueCode;
+        if (data.googleWalletUrl) {
+          updatedFormData.walletUrl = data.googleWalletUrl;
+        }
+        if (data.appleWalletUrl) {
+          updatedFormData.appleWalletUrl = data.appleWalletUrl;
+        } else {
+          console.warn("⚠️ Apple Wallet URL not in response");
+        }
+        if (data.uniqueCode) {
+          updatedFormData.barcodeUnicode = data.uniqueCode;
+        }
       } else {
-        console.error("❌ Wallet pass generation failed, proceeding without it.");
+        console.error("❌ Wallet pass generation failed!");
+        console.error("Status:", response.status);
         const errorText = await response.text();
         console.error("Error response:", errorText);
+        try {
+          const errorJson = JSON.parse(errorText);
+          console.error("Parsed error:", errorJson);
+        } catch (e) {
+          console.error("Could not parse error as JSON");
+        }
+        // Don't proceed silently - show user what went wrong
+        alert(`Wallet pass generation failed: ${response.status}. Check console for details.`);
       }
     } catch (error) {
-      console.error("Error generating wallet pass, proceeding anyway:", error);
+      console.error("❌ Error generating wallet pass:", error);
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+      });
+      alert(`Error generating wallet pass: ${error.message}. Please try again or contact support.`);
     }
 
     console.log(updatedFormData);
@@ -391,10 +416,14 @@ const validatePhone = (phone) => {
       if (updatedFormData.walletUrl) {
         console.log("Setting Google Wallet URL:", updatedFormData.walletUrl);
         setWalletUrl(updatedFormData.walletUrl);
+      } else {
+        console.warn("⚠️ Google Wallet URL not available");
       }
       if (updatedFormData.appleWalletUrl) {
         console.log("Setting Apple Wallet URL:", updatedFormData.appleWalletUrl);
         setAppleWalletUrl(updatedFormData.appleWalletUrl);
+      } else {
+        console.warn("⚠️ Apple Wallet URL not available - this will cause the error you're seeing");
       }
 
       setShowModal(true);
@@ -407,6 +436,8 @@ const validatePhone = (phone) => {
   const handlePurchaseModal = () => {
     setShowModal(false);
     onClose(false);
+    // Refresh the page after closing the modal
+    window.location.reload();
   };
 
   // Detect if user is on iOS Safari
@@ -562,6 +593,20 @@ const validatePhone = (phone) => {
       document.body.style.overflow = "unset";
     };
   }, []);
+
+  // Auto-refresh page after successful purchase
+  useEffect(() => {
+    if (showModal) {
+      // Refresh the page after 5 seconds to show the success message
+      const refreshTimer = setTimeout(() => {
+        window.location.reload();
+      }, 5000);
+
+      return () => {
+        clearTimeout(refreshTimer);
+      };
+    }
+  }, [showModal]);
 
   return (
     <div className="purchase-modal-open-overlay">

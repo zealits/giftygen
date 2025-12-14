@@ -317,7 +317,7 @@ select {
     color: #000000 !important;
 }
 
-input::placeholder, textarea::placeholder {
+input:not([type="tel"])::placeholder, textarea::placeholder {
     color: #6b7280 !important; /* Force darker placeholder color */
     opacity: 1;
 }
@@ -478,22 +478,59 @@ select {
 }
 
 /* Force black text on all pseudo-elements */
-input::placeholder,
+input:not([type="tel"])::placeholder,
 textarea::placeholder {
     color: #6b7280 !important;
     opacity: 1 !important;
 }
 
-input::-webkit-input-placeholder,
+input:not([type="tel"])::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder {
     color: #6b7280 !important;
     opacity: 1 !important;
 }
 
-input::-moz-placeholder,
+input:not([type="tel"])::-moz-placeholder,
 textarea::-moz-placeholder {
     color: #6b7280 !important;
     opacity: 1 !important;
+}
+
+/* Phone number placeholder styling - minimum visible grey color */
+.giftCardContainer input[type="tel"]::placeholder,
+.form-group input[type="tel"]::placeholder,
+#self-purchase-form input[type="tel"]::placeholder,
+#gift-purchase-form input[type="tel"]::placeholder,
+input[type="tel"]::placeholder {
+    color: #d1d5db !important;
+    opacity: 0.6 !important;
+}
+
+.giftCardContainer input[type="tel"]::-webkit-input-placeholder,
+.form-group input[type="tel"]::-webkit-input-placeholder,
+#self-purchase-form input[type="tel"]::-webkit-input-placeholder,
+#gift-purchase-form input[type="tel"]::-webkit-input-placeholder,
+input[type="tel"]::-webkit-input-placeholder {
+    color: #d1d5db !important;
+    opacity: 0.6 !important;
+}
+
+.giftCardContainer input[type="tel"]::-moz-placeholder,
+.form-group input[type="tel"]::-moz-placeholder,
+#self-purchase-form input[type="tel"]::-moz-placeholder,
+#gift-purchase-form input[type="tel"]::-moz-placeholder,
+input[type="tel"]::-moz-placeholder {
+    color: #d1d5db !important;
+    opacity: 0.6 !important;
+}
+
+.giftCardContainer input[type="tel"]:-ms-input-placeholder,
+.form-group input[type="tel"]:-ms-input-placeholder,
+#self-purchase-form input[type="tel"]:-ms-input-placeholder,
+#gift-purchase-form input[type="tel"]:-ms-input-placeholder,
+input[type="tel"]:-ms-input-placeholder {
+    color: #d1d5db !important;
+    opacity: 0.6 !important;
 }
 
 /* Additional enforcement of black borders and text */
