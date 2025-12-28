@@ -115,54 +115,63 @@ function LandingPage() {
 
   const benefitsData = useMemo(() => [
     {
+      id: "seasonal",
       icon: <TrendingUp size={24} />,
       title: t("benefits.items.seasonal.title"),
       description: t("benefits.items.seasonal.description"),
       color: "var(--success)",
     },
     {
+      id: "revenue",
       icon: <DollarSign size={24} />,
       title: t("benefits.items.revenue.title"),
       description: t("benefits.items.revenue.description"),
       color: "var(--primary)",
     },
     {
+      id: "loyalty",
       icon: <Users size={24} />,
       title: t("benefits.items.loyalty.title"),
       description: t("benefits.items.loyalty.description"),
       color: "var(--primary-2)",
     },
     {
+      id: "repeat",
       icon: <Repeat size={24} />,
       title: t("benefits.items.repeat.title"),
       description: t("benefits.items.repeat.description"),
       color: "var(--success)",
     },
     {
+      id: "attract",
       icon: <Target size={24} />,
       title: t("benefits.items.attract.title"),
       description: t("benefits.items.attract.description"),
       color: "var(--primary)",
     },
     {
+      id: "trackable",
       icon: <BarChart3 size={24} />,
       title: t("benefits.items.trackable.title"),
       description: t("benefits.items.trackable.description"),
       color: "var(--primary-2)",
     },
     {
+      id: "visibility",
       icon: <Eye size={24} />,
       title: t("benefits.items.visibility.title"),
       description: t("benefits.items.visibility.description"),
       color: "var(--success)",
     },
     {
+      id: "orderValue",
       icon: <DollarSign size={24} />,
       title: t("benefits.items.orderValue.title"),
       description: t("benefits.items.orderValue.description"),
       color: "var(--primary)",
     },
     {
+      id: "flexible",
       icon: <Gift size={24} />,
       title: t("benefits.items.flexible.title"),
       description: t("benefits.items.flexible.description"),
@@ -476,12 +485,30 @@ function LandingPage() {
           <div className="lp-benefits-container">
             <div className="lp-benefits-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
               {benefitsData.map((benefit, index) => (
-                <div key={index} className="lp-benefit-card">
+                <div 
+                  key={index} 
+                  className="lp-benefit-card"
+                  onClick={() => navigate(`/benefit/${benefit.id}`)}
+                  style={{ cursor: 'pointer' }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      navigate(`/benefit/${benefit.id}`);
+                    }
+                  }}
+                  aria-label={`Learn more about ${benefit.title}`}
+                >
                   <div className="lp-benefit-icon" style={{ color: benefit.color }}>
                     {benefit.icon}
                   </div>
                   <h3 className="lp-benefit-title">{benefit.title}</h3>
                   <p className="lp-benefit-description">{benefit.description}</p>
+                  <div className="lp-benefit-link">
+                    <span>Learn more</span>
+                    <ArrowRight size={16} />
+                  </div>
                 </div>
               ))}
             </div>

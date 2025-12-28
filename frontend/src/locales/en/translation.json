@@ -53,39 +53,201 @@
     "items": {
       "seasonal": {
         "title": "Seasonal Promotions",
-        "description": "Perfect for holidays and events with targeted campaigns."
+        "description": "Perfect for holidays and events with targeted campaigns.",
+        "detail": {
+          "heading": "Seasonal Promotions",
+          "subheading": "Maximize your business potential during peak seasons",
+          "content": "Seasonal promotions with gift cards are a powerful way to capitalize on holidays, festivals, and special events. Create targeted campaigns that align with your customers' gifting needs throughout the year.",
+          "points": [
+            "Launch holiday-specific gift card campaigns (Christmas, Diwali, New Year, etc.)",
+            "Create limited-time offers that drive urgency and sales",
+            "Target specific customer segments with personalized promotions",
+            "Increase revenue during traditionally slow periods",
+            "Build anticipation with pre-holiday gift card sales"
+          ],
+          "benefits": [
+            "Higher sales during peak seasons",
+            "Better inventory management",
+            "Improved customer engagement",
+            "Increased brand awareness during key events"
+          ]
+        }
       },
       "revenue": {
         "title": "Boosts Revenue",
-        "description": "Upfront cash flow; often redeemed for more than face value."
+        "description": "Upfront cash flow; often redeemed for more than face value.",
+        "detail": {
+          "heading": "Boosts Revenue",
+          "subheading": "Improve your cash flow and increase average transaction value",
+          "content": "Gift cards provide immediate revenue through upfront payments while customers typically spend more than the card's face value when redeeming. This creates a win-win situation for your business.",
+          "points": [
+            "Receive payment immediately when gift cards are purchased",
+            "Customers often spend 20-40% more than the card value",
+            "Unredeemed gift cards contribute to your bottom line",
+            "Predictable revenue stream for better financial planning",
+            "Reduce dependency on seasonal fluctuations"
+          ],
+          "benefits": [
+            "Improved cash flow management",
+            "Higher average transaction values",
+            "Better financial forecasting",
+            "Reduced payment processing delays"
+          ]
+        }
       },
       "loyalty": {
         "title": "Improves Loyalty",
-        "description": "Power referral and rewards programs for customer retention."
+        "description": "Power referral and rewards programs for customer retention.",
+        "detail": {
+          "heading": "Improves Loyalty",
+          "subheading": "Build lasting relationships with your customers",
+          "content": "Gift cards are an excellent tool for building customer loyalty through referral programs, rewards, and retention strategies. They encourage repeat business and turn customers into brand advocates.",
+          "points": [
+            "Implement referral programs that reward both referrer and new customer",
+            "Use gift cards as rewards for loyalty program members",
+            "Create exclusive gift card offers for VIP customers",
+            "Reward customer milestones (birthdays, anniversaries)",
+            "Build emotional connections through thoughtful gifting"
+          ],
+          "benefits": [
+            "Increased customer lifetime value",
+            "Higher customer retention rates",
+            "More word-of-mouth marketing",
+            "Stronger brand loyalty"
+          ]
+        }
       },
       "repeat": {
         "title": "Encourages Repeat Visits",
-        "description": "Drives return traffic and upsell opportunities."
+        "description": "Drives return traffic and upsell opportunities.",
+        "detail": {
+          "heading": "Encourages Repeat Visits",
+          "subheading": "Turn one-time customers into regular patrons",
+          "content": "Gift cards naturally encourage customers to return to your business. When customers have a gift card, they're more likely to visit again, and often spend more than the card's value during their visit.",
+          "points": [
+            "Gift card holders are 2-3x more likely to return",
+            "Create opportunities for upselling during redemption",
+            "Build a habit of regular visits",
+            "Increase customer lifetime value through repeat business",
+            "Turn occasional visitors into regular customers"
+          ],
+          "benefits": [
+            "Higher customer retention",
+            "Increased visit frequency",
+            "More opportunities for upselling",
+            "Better customer relationship management"
+          ]
+        }
       },
       "attract": {
         "title": "Attracts New Customers",
-        "description": "Gifts bring first-time buyers and brand discovery."
+        "description": "Gifts bring first-time buyers and brand discovery.",
+        "detail": {
+          "heading": "Attracts New Customers",
+          "subheading": "Expand your customer base through gift card gifting",
+          "content": "Gift cards are often purchased by existing customers for friends and family, introducing your business to new potential customers. This creates a natural referral system that expands your reach.",
+          "points": [
+            "Existing customers gift cards to introduce your brand to others",
+            "New customers discover your business through gifted cards",
+            "Lower barrier to entry for first-time visitors",
+            "Create positive first impressions with gift card recipients",
+            "Build brand awareness through social gifting"
+          ],
+          "benefits": [
+            "Expanded customer base",
+            "Increased brand awareness",
+            "More first-time visitors",
+            "Natural word-of-mouth marketing"
+          ]
+        }
       },
       "trackable": {
         "title": "Trackable",
-        "description": "Usage data for smarter forecasting and insights."
+        "description": "Usage data for smarter forecasting and insights.",
+        "detail": {
+          "heading": "Trackable",
+          "subheading": "Make data-driven decisions with comprehensive analytics",
+          "content": "Digital gift cards provide valuable insights into customer behavior, purchase patterns, and redemption trends. Use this data to optimize your marketing strategies and business operations.",
+          "points": [
+            "Track gift card sales and redemption rates in real-time",
+            "Analyze customer purchase patterns and preferences",
+            "Monitor seasonal trends and peak redemption periods",
+            "Identify your most valuable customer segments",
+            "Measure the effectiveness of marketing campaigns"
+          ],
+          "benefits": [
+            "Better business intelligence",
+            "Improved marketing ROI",
+            "Data-driven decision making",
+            "Enhanced customer segmentation"
+          ]
+        }
       },
       "visibility": {
         "title": "Enhances Visibility",
-        "description": "Branded cards act as mini ads for your business."
+        "description": "Branded cards act as mini ads for your business.",
+        "detail": {
+          "heading": "Enhances Visibility",
+          "subheading": "Turn every gift card into a marketing opportunity",
+          "content": "Branded gift cards serve as portable advertisements for your business. Every time a gift card is shared, viewed, or used, it increases your brand visibility and creates marketing opportunities.",
+          "points": [
+            "Custom-branded cards showcase your brand identity",
+            "Gift cards are shared digitally, increasing reach",
+            "Recipients see your brand before visiting",
+            "Create memorable brand experiences",
+            "Leverage social sharing for increased visibility"
+          ],
+          "benefits": [
+            "Increased brand recognition",
+            "Wider marketing reach",
+            "Professional brand image",
+            "More touchpoints with potential customers"
+          ]
+        }
       },
       "orderValue": {
         "title": "Higher Order Value",
-        "description": "Customers spend beyond the card amount."
+        "description": "Customers spend beyond the card amount.",
+        "detail": {
+          "heading": "Higher Order Value",
+          "subheading": "Increase average transaction value with gift cards",
+          "content": "Studies show that customers typically spend 20-40% more than the gift card's face value when redeeming. This incremental revenue significantly boosts your bottom line.",
+          "points": [
+            "Customers spend an average of 20-40% more than card value",
+            "Gift card redemption often includes additional purchases",
+            "Customers are more likely to try premium items",
+            "Increase upsell and cross-sell opportunities",
+            "Boost overall revenue per transaction"
+          ],
+          "benefits": [
+            "Higher average transaction value",
+            "Increased revenue per customer",
+            "Better profit margins",
+            "More opportunities for upselling"
+          ]
+        }
       },
       "flexible": {
         "title": "Flexible Marketing",
-        "description": "Promotions, contests, and refunds for various campaigns."
+        "description": "Promotions, contests, and refunds for various campaigns.",
+        "detail": {
+          "heading": "Flexible Marketing",
+          "subheading": "Adapt your marketing strategy with versatile gift card campaigns",
+          "content": "Gift cards offer incredible flexibility for various marketing initiatives. Use them for promotions, contests, refunds, employee rewards, and customer appreciation programs.",
+          "points": [
+            "Create promotional campaigns with gift card incentives",
+            "Use gift cards as contest prizes and rewards",
+            "Offer gift cards as refund alternatives",
+            "Implement employee recognition programs",
+            "Design customer appreciation initiatives"
+          ],
+          "benefits": [
+            "Versatile marketing tool",
+            "Multiple use cases",
+            "Cost-effective promotions",
+            "Easy campaign management"
+          ]
+        }
       }
     }
   },

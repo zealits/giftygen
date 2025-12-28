@@ -906,6 +906,16 @@
   transform: translateY(-4px);
   border-color: rgba(147, 168, 255, 0.3);
   box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, rgba(108, 140, 255, 0.1) 0%, rgba(108, 140, 255, 0.05) 100%);
+}
+
+.lp-benefit-card:active {
+  transform: translateY(-2px);
+}
+
+.lp-benefit-card:focus {
+  outline: 2px solid rgba(108, 140, 255, 0.5);
+  outline-offset: 2px;
 }
 
 .lp-benefit-icon {
@@ -937,7 +947,33 @@
   color: var(--muted);
   font-size: 14px;
   line-height: 1.5;
-  margin: 0;
+  margin: 0 0 16px 0;
+}
+
+.lp-benefit-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 8px;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.lp-benefit-card:hover .lp-benefit-link {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+.lp-benefit-link svg {
+  transition: transform 0.3s ease;
+}
+
+.lp-benefit-card:hover .lp-benefit-link svg {
+  transform: translateX(2px);
 }
 
 /* Slider Controls */
