@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import QRScanner from "./QRScanner.js";
 import "./RedeemGiftCard.css";
@@ -21,6 +21,9 @@ const RedeemGiftCard = () => {
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState(""); // "error" or "warning"
+
+  // Ref for OTP section to enable smooth scrolling
+  const otpSectionRef = useRef(null);
 
   // Function to show alert modal instead of using alert()
   const showAlert = (message, type = "error") => {
@@ -135,6 +138,16 @@ const RedeemGiftCard = () => {
         setTimeout(() => {
           setOtpSuccessModalOpen(false);
         }, 3000);
+        
+        // Smooth scroll to OTP section after a short delay
+        setTimeout(() => {
+          if (otpSectionRef.current) {
+            otpSectionRef.current.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 500);
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
@@ -272,68 +285,78 @@ const RedeemGiftCard = () => {
               <form className="redeem-form">
                 <div className="form-group">
                   <div className="form-group-title">Card Information</div>
-                  <label>
-                    Gift Card Name:
-                    <input type="text" value={giftCard.giftCardName} readOnly />
-                  </label>
-                  <label>
-                    Tag:
-                    <input type="text" value={giftCard.giftCardTag} readOnly />
-                  </label>
-                  <label>
-                    Description:
-                    <textarea value={giftCard.description} readOnly />
-                  </label>
+                  <div className="info-field">
+                    <span className="info-label">Gift Card Name:</span>
+                    <span className="info-value">{giftCard.giftCardName}</span>
+                  </div>
+                  <div className="info-field">
+                    <span className="info-label">Tag:</span>
+                    <span className="info-value">{giftCard.giftCardTag}</span>
+                  </div>
+                  <div className="info-field">
+                    <span className="info-label">Description:</span>
+                    <span className="info-value">{giftCard.description}</span>
+                  </div>
                 </div>
 
                 <div className="form-group">
                   <div className="form-group-title">Card Status</div>
-                  <label>
-                    Amount:
-                    <input type="number" value={giftCard.amount} readOnly />
-                  </label>
-                  <label>
-                    Remaining Balance:
-                    <input type="number" value={selectedBuyer.remainingBalance || giftCard.amount} readOnly />
-                  </label>
-                  <label>
-                    Status:
-                    <input type="text" value={giftCard.status} readOnly />
-                  </label>
-                  <label>
-                    Expiration Date:
-                    <input type="text" value={new Date(giftCard.expirationDate).toLocaleDateString()} readOnly />
-                  </label>
+                  <div className="info-field">
+                    <span className="info-label">Amount:</span>
+                    <span className="info-value">₹{giftCard.amount?.toFixed(2) || "0.00"}</span>
+                  </div>
+                  <div className="info-field">
+                    <span className="info-label">Remaining Balance:</span>
+                    <span className="info-value highlight-balance">
+                      ₹{(selectedBuyer?.remainingBalance || giftCard.amount)?.toFixed(2) || "0.00"}
+                    </span>
+                  </div>
+                  <div className="info-field">
+                    <span className="info-label">Status:</span>
+                    <span className={`info-value status-badge status-${giftCard.status?.toLowerCase() || "active"}`}>
+                      {giftCard.status?.charAt(0).toUpperCase() + giftCard.status?.slice(1) || "Active"}
+                    </span>
+                  </div>
+                  <div className="info-field">
+                    <span className="info-label">Expiration Date:</span>
+                    <span className="info-value">
+                      {giftCard.expirationDate ? new Date(giftCard.expirationDate).toLocaleDateString() : "N/A"}
+                    </span>
+                  </div>
                 </div>
                 <div className="form-group">
                   <div className="form-group-title">
                     {selectedBuyer?.giftInfo?.recipientEmail ? "Recipient Details" : "Buyer Details"}
                   </div>
-                  <label>
-                    {selectedBuyer?.giftInfo?.recipientEmail ? "Recipient Name" : "Buyer Name"}:
-                    <input
-                      type="text"
-                      value={selectedBuyer?.giftInfo?.recipientName || selectedBuyer?.selfInfo?.name || ""}
-                      readOnly
-                    />
-                  </label>
-
-                  <label>
-                    {selectedBuyer?.giftInfo?.recipientEmail ? "Recipient Email" : "Buyer Email"}:
-                    <input
-                      type="text"
-                      value={selectedBuyer?.giftInfo?.recipientEmail || selectedBuyer?.selfInfo?.email || ""}
-                      readOnly
-                    />
-                  </label>
+                  <div className="info-field">
+                    <span className="info-label">
+                      {selectedBuyer?.giftInfo?.recipientEmail ? "Recipient Name" : "Buyer Name"}:
+                    </span>
+                    <span className="info-value">
+                      {selectedBuyer?.giftInfo?.recipientName || selectedBuyer?.selfInfo?.name || "N/A"}
+                    </span>
+                  </div>
+                  <div className="info-field">
+                    <span className="info-label">
+                      {selectedBuyer?.giftInfo?.recipientEmail ? "Recipient Email" : "Buyer Email"}:
+                    </span>
+                    <span className="info-value">
+                      {selectedBuyer?.giftInfo?.recipientEmail || selectedBuyer?.selfInfo?.email || "N/A"}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="redeem-amount-group">
-                  <label>
-                    Enter Amount to Redeem:
+                  <div className="redeem-amount-header">
+                    <span className="redeem-amount-icon">💰</span>
+                    <h3 className="redeem-amount-title">Enter Amount to Redeem</h3>
+                  </div>
+                  <div className="redeem-amount-input-wrapper">
+                    <span className="currency-symbol">₹</span>
                     <input
                       type="number"
-                      placeholder="Enter amount to redeem"
+                      className="redeem-amount-input"
+                      placeholder="0.00"
                       value={redeemAmount}
                       onChange={(e) => {
                         const enteredAmount = Number(e.target.value);
@@ -348,16 +371,10 @@ const RedeemGiftCard = () => {
                         }
                       }}
                     />
-                  </label>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#856404",
-                      marginTop: "8px",
-                      textAlign: "center",
-                    }}
-                  >
-                    Available Balance: ${selectedBuyer?.remainingBalance ?? giftCard.amount}
+                  </div>
+                  <div className="available-balance-display">
+                    <span className="balance-label">Available Balance:</span>
+                    <span className="balance-amount">₹{(selectedBuyer?.remainingBalance ?? giftCard.amount)?.toFixed(2) || "0.00"}</span>
                   </div>
                 </div>
 
@@ -366,18 +383,20 @@ const RedeemGiftCard = () => {
                 </button>
 
                 {isOtpSent && (
-                  <div className="form-group">
+                  <div className="form-group otp-section" ref={otpSectionRef}>
                     <div className="form-group-title">OTP Verification</div>
-                    <label>
-                      Enter OTP:
+                    <div className="otp-input-wrapper">
+                      <label className="otp-label">Enter OTP:</label>
                       <input
                         type="text"
+                        className="otp-input"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
                         placeholder="Enter 6-digit OTP"
                         maxLength="6"
+                        autoFocus
                       />
-                    </label>
+                    </div>
                   </div>
                 )}
 

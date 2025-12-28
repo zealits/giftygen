@@ -102,21 +102,21 @@
       "email": "Email",
       "emailPlaceholder": "name@business.com",
       "phone": "Phone",
-      "phonePlaceholder": "(555) 123-4567",
+      "phonePlaceholder": "98765 43210",
       "website": "Website",
       "websitePlaceholder": "https://",
       "notes": "Notes",
       "notesPlaceholder": "Tell us about your gift card goals",
       "submit": "Register",
       "errorFix": "Please fix the highlighted fields.",
-      "errorPhone": "Please enter a valid phone number like (555) 123-4567.",
+      "errorPhone": "Please enter a valid phone number like 98765 43210.",
       "success": "✅ Registration submitted successfully! Please check your email for confirmation and next steps. We'll be in touch within 24 hours.",
       "error": "Sorry, something went wrong. Please try again later."
     }
   },
   "contact": {
     "title": "Contact us",
-    "description": "Visit giftygen.com to learn more or scan the QR code below to explore our platform.",
+    "description": "Visit giftygen.com to learn more.",
     "visitWebsite": "Visit website",
     "exploreCards": "Explore gift cards",
     "scanText": "Scan to learn more"

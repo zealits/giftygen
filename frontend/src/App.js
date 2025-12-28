@@ -1,28 +1,30 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { loadUser } from "./services/Actions/authActions.js";
-import Login from "./components/Auth/Login";
-import Register from "./components/Register";
-import AdminDashboard from "./pages/admin/AdminDashboard.js";
-import UserLanding from "./pages/user/UserLanding.js";
-import LandingPage from "./pages/marketing/LandingPage";
-import PrivacyPolicy from "./pages/marketing/PrivacyPolicy";
-import TermsOfService from "./pages/marketing/TermsOfService";
-import Sidebar from "./pages/admin/Sidebar.js";
-import GiftCards from "./pages/admin/GiftCards.js"; // GiftCards page
-import Orders from "./pages/admin/Orders.js"; // GiftCards page
-import Customers from "./pages/admin/Customers.js"; // GiftCards page
-import Reports from "./pages/admin/Reports.js"; // GiftCards page
-import Settings from "./pages/admin/Settings.js"; // GiftCards page
-import RedeemGiftCard from "./pages/admin/RedeemGiftCard.js";
 import { LoadingProvider } from "./context/LoadingContext";
-import GiftCardDetails from "./pages/user/GiftCardDetails.js";
-import SuperAdminLogin from "./components/SuperAdmin/SuperAdminLogin";
-import SuperAdminDashboard from "./components/SuperAdmin/SuperAdminDashboard";
-import VideoModal from "./components/VideoModal/VideoModal";
-import SubscriptionManagement from "./components/subscriptionManagement";
 import "./App.css";
+
+// Lazy load components
+const Login = lazy(() => import("./components/Auth/Login"));
+const Register = lazy(() => import("./components/Register"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.js"));
+const UserLanding = lazy(() => import("./pages/user/UserLanding.js"));
+const LandingPage = lazy(() => import("./pages/marketing/LandingPage"));
+const PrivacyPolicy = lazy(() => import("./pages/marketing/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/marketing/TermsOfService"));
+const Sidebar = lazy(() => import("./pages/admin/Sidebar.js"));
+const GiftCards = lazy(() => import("./pages/admin/GiftCards.js"));
+const Orders = lazy(() => import("./pages/admin/Orders.js"));
+const Customers = lazy(() => import("./pages/admin/Customers.js"));
+const Reports = lazy(() => import("./pages/admin/Reports.js"));
+const Settings = lazy(() => import("./pages/admin/Settings.js"));
+const RedeemGiftCard = lazy(() => import("./pages/admin/RedeemGiftCard.js"));
+const GiftCardDetails = lazy(() => import("./pages/user/GiftCardDetails.js"));
+const SuperAdminLogin = lazy(() => import("./components/SuperAdmin/SuperAdminLogin"));
+const SuperAdminDashboard = lazy(() => import("./components/SuperAdmin/SuperAdminDashboard"));
+const VideoModal = lazy(() => import("./components/VideoModal/VideoModal"));
+const SubscriptionManagement = lazy(() => import("./components/subscriptionManagement"));
 // import 'font-awesome/css/font-awesome.min.css';
 
 function AppRoutes() {
@@ -40,9 +42,14 @@ function AppRoutes() {
 
   return (
     <>
-      {userDetails?.role === "Admin" && isAdminRoute ? <Sidebar /> : null}
+      {userDetails?.role === "Admin" && isAdminRoute ? (
+        <Suspense fallback={<div className="content">Loading...</div>}>
+          <Sidebar />
+        </Suspense>
+      ) : null}
 
-      <Routes>
+      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>}>
+        <Routes>
         <Route
           path="/login"
           element={user ? <Navigate to={userDetails?.role === "Admin" ? "/dashboard" : "/explore"} /> : <Login />}
@@ -129,7 +136,8 @@ function AppRoutes() {
         <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
 
         <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </>
   );
 }
@@ -159,7 +167,9 @@ function App() {
         <Router>
           <AppRoutes />
         </Router>
-        <VideoModal isOpen={showVideoModal} onClose={handleCloseVideoModal} />
+        <Suspense fallback={null}>
+          <VideoModal isOpen={showVideoModal} onClose={handleCloseVideoModal} />
+        </Suspense>
       </div>
     </LoadingProvider>
   );

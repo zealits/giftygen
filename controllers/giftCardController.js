@@ -320,16 +320,26 @@ const getSalesTrends = async (req, res) => {
 
 const getSalesData = async (req, res) => {
   try {
-    const { businessSlug } = req.query || {};
-    // Get the current date and 30 days ago
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 30); // 30 days range
+    const { businessSlug, startDate: startDateParam, endDate: endDateParam } = req.query || {};
+    
+    // Get the current date and calculate start date based on parameters or default to 30 days
+    let endDate = new Date();
+    let startDate = new Date();
+    
+    if (startDateParam && endDateParam) {
+      startDate = new Date(startDateParam);
+      endDate = new Date(endDateParam);
+      // Set end date to end of day to include all purchases on that day
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      // Default to 30 days if no dates provided
+      startDate.setDate(endDate.getDate() - 30);
+    }
 
-    console.log("Start Date (30 days ago):", startDate);
+    console.log("Start Date:", startDate);
     console.log("End Date:", endDate);
 
-    // Query the database for sales data in the past 30 days based on the 'purchaseDate' of buyers
+    // Query the database for sales data based on the 'purchaseDate' of buyers
     const pipeline = [];
     if (businessSlug) {
       pipeline.push({ $match: { businessSlug } });
@@ -547,6 +557,10 @@ const addBuyer = async (req, res) => {
       uniqueCode = `${id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
     }
 
+    /* // Construct Apple Wallet URL from uniqueCode if not provided
+    const appleWalletUrl = req.body.appleWalletUrl || (uniqueCode ? `/api/wallet/download-apple-pass/${uniqueCode}` : null);
+    console.log("apple wallet url : ", appleWalletUrl);
+ */
     // Generate QR code as Buffer
     const qrCodeBuffer = await QRCode.toBuffer(uniqueCode, {
       errorCorrectionLevel: "H",
@@ -584,6 +598,11 @@ const addBuyer = async (req, res) => {
     const senderEmail = selfInfo?.email || giftInfo?.senderEmail;
     const recipientEmail = giftInfo?.recipientEmail;
     const { giftCardName, giftCardTag, description, amount, expirationDate } = giftCardDetails;
+
+    // Get currency and format amount
+    const currency = paymentDetails?.currency || "INR";
+    const currencySymbol = currency === "INR" ? "₹" : currency === "USD" ? "$" : currency;
+    const formattedAmount = `${currencySymbol} ${amount}`;
 
     // Email template function
     const createEmailTemplate = (isRecipient = false) => `
@@ -844,7 +863,7 @@ const addBuyer = async (req, res) => {
 
             <!-- Amount Display -->
             <div class="card-amount">
-                <div class="amount">$ ${amount}</div>
+                <div class="amount">${formattedAmount}</div>
             </div>
 
             <!-- Card Details -->
@@ -872,22 +891,28 @@ const addBuyer = async (req, res) => {
             </div>
           
             
-            <!-- Google Wallet Section -->
+            <!-- Wallet Section -->
+            ${walletUrl || appleWalletUrl ? `
             <div class="qr-section">
+                ${walletUrl ? `
                 <a href="${walletUrl}" target="_blank" rel="noopener noreferrer" class="wallet-button">
                     <img src="https://res.cloudinary.com/dzmn9lnk5/image/upload/v1740297009/gift_cards/google-wallet_wfh992.png" 
                          alt="Google Wallet" 
                          class="wallet-icon" />
                     <span class="wallet-text">Add to Google Wallet</span>
                 </a>
+                ` : ''}
                 
-                <a href="${walletUrl}" target="_blank" rel="noopener noreferrer" class="wallet-button apple-wallet">
+                ${appleWalletUrl ? `
+                <a href="https://giftygen.com${appleWalletUrl}" target="_blank" rel="noopener noreferrer" class="wallet-button apple-wallet">
                     <img src="https://res.cloudinary.com/dzmn9lnk5/image/upload/v1755349111/gift_cards/64px-Apple_Wallet_Icon.svg_tk8gzq.png" 
                          alt="Apple Wallet" 
                          class="wallet-icon" />
                     <span class="wallet-text">Add to Apple Wallet</span>
                 </a>
+                ` : ''}
             </div>
+            ` : ''}
         </div>
 
         <!-- Instructions -->
@@ -1277,17 +1302,27 @@ const totalRedemptionValue = async (req, res) => {
 
 const getRevenueForLast30Days = async (req, res) => {
   try {
-    const { businessSlug } = req.query || {};
-    // Calculate the start and end date for the last 30 days
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 30);
+    const { businessSlug, startDate: startDateParam, endDate: endDateParam } = req.query || {};
+    
+    // Calculate the start and end date based on parameters or default to last 30 days
+    let endDate = new Date();
+    let startDate = new Date();
+    
+    if (startDateParam && endDateParam) {
+      startDate = new Date(startDateParam);
+      endDate = new Date(endDateParam);
+      // Set end date to end of day to include all purchases on that day
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      // Default to 30 days if no dates provided
+      startDate.setDate(endDate.getDate() - 30);
+    }
 
-    // Fetch gift cards sold within the last 30 days
+    // Fetch gift cards sold within the specified date range
     const baseFilter = businessSlug ? { businessSlug } : {};
     const giftCards = await GiftCard.find({
       ...baseFilter,
-      "buyers.purchaseDate": { $gte: startDate, $lt: endDate },
+      "buyers.purchaseDate": { $gte: startDate, $lte: endDate },
     });
 
     // Calculate revenue grouped by day

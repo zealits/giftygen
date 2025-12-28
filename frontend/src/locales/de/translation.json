@@ -102,21 +102,21 @@
       "email": "E-Mail",
       "emailPlaceholder": "name@business.com",
       "phone": "Telefon",
-      "phonePlaceholder": "(555) 123-4567",
+      "phonePlaceholder": "98765 43210",
       "website": "Webseite",
       "websitePlaceholder": "https://",
       "notes": "Notizen",
       "notesPlaceholder": "Teilen Sie uns Ihre Ziele mit Geschenkkarten mit",
       "submit": "Registrieren",
       "errorFix": "Bitte korrigieren Sie die markierten Felder.",
-      "errorPhone": "Bitte geben Sie eine gültige Telefonnummer wie (555) 123-4567 ein.",
+      "errorPhone": "Bitte geben Sie eine gültige Telefonnummer wie 98765 43210 ein.",
       "success": "✅ Registrierung erfolgreich eingereicht! Bitte überprüfen Sie Ihre E-Mail für die Bestätigung und nächste Schritte. Wir melden uns innerhalb von 24 Stunden.",
       "error": "Entschuldigung, etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut."
     }
   },
   "contact": {
     "title": "Kontaktieren Sie uns",
-    "description": "Besuchen Sie giftygen.com, um mehr zu erfahren, oder scannen Sie den QR-Code unten.",
+    "description": "Besuchen Sie giftygen.com, um mehr zu erfahren.",
     "visitWebsite": "Webseite besuchen",
     "exploreCards": "Geschenkkarten erkunden",
     "scanText": "Scannen, um mehr zu erfahren"

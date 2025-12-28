@@ -353,3 +353,148 @@ canvas {
   border-radius: 8px;
   padding: 12px !important;
 }
+
+/* Graph Header with Filter */
+.graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.graph-header h3 {
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Filter Container */
+.filter-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  min-width: 150px;
+}
+
+.filter-select:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+}
+
+.filter-select:focus {
+  border-color: rgb(168, 85, 247);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.filter-select option {
+  background: #1e293b;
+  color: #fff;
+  padding: 8px;
+}
+
+/* Custom Date Picker */
+.custom-date-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.date-input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  background: rgba(15, 23, 42, 0.8);
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.date-input:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+}
+
+.date-input:focus {
+  border-color: rgb(168, 85, 247);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+}
+
+.date-separator {
+  color: rgba(148, 163, 184, 0.8);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.apply-date-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.apply-date-button:hover {
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.apply-date-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design for Filters */
+@media (max-width: 768px) {
+  .graph-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .graph-header h3 {
+    width: 100%;
+    text-align: center;
+  }
+
+  .filter-container {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .custom-date-picker {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .date-input {
+    width: 100%;
+  }
+
+  .apply-date-button {
+    width: 100%;
+  }
+}

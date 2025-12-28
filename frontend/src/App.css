@@ -1,6 +1,11 @@
+/* Prevent horizontal scroll across the app */
+body {
+  overflow-x: hidden;
+}
+
 .app {
-    display: block;
-    width: 100%;
+  display: block;
+  width: 100%;
 }
   
   .sidebar {

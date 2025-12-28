@@ -102,21 +102,21 @@
       "email": "电子邮件",
       "emailPlaceholder": "name@business.com",
       "phone": "电话",
-      "phonePlaceholder": "(555) 123-4567",
+      "phonePlaceholder": "98765 43210",
       "website": "网站",
       "websitePlaceholder": "https://",
       "notes": "备注",
       "notesPlaceholder": "告诉我们你关于礼品卡的目标",
       "submit": "注册",
       "errorFix": "请修复高亮显示的字段。",
-      "errorPhone": "请输入有效的电话号码，例如 (555) 123-4567。",
+      "errorPhone": "请输入有效的电话号码，例如 98765 43210。",
       "success": "✅ 注册提交成功！请检查您的电子邮件以获取确认和下一步操作。我们将在24小时内与您联系。",
       "error": "抱歉，出了些问题。请稍后再试。"
     }
   },
   "contact": {
     "title": "联系我们",
-    "description": "访问 giftygen.com 了解更多，或扫描下面的二维码以探索我们的平台。",
+    "description": "访问 giftygen.com 了解更多。",
     "visitWebsite": "访问网站",
     "exploreCards": "探索礼品卡",
     "scanText": "扫描以了解更多"

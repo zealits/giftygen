@@ -37,10 +37,77 @@ const AdminDashboard = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  const [dateFilter, setDateFilter] = useState("30"); // Default to 30 days
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
+  const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const businessSlug = user?.user?.businessSlug || "";
 
   const hasFetched = useRef(false); // ✅ Prevent duplicate API calls
+
+  // Function to calculate date range based on filter
+  const getDateRange = () => {
+    if (dateFilter === "custom" && customStartDate && customEndDate) {
+      return {
+        startDate: customStartDate,
+        endDate: customEndDate,
+      };
+    }
+
+    const endDate = new Date();
+    const startDate = new Date();
+    const days = parseInt(dateFilter);
+    startDate.setDate(endDate.getDate() - days);
+
+    return {
+      startDate: startDate.toISOString().split("T")[0],
+      endDate: endDate.toISOString().split("T")[0],
+    };
+  };
+
+  // Function to fetch graph data based on current filter
+  const fetchGraphData = async () => {
+    try {
+      setLoading(true);
+      const { startDate, endDate } = getDateRange();
+
+      const [salesResponse, revenueGraphResponse] = await Promise.all([
+        axios.get(
+          `/api/v1/admin/sales-data?businessSlug=${encodeURIComponent(businessSlug)}&startDate=${startDate}&endDate=${endDate}`
+        ),
+        axios.get(
+          `/api/v1/admin/last-30-days?businessSlug=${encodeURIComponent(businessSlug)}&startDate=${startDate}&endDate=${endDate}`
+        ),
+      ]);
+
+      // Sort sales data
+      const salesDataArray = salesResponse.data.map((item) => ({
+        date: item.date,
+        sales: item.sales,
+      }));
+      salesDataArray.sort((a, b) => new Date(a.date) - new Date(b.date));
+      setSalesData({
+        labels: salesDataArray.map((item) => item.date),
+        sales: salesDataArray.map((item) => item.sales),
+      });
+
+      // Sort revenue data
+      const revenueDataArray = Object.entries(revenueGraphResponse.data.revenueByDate).map(([date, revenue]) => ({
+        date,
+        revenue,
+      }));
+      revenueDataArray.sort((a, b) => new Date(a.date) - new Date(b.date));
+      setRevenueData({
+        labels: revenueDataArray.map((item) => item.date),
+        revenue: revenueDataArray.map((item) => item.revenue),
+      });
+    } catch (error) {
+      console.error("❌ Error fetching graph data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (hasFetched.current) return; // ✅ Stop if already fetched
@@ -57,52 +124,26 @@ const AdminDashboard = () => {
           giftCardResponse,
           soldResponse,
           revenueResponse,
-          salesResponse,
           redemptionResponse,
-          revenueGraphResponse,
         ] = await Promise.all([
           axios.get(`/api/v1/admin/list?businessSlug=${encodeURIComponent(businessSlug)}`),
           axios.get(`/api/v1/admin/total-sold?businessSlug=${encodeURIComponent(businessSlug)}`),
           axios.get(`/api/v1/admin/total-revenue?businessSlug=${encodeURIComponent(businessSlug)}`),
-          axios.get(`/api/v1/admin/sales-data?businessSlug=${encodeURIComponent(businessSlug)}`),
           axios.get(`/api/v1/admin/total-redemption?businessSlug=${encodeURIComponent(businessSlug)}`),
-          axios.get(`/api/v1/admin/last-30-days?businessSlug=${encodeURIComponent(businessSlug)}`),
         ]);
+
+        // Fetch graph data separately
+        await fetchGraphData();
 
         console.log("✅ API responses received!");
         console.log("🎟️ Total Gift Cards:", giftCardResponse.data.giftCardCount);
         console.log("🎫 Total Sold:", soldResponse.data.totalSold);
         console.log("💰 Total Revenue:", revenueResponse.data.totalRevenue);
-        console.log("📊 Sales Data:", salesResponse.data);
         console.log("💸 Total Redemption:", redemptionResponse.data.totalRedemption);
-        console.log("📈 Revenue Data:", revenueGraphResponse.data.revenueByDate);
 
         setTotalGiftCards(giftCardResponse.data.giftCardCount);
         setTotalSold(soldResponse.data.totalSold);
         setTotalRevenue(revenueResponse.data.totalRevenue);
-
-        // Sort sales data
-        const salesDataArray = salesResponse.data.map((item) => ({
-          date: item.date,
-          sales: item.sales,
-        }));
-        salesDataArray.sort((a, b) => new Date(a.date) - new Date(b.date));
-        setSalesData({
-          labels: salesDataArray.map((item) => item.date),
-          sales: salesDataArray.map((item) => item.sales),
-        });
-
-        // Sort revenue data
-        const revenueDataArray = Object.entries(revenueGraphResponse.data.revenueByDate).map(([date, revenue]) => ({
-          date,
-          revenue,
-        }));
-        revenueDataArray.sort((a, b) => new Date(a.date) - new Date(b.date));
-        setRevenueData({
-          labels: revenueDataArray.map((item) => item.date),
-          revenue: revenueDataArray.map((item) => item.revenue),
-        });
-
         setTotalRedemption(redemptionResponse.data.totalRedemption);
       } catch (error) {
         console.error("❌ Error fetching data:", error);
@@ -118,6 +159,14 @@ const AdminDashboard = () => {
       console.log("🛑 Cleanup function executed (if necessary)");
     };
   }, [businessSlug]);
+
+  // Fetch graph data when filter changes (only for non-custom filters)
+  useEffect(() => {
+    if (hasFetched.current && businessSlug && dateFilter !== "custom") {
+      fetchGraphData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateFilter, view, businessSlug]);
 
   // // Line chart data and options for gift card sales
   // const chartData = {
@@ -410,7 +459,38 @@ const AdminDashboard = () => {
 
   const handleRevenueView = () => {
     setView("revenue");
-    // Fetch buyers when switching to the "User" view
+  };
+
+  const handleFilterChange = (filterValue) => {
+    setDateFilter(filterValue);
+    if (filterValue !== "custom") {
+      setShowCustomDatePicker(false);
+    } else {
+      setShowCustomDatePicker(true);
+    }
+  };
+
+  const handleCustomDateApply = () => {
+    if (customStartDate && customEndDate && new Date(customStartDate) <= new Date(customEndDate)) {
+      fetchGraphData();
+    } else {
+      alert("Please select valid start and end dates");
+    }
+  };
+
+  const getFilterLabel = () => {
+    if (dateFilter === "custom") {
+      return customStartDate && customEndDate
+        ? `${customStartDate} to ${customEndDate}`
+        : "Custom Range";
+    }
+    const days = parseInt(dateFilter);
+    if (days === 7) return "Last 7 Days";
+    if (days === 30) return "Last 30 Days";
+    if (days === 90) return "Last 90 Days";
+    if (days === 180) return "Last 6 Months";
+    if (days === 365) return "Last Year";
+    return `Last ${days} Days`;
   };
 
   return (
@@ -458,7 +538,46 @@ const AdminDashboard = () => {
       {/* Sales View */}
       {view === "sales" && (
         <div className="graphs-section">
-          <h3>Gift Card Sales (Last 30 Days)</h3>
+          <div className="graph-header">
+            <h3>Gift Card Sales ({getFilterLabel()})</h3>
+            <div className="filter-container">
+              <select
+                value={dateFilter}
+                onChange={(e) => handleFilterChange(e.target.value)}
+                className="filter-select"
+              >
+                <option value="7">Last 7 Days</option>
+                <option value="30">Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="180">Last 6 Months</option>
+                <option value="365">Last Year</option>
+                <option value="custom">Custom Range</option>
+              </select>
+              {showCustomDatePicker && (
+                <div className="custom-date-picker">
+                  <input
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="date-input"
+                    max={customEndDate || new Date().toISOString().split("T")[0]}
+                  />
+                  <span className="date-separator">to</span>
+                  <input
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="date-input"
+                    min={customStartDate}
+                    max={new Date().toISOString().split("T")[0]}
+                  />
+                  <button onClick={handleCustomDateApply} className="apply-date-button">
+                    Apply
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
           <div className="chart-wrapper">
             {loading ? <div className="skeleton-graph" /> : <Line data={chartData} options={chartOptions} />}
           </div>
@@ -468,7 +587,46 @@ const AdminDashboard = () => {
       {/* Revenue View */}
       {view === "revenue" && (
         <div className="graphs-section">
-          <h3>Gift Card Revenue (Last 30 Days)</h3>
+          <div className="graph-header">
+            <h3>Gift Card Revenue ({getFilterLabel()})</h3>
+            <div className="filter-container">
+              <select
+                value={dateFilter}
+                onChange={(e) => handleFilterChange(e.target.value)}
+                className="filter-select"
+              >
+                <option value="7">Last 7 Days</option>
+                <option value="30">Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="180">Last 6 Months</option>
+                <option value="365">Last Year</option>
+                <option value="custom">Custom Range</option>
+              </select>
+              {showCustomDatePicker && (
+                <div className="custom-date-picker">
+                  <input
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="date-input"
+                    max={customEndDate || new Date().toISOString().split("T")[0]}
+                  />
+                  <span className="date-separator">to</span>
+                  <input
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="date-input"
+                    min={customStartDate}
+                    max={new Date().toISOString().split("T")[0]}
+                  />
+                  <button onClick={handleCustomDateApply} className="apply-date-button">
+                    Apply
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
           <div className="chart-wrapper">
             {loading ? <div className="skeleton-graph" /> : <Line data={revenueChartData} options={revenueChartOptions} />}
           </div>

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
-import logo from "../../assets/giftygen_logo.png";
+import logo from "../../assets/giftygen_logo.svg";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
 import LanguageDropdown from "../../components/LanguageDropdown";
@@ -41,6 +41,7 @@ function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoadingLanguage, setIsLoadingLanguage] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({
     businessName: false,
     businessType: false,
@@ -52,7 +53,13 @@ function LandingPage() {
 
   return (
     <div className="lp-modal-overlay" onClick={onClose}>
-      <div className="lp-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="lp-modal"
+        role="dialog"
+        aria-modal="true"
+       aria-labelledby="modal-title"
+       onClick={(e) => e.stopPropagation()}
+      >
         <div className={`lp-modal__icon lp-modal__icon--${type}`}>
           {type === "success" ? (
             <CheckCircle size={48} />
@@ -60,9 +67,10 @@ function LandingPage() {
             <X size={48} />
           )}
         </div>
-        <h3 className="lp-modal__title">
-          {type === "success" ? t("modal.successTitle") : t("modal.errorTitle")}
+        <h3 id="modal-title" className="lp-modal__title">
+         {type === "success" ? t("modal.successTitle") : t("modal.errorTitle")}
         </h3>
+
         <p className="lp-modal__message">{message}</p>
         <button className="lp-btn lp-modal__btn" onClick={onClose}>
           {t("modal.close")}
@@ -105,7 +113,7 @@ function LandingPage() {
   type: "success"
 });
 
-  const benefitsData = [
+  const benefitsData = useMemo(() => [
     {
       icon: <TrendingUp size={24} />,
       title: t("benefits.items.seasonal.title"),
@@ -160,7 +168,7 @@ function LandingPage() {
       description: t("benefits.items.flexible.description"),
       color: "var(--primary-2)",
     },
-  ];
+  ], [t]);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % Math.ceil(benefitsData.length / 3));
@@ -185,13 +193,13 @@ function LandingPage() {
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
-  const formatUSPhone = (value) => {
-    const digits = (value || "").replace(/\D/g, "").slice(0, 10);
-    if (digits.length === 0) return "";
-    if (digits.length < 4) return `(${digits}`;
-    if (digits.length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+  const formatIndianPhone = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 10);
+  
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)} ${digits.slice(5)}`;
   };
+  
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -221,7 +229,7 @@ function LandingPage() {
     };
   }, [isMobileMenuOpen]);
 
-  // Show loading state while detecting language
+  /* // Show loading state while detecting language
   if (isLoadingLanguage) {
     return (
       <div className="lp-root" data-theme={theme}>
@@ -236,7 +244,7 @@ function LandingPage() {
         </div>
       </div>
     );
-  }
+  } */
 
   // SEO structured data
   const structuredData = [
@@ -256,7 +264,7 @@ function LandingPage() {
       {/* Navbar */}
       <header className="lp-nav">
         <div className="lp-nav__brand" onClick={() => navigate("/")}>
-          <img src={logo} alt="giftygen logo" className="lp-nav__logo" />
+          <img src={logo} alt="GiftyGen digital gift card platform logo" width={120} height={40} className="lp-nav__logo" />
         </div>
 
         {/* Desktop Navigation */}
@@ -277,9 +285,9 @@ function LandingPage() {
           <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/login")}>
             {t("nav.signIn")}
           </button>
-          <button className="lp-btn" onClick={() => navigate("/explore")}>
+          <a href="/explore" className="lp-btn">
             {t("nav.explore")}
-          </button>
+          </a>
           <LanguageDropdown variant="desktop" />
         </div>
 
@@ -337,9 +345,10 @@ function LandingPage() {
             <button className="lp-btn" onClick={() => handleScrollTo("register")}>
               {t("hero.getStarted")}
             </button>
-            <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/explore")}>
-              {t("hero.buyGiftCard")}
-            </button>
+            <a href="/explore" className="lp-btn">
+               {t("hero.buyGiftCard")}
+            </a>
+
           </div>
         </div>
         <div className="lp-hero__visual" aria-hidden>
@@ -529,13 +538,18 @@ function LandingPage() {
             }
             try {
               if (payload.phone) {
-                const phoneRegex = /^\([0-9]{3}\)\s[0-9]{3}-[0-9]{4}$/;
-                if (!phoneRegex.test(payload.phone)) {
-                  setNotice({ type: "error", text: "Please enter a valid phone number like (555) 123-4567." });
-                  setTimeout(() => setNotice(null), 8000);
+                const cleanedPhone = payload.phone.replace(/\s/g, "");
+                if (!/^[6-9]\d{9}$/.test(cleanedPhone)) {
+                  setModalState({
+                    isOpen: true,
+                    type: "error",
+                    message: "Please enter a valid Indian mobile number (10 digits).",
+                  });
                   return;
                 }
+                payload.phone = `+91${cleanedPhone}`;
               }
+              
               const res = await fetch("/api/v1/admin/registration-interest", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -612,9 +626,9 @@ function LandingPage() {
                 autoComplete="tel"
                 placeholder={t("register.form.phonePlaceholder")}
                 value={phone}
-                onChange={(e) => setPhone(formatUSPhone(e.target.value))}
-                maxLength={14}
-                aria-label="US phone number"
+                onChange={(e) => setPhone(formatIndianPhone(e.target.value))}
+                maxLength={11}
+                aria-label="Indian mobile number"
               />
             </div>
             <div className="lp-field">
@@ -653,12 +667,13 @@ function LandingPage() {
               <a className="lp-btn" href="https://giftygen.com" target="_blank" rel="noreferrer">
                 {t("contact.visitWebsite")}
               </a>
-              <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/explore")}>
+              <a href="/explore" className="lp-btn">
                 {t("contact.exploreCards")}
-              </button>
+              </a>
+
             </div>
           </div>
-          <div className="lp-qr">
+          {/* <div className="lp-qr">
             <img
               src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
                 "https://giftygen.com"
@@ -666,7 +681,7 @@ function LandingPage() {
               alt="QR code for giftygen.com"
             />
             <span>{t("contact.scanText")}</span>
-          </div>
+          </div> */}
         </div>
       </section>
 
