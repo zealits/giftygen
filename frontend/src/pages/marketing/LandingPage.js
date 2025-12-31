@@ -4,6 +4,7 @@ import "./LandingPage.css";
 import logo from "../../assets/giftygen_logo.svg";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
+
 import LanguageDropdown from "../../components/LanguageDropdown";
 import { detectAndSetLanguage, getDetailedLocation } from "../../utils/geolocationLanguage";
 import { formatCurrency } from "../../utils/currency";

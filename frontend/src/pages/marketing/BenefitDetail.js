@@ -115,7 +115,7 @@ function BenefitDetail() {
           </section>
 
           <section className="benefit-detail__section">
-            <h2 className="benefit-detail__section-title">Key Features</h2>
+            <h2 className="benefit-detail__section-title">{detail.pointsTitle}</h2>
             <ul className="benefit-detail__list">
               {detail.points?.map((point, index) => (
                 <li key={index} className="benefit-detail__list-item">
@@ -127,7 +127,7 @@ function BenefitDetail() {
           </section>
 
           <section className="benefit-detail__section">
-            <h2 className="benefit-detail__section-title">Business Benefits</h2>
+            <h2 className="benefit-detail__section-title">{t(detail.businessBenefitsTitle)}</h2>
             <div className="benefit-detail__benefits-grid">
               {detail.benefits?.map((benefit, index) => (
                 <div key={index} className="benefit-detail__benefit-card">
@@ -141,9 +141,9 @@ function BenefitDetail() {
           </section>
 
           <section className="benefit-detail__cta">
-            <h3 className="benefit-detail__cta-title">Ready to Get Started?</h3>
+            <h3 className="benefit-detail__cta-title">{t(detail.cta.title)}</h3>
             <p className="benefit-detail__cta-text">
-              Start leveraging the power of digital gift cards for your business today.
+              {t(detail.cta.text)}
             </p>
             <div className="benefit-detail__cta-buttons">
               <button
@@ -158,13 +158,13 @@ function BenefitDetail() {
                   }, 100);
                 }}
               >
-                Register Your Business
+                {t(detail.cta.primaryButton)}
               </button>
               <button
                 className="benefit-detail__btn benefit-detail__btn--secondary"
                 onClick={() => navigate("/explore")}
               >
-                Explore Gift Cards
+                {t(detail.cta.secondaryButton)}
               </button>
             </div>
           </section>

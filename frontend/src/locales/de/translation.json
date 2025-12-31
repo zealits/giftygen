@@ -53,39 +53,273 @@
     "items": {
       "seasonal": {
         "title": "Saisonale Aktionen",
-        "description": "Perfekt für Feiertage und Events mit gezielten Kampagnen."
+        "description": "Perfekt für Feiertage und Events mit gezielten Kampagnen.",
+        "detail": {
+          "heading": "Saisonale Aktionen",
+          "subheading": "Maximieren Sie Ihr Geschäftspotenzial in der Hauptsaison",
+          "content": "Saisonale Aktionen mit Geschenkkarten sind eine wirksame Möglichkeit, Feiertage, Feste und besondere Anlässe zu nutzen. Erstellen Sie gezielte Kampagnen, die das ganze Jahr über mit den Geschenkbedürfnissen Ihrer Kunden übereinstimmen.",
+          "pointsTitle": "Hauptmerkmale",
+          "points": [
+            "Starten Sie feiertagsspezifische Geschenkkartenkampagnen (Weihnachten, Diwali, Neujahr usw.)",
+            "Erstellen Sie zeitlich begrenzte Angebote, die Dringlichkeit und Verkäufe fördern",
+            "Zielen Sie auf spezifische Kundensegmente mit personalisierten Aktionen",
+            "Steigern Sie den Umsatz in traditionell ruhigen Zeiten",
+            "Schaffen Sie Vorfreude mit Geschenkkartenverkäufen vor den Feiertagen"
+          ],
+          "benefits": [
+            "Höhere Verkäufe in der Hauptsaison",
+            "Bessere Bestandsverwaltung",
+            "Verbesserte Kundenbindung",
+            "Erhöhte Markenbekanntheit bei wichtigen Veranstaltungen"
+          ],
+          "businessBenefitsTitle": "Geschäftsvorteile",
+          "cta": {
+            "title": "Bereit loszulegen?",
+            "text": "Beginnen Sie noch heute, die Kraft digitaler Geschenkkarten für Ihr Geschäft zu nutzen.",
+            "primaryButton": "Registrieren Sie Ihr Unternehmen",
+            "secondaryButton": "Geschenkkarten ansehen"
+          }
+        }
       },
       "revenue": {
         "title": "Steigert den Umsatz",
-        "description": "Sofortiger Cashflow; oft über dem Nennwert eingelöst."
+        "description": "Sofortiger Cashflow; oft über dem Nennwert eingelöst.",
+        "detail": {
+          "heading": "Steigert den Umsatz",
+          "subheading": "Verbessern Sie Ihren Cashflow und erhöhen Sie den durchschnittlichen Transaktionswert",
+          "content": "Geschenkkarten bieten sofortigen Umsatz durch Vorauszahlungen, während Kunden beim Einlösen typischerweise mehr als den Nennwert der Karte ausgeben.",
+          "pointsTitle": "Hauptmerkmale",
+          "points": [
+            "Erhalten Sie sofortige Zahlung beim Kauf von Geschenkkarten",
+            "Kunden geben oft 20–40% mehr als den Kartenwert aus",
+            "Nicht eingelöste Geschenkkarten tragen direkt zum Gewinn bei",
+            "Vorhersehbare Einnahmen für bessere Finanzplanung",
+            "Reduzieren Sie die Abhängigkeit von saisonalen Schwankungen"
+          ],
+          "benefits": [
+            "Verbesserte Cashflow-Verwaltung",
+            "Höhere durchschnittliche Transaktionswerte",
+            "Bessere Finanzprognosen",
+            "Reduzierte Zahlungsverzögerungen"
+          ],
+          "businessBenefitsTitle": "Geschäftsvorteile",
+          "cta": {
+            "title": "Bereit loszulegen?",
+            "text": "Beginnen Sie noch heute, die Kraft digitaler Geschenkkarten für Ihr Geschäft zu nutzen.",
+            "primaryButton": "Registrieren Sie Ihr Unternehmen",
+            "secondaryButton": "Geschenkkarten ansehen"
+          }
+        }
       },
       "loyalty": {
         "title": "Verbessert die Kundentreue",
-        "description": "Unterstützt Empfehlungs- und Bonusprogramme für Kundenbindung."
+        "description": "Unterstützt Empfehlungs- und Bonusprogramme für Kundenbindung.",
+        "detail": {
+          "heading": "Verbessert die Kundentreue",
+          "subheading": "Bauen Sie langfristige Beziehungen zu Ihren Kunden auf",
+          "content": "Geschenkkarten sind ein ausgezeichnetes Instrument zur Steigerung der Kundentreue durch Empfehlungsprogramme, Belohnungen und Bindungsstrategien.",
+          "pointsTitle": "Hauptmerkmale",
+          "points": [
+            "Führen Sie Empfehlungsprogramme ein, die sowohl Empfehlenden als auch neuen Kunden belohnen",
+            "Verwenden Sie Geschenkkarten als Belohnungen für Treueprogramm-Mitglieder",
+            "Erstellen Sie exklusive Geschenkkartenangebote für VIP-Kunden",
+            "Belohnen Sie Kundenmeilensteine (Geburtstage, Jubiläen)",
+            "Bauen Sie emotionale Verbindungen durch durchdachtes Verschenken auf"
+          ],
+          "benefits": [
+            "Erhöhter Kundenlebenszeitwert",
+            "Höhere Kundenbindungsraten",
+            "Mehr Mundpropaganda-Marketing",
+            "Stärkere Markentreue"
+          ],
+          "businessBenefitsTitle": "Geschäftsvorteile",
+          "cta": {
+            "title": "Bereit loszulegen?",
+            "text": "Beginnen Sie noch heute, die Kraft digitaler Geschenkkarten für Ihr Geschäft zu nutzen.",
+            "primaryButton": "Registrieren Sie Ihr Unternehmen",
+            "secondaryButton": "Geschenkkarten ansehen"
+          }
+        }
       },
       "repeat": {
         "title": "Fördert Wiederholungsbesuche",
-        "description": "Treibt Rückkehrbesuche und Upselling-Möglichkeiten an."
+        "description": "Treibt Rückkehrbesuche und Upselling-Möglichkeiten an.",
+        "detail": {
+          "heading": "Fördert Wiederholungsbesuche",
+          "subheading": "Verwandeln Sie einmalige Kunden in regelmäßige Gäste",
+          "content": "Geschenkkarten ermutigen Kunden auf natürliche Weise, zu Ihrem Geschäft zurückzukehren. Beim Einlösen geben Kunden oft mehr aus.",
+          "pointsTitle": "Hauptmerkmale",
+          "points": [
+            "Geschenkkarteninhaber kehren 2–3 Mal häufiger zurück",
+            "Schaffen Sie Upselling-Möglichkeiten beim Einlösen",
+            "Bauen Sie eine Gewohnheit regelmäßiger Besuche auf",
+            "Erhöhen Sie den Kundenlebenszeitwert durch wiederholte Geschäfte",
+            "Verwandeln Sie gelegentliche Besucher in regelmäßige Kunden"
+          ],
+          "benefits": [
+            "Höhere Kundenbindung",
+            "Erhöhte Besuchsfrequenz",
+            "Mehr Upselling-Möglichkeiten",
+            "Besseres Kundenbeziehungsmanagement"
+          ],
+          "businessBenefitsTitle": "Geschäftsvorteile",
+          "cta": {
+            "title": "Bereit loszulegen?",
+            "text": "Beginnen Sie noch heute, die Kraft digitaler Geschenkkarten für Ihr Geschäft zu nutzen.",
+            "primaryButton": "Registrieren Sie Ihr Unternehmen",
+            "secondaryButton": "Geschenkkarten ansehen"
+          }
+        }
       },
       "attract": {
         "title": "Gewinnt neue Kunden",
-        "description": "Geschenke bringen Erstkäufer und Markenentdeckung."
+        "description": "Geschenke bringen Erstkäufer und Markenentdeckung.",
+        "detail": {
+          "heading": "Gewinnt neue Kunden",
+          "subheading": "Erweitern Sie Ihre Kundenbasis durch Geschenkkartenverschenken",
+          "content": "Bestehende Kunden kaufen Geschenkkarten für Freunde und Familie, was Ihr Geschäft neuen potenziellen Kunden vorstellt.",
+          "pointsTitle": "Hauptmerkmale",
+          "points": [
+            "Bestehende Kunden verschenken Karten, um Ihre Marke anderen vorzustellen",
+            "Neue Kunden entdecken Ihr Geschäft durch verschenkte Karten",
+            "Niedrigere Einstiegshürde für Erstbesucher",
+            "Schaffen Sie positive erste Eindrücke bei Geschenkkartenempfängern",
+            "Steigern Sie die Markenbekanntheit durch soziales Verschenken"
+          ],
+          "benefits": [
+            "Erweiterte Kundenbasis",
+            "Erhöhte Markenbekanntheit",
+            "Mehr Erstbesucher",
+            "Natürliches Mundpropaganda-Marketing"
+          ],
+          "businessBenefitsTitle": "Geschäftsvorteile",
+          "cta": {
+            "title": "Bereit loszulegen?",
+            "text": "Beginnen Sie noch heute, die Kraft digitaler Geschenkkarten für Ihr Geschäft zu nutzen.",
+            "primaryButton": "Registrieren Sie Ihr Unternehmen",
+            "secondaryButton": "Geschenkkarten ansehen"
+          }
+        }
       },
       "trackable": {
         "title": "Nachverfolgbar",
-        "description": "Nutzungsdaten für bessere Prognosen und Insights."
+        "description": "Nutzungsdaten für bessere Prognosen und Insights.",
+        "detail": {
+          "heading": "Nachverfolgbar",
+          "subheading": "Treffen Sie datengestützte Entscheidungen mit umfassenden Analysen",
+          "content": "Digitale Geschenkkarten bieten wertvolle Einblicke in Kundenverhalten, Kaufmuster und Einlösungstrends.",
+          "pointsTitle": "Hauptmerkmale",
+          "points": [
+            "Verfolgen Sie Geschenkkartenverkäufe und Einlösungen in Echtzeit",
+            "Analysieren Sie Kundenkaufpräferenzen",
+            "Identifizieren Sie saisonale Trends und Spitzenzeiten",
+            "Finden Sie Ihre wertvollsten Kundensegmente",
+            "Messen Sie die Wirksamkeit von Marketingkampagnen"
+          ],
+          "benefits": [
+            "Bessere Geschäftsintelligenz",
+            "Verbesserte Marketing-ROI",
+            "Datengestützte Entscheidungsfindung",
+            "Erweiterte Kundensegmentierung"
+          ],
+          "businessBenefitsTitle": "Geschäftsvorteile",
+          "cta": {
+            "title": "Bereit loszulegen?",
+            "text": "Beginnen Sie noch heute, die Kraft digitaler Geschenkkarten für Ihr Geschäft zu nutzen.",
+            "primaryButton": "Registrieren Sie Ihr Unternehmen",
+            "secondaryButton": "Geschenkkarten ansehen"
+          }
+        }
       },
       "visibility": {
         "title": "Erhöht die Sichtbarkeit",
-        "description": "Gebrandete Karten wirken wie kleine Anzeigen für Ihr Geschäft."
+        "description": "Gebrandete Karten wirken wie kleine Anzeigen für Ihr Geschäft.",
+        "detail": {
+          "heading": "Erhöht die Sichtbarkeit",
+          "subheading": "Verwandeln Sie jede Geschenkkarte in eine Marketingmöglichkeit",
+          "content": "Gebrandete Geschenkkarten fungieren als tragbare Werbung für Ihr Geschäft. Jedes Teilen, Ansehen oder Verwenden erhöht die Markensichtbarkeit.",
+          "pointsTitle": "Hauptmerkmale",
+          "points": [
+            "Individuell gebrandete Karten zeigen Markenidentität",
+            "Digitales Teilen erhöht die Reichweite",
+            "Empfänger sehen Ihre Marke vor dem Besuch",
+            "Schaffen Sie unvergessliche Markenerlebnisse",
+            "Nutzen Sie soziales Teilen für erhöhte Sichtbarkeit"
+          ],
+          "benefits": [
+            "Erhöhte Markenerkennung",
+            "Weitere Marketingreichweite",
+            "Professionelles Markenimage",
+            "Mehr Kontaktpunkte mit potenziellen Kunden"
+          ],
+          "businessBenefitsTitle": "Geschäftsvorteile",
+          "cta": {
+            "title": "Bereit loszulegen?",
+            "text": "Beginnen Sie noch heute, die Kraft digitaler Geschenkkarten für Ihr Geschäft zu nutzen.",
+            "primaryButton": "Registrieren Sie Ihr Unternehmen",
+            "secondaryButton": "Geschenkkarten ansehen"
+          }
+        }
       },
       "orderValue": {
         "title": "Höherer Bestellwert",
-        "description": "Kunden geben oft mehr aus als den Kartenwert."
+        "description": "Kunden geben oft mehr aus als den Kartenwert.",
+        "detail": {
+          "heading": "Höherer Bestellwert",
+          "subheading": "Erhöhen Sie den durchschnittlichen Transaktionswert mit Geschenkkarten",
+          "content": "Studien zeigen, dass Kunden beim Einlösen typischerweise 20–40% mehr als den Nennwert der Karte ausgeben.",
+          "pointsTitle": "Hauptmerkmale",
+          "points": [
+            "Kunden geben durchschnittlich 20–40% mehr aus",
+            "Zusätzliche Käufe beim Einlösen",
+            "Erhöhte Wahrscheinlichkeit, Premium-Produkte zu verwenden",
+            "Mehr Upsell- und Cross-Sell-Möglichkeiten",
+            "Gesamteinnahmen pro Transaktion steigen"
+          ],
+          "benefits": [
+            "Höherer durchschnittlicher Transaktionswert",
+            "Mehr Einnahmen pro Kunde",
+            "Bessere Gewinnmargen",
+            "Mehr Möglichkeiten für Upselling"
+          ],
+          "businessBenefitsTitle": "Geschäftsvorteile",
+          "cta": {
+            "title": "Bereit loszulegen?",
+            "text": "Beginnen Sie noch heute, die Kraft digitaler Geschenkkarten für Ihr Geschäft zu nutzen.",
+            "primaryButton": "Registrieren Sie Ihr Unternehmen",
+            "secondaryButton": "Geschenkkarten ansehen"
+          }
+        }
       },
       "flexible": {
         "title": "Flexible Vermarktung",
-        "description": "Aktionen, Wettbewerbe und Rückerstattungen für verschiedene Kampagnen."
+        "description": "Aktionen, Wettbewerbe und Rückerstattungen für verschiedene Kampagnen.",
+        "detail": {
+          "heading": "Flexible Vermarktung",
+          "subheading": "Passen Sie Ihre Marketingstrategie mit vielseitigen Geschenkkartenkampagnen an",
+          "content": "Geschenkkarten bieten unglaubliche Flexibilität für verschiedene Marketinginitiativen — Aktionen, Wettbewerbe, Rückerstattungen, Mitarbeiterbelohnungen und Kundenanerkennungsprogramme.",
+          "pointsTitle": "Hauptmerkmale",
+          "points": [
+            "Erstellen Sie Werbekampagnen mit Geschenkkartenanreizen",
+            "Verwenden Sie Geschenkkarten als Wettbewerbsgewinne und Belohnungen",
+            "Bieten Sie Geschenkkarten als Rückerstattungsalternativen an",
+            "Führen Sie Mitarbeiteranerkennungsprogramme ein",
+            "Gestalten Sie Kundenanerkennungsinitiativen"
+          ],
+          "benefits": [
+            "Vielseitiges Marketinginstrument",
+            "Mehrere Anwendungsfälle",
+            "Kostengünstige Aktionen",
+            "Einfache Kampagnenverwaltung"
+          ],
+          "businessBenefitsTitle": "Geschäftsvorteile",
+          "cta": {
+            "title": "Bereit loszulegen?",
+            "text": "Beginnen Sie noch heute, die Kraft digitaler Geschenkkarten für Ihr Geschäft zu nutzen.",
+            "primaryButton": "Registrieren Sie Ihr Unternehmen",
+            "secondaryButton": "Geschenkkarten ansehen"
+          }
+        }
       }
     }
   },
@@ -129,5 +363,10 @@
     "Brand" : "giftygen",
     "to": "An: Sie",
     "from": "Von: Absender"
+  },
+  "modal": {
+    "successTitle": "Erfolg!",
+    "errorTitle": "Fehler",
+    "close": "Schließen"
   }
 }
