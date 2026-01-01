@@ -353,11 +353,11 @@ function LandingPage() {
           <p className="lp-hero__desc">{t("hero.description")}</p>
           <div className="lp-hero__actions">
             <button className="lp-btn" onClick={() => handleScrollTo("register")}>
-              {t("hero.getStarted")}
+              {t("hero.startFreeTrial")}
             </button>
-            <a href="/explore" className="lp-btn">
-              {t("hero.buyGiftCard")}
-            </a>
+            <button className="lp-btn" onClick={() => handleScrollTo("register")}>
+              {t("hero.scheduleDemo")}
+            </button>
           </div>
         </div>
         <div className="lp-hero__visual" aria-hidden>
