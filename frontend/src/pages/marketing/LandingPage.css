@@ -1801,14 +1801,46 @@
 
 /* Offer, sections */
 .lp-offer { 
-  padding: 48px clamp(16px, 6vw, 72px) 24px; 
+  padding: 64px clamp(16px, 6vw, 72px) 48px; 
   width: 100%; 
   margin: 0 auto; 
   color: var(--muted); 
   max-width: none; 
   text-align: center;
-  background: linear-gradient(135deg, rgba(147, 168, 255, 0.02) 0%, rgba(34, 197, 94, 0.02) 100%);
+  background: linear-gradient(135deg, rgba(147, 168, 255, 0.03) 0%, rgba(34, 197, 94, 0.02) 100%);
   border-radius: 0 0 40px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.lp-offer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(147, 168, 255, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(34, 197, 94, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lp-offer > * {
+  position: relative;
+  z-index: 1;
+}
+
+.lp-offer .lp-section__title {
+  margin-bottom: 16px;
+}
+
+.lp-offer .lp-lead {
+  max-width: 800px;
+  margin: 0 auto 24px;
+  font-size: clamp(16px, 2.2vw, 18px);
+  line-height: 1.7;
 }
 
 .lp-section { 
@@ -2232,6 +2264,503 @@
   background-size: 12px 12px; 
   opacity: 0.3; 
   mask-image: linear-gradient(to left, transparent, rgba(0,0,0,.85) 35%, rgba(0,0,0,1)); 
+}
+
+/* Business Category Cards - Professional Design with Consistent Color Scheme */
+.lp-business-categories {
+  margin-top: 56px;
+  width: 100%;
+}
+
+.lp-business-categories__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.lp-business-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, var(--card) 0%, rgba(21, 25, 36, 0.95) 100%);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  height: 100%;
+}
+
+.lp-root[data-theme='light'] .lp-business-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-color: var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.lp-business-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+}
+
+.lp-business-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  border-color: rgba(147, 168, 255, 0.4);
+}
+
+.lp-business-card:hover::before {
+  opacity: 1;
+}
+
+.lp-root[data-theme='light'] .lp-business-card:hover {
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15), 0 0 0 1px rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.lp-business-card:active {
+  transform: translateY(-4px);
+}
+
+.lp-business-card__image {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(135deg, var(--card) 0%, rgba(21, 25, 36, 0.8) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.lp-root[data-theme='light'] .lp-business-card__image {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+
+.lp-business-card__image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+  opacity: 0.7;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lp-business-card:hover .lp-business-card__image::after {
+  opacity: 0.8;
+}
+
+.lp-business-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  display: block;
+}
+
+.lp-business-card:hover .lp-business-card__img {
+  transform: scale(1.08);
+}
+
+.lp-business-card__gradient {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--gradient-primary);
+  opacity: 0.9;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lp-business-card:hover .lp-business-card__gradient {
+  opacity: 0.95;
+}
+
+/* Unified gradient background using primary color scheme */
+.lp-business-card--restaurants .lp-business-card__gradient,
+.lp-business-card--hotels .lp-business-card__gradient,
+.lp-business-card--retail .lp-business-card__gradient,
+.lp-business-card--salons .lp-business-card__gradient,
+.lp-business-card--fitness .lp-business-card__gradient,
+.lp-business-card--seasonal .lp-business-card__gradient {
+  background: var(--gradient-primary);
+}
+
+/* Overlay on image with button */
+.lp-business-card__overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.lp-business-card__button {
+  color: var(--white);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: auto;
+  min-width: fit-content;
+  text-align: center;
+  position: relative;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  pointer-events: auto;
+  z-index: 3;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+.lp-business-card__button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.lp-business-card__button:hover {
+  transform: translateY(-3px) scale(1.02);
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.lp-business-card__button:hover::before {
+  left: 100%;
+}
+
+.lp-business-card__button:active {
+  transform: translateY(-1px) scale(1);
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Light theme adjustments for transparent button */
+.lp-root[data-theme='light'] .lp-business-card__button {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--white);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.lp-root[data-theme='light'] .lp-business-card__button:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Unified button styling - all use transparent glassmorphism */
+.lp-business-card--restaurants .lp-business-card__button,
+.lp-business-card--hotels .lp-business-card__button,
+.lp-business-card--retail .lp-business-card__button,
+.lp-business-card--salons .lp-business-card__button,
+.lp-business-card--fitness .lp-business-card__button,
+.lp-business-card--seasonal .lp-business-card__button {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.lp-business-card--restaurants .lp-business-card__button:hover,
+.lp-business-card--hotels .lp-business-card__button:hover,
+.lp-business-card--retail .lp-business-card__button:hover,
+.lp-business-card--salons .lp-business-card__button:hover,
+.lp-business-card--fitness .lp-business-card__button:hover,
+.lp-business-card--seasonal .lp-business-card__button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Business Modal */
+.lp-business-modal {
+  background: var(--panel);
+  border-radius: 20px;
+  padding: 0;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+.lp-business-modal__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.lp-business-modal__close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #fca5a5;
+  transform: scale(1.1);
+}
+
+.lp-business-modal__header {
+  padding: 40px 40px 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.lp-business-modal__title {
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: var(--white);
+  line-height: 1.2;
+}
+
+.lp-business-modal__subtitle {
+  font-size: clamp(16px, 2.5vw, 18px);
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.lp-business-modal__content {
+  padding: 32px 40px;
+}
+
+.lp-business-modal__description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 32px 0;
+}
+
+.lp-business-modal__features,
+.lp-business-modal__benefits {
+  margin-bottom: 32px;
+}
+
+.lp-business-modal__features:last-child,
+.lp-business-modal__benefits:last-child {
+  margin-bottom: 0;
+}
+
+.lp-business-modal__features-title,
+.lp-business-modal__benefits-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--white);
+  margin: 0 0 16px 0;
+}
+
+.lp-business-modal__features-list,
+.lp-business-modal__benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lp-business-modal__features-list li,
+.lp-business-modal__benefits-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.lp-business-modal__features-list li svg {
+  color: var(--success);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.lp-business-modal__benefits-list li svg {
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.lp-business-modal__actions {
+  padding: 24px 40px 40px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  border-top: 1px solid var(--border);
+}
+
+.lp-business-modal__actions .lp-btn {
+  min-width: 180px;
+}
+
+/* Responsive Business Cards */
+@media (min-width: 768px) {
+  .lp-business-categories__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  
+  .lp-business-card__image {
+    min-height: 280px;
+  }
+  
+  .lp-business-card__overlay {
+    padding: 28px 24px;
+  }
+  
+  .lp-business-card__button {
+    padding: 16px 32px;
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lp-business-categories__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+  }
+  
+  .lp-business-card__image {
+    min-height: 300px;
+  }
+  
+  .lp-business-card__overlay {
+    padding: 32px 28px;
+  }
+}
+
+@media (max-width: 767px) {
+  .lp-business-categories {
+    margin-top: 40px;
+  }
+  
+  .lp-business-categories__grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .lp-business-card {
+    border-radius: 16px;
+  }
+  
+  .lp-business-card__image {
+    min-height: 250px;
+  }
+  
+  .lp-business-card__overlay {
+    padding: 20px;
+  }
+  
+  .lp-business-card__button {
+    padding: 14px 24px;
+    font-size: 14px;
+  }
+  
+  .lp-business-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .lp-business-modal__header {
+    padding: 32px 24px 20px;
+  }
+  
+  .lp-business-modal__content {
+    padding: 24px;
+  }
+  
+  .lp-business-modal__actions {
+    padding: 20px 24px 32px;
+    flex-direction: column;
+  }
+  
+  .lp-business-modal__actions .lp-btn {
+    width: 100%;
+  }
+  
+  .lp-business-modal__close {
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Additional professional styling */
+.lp-business-card__button:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.lp-business-card:focus-within {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+.lp-root[data-theme='light'] .lp-business-modal {
+  background: var(--panel);
+  border-color: var(--border);
+}
+
+.lp-root[data-theme='light'] .lp-business-modal__close {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: var(--border);
+  color: var(--white);
+}
+
+.lp-root[data-theme='light'] .lp-business-modal__close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
 }
 
 /* Smooth scrolling for better UX */
@@ -2744,6 +3273,1172 @@ html {
   
   .lp-dot:active {
     transform: scale(0.9);
+  }
+}
+
+/* ============================================ */
+/* ANIMATED GIFT CARD SCAN SECTION              */
+/* ============================================ */
+
+/* Animation Container - Shared space for gift card and categories */
+.lp-gift-animation-container {
+  position: relative;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 48px auto;
+  overflow: visible;
+  perspective: 1000px;
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Adjust container height based on animation phase */
+.lp-animated-section--laptop-appear .lp-gift-animation-container,
+.lp-animated-section--zoom-in .lp-gift-animation-container {
+  min-height: 500px;
+}
+
+.lp-animated-section--revealed .lp-gift-animation-container {
+  min-height: 800px;
+}
+
+@media (min-width: 768px) {
+  .lp-animated-section--laptop-appear .lp-gift-animation-container,
+  .lp-animated-section--zoom-in .lp-gift-animation-container {
+    min-height: 450px;
+  }
+  
+  .lp-animated-section--revealed .lp-gift-animation-container {
+    min-height: 750px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lp-animated-section--laptop-appear .lp-gift-animation-container,
+  .lp-animated-section--zoom-in .lp-gift-animation-container {
+    min-height: 450px;
+  }
+  
+  .lp-animated-section--revealed .lp-gift-animation-container {
+    min-height: 700px;
+  }
+}
+
+/* Animated Section Base */
+.lp-animated-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.lp-animated-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(108, 140, 255, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(34, 197, 94, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scanning Gift Card Container */
+.lp-scan-giftcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.lp-scan-giftcard--hidden {
+  opacity: 0;
+  transform: scale(0.3) rotateY(90deg);
+  pointer-events: none;
+  position: absolute;
+}
+
+/* Floating Particles Background */
+.lp-particles {
+  position: absolute;
+  top: -50px;
+  left: -100px;
+  right: -100px;
+  bottom: -50px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lp-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  opacity: 0.4;
+  left: var(--x);
+  top: var(--y);
+  animation: particleFloat var(--duration) ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translate(10px, -15px) scale(1.2);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-5px, -25px) scale(0.8);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(15px, -10px) scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+/* The Scan Card Itself */
+.lp-scan-card {
+  position: relative;
+  width: 380px;
+  height: 240px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #1a1f35 0%, #0d1220 100%);
+  border: 1px solid rgba(108, 140, 255, 0.3);
+  box-shadow: 
+    0 25px 60px -15px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(108, 140, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  animation: cardFloat 6s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0) rotateX(2deg) rotateY(-2deg);
+  }
+  33% {
+    transform: translateY(-15px) rotateX(-1deg) rotateY(3deg);
+  }
+  66% {
+    transform: translateY(-8px) rotateX(1deg) rotateY(-1deg);
+  }
+}
+
+.lp-animated-section--scanning .lp-scan-card {
+  animation: cardFloat 6s ease-in-out infinite, cardPulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes cardPulse {
+  from {
+    box-shadow: 
+      0 25px 60px -15px rgba(0, 0, 0, 0.5),
+      0 0 40px rgba(108, 140, 255, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  to {
+    box-shadow: 
+      0 25px 60px -15px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(108, 140, 255, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Card Glow Effect */
+.lp-scan-card__glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(108, 140, 255, 0.1) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.lp-animated-section--scanning .lp-scan-card__glow {
+  opacity: 1;
+  animation: glowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Card Inner Content */
+.lp-scan-card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 24px 28px;
+  z-index: 1;
+}
+
+.lp-scan-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.lp-scan-card__icon {
+  color: var(--primary-2);
+  filter: drop-shadow(0 0 8px rgba(108, 140, 255, 0.5));
+}
+
+.lp-scan-card__brand {
+  font-size: 18px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-2) 0%, var(--success) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+
+.lp-scan-card__chip {
+  position: absolute;
+  top: 70px;
+  left: 28px;
+  width: 45px;
+  height: 35px;
+  background: linear-gradient(135deg, #ffd700 0%, #b8860b 50%, #ffd700 100%);
+  border-radius: 6px;
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.lp-scan-card__chip::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2px solid rgba(139, 90, 43, 0.5);
+  border-radius: 3px;
+}
+
+.lp-scan-card__nfc {
+  position: absolute;
+  top: 75px;
+  left: 85px;
+  color: rgba(255, 255, 255, 0.5);
+  transform: rotate(90deg);
+}
+
+.lp-scan-card__title {
+  position: absolute;
+  bottom: 60px;
+  left: 28px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.5px;
+}
+
+.lp-scan-card__amount {
+  position: absolute;
+  bottom: 24px;
+  left: 28px;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--white);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* QR Code Pattern */
+.lp-scan-card__qr {
+  position: absolute;
+  bottom: 24px;
+  right: 28px;
+  width: 60px;
+  height: 60px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.lp-qr-pattern {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+}
+
+.lp-qr-cell {
+  background: #0b0c10;
+  border-radius: 1px;
+}
+
+/* Scan Line Animation */
+.lp-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(108, 140, 255, 0.3) 20%, 
+    rgba(108, 140, 255, 1) 50%, 
+    rgba(108, 140, 255, 0.3) 80%, 
+    transparent 100%
+  );
+  box-shadow: 
+    0 0 20px rgba(108, 140, 255, 0.8),
+    0 0 40px rgba(108, 140, 255, 0.4),
+    0 0 60px rgba(108, 140, 255, 0.2);
+  animation: scanLine 2s ease-in-out infinite;
+  z-index: 10;
+  border-radius: 2px;
+}
+
+@keyframes scanLine {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: calc(100% - 4px);
+    opacity: 0;
+  }
+}
+
+/* Scan Glow Effect */
+.lp-scan-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(180deg, rgba(108, 140, 255, 0.3) 0%, transparent 100%);
+  animation: scanGlow 2s ease-in-out infinite;
+  z-index: 9;
+  pointer-events: none;
+}
+
+@keyframes scanGlow {
+  0% {
+    top: -80px;
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    top: calc(100% - 80px);
+    opacity: 0;
+  }
+}
+
+/* Scan Pulse Effect */
+.lp-scan-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(108, 140, 255, 0.5);
+  border-radius: 24px;
+  transform: translate(-50%, -50%);
+  animation: scanPulse 1s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes scanPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* NFC Wave Animation */
+.lp-nfc-waves {
+  position: absolute;
+  top: 50%;
+  right: -30px;
+  transform: translateY(-50%);
+  z-index: 15;
+}
+
+.lp-nfc-wave {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(108, 140, 255, 0.6);
+  border-radius: 50%;
+  animation: nfcWave 1.5s ease-out infinite;
+}
+
+@keyframes nfcWave {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Scan Status Text */
+.lp-scan-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: rgba(108, 140, 255, 0.1);
+  border: 1px solid rgba(108, 140, 255, 0.3);
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-2);
+  animation: statusPulse 1s ease-in-out infinite;
+}
+
+.lp-scan-status__dot {
+  width: 8px;
+  height: 8px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: dotBlink 0.8s ease-in-out infinite;
+}
+
+@keyframes dotBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+@keyframes statusPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(108, 140, 255, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(108, 140, 255, 0); }
+}
+
+/* Burst Particles During Transformation */
+.lp-burst-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 20;
+}
+
+.lp-burst-particle {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--success) 100%);
+  border-radius: 50%;
+  animation: burstOut 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: var(--delay);
+  box-shadow: 0 0 10px var(--primary);
+}
+
+@keyframes burstOut {
+  0% {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--distance));
+    opacity: 0;
+  }
+}
+
+/* Business Categories - Animated Version - Positioned in same space as gift card */
+.lp-business-categories--animated {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.lp-business-categories--visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+
+/* Individual Card Animation */
+.lp-business-card--animated {
+  opacity: 0;
+  transform: translateY(40px) scale(0.9);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: var(--reveal-delay);
+}
+
+.lp-business-categories--visible .lp-business-card--animated {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Enhanced Hover Effects for Category Cards */
+
+/* Enhanced Card Hover - Lift and Shadow */
+.lp-business-card--animated:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(108, 140, 255, 0.2);
+}
+
+.lp-business-card--animated:hover .lp-business-card__img {
+  transform: scale(1.12);
+}
+
+/* Light Theme Adjustments */
+.lp-root[data-theme='light'] .lp-scan-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f0f4ff 100%);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.lp-root[data-theme='light'] .lp-scan-card__amount,
+.lp-root[data-theme='light'] .lp-scan-card__title {
+  color: #0b0c10;
+}
+
+.lp-root[data-theme='light'] .lp-scan-status {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.lp-root[data-theme='light'] .lp-particle {
+  background: var(--primary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767px) {
+  .lp-gift-animation-container {
+    min-height: 400px;
+    margin: 32px 0;
+  }
+  
+  .lp-animated-section--revealed .lp-gift-animation-container {
+    min-height: 1200px;
+  }
+  
+  .lp-business-categories--animated {
+    padding: 0 16px;
+  }
+  
+  .lp-scan-card {
+    width: 300px;
+    height: 190px;
+  }
+  
+  .lp-scan-card__inner {
+    padding: 20px 22px;
+  }
+  
+  .lp-scan-card__chip {
+    width: 38px;
+    height: 28px;
+    top: 58px;
+    left: 22px;
+  }
+  
+  .lp-scan-card__nfc {
+    top: 62px;
+    left: 70px;
+  }
+  
+  .lp-scan-card__title {
+    bottom: 50px;
+    left: 22px;
+    font-size: 12px;
+  }
+  
+  .lp-scan-card__amount {
+    bottom: 20px;
+    left: 22px;
+    font-size: 26px;
+  }
+  
+  .lp-scan-card__qr {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 22px;
+  }
+  
+  .lp-scan-status {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
+  .lp-particles {
+    left: -50px;
+    right: -50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lp-gift-animation-container {
+    min-height: 350px;
+    margin: 24px 0;
+  }
+  
+  .lp-animated-section--revealed .lp-gift-animation-container {
+    min-height: 1400px;
+  }
+  
+  .lp-business-categories--animated {
+    padding: 0 12px;
+  }
+  
+  .lp-scan-card {
+    width: 260px;
+    height: 165px;
+  }
+  
+  .lp-scan-card__inner {
+    padding: 16px 18px;
+  }
+  
+  .lp-scan-card__header {
+    margin-bottom: 10px;
+  }
+  
+  .lp-scan-card__icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .lp-scan-card__brand {
+    font-size: 15px;
+  }
+  
+  .lp-scan-card__chip {
+    width: 32px;
+    height: 24px;
+    top: 50px;
+    left: 18px;
+  }
+  
+  .lp-scan-card__nfc {
+    top: 52px;
+    left: 58px;
+  }
+  
+  .lp-scan-card__nfc svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .lp-scan-card__title {
+    bottom: 42px;
+    left: 18px;
+    font-size: 11px;
+  }
+  
+  .lp-scan-card__amount {
+    bottom: 16px;
+    left: 18px;
+    font-size: 22px;
+  }
+  
+  .lp-scan-card__qr {
+    width: 42px;
+    height: 42px;
+    bottom: 16px;
+    right: 18px;
+    padding: 5px;
+  }
+  
+  .lp-scan-status {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  
+  .lp-nfc-waves {
+    display: none;
+  }
+}
+
+/* ============================================ */
+/* LAPTOP REVEAL & ZOOM ANIMATION               */
+/* ============================================ */
+
+/* Laptop Container */
+.lp-laptop-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lp-laptop-container--visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.lp-laptop-container--zoomed {
+  transform: translate(-50%, -50%) scale(2.5);
+  opacity: 0;
+  transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Laptop Body */
+.lp-laptop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.4));
+}
+
+/* Laptop Screen */
+.lp-laptop__screen {
+  width: 500px;
+  height: 320px;
+  background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
+  border-radius: 16px 16px 0 0;
+  padding: 8px;
+  position: relative;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 -2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.lp-laptop__screen-bezel {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #0d0d0d 0%, #1a1a1a 100%);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Camera dot */
+.lp-laptop__camera {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #333 40%, #222 100%);
+  border-radius: 50%;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.lp-laptop__camera::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+/* Laptop Display */
+.lp-laptop__display {
+  flex: 1;
+  margin: 20px 12px 12px;
+  background: linear-gradient(145deg, #0f1218 0%, #1a1f2e 100%);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header bar inside screen */
+.lp-laptop__header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lp-laptop__logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--primary-2);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lp-laptop__nav-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.lp-laptop__nav-dots span {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+/* Category cards grid inside laptop */
+.lp-laptop__categories {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+  padding: 10px;
+}
+
+.lp-laptop__category-card {
+  background: linear-gradient(145deg, #252a3a 0%, #1a1f2e 100%);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: categoryCardAppear 0.6s ease-out backwards;
+  animation-delay: var(--card-delay);
+  transition: all 0.3s ease;
+}
+
+@keyframes categoryCardAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.lp-laptop__category-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(108, 140, 255, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.lp-laptop__category-img {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  min-height: 50px;
+}
+
+.lp-laptop__category-name {
+  padding: 6px 8px;
+  font-size: 8px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Screen glow effect */
+.lp-laptop__screen-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, rgba(108, 140, 255, 0.08) 0%, transparent 70%);
+  animation: screenPulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes screenPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Laptop Base/Keyboard */
+.lp-laptop__base {
+  width: 540px;
+  height: 25px;
+  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  border-radius: 0 0 8px 8px;
+  position: relative;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.lp-laptop__base::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 4px;
+  background: linear-gradient(180deg, #222 0%, #333 100%);
+  border-radius: 0 0 4px 4px;
+}
+
+.lp-laptop__keyboard {
+  display: none; /* Hidden in simplified view */
+}
+
+.lp-laptop__trackpad {
+  display: none; /* Hidden in simplified view */
+}
+
+/* Laptop Shadow */
+.lp-laptop__shadow {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 30px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3) 0%, transparent 70%);
+  filter: blur(10px);
+}
+
+/* Light theme laptop adjustments */
+.lp-root[data-theme='light'] .lp-laptop__display {
+  background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.lp-root[data-theme='light'] .lp-laptop__header-bar {
+  background: rgba(0, 0, 0, 0.05);
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+.lp-root[data-theme='light'] .lp-laptop__logo {
+  color: var(--primary);
+}
+
+.lp-root[data-theme='light'] .lp-laptop__nav-dots span {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.lp-root[data-theme='light'] .lp-laptop__category-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f0f4ff 100%);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.lp-root[data-theme='light'] .lp-laptop__category-name {
+  color: #0b0c10;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Responsive laptop sizing */
+@media (max-width: 767px) {
+  .lp-laptop__screen {
+    width: 320px;
+    height: 220px;
+    border-radius: 12px 12px 0 0;
+    padding: 6px;
+  }
+  
+  .lp-laptop__screen-bezel {
+    border-radius: 8px;
+  }
+  
+  .lp-laptop__display {
+    margin: 16px 8px 8px;
+  }
+  
+  .lp-laptop__header-bar {
+    padding: 6px 10px;
+  }
+  
+  .lp-laptop__logo {
+    font-size: 9px;
+  }
+  
+  .lp-laptop__logo svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .lp-laptop__nav-dots span {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .lp-laptop__categories {
+    gap: 6px;
+    padding: 8px;
+  }
+  
+  .lp-laptop__category-card {
+    border-radius: 6px;
+  }
+  
+  .lp-laptop__category-img {
+    min-height: 40px;
+  }
+  
+  .lp-laptop__category-name {
+    padding: 4px 6px;
+    font-size: 7px;
+  }
+  
+  .lp-laptop__base {
+    width: 340px;
+    height: 18px;
+  }
+  
+  .lp-laptop__base::before {
+    width: 80px;
+    height: 3px;
+  }
+  
+  .lp-laptop-container--zoomed {
+    transform: translate(-50%, -50%) scale(2.2);
+  }
+}
+
+@media (max-width: 480px) {
+  .lp-laptop__screen {
+    width: 280px;
+    height: 190px;
+    padding: 5px;
+  }
+  
+  .lp-laptop__display {
+    margin: 14px 6px 6px;
+  }
+  
+  .lp-laptop__header-bar {
+    padding: 5px 8px;
+  }
+  
+  .lp-laptop__logo {
+    font-size: 8px;
+    gap: 4px;
+  }
+  
+  .lp-laptop__logo svg {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .lp-laptop__nav-dots span {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .lp-laptop__categories {
+    gap: 4px;
+    padding: 6px;
+  }
+  
+  .lp-laptop__category-card {
+    border-radius: 4px;
+  }
+  
+  .lp-laptop__category-img {
+    min-height: 30px;
+  }
+  
+  .lp-laptop__category-name {
+    padding: 3px 4px;
+    font-size: 6px;
+  }
+  
+  .lp-laptop__base {
+    width: 300px;
+    height: 15px;
+  }
+  
+  .lp-laptop__base::before {
+    width: 60px;
+    height: 2px;
+  }
+  
+  .lp-laptop-container--zoomed {
+    transform: translate(-50%, -50%) scale(2);
+  }
+}
+
+/* Prefers Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .lp-scan-card {
+    animation: none;
+  }
+  
+  .lp-particle {
+    animation: none;
+    opacity: 0.3;
+  }
+  
+  .lp-scan-line,
+  .lp-scan-glow,
+  .lp-scan-pulse,
+  .lp-nfc-wave {
+    animation: none;
+    opacity: 0.5;
+  }
+  
+  .lp-burst-particle {
+    animation: none;
+  }
+  
+  .lp-business-card--animated,
+  .lp-business-categories--animated {
+    transition-duration: 0.1s;
+  }
+  
+  .lp-laptop-container {
+    transition-duration: 0.1s;
+  }
+  
+  .lp-laptop__card {
+    animation: none;
+  }
+  
+  .lp-laptop__screen-glow {
+    animation: none;
+    opacity: 0.5;
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/giftygen_logo.svg";
@@ -30,6 +30,8 @@ import {
   ChevronRight,
   Menu,
   X,
+  CreditCard,
+  Wifi,
 } from "lucide-react";
 
 function LandingPage() {
@@ -77,6 +79,73 @@ function LandingPage() {
     );
   };
 
+  const BusinessModal = ({ isOpen, onClose, businessType }) => {
+    if (!isOpen || !businessType) return null;
+
+    const businessData = t(`businessCategories.${businessType}`, { returnObjects: true });
+
+    return (
+      <div className="lp-modal-overlay" onClick={onClose}>
+        <div
+          className="lp-business-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="business-modal-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button className="lp-business-modal__close" onClick={onClose} aria-label="Close modal">
+            <X size={24} />
+          </button>
+          <div className="lp-business-modal__header">
+            <h2 id="business-modal-title" className="lp-business-modal__title">
+              {businessData.title}
+            </h2>
+            <p className="lp-business-modal__subtitle">{businessData.subtitle}</p>
+          </div>
+          <div className="lp-business-modal__content">
+            <p className="lp-business-modal__description">{businessData.description}</p>
+            <div className="lp-business-modal__features">
+              <h3 className="lp-business-modal__features-title">{businessData.featuresTitle}</h3>
+              <ul className="lp-business-modal__features-list">
+                {businessData.features.map((feature, index) => (
+                  <li key={index}>
+                    <CheckCircle size={18} />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="lp-business-modal__benefits">
+              <h3 className="lp-business-modal__benefits-title">{businessData.benefitsTitle}</h3>
+              <ul className="lp-business-modal__benefits-list">
+                {businessData.benefits.map((benefit, index) => (
+                  <li key={index}>
+                    <Star size={16} />
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="lp-business-modal__actions">
+            <button
+              className="lp-btn"
+              onClick={() => {
+                onClose();
+                handleScrollTo("register");
+              }}
+            >
+              {t("businessCategories.cta.register")}
+            </button>
+            <button className="lp-btn lp-btn--ghost" onClick={onClose}>
+              {t("businessCategories.cta.close")}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Detect and set language based on geolocation
   useEffect(() => {
     const initializeLanguage = async () => {
@@ -109,6 +178,77 @@ function LandingPage() {
     message: "",
     type: "success",
   });
+
+  const [businessModalState, setBusinessModalState] = useState({
+    isOpen: false,
+    selectedBusiness: null,
+  });
+
+  // Animation states for the gift card reveal section
+  // Phases: initial -> scanning -> laptop-appear -> zoom-in -> revealed
+  const [animationPhase, setAnimationPhase] = useState("initial");
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const animationSectionRef = useRef(null);
+
+  // Animation phases: initial -> scanning -> laptop-appear -> zoom-in -> revealed
+  const startAnimation = useCallback(() => {
+    if (hasAnimated) return;
+    setHasAnimated(true);
+
+    // Phase 1: Start scanning animation
+    setAnimationPhase("scanning");
+
+    // Phase 2: After scan completes (2 seconds), laptop appears
+    setTimeout(() => {
+      setAnimationPhase("laptop-appear");
+    }, 2000);
+
+    // Phase 3: After laptop appears (1.5 seconds), zoom into laptop screen
+    setTimeout(() => {
+      setAnimationPhase("zoom-in");
+    }, 3500);
+
+    // Phase 4: After zoom completes (1.5 seconds), reveal categories
+    setTimeout(() => {
+      setAnimationPhase("revealed");
+    }, 5000);
+  }, [hasAnimated]);
+
+  // Intersection Observer for scroll-triggered animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            startAnimation();
+          }
+        });
+      },
+      {
+        threshold: 0.3,
+        rootMargin: "-50px 0px",
+      }
+    );
+
+    if (animationSectionRef.current) {
+      observer.observe(animationSectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasAnimated, startAnimation]);
+
+  // Business category images mapping
+  // Place images in: frontend/public/images/business-categories/
+  // Supported formats: .jpg, .jpeg, .png, .webp
+  // Image names should match: restaurants.jpg, hotels.jpg, retail.jpg, salons.jpg, fitness.jpg, seasonal.jpg
+  const businessCategoryImages = {
+    restaurants: "/images/business-categories/restaurants.jpg",
+    hotels: "/images/business-categories/hotels.jpg",
+    retail: "/images/business-categories/retail.jpg",
+    salons: "/images/business-categories/salons.jpg",
+    fitness: "/images/business-categories/fitness.jpg",
+    seasonal: "/images/business-categories/seasonal.jpeg",
+  };
 
   const benefitsData = useMemo(
     () => [
@@ -375,10 +515,219 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Business Offer */}
-      <section className="lp-offer">
+      {/* Animated Business Offer Section */}
+      <section
+        className={`lp-offer lp-animated-section lp-animated-section--${animationPhase}`}
+        ref={animationSectionRef}
+      >
         <h2 className="lp-section__title lp-h2">{t("offer.title")}</h2>
         <p className="lp-lead">{t("offer.description")}</p>
+
+        {/* Animated Gift Card Container */}
+        <div className="lp-gift-animation-container">
+          {/* The scanning gift card - visible only in initial and scanning phases */}
+          <div
+            className={`lp-scan-giftcard ${
+              animationPhase === "laptop-appear" || animationPhase === "zoom-in" || animationPhase === "revealed"
+                ? "lp-scan-giftcard--hidden"
+                : ""
+            }`}
+          >
+            {/* Floating particles background */}
+            <div className="lp-particles">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="lp-particle"
+                  style={{
+                    "--delay": `${Math.random() * 2}s`,
+                    "--x": `${Math.random() * 100}%`,
+                    "--y": `${Math.random() * 100}%`,
+                    "--duration": `${2 + Math.random() * 3}s`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* The gift card */}
+            <div className="lp-scan-card">
+              <div className="lp-scan-card__glow" />
+              <div className="lp-scan-card__inner">
+                <div className="lp-scan-card__header">
+                  <CreditCard className="lp-scan-card__icon" size={24} />
+                  <span className="lp-scan-card__brand">GiftyGen</span>
+                </div>
+                <div className="lp-scan-card__chip" />
+                <div className="lp-scan-card__nfc">
+                  <Wifi size={18} />
+                </div>
+                <div className="lp-scan-card__title">{t("giftCard.digitalGiftCard")}</div>
+                <div className="lp-scan-card__amount">{formatCurrency(500, "INR")}</div>
+                <div className="lp-scan-card__qr">
+                  <div className="lp-qr-pattern">
+                    {[...Array(25)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="lp-qr-cell"
+                        style={{
+                          opacity: Math.random() > 0.5 ? 1 : 0.2,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Scan line animation - only during scanning phase */}
+              {animationPhase === "scanning" && (
+                <>
+                  <div className="lp-scan-line" />
+                  <div className="lp-scan-glow" />
+                  <div className="lp-scan-pulse" />
+                  {/* NFC wave animation */}
+                  <div className="lp-nfc-waves">
+                    <div className="lp-nfc-wave" />
+                    <div className="lp-nfc-wave" style={{ animationDelay: "0.3s" }} />
+                    <div className="lp-nfc-wave" style={{ animationDelay: "0.6s" }} />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Scanning status text */}
+            {animationPhase === "scanning" && (
+              <div className="lp-scan-status">
+                <div className="lp-scan-status__dot" />
+                <span>Scanning gift card...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Laptop with category cards inside - appears after scan */}
+          <div
+            className={`lp-laptop-container ${
+              animationPhase === "laptop-appear" || animationPhase === "zoom-in" || animationPhase === "revealed"
+                ? "lp-laptop-container--visible"
+                : ""
+            } ${animationPhase === "zoom-in" || animationPhase === "revealed" ? "lp-laptop-container--zoomed" : ""}`}
+          >
+            {/* Laptop body */}
+            <div className="lp-laptop">
+              {/* Laptop screen */}
+              <div className="lp-laptop__screen">
+                <div className="lp-laptop__screen-bezel">
+                  {/* Camera dot */}
+                  <div className="lp-laptop__camera" />
+                  {/* Screen content - Category cards grid inside */}
+                  <div className="lp-laptop__display">
+                    {/* Header bar */}
+                    <div className="lp-laptop__header-bar">
+                      <div className="lp-laptop__logo">
+                        <CreditCard size={14} />
+                        <span>GiftyGen</span>
+                      </div>
+                      <div className="lp-laptop__nav-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                    </div>
+                    {/* Category cards grid */}
+                    <div className="lp-laptop__categories">
+                      {["restaurants", "hotels", "retail", "salons", "fitness", "seasonal"].map((category, index) => (
+                        <div
+                          key={category}
+                          className="lp-laptop__category-card"
+                          style={{ "--card-delay": `${index * 0.1}s` }}
+                        >
+                          <div
+                            className="lp-laptop__category-img"
+                            style={{ backgroundImage: `url(${businessCategoryImages[category]})` }}
+                          />
+                          <div className="lp-laptop__category-name">{t(`businessCategories.${category}.title`)}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Screen glow effect */}
+                    <div className="lp-laptop__screen-glow" />
+                  </div>
+                </div>
+              </div>
+              {/* Laptop base/keyboard */}
+              <div className="lp-laptop__base">
+                <div className="lp-laptop__trackpad" />
+              </div>
+              {/* Laptop shadow */}
+              <div className="lp-laptop__shadow" />
+            </div>
+          </div>
+
+          {/* Burst particles during zoom transition */}
+          {animationPhase === "zoom-in" && (
+            <div className="lp-burst-container">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="lp-burst-particle"
+                  style={{
+                    "--angle": `${(i / 20) * 360}deg`,
+                    "--distance": `${80 + Math.random() * 100}px`,
+                    "--delay": `${Math.random() * 0.3}s`,
+                    "--size": `${3 + Math.random() * 6}px`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Business Category Cards - revealed after animation, in same position */}
+          <div
+            className={`lp-business-categories lp-business-categories--animated ${
+              animationPhase === "revealed" ? "lp-business-categories--visible" : ""
+            }`}
+          >
+            <div className="lp-business-categories__grid">
+              {["restaurants", "hotels", "retail", "salons", "fitness", "seasonal"].map((category, index) => (
+                <div
+                  key={category}
+                  className={`lp-business-card lp-business-card--${category} lp-business-card--animated`}
+                  style={{ "--reveal-delay": `${index * 0.12}s` }}
+                  onClick={() => setBusinessModalState({ isOpen: true, selectedBusiness: category })}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setBusinessModalState({ isOpen: true, selectedBusiness: category });
+                    }
+                  }}
+                  aria-label={`Learn how GiftyGen helps ${t(`businessCategories.${category}.title`)}`}
+                >
+                  <div className="lp-business-card__image">
+                    <img
+                      src={businessCategoryImages[category]}
+                      alt={t(`businessCategories.${category}.title`)}
+                      className="lp-business-card__img"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        const gradient = e.target.nextElementSibling;
+                        if (gradient) {
+                          gradient.style.display = "block";
+                        }
+                      }}
+                    />
+                    <div className="lp-business-card__gradient" style={{ display: "none" }}></div>
+                    {/* Button overlaid on image */}
+                    <div className="lp-business-card__overlay">
+                      <button className="lp-business-card__button">{t(`businessCategories.${category}.title`)}</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Product Highlights */}
@@ -729,6 +1078,11 @@ function LandingPage() {
         onClose={() => setModalState({ ...modalState, isOpen: false })}
         message={modalState.message}
         type={modalState.type}
+      />
+      <BusinessModal
+        isOpen={businessModalState.isOpen}
+        onClose={() => setBusinessModalState({ isOpen: false, selectedBusiness: null })}
+        businessType={businessModalState.selectedBusiness}
       />
     </div>
   );

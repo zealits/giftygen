@@ -365,10 +365,143 @@
     "from": "From: Sender"
   },
   "modal": {
-  "successTitle": "Success!",
-  "errorTitle": "Error",
-  "close": "Close"
-}
+    "successTitle": "Success!",
+    "errorTitle": "Error",
+    "close": "Close"
+  },
+  "businessCategories": {
+    "cta": {
+      "register": "Register Your Business",
+      "close": "Close",
+      "learnMore": "Learn More"
+    },
+    "restaurants": {
+      "title": "Restaurants and Dining",
+      "subtitle": "Boost your restaurant's revenue and customer loyalty with digital gift cards",
+      "description": "GiftyGen helps restaurants increase revenue, attract new customers, and build lasting relationships. Our digital gift card platform is perfect for restaurants looking to boost sales during peak seasons, reward loyal customers, and create memorable dining experiences.",
+      "featuresTitle": "How GiftyGen Helps Restaurants",
+      "features": [
+        "Increase revenue during slow periods with gift card promotions",
+        "Attract new customers through gift card gifting",
+        "Build customer loyalty with reward programs",
+        "Create seasonal promotions for holidays and special events",
+        "Track customer spending patterns and preferences",
+        "Easy redemption at POS systems or online ordering"
+      ],
+      "benefitsTitle": "Key Benefits",
+      "benefits": [
+        "Higher average transaction values",
+        "Increased customer retention",
+        "Better cash flow management",
+        "Expanded customer base"
+      ]
+    },
+    "hotels": {
+      "title": "Hotels",
+      "subtitle": "Enhance guest experiences and drive bookings with digital gift cards",
+      "description": "GiftyGen empowers hotels to offer flexible gift card solutions for room bookings, spa services, dining, and more. Perfect for corporate gifting, travel rewards, and special occasion packages.",
+      "featuresTitle": "How GiftyGen Helps Hotels",
+      "features": [
+        "Offer gift cards for room bookings and packages",
+        "Create spa and dining experience packages",
+        "Corporate gifting solutions for business clients",
+        "Loyalty program integration for repeat guests",
+        "Seasonal promotions for holidays and events",
+        "Multi-property gift card management"
+      ],
+      "benefitsTitle": "Key Benefits",
+      "benefits": [
+        "Increased advance bookings",
+        "Higher revenue per guest",
+        "Enhanced guest loyalty",
+        "Flexible corporate solutions"
+      ]
+    },
+    "retail": {
+      "title": "Retail",
+      "subtitle": "Drive sales and customer engagement with digital gift cards",
+      "description": "GiftyGen helps retail businesses boost sales, attract new customers, and create flexible shopping experiences. Perfect for both online and brick-and-mortar stores looking to increase revenue and customer satisfaction.",
+      "featuresTitle": "How GiftyGen Helps Retail Businesses",
+      "features": [
+        "Increase sales during peak shopping seasons",
+        "Attract new customers through gift card gifting",
+        "Create flexible return and exchange policies",
+        "Build customer loyalty programs",
+        "Track purchase patterns and preferences",
+        "Seamless integration with POS systems"
+      ],
+      "benefitsTitle": "Key Benefits",
+      "benefits": [
+        "Higher average transaction values",
+        "Improved customer retention",
+        "Better inventory management",
+        "Expanded customer reach"
+      ]
+    },
+    "salons": {
+      "title": "Salons & Spas",
+      "subtitle": "Grow your beauty and wellness business with digital gift cards",
+      "description": "GiftyGen helps salons and spas increase bookings, reward loyal clients, and create memorable experiences. Perfect for beauty businesses looking to boost revenue and build lasting customer relationships.",
+      "featuresTitle": "How GiftyGen Helps Salons & Spas",
+      "features": [
+        "Increase bookings during slow periods",
+        "Create service packages and promotions",
+        "Reward loyal clients with gift cards",
+        "Attract new customers through referrals",
+        "Build appointment-based loyalty programs",
+        "Easy redemption for services and products"
+      ],
+      "benefitsTitle": "Key Benefits",
+      "benefits": [
+        "Higher booking rates",
+        "Increased customer lifetime value",
+        "Better client retention",
+        "More referral business"
+      ]
+    },
+    "fitness": {
+      "title": "Fitness Centers",
+      "subtitle": "Boost membership and engagement with digital gift cards",
+      "description": "GiftyGen helps fitness centers attract new members, reward existing ones, and create flexible membership options. Perfect for gyms, yoga studios, and fitness facilities looking to grow their membership base.",
+      "featuresTitle": "How GiftyGen Helps Fitness Centers",
+      "features": [
+        "Attract new members with gift card promotions",
+        "Create flexible membership trial options",
+        "Reward referrals and loyalty",
+        "Offer gift cards for personal training sessions",
+        "Build seasonal membership campaigns",
+        "Track member engagement and retention"
+      ],
+      "benefitsTitle": "Key Benefits",
+      "benefits": [
+        "Increased membership sign-ups",
+        "Higher member retention rates",
+        "More referral business",
+        "Flexible membership options"
+      ]
+    },
+    "seasonal": {
+      "title": "Seasonal Gifting",
+      "subtitle": "Maximize revenue during holidays and special events",
+      "description": "GiftyGen helps businesses of all types capitalize on seasonal opportunities. Create targeted gift card campaigns for holidays, festivals, and special occasions to boost sales and customer engagement.",
+      "featuresTitle": "How GiftyGen Helps with Seasonal Gifting",
+      "features": [
+        "Create holiday-specific gift card campaigns",
+        "Launch limited-time promotional offers",
+        "Target specific customer segments",
+        "Build anticipation with pre-holiday sales",
+        "Increase revenue during peak seasons",
+        "Track seasonal trends and performance"
+      ],
+      "benefitsTitle": "Key Benefits",
+      "benefits": [
+        "Higher sales during peak seasons",
+        "Better inventory management",
+        "Improved customer engagement",
+        "Increased brand awareness"
+      ]
+    }
+  }
 }
 
 
