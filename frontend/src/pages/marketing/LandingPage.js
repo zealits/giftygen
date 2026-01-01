@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/giftygen_logo.svg";
@@ -50,56 +50,52 @@ function LandingPage() {
     email: false,
   });
   const SuccessModal = ({ isOpen, onClose, message, type = "success" }) => {
-  if (!isOpen) return null;
+    if (!isOpen) return null;
 
-  return (
-    <div className="lp-modal-overlay" onClick={onClose}>
-      <div
-        className="lp-modal"
-        role="dialog"
-        aria-modal="true"
-       aria-labelledby="modal-title"
-       onClick={(e) => e.stopPropagation()}
-      >
-        <div className={`lp-modal__icon lp-modal__icon--${type}`}>
-          {type === "success" ? (
-            <CheckCircle size={48} />
-          ) : (
-            <X size={48} />
-          )}
+    return (
+      <div className="lp-modal-overlay" onClick={onClose}>
+        <div
+          className="lp-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className={`lp-modal__icon lp-modal__icon--${type}`}>
+            {type === "success" ? <CheckCircle size={48} /> : <X size={48} />}
+          </div>
+          <h3 id="modal-title" className="lp-modal__title">
+            {type === "success" ? t("modal.successTitle") : t("modal.errorTitle")}
+          </h3>
+
+          <p className="lp-modal__message">{message}</p>
+          <button className="lp-btn lp-modal__btn" onClick={onClose}>
+            {t("modal.close")}
+          </button>
         </div>
-        <h3 id="modal-title" className="lp-modal__title">
-         {type === "success" ? t("modal.successTitle") : t("modal.errorTitle")}
-        </h3>
-
-        <p className="lp-modal__message">{message}</p>
-        <button className="lp-btn lp-modal__btn" onClick={onClose}>
-          {t("modal.close")}
-        </button>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
   // Detect and set language based on geolocation
   useEffect(() => {
     const initializeLanguage = async () => {
       try {
         setIsLoadingLanguage(true);
-        
+
         // Detect and set language based on user's location
         const detectedLang = await detectAndSetLanguage(i18n);
-        console.log('Detected language:', detectedLang);
+        console.log("Detected language:", detectedLang);
 
         // Optionally get detailed location info
         const locationData = await getDetailedLocation();
         setUserLocation(locationData);
-        
+
         if (locationData) {
-          console.log('User location:', locationData.country, locationData.city);
+          console.log("User location:", locationData.country, locationData.city);
         }
       } catch (error) {
-        console.error('Error initializing language:', error);
+        console.error("Error initializing language:", error);
       } finally {
         setIsLoadingLanguage(false);
       }
@@ -107,78 +103,81 @@ function LandingPage() {
 
     initializeLanguage();
   }, [i18n]);
-  
-  const [modalState, setModalState] = useState({
-  isOpen: false,
-  message: "",
-  type: "success"
-});
 
-  const benefitsData = useMemo(() => [
-    {
-      id: "seasonal",
-      icon: <TrendingUp size={24} />,
-      title: t("benefits.items.seasonal.title"),
-      description: t("benefits.items.seasonal.description"),
-      color: "var(--success)",
-    },
-    {
-      id: "revenue",
-      icon: <DollarSign size={24} />,
-      title: t("benefits.items.revenue.title"),
-      description: t("benefits.items.revenue.description"),
-      color: "var(--primary)",
-    },
-    {
-      id: "loyalty",
-      icon: <Users size={24} />,
-      title: t("benefits.items.loyalty.title"),
-      description: t("benefits.items.loyalty.description"),
-      color: "var(--primary-2)",
-    },
-    {
-      id: "repeat",
-      icon: <Repeat size={24} />,
-      title: t("benefits.items.repeat.title"),
-      description: t("benefits.items.repeat.description"),
-      color: "var(--success)",
-    },
-    {
-      id: "attract",
-      icon: <Target size={24} />,
-      title: t("benefits.items.attract.title"),
-      description: t("benefits.items.attract.description"),
-      color: "var(--primary)",
-    },
-    {
-      id: "trackable",
-      icon: <BarChart3 size={24} />,
-      title: t("benefits.items.trackable.title"),
-      description: t("benefits.items.trackable.description"),
-      color: "var(--primary-2)",
-    },
-    {
-      id: "visibility",
-      icon: <Eye size={24} />,
-      title: t("benefits.items.visibility.title"),
-      description: t("benefits.items.visibility.description"),
-      color: "var(--success)",
-    },
-    {
-      id: "orderValue",
-      icon: <DollarSign size={24} />,
-      title: t("benefits.items.orderValue.title"),
-      description: t("benefits.items.orderValue.description"),
-      color: "var(--primary)",
-    },
-    {
-      id: "flexible",
-      icon: <Gift size={24} />,
-      title: t("benefits.items.flexible.title"),
-      description: t("benefits.items.flexible.description"),
-      color: "var(--primary-2)",
-    },
-  ], [t]);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
+
+  const benefitsData = useMemo(
+    () => [
+      {
+        id: "seasonal",
+        icon: <TrendingUp size={24} />,
+        title: t("benefits.items.seasonal.title"),
+        description: t("benefits.items.seasonal.description"),
+        color: "var(--success)",
+      },
+      {
+        id: "revenue",
+        icon: <DollarSign size={24} />,
+        title: t("benefits.items.revenue.title"),
+        description: t("benefits.items.revenue.description"),
+        color: "var(--primary)",
+      },
+      {
+        id: "loyalty",
+        icon: <Users size={24} />,
+        title: t("benefits.items.loyalty.title"),
+        description: t("benefits.items.loyalty.description"),
+        color: "var(--primary-2)",
+      },
+      {
+        id: "repeat",
+        icon: <Repeat size={24} />,
+        title: t("benefits.items.repeat.title"),
+        description: t("benefits.items.repeat.description"),
+        color: "var(--success)",
+      },
+      {
+        id: "attract",
+        icon: <Target size={24} />,
+        title: t("benefits.items.attract.title"),
+        description: t("benefits.items.attract.description"),
+        color: "var(--primary)",
+      },
+      {
+        id: "trackable",
+        icon: <BarChart3 size={24} />,
+        title: t("benefits.items.trackable.title"),
+        description: t("benefits.items.trackable.description"),
+        color: "var(--primary-2)",
+      },
+      {
+        id: "visibility",
+        icon: <Eye size={24} />,
+        title: t("benefits.items.visibility.title"),
+        description: t("benefits.items.visibility.description"),
+        color: "var(--success)",
+      },
+      {
+        id: "orderValue",
+        icon: <DollarSign size={24} />,
+        title: t("benefits.items.orderValue.title"),
+        description: t("benefits.items.orderValue.description"),
+        color: "var(--primary)",
+      },
+      {
+        id: "flexible",
+        icon: <Gift size={24} />,
+        title: t("benefits.items.flexible.title"),
+        description: t("benefits.items.flexible.description"),
+        color: "var(--primary-2)",
+      },
+    ],
+    [t]
+  );
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % Math.ceil(benefitsData.length / 3));
@@ -205,11 +204,10 @@ function LandingPage() {
 
   const formatIndianPhone = (value) => {
     const digits = value.replace(/\D/g, "").slice(0, 10);
-  
+
     if (digits.length <= 5) return digits;
     return `${digits.slice(0, 5)} ${digits.slice(5)}`;
   };
-  
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -257,10 +255,7 @@ function LandingPage() {
   } */
 
   // SEO structured data
-  const structuredData = [
-    getOrganizationSchema(),
-    getWebsiteSchema()
-  ];
+  const structuredData = [getOrganizationSchema(), getWebsiteSchema()];
 
   return (
     <div className="lp-root" data-theme={theme}>
@@ -274,7 +269,13 @@ function LandingPage() {
       {/* Navbar */}
       <header className="lp-nav">
         <div className="lp-nav__brand" onClick={() => navigate("/")}>
-          <img src={logo} alt="GiftyGen digital gift card platform logo" width={120} height={40} className="lp-nav__logo" />
+          <img
+            src={logo}
+            alt="GiftyGen digital gift card platform logo"
+            width={120}
+            height={40}
+            className="lp-nav__logo"
+          />
         </div>
 
         {/* Desktop Navigation */}
@@ -288,7 +289,6 @@ function LandingPage() {
 
         {/* Desktop CTA */}
         <div className="lp-nav__cta">
-          
           <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === "dark" ? "☀️" : "🌙"}
           </button>
@@ -356,9 +356,8 @@ function LandingPage() {
               {t("hero.getStarted")}
             </button>
             <a href="/explore" className="lp-btn">
-               {t("hero.buyGiftCard")}
+              {t("hero.buyGiftCard")}
             </a>
-
           </div>
         </div>
         <div className="lp-hero__visual" aria-hidden>
@@ -366,7 +365,7 @@ function LandingPage() {
             <div className="lp-giftcard__ribbon" />
             <div className="lp-giftcard__brand">{t("giftCard.Brand")}</div>
             <div className="lp-giftcard__title">{t("giftCard.digitalGiftCard")}</div>
-            <div className="lp-giftcard__amount">{formatCurrency(50, 'INR')}</div>
+            <div className="lp-giftcard__amount">{formatCurrency(499, "INR")}</div>
             <div className="lp-giftcard__meta">
               <span>{t("giftCard.to")}</span>
               <span>{t("giftCard.from")}</span>
@@ -486,15 +485,15 @@ function LandingPage() {
           <div className="lp-benefits-container">
             <div className="lp-benefits-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
               {benefitsData.map((benefit, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="lp-benefit-card"
                   onClick={() => navigate(`/benefit/${benefit.id}`)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+                    if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
                       navigate(`/benefit/${benefit.id}`);
                     }
@@ -577,19 +576,20 @@ function LandingPage() {
                 }
                 payload.phone = `+91${cleanedPhone}`;
               }
-              
+
               const res = await fetch("/api/v1/admin/registration-interest", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
               });
               if (!res.ok) throw new Error("Failed to submit");
-              setModalState({    
-                 isOpen: true,
-                 type: "success",
-                 message: "Registration submitted successfully! Please check your email for confirmation and next steps. We'll be in touch within 24 hours."
-               });            
-               form.reset();
+              setModalState({
+                isOpen: true,
+                type: "success",
+                message:
+                  "Registration submitted successfully! Please check your email for confirmation and next steps. We'll be in touch within 24 hours.",
+              });
+              form.reset();
               setPhone("");
               setErrors({ businessName: false, businessType: false, contactName: false, email: false });
               setTimeout(() => setNotice(null), 60000);
@@ -597,7 +597,7 @@ function LandingPage() {
               setModalState({
                 isOpen: true,
                 type: "error",
-                message: "Sorry, something went wrong. Please try again later."
+                message: "Sorry, something went wrong. Please try again later.",
               });
 
               setTimeout(() => setNotice(null), 8000);
@@ -688,9 +688,7 @@ function LandingPage() {
         <div className="lp-contact__content">
           <div>
             <h2>{t("nav.contact")}</h2>
-            <p className="lp-contact__lead">
-              {t("contact.description")}
-            </p>
+            <p className="lp-contact__lead">{t("contact.description")}</p>
             <div className="lp-contact__actions">
               <a className="lp-btn" href="https://giftygen.com" target="_blank" rel="noreferrer">
                 {t("contact.visitWebsite")}
@@ -698,7 +696,6 @@ function LandingPage() {
               <a href="/explore" className="lp-btn">
                 {t("contact.exploreCards")}
               </a>
-
             </div>
           </div>
           {/* <div className="lp-qr">
@@ -723,14 +720,16 @@ function LandingPage() {
           <button onClick={() => navigate("/privacy-policy")}>Privacy Policy</button>
           <button onClick={() => navigate("/terms-of-service")}>Terms of Service</button>
         </div>
-        <div className="lp-footer__right">© {new Date().getFullYear()} {t("footer.rights")}</div>
+        <div className="lp-footer__right">
+          © {new Date().getFullYear()} {t("footer.rights")}
+        </div>
       </footer>
       <SuccessModal
-      isOpen={modalState.isOpen}
-      onClose={() => setModalState({ ...modalState, isOpen: false })}
-      message={modalState.message}
-      type={modalState.type}
-/>
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ ...modalState, isOpen: false })}
+        message={modalState.message}
+        type={modalState.type}
+      />
     </div>
   );
 }

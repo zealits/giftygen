@@ -207,7 +207,7 @@ app.post("/generate-wallet-pass", async (req, res) => {
       defaultValue: { language: "en", value: "testing giftcard name" },
     },
     subheader: {
-      defaultValue: { language: "en", value: "₹ 50" },
+      defaultValue: { language: "en", value: "₹ 499" },
     },
     header: {
       defaultValue: { language: "en", value: "Testing User" },

@@ -1657,7 +1657,7 @@
   display: grid; 
   grid-template-columns: 1fr; 
   gap: 32px; 
-  padding: 80px clamp(16px, 6vw, 72px) 48px; 
+  padding: 60px clamp(16px, 6vw, 72px) 40px; 
   width: 100%; 
   margin: 0 auto; 
   max-width: none; 
@@ -1687,7 +1687,7 @@
 .lp-hero__content { 
   display: flex; 
   flex-direction: column; 
-  gap: 16px; 
+  gap: 0; 
 }
 
 .lp-kicker { 
@@ -1700,30 +1700,35 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin-bottom: 12px;
 }
 
 .lp-hero__title { 
   font-size: clamp(32px, 5vw, 56px); 
-  line-height: 1.1; 
-  margin: 8px 0; 
+  line-height: 1.15; 
+  margin: 0 0 16px 0; 
 }
 
 .lp-hero__subtitle { 
   color: var(--primary-2); 
   font-weight: 600; 
   font-size: clamp(18px, 2.5vw, 24px);
+  margin: 0 0 16px 0;
+  line-height: 1.4;
 }
 
 .lp-hero__desc { 
   color: var(--muted); 
   max-width: 640px; 
   font-size: clamp(16px, 2vw, 18px);
+  line-height: 1.6;
+  margin: 0 0 24px 0;
 }
 
 .lp-hero__actions { 
   display: flex; 
   gap: 16px; 
-  margin-top: 12px; 
+  margin: 0; 
   flex-wrap: wrap;
 }
 
@@ -2267,7 +2272,7 @@ html {
   .lp-hero { 
     grid-template-columns: 1.1fr 0.9fr; 
     align-items: center; 
-    padding-top: 96px; 
+    padding-top: 70px; 
   }
   
   .lp-hero__title { 
@@ -2305,7 +2310,7 @@ html {
   }
   
   .lp-hero {
-    padding: 120px clamp(16px, 6vw, 72px) 64px;
+    padding: 80px clamp(16px, 6vw, 72px) 50px;
   }
 }
 
