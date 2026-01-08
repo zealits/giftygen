@@ -330,7 +330,7 @@
       "businessName": "Название бизнеса",
       "businessNamePlaceholder": "например, Ocean View Bistro",
       "businessType": "Тип бизнеса",
-      "businessTypePlaceholder": "например, ресторан, салон, розница",
+      "businessTypePlaceholder": "Выберите отрасль",
       "contactName": "Контактное лицо",
       "contactNamePlaceholder": "Ваше имя",
       "email": "Email",

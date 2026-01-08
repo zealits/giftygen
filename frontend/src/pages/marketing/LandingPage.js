@@ -436,11 +436,34 @@ function LandingPage() {
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
-  const formatIndianPhone = (value) => {
-    const digits = value.replace(/\D/g, "").slice(0, 10);
+  // Format phone number based on location
+  const formatPhone = (value) => {
+    const digits = value.replace(/\D/g, "");
+    const isIndia = userLocation?.country === "IN";
 
-    if (digits.length <= 5) return digits;
-    return `${digits.slice(0, 5)} ${digits.slice(5)}`;
+    if (isIndia) {
+      // Indian format: 98765 43210 (10 digits)
+      const limitedDigits = digits.slice(0, 10);
+      if (limitedDigits.length <= 5) return limitedDigits;
+      return `${limitedDigits.slice(0, 5)} ${limitedDigits.slice(5)}`;
+    } else {
+      // US format: (555) 123-4567 (10 digits)
+      const limitedDigits = digits.slice(0, 10);
+      if (limitedDigits.length === 0) return "";
+      if (limitedDigits.length <= 3) return `(${limitedDigits}`;
+      if (limitedDigits.length <= 6) return `(${limitedDigits.slice(0, 3)}) ${limitedDigits.slice(3)}`;
+      return `(${limitedDigits.slice(0, 3)}) ${limitedDigits.slice(3, 6)}-${limitedDigits.slice(6)}`;
+    }
+  };
+
+  // Get phone placeholder based on location
+  const getPhonePlaceholder = () => {
+    if (!userLocation || !userLocation.country) {
+      // Default to Indian format if location not detected
+      return "98765 43210";
+    }
+    const isIndia = userLocation.country === "IN";
+    return isIndia ? "98765 43210" : "(555) 123-4567";
   };
 
   const toggleMobileMenu = () => {
@@ -1362,16 +1385,32 @@ function LandingPage() {
             }
             try {
               if (payload.phone) {
-                const cleanedPhone = payload.phone.replace(/\s/g, "");
-                if (!/^[6-9]\d{9}$/.test(cleanedPhone)) {
-                  setModalState({
-                    isOpen: true,
-                    type: "error",
-                    message: "Please enter a valid Indian mobile number (10 digits).",
-                  });
-                  return;
+                const cleanedPhone = payload.phone.replace(/\D/g, "");
+                const isIndia = userLocation?.country === "IN";
+
+                if (isIndia) {
+                  // Indian phone validation: 10 digits starting with 6-9
+                  if (!/^[6-9]\d{9}$/.test(cleanedPhone)) {
+                    setModalState({
+                      isOpen: true,
+                      type: "error",
+                      message: "Please enter a valid Indian mobile number (10 digits).",
+                    });
+                    return;
+                  }
+                  payload.phone = `+91${cleanedPhone}`;
+                } else {
+                  // US phone validation: 10 digits
+                  if (!/^\d{10}$/.test(cleanedPhone)) {
+                    setModalState({
+                      isOpen: true,
+                      type: "error",
+                      message: "Please enter a valid phone number (10 digits).",
+                    });
+                    return;
+                  }
+                  payload.phone = `+1${cleanedPhone}`;
                 }
-                payload.phone = `+91${cleanedPhone}`;
               }
 
               const res = await fetch("/api/v1/admin/registration-interest", {
@@ -1403,7 +1442,9 @@ function LandingPage() {
         >
           <div className="lp-form__grid">
             <div className="lp-field">
-              <label>{t("register.form.businessName")}</label>
+              <label>
+                {t("register.form.businessName")} <span style={{ color: "red" }}>*</span>
+              </label>
               <input
                 type="text"
                 name="businessName"
@@ -1413,17 +1454,31 @@ function LandingPage() {
               />
             </div>
             <div className="lp-field">
-              <label>{t("register.form.businessType")}</label>
-              <input
-                type="text"
+              <label>
+                {t("register.form.businessType")} <span style={{ color: "red" }}>*</span>
+              </label>
+              <select
                 name="businessType"
-                placeholder={t("register.form.businessTypePlaceholder")}
                 className={errors.businessType ? "lp-input--error" : undefined}
-                onInput={() => setErrors((e) => ({ ...e, businessType: false }))}
-              />
+                onChange={() => setErrors((e) => ({ ...e, businessType: false }))}
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  {t("register.form.businessTypePlaceholder") || "Select industry"}
+                </option>
+                <option value="Restaurant & Bars">Restaurant & Bars</option>
+                <option value="Retail & E-commerce">Retail & E-commerce</option>
+                <option value="Hotels & Hospitality">Hotels & Hospitality</option>
+                <option value="Salons & Spas">Salons & Spas</option>
+                <option value="Fitness & Wellness">Fitness & Wellness</option>
+                <option value="Professional Services">Professional Services</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
             <div className="lp-field">
-              <label>{t("register.form.contactName")}</label>
+              <label>
+                {t("register.form.contactName")} <span style={{ color: "red" }}>*</span>
+              </label>
               <input
                 type="text"
                 name="contactName"
@@ -1433,7 +1488,9 @@ function LandingPage() {
               />
             </div>
             <div className="lp-field">
-              <label>{t("register.form.email")}</label>
+              <label>
+                {t("register.form.email")} <span style={{ color: "red" }}>*</span>
+              </label>
               <input
                 type="email"
                 name="email"
@@ -1443,17 +1500,19 @@ function LandingPage() {
               />
             </div>
             <div className="lp-field">
-              <label>{t("register.form.phone")}</label>
+              <label>
+                {t("register.form.phone")} <span style={{ color: "red" }}>*</span>
+              </label>
               <input
                 type="tel"
                 name="phone"
                 inputMode="numeric"
                 autoComplete="tel"
-                placeholder={t("register.form.phonePlaceholder")}
+                placeholder={getPhonePlaceholder()}
                 value={phone}
-                onChange={(e) => setPhone(formatIndianPhone(e.target.value))}
-                maxLength={11}
-                aria-label="Indian mobile number"
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                maxLength={userLocation?.country === "IN" ? 11 : 14}
+                aria-label={userLocation?.country === "IN" ? "Indian mobile number" : "Phone number"}
               />
             </div>
             <div className="lp-field">
