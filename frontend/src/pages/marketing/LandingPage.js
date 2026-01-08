@@ -52,6 +52,22 @@ function LandingPage() {
   const [isLoadingLanguage, setIsLoadingLanguage] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Determine currency and amount based on user location
+  const getCurrencyConfig = useMemo(() => {
+    if (!userLocation || !userLocation.country) {
+      // Default to INR if location not detected yet
+      return { currency: "INR", amount: 499, displayAmount: 499, locale: "en-IN" };
+    }
+
+    const isIndia = userLocation.country === "IN";
+    if (isIndia) {
+      return { currency: "INR", amount: 499, displayAmount: 499, locale: "en-IN" };
+    } else {
+      // For USA and all other non-India countries, use USD
+      return { currency: "USD", amount: 50, displayAmount: 50, locale: "en-US" };
+    }
+  }, [userLocation]);
   const [errors, setErrors] = useState({
     businessName: false,
     businessType: false,
@@ -583,7 +599,11 @@ function LandingPage() {
             <div className="lp-giftcard__ribbon" />
             <div className="lp-giftcard__brand">{t("giftCard.Brand")}</div>
             <div className="lp-giftcard__title">{t("giftCard.digitalGiftCard")}</div>
-            <div className="lp-giftcard__amount">{formatCurrency(499, "INR")}</div>
+            <div className="lp-giftcard__amount">
+              {formatCurrency(getCurrencyConfig.displayAmount, getCurrencyConfig.currency, {
+                locale: getCurrencyConfig.locale,
+              })}
+            </div>
             <div className="lp-giftcard__meta">
               <span>{t("giftCard.to")}</span>
               <span>{t("giftCard.from")}</span>
@@ -640,7 +660,11 @@ function LandingPage() {
                   <Wifi size={18} />
                 </div>
                 <div className="lp-scan-card__title">{t("giftCard.digitalGiftCard")}</div>
-                <div className="lp-scan-card__amount">{formatCurrency(500, "INR")}</div>
+                <div className="lp-scan-card__amount">
+                  {formatCurrency(getCurrencyConfig.displayAmount, getCurrencyConfig.currency, {
+                    locale: getCurrencyConfig.locale,
+                  })}
+                </div>
                 <div className="lp-scan-card__qr">
                   <div className="lp-qr-pattern">
                     {[...Array(25)].map((_, i) => (
