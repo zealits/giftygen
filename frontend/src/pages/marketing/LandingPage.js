@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback } from "react"
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/giftygen_logo.svg";
+import logoWhiteBg from "../../assets/giftgen_whitebg_logo.png";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
 
@@ -487,7 +488,7 @@ function LandingPage() {
       <header className="lp-nav">
         <div className="lp-nav__brand" onClick={() => navigate("/")}>
           <img
-            src={logo}
+            src={theme === "light" ? logoWhiteBg : logo}
             alt="GiftyGen digital gift card platform logo"
             width={120}
             height={40}
@@ -528,7 +529,7 @@ function LandingPage() {
       <div className={`lp-mobile-menu ${isMobileMenuOpen ? "lp-mobile-menu--open" : ""}`}>
         <div className="lp-mobile-header">
           <div className="lp-mobile-header__brand">
-            <img src={logo} alt="giftygen logo" className="lp-mobile-header__logo" />
+            <img src={theme === "light" ? logoWhiteBg : logo} alt="giftygen logo" className="lp-mobile-header__logo" />
             <span className="lp-mobile-header__title">giftygen</span>
           </div>
           <button className="lp-mobile-close" onClick={closeMobileMenu} aria-label="Close mobile menu">

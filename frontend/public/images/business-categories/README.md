@@ -29,3 +29,6 @@ If an image is not found or fails to load, the card will automatically fall back
 Images are automatically loaded from this folder when the landing page displays business category cards. No code changes needed - just add the images with the correct filenames.
 
 
+
+
+
