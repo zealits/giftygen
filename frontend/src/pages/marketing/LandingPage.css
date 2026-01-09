@@ -2421,23 +2421,30 @@
 
 .lp-business-card {
   position: relative;
-  border-radius: 20px;
+  border-radius: 24px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   background: linear-gradient(135deg, var(--card) 0%, rgba(21, 25, 36, 0.95) 100%);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  border: 1.5px solid rgba(108, 140, 255, 0.12);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
   backdrop-filter: blur(10px);
   height: 100%;
+  will-change: transform;
 }
 
 .lp-root[data-theme='light'] .lp-business-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-color: var(--border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .lp-business-card::before {
@@ -2446,17 +2453,22 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: var(--gradient-primary);
+  height: 4px;
+  background: linear-gradient(90deg, #6c8cff 0%, #93a8ff 50%, #6c8cff 100%);
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
+  border-radius: 24px 24px 0 0;
 }
 
 .lp-business-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
-  border-color: rgba(147, 168, 255, 0.4);
+  transform: translateY(-12px) scale(1.01);
+  box-shadow: 
+    0 20px 48px rgba(0, 0, 0, 0.25),
+    0 8px 16px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(108, 140, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-color: rgba(108, 140, 255, 0.35);
 }
 
 .lp-business-card:hover::before {
@@ -2464,12 +2476,17 @@
 }
 
 .lp-root[data-theme='light'] .lp-business-card:hover {
-  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15), 0 0 0 1px rgba(59, 130, 246, 0.1);
+  box-shadow: 
+    0 20px 48px rgba(59, 130, 246, 0.18),
+    0 8px 16px rgba(59, 130, 246, 0.12),
+    0 0 0 1px rgba(59, 130, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   border-color: rgba(59, 130, 246, 0.3);
 }
 
 .lp-business-card:active {
-  transform: translateY(-4px);
+  transform: translateY(-8px) scale(1);
+  transition: transform 0.15s ease;
 }
 
 .lp-business-card__image {
@@ -2495,27 +2512,34 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
-  opacity: 0.7;
-  transition: opacity 0.4s ease;
+  background: linear-gradient(
+    180deg, 
+    rgba(0, 0, 0, 0) 0%, 
+    rgba(0, 0, 0, 0.2) 40%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+  opacity: 0.75;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
   pointer-events: none;
 }
 
 .lp-business-card:hover .lp-business-card__image::after {
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 .lp-business-card__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   display: block;
+  filter: brightness(0.95);
 }
 
 .lp-business-card:hover .lp-business-card__img {
-  transform: scale(1.08);
+  transform: scale(1.1);
+  filter: brightness(1);
 }
 
 .lp-business-card__gradient {
@@ -2549,7 +2573,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 24px;
+  padding: 28px 24px;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -2558,30 +2582,33 @@
 }
 
 .lp-business-card__button {
-  color: var(--white);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  padding: 12px 24px;
-  border-radius: 12px;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  padding: 14px 32px;
+  border-radius: 16px;
   font-weight: 600;
   font-size: 15px;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   width: auto;
   min-width: fit-content;
   text-align: center;
   position: relative;
-  background: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   overflow: hidden;
   pointer-events: auto;
   z-index: 3;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
 .lp-business-card__button::before {
@@ -2591,42 +2618,89 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
+  background: linear-gradient(
+    90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.25) 50%, 
+    transparent 100%
+  );
+  transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.lp-business-card__button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 0;
 }
 
 .lp-business-card__button:hover {
-  transform: translateY(-3px) scale(1.02);
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-4px) scale(1.03);
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(255, 255, 255, 0.55);
   box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+    0 12px 32px rgba(0, 0, 0, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .lp-business-card__button:hover::before {
   left: 100%;
 }
 
+.lp-business-card__button:hover::after {
+  opacity: 1;
+}
+
 .lp-business-card__button:active {
-  transform: translateY(-1px) scale(1);
-  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px) scale(1.01);
+  background: rgba(255, 255, 255, 0.18) !important;
+  transition: transform 0.15s ease;
+}
+
+.lp-business-card__button span {
+  position: relative;
+  z-index: 2;
 }
 
 /* Light theme adjustments for transparent button */
 .lp-root[data-theme='light'] .lp-business-card__button {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-color: rgba(255, 255, 255, 0.4);
-  color: var(--white);
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
 }
 
 .lp-root[data-theme='light'] .lp-business-card__button:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
-  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.28) !important;
+  border-color: rgba(255, 255, 255, 0.65);
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 /* Unified button styling - all use transparent glassmorphism */
@@ -2636,7 +2710,7 @@
 .lp-business-card--salons .lp-business-card__button,
 .lp-business-card--fitness .lp-business-card__button,
 .lp-business-card--seasonal .lp-business-card__button {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
 }
 
 .lp-business-card--restaurants .lp-business-card__button:hover,
@@ -2645,7 +2719,7 @@
 .lp-business-card--salons .lp-business-card__button:hover,
 .lp-business-card--fitness .lp-business-card__button:hover,
 .lp-business-card--seasonal .lp-business-card__button:hover {
-  background: rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
 }
 
 /* Business Modal */
@@ -2841,8 +2915,14 @@
   }
   
   .lp-business-card__button {
-    padding: 14px 24px;
+    padding: 14px 28px;
     font-size: 14px;
+    border-radius: 14px;
+    letter-spacing: 0.3px;
+  }
+  
+  .lp-business-card__button:hover {
+    transform: translateY(-3px) scale(1.02);
   }
   
   .lp-business-modal {
@@ -3954,14 +4034,27 @@ html {
 
 /* Enhanced Card Hover - Lift and Shadow */
 .lp-business-card--animated:hover {
-  transform: translateY(-12px) scale(1.02);
+  transform: translateY(-12px) scale(1.01);
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(108, 140, 255, 0.2);
+    0 24px 56px rgba(0, 0, 0, 0.28),
+    0 8px 20px rgba(0, 0, 0, 0.18),
+    0 0 0 1.5px rgba(108, 140, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-color: rgba(108, 140, 255, 0.35);
 }
 
 .lp-business-card--animated:hover .lp-business-card__img {
-  transform: scale(1.12);
+  transform: scale(1.1);
+  filter: brightness(1);
+}
+
+.lp-root[data-theme='light'] .lp-business-card--animated:hover {
+  box-shadow: 
+    0 24px 56px rgba(59, 130, 246, 0.2),
+    0 8px 20px rgba(59, 130, 246, 0.15),
+    0 0 0 1.5px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 /* Light Theme Adjustments */

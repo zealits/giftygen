@@ -14,6 +14,7 @@ const LandingPage = lazy(() => import("./pages/marketing/LandingPage"));
 const PrivacyPolicy = lazy(() => import("./pages/marketing/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/marketing/TermsOfService"));
 const BenefitDetail = lazy(() => import("./pages/marketing/BenefitDetail"));
+const BusinessCategoryDetail = lazy(() => import("./pages/marketing/BusinessCategoryDetail"));
 const Sidebar = lazy(() => import("./pages/admin/Sidebar.js"));
 const GiftCards = lazy(() => import("./pages/admin/GiftCards.js"));
 const Orders = lazy(() => import("./pages/admin/Orders.js"));
@@ -128,6 +129,7 @@ function AppRoutes() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/benefit/:benefitId" element={<BenefitDetail />} />
+        <Route path="/category/:categoryId" element={<BusinessCategoryDetail />} />
         <Route path="/explore" element={<UserLanding />} />
         <Route path="/gift-card/:id" element={<GiftCardDetails />} />
         <Route path="/:businessSlug/giftcards" element={<UserLanding />} />

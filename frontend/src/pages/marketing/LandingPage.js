@@ -268,12 +268,12 @@ function LandingPage() {
   // Supported formats: .jpg, .jpeg, .png, .webp
   // Image names should match: restaurants.jpg, hotels.jpg, retail.jpg, salons.jpg, fitness.jpg, seasonal.jpg
   const businessCategoryImages = {
-    restaurants: "/images/business-categories/restaurants.jpg",
-    hotels: "/images/business-categories/hotels.jpg",
-    retail: "/images/business-categories/retail.jpg",
-    salons: "/images/business-categories/salons.jpg",
-    fitness: "/images/business-categories/fitness.jpg",
-    seasonal: "/images/business-categories/seasonal.jpeg",
+    restaurants: "/images/business-categories/restaurants.png",
+    hotels: "/images/business-categories/hotels.png",
+    retail: "/images/business-categories/retail.png",
+    salons: "/images/business-categories/salons.png",
+    fitness: "/images/business-categories/fitness.png",
+    seasonal: "/images/business-categories/seasonal.png",
   };
 
   const benefitsData = useMemo(
@@ -641,6 +641,7 @@ function LandingPage() {
 
       {/* Animated Business Offer Section */}
       <section
+        id="offer"
         className={`lp-offer lp-animated-section lp-animated-section--${animationPhase}`}
         ref={animationSectionRef}
       >
@@ -820,13 +821,13 @@ function LandingPage() {
                   key={category}
                   className={`lp-business-card lp-business-card--${category} lp-business-card--animated`}
                   style={{ "--reveal-delay": `${index * 0.12}s` }}
-                  onClick={() => setBusinessModalState({ isOpen: true, selectedBusiness: category })}
+                  onClick={() => navigate(`/category/${category}`)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      setBusinessModalState({ isOpen: true, selectedBusiness: category });
+                      navigate(`/category/${category}`);
                     }
                   }}
                   aria-label={`Learn how GiftyGen helps ${t(`businessCategories.${category}.title`)}`}
@@ -848,7 +849,9 @@ function LandingPage() {
                     <div className="lp-business-card__gradient" style={{ display: "none" }}></div>
                     {/* Button overlaid on image */}
                     <div className="lp-business-card__overlay">
-                      <button className="lp-business-card__button">{t(`businessCategories.${category}.title`)}</button>
+                      <button className="lp-business-card__button">
+                        <span>{t(`businessCategories.${category}.title`)}</span>
+                      </button>
                     </div>
                   </div>
                 </div>
