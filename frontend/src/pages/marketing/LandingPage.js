@@ -52,6 +52,7 @@ function LandingPage() {
   const [isLoadingLanguage, setIsLoadingLanguage] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   // Determine currency and amount based on user location
   const getCurrencyConfig = useMemo(() => {
@@ -541,6 +542,7 @@ function LandingPage() {
           <button onClick={() => handleScrollTo("highlights")}>{t("nav.highlights")}</button>
           <button onClick={() => handleScrollTo("benefits")}>{t("nav.benefits")}</button>
           <button onClick={() => handleScrollTo("register")}>{t("nav.register")}</button>
+          <button onClick={() => handleScrollTo("faq")}>FAQ</button>
           <button onClick={() => handleScrollTo("contact")}>{t("nav.contact")}</button>
         </nav>
 
@@ -581,6 +583,7 @@ function LandingPage() {
           <button onClick={() => handleMobileNavClick("highlights")}>{t("nav.highlights")}</button>
           <button onClick={() => handleMobileNavClick("benefits")}>{t("nav.benefits")}</button>
           <button onClick={() => handleMobileNavClick("register")}>{t("nav.register")}</button>
+          <button onClick={() => handleMobileNavClick("faq")}>FAQ</button>
           <button onClick={() => handleMobileNavClick("contact")}>{t("nav.contact")}</button>
         </nav>
         <div className="lp-mobile-cta">
@@ -1537,6 +1540,51 @@ function LandingPage() {
             {t("register.form.submit")}
           </button>
         </form>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="lp-section lp-faq" id="faq">
+        <div className="lp-section__header">
+          <h2 className="lp-section__title lp-h2">FAQ SECTION</h2>
+        </div>
+        <div className="lp-faq__container">
+          {[
+            "How long does it take to set up Giftygen?",
+            "What's the cost? Do you have a free trial?",
+            "Which POS systems do you integrate with?",
+            "How secure is customer data? Is this PCI compliant?",
+            "How do customers redeem gift cards?",
+            "What if customers don't redeem their gift cards? Do we keep the money?",
+            "Can we customize the gift card design? Can I add our logo?",
+            "Do you own my customer data? Can I export it? What if I want to cancel?",
+            "Can we run seasonal promotions?",
+            "Can we sell multi-denomination cards?",
+            "How does payment processing work?",
+          ].map((question, index) => (
+            <div key={index} className="lp-faq__item">
+              <button
+                className={`lp-faq__question ${openFaqIndex === index ? "lp-faq__question--open" : ""}`}
+                onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                aria-expanded={openFaqIndex === index}
+                aria-controls={`faq-answer-${index}`}
+              >
+                <span className="lp-faq__number">FAQ #{index + 1}:</span>
+                <span className="lp-faq__text">{question}</span>
+                <span className="lp-faq__icon">{openFaqIndex === index ? "−" : "+"}</span>
+              </button>
+              <div
+                id={`faq-answer-${index}`}
+                className={`lp-faq__answer ${openFaqIndex === index ? "lp-faq__answer--open" : ""}`}
+                aria-hidden={openFaqIndex !== index}
+              >
+                <p className="lp-faq__answer-text">
+                  {/* Placeholder for answer - you can add actual answers later */}
+                  Answer to this question will be added here.
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Contact */}

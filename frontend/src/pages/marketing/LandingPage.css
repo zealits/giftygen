@@ -2048,6 +2048,130 @@
   box-shadow: var(--shadow-md);
 }
 
+/* FAQ Section */
+.lp-faq {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.lp-faq__container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lp-faq__item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.lp-faq__item:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(147, 168, 255, 0.3);
+}
+
+.lp-faq__question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.lp-faq__question:hover {
+  background: rgba(147, 168, 255, 0.05);
+}
+
+.lp-faq__question--open {
+  background: rgba(147, 168, 255, 0.08);
+}
+
+.lp-faq__number {
+  color: var(--primary);
+  font-weight: 700;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.lp-faq__text {
+  flex: 1;
+  color: var(--white);
+}
+
+.lp-faq__icon {
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--primary);
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.lp-faq__question--open .lp-faq__icon {
+  transform: rotate(180deg);
+}
+
+.lp-faq__answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 24px;
+}
+
+.lp-faq__answer--open {
+  max-height: 500px;
+  padding: 0 24px 20px 24px;
+}
+
+.lp-faq__answer-text {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 15px;
+  margin: 0;
+  padding-top: 8px;
+}
+
+/* Light theme overrides for FAQ */
+.lp-root[data-theme='light'] .lp-faq__item {
+  background: #ffffff;
+  border-color: var(--border);
+}
+
+.lp-root[data-theme='light'] .lp-faq__question {
+  color: #0b0c10;
+}
+
+.lp-root[data-theme='light'] .lp-faq__question:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.lp-root[data-theme='light'] .lp-faq__question--open {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.lp-root[data-theme='light'] .lp-faq__text {
+  color: #0b0c10;
+}
+
+.lp-root[data-theme='light'] .lp-faq__answer-text {
+  color: var(--muted);
+}
+
 /* Contact */
 .lp-contact__content { 
   display: grid; 
