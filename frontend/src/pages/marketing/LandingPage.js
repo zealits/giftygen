@@ -77,6 +77,7 @@ function LandingPage() {
   });
   const [isCardsVisible, setIsCardsVisible] = useState(false);
   const cardsGridRef = useRef(null);
+  const creativeCardsRef = useRef(null);
   const SuccessModal = ({ isOpen, onClose, message, type = "success" }) => {
     if (!isOpen) return null;
 
@@ -430,6 +431,39 @@ function LandingPage() {
     };
   }, []);
 
+  // Intersection Observer for creative cards animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Add animation class to all card columns
+            const cardColumns = entry.target.querySelectorAll('.lp-creative-column');
+            cardColumns.forEach((col) => {
+              col.classList.add('lp-creative-animate');
+            });
+            // Unobserve after animation is triggered
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of section is visible
+        rootMargin: '0px 0px -50px 0px', // Trigger 50px before bottom of viewport
+      }
+    );
+
+    if (creativeCardsRef.current) {
+      observer.observe(creativeCardsRef.current);
+    }
+
+    return () => {
+      if (creativeCardsRef.current) {
+        observer.unobserve(creativeCardsRef.current);
+      }
+    };
+  }, []);
+
   const handleScrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -640,367 +674,180 @@ function LandingPage() {
       </section>
 
       {/* Gift Card Management Features */}
-      <section className="lp-section lp-book-features-section" id="features">
+      <section className="lp-section lp-creative-cards-section" id="features" ref={creativeCardsRef}>
         <div className="lp-section__header">
           <h2 className="lp-section__title lp-h2">
             Gift Card Management Features That Drive Revenue & Customer Loyalty
           </h2>
         </div>
 
-        <div className="lp-book-cards-grid" ref={cardsGridRef}>
-          {/* Card 1 - Apple Wallet & Google Pay */}
-          <div
-            className={`lp-book-card ${isCardsVisible ? "lp-book-card--animate" : ""}`}
-            style={{ "--card-index": 0 }}
-          >
-            <div className="lp-flip-card">
-              <div className="lp-flip-card__container">
-                <div className="lp-card-front">
-                  <div className="lp-card-front__tp lp-card-front__tp--pink">
-                    <span className="lp-card-front__category lp-card-front__category--pink">FOR DATA-DRIVEN</span>
-                    <img
-                      src="/images/feature-cards/apple-wallet-google-pay.png"
-                      alt="Apple Wallet & Google Pay Integration"
-                      className="lp-card-front__image"
-                    />
-                    <h3 className="lp-card-front__heading">
-                      Apple Wallet & Google Pay Integration for Digital Gift Cards
-                    </h3>
-                    <button
-                      className="lp-card-mobile-btn lp-card-mobile-btn--pink"
-                      onClick={() => handleScrollTo("register")}
-                    >
-                      Know More
-                    </button>
-                  </div>
+        <div className="lp-creative-container">
+          <div className="lp-creative-row">
+            {/* Card 1 - Apple Wallet & Google Pay */}
+            <div className="lp-creative-column">
+              <div className="lp-creative-card-details">
+                <div className="lp-creative-card-icons">
+                  <Smartphone className="lp-creative-icon" size={45} />
                 </div>
-                <div className="lp-card-back lp-card-back--pink"></div>
-              </div>
-            </div>
-            <div className="lp-inside-page">
-              <div className="lp-inside-page__container">
-                <h3 className="lp-inside-page__heading lp-inside-page__heading--pink">
-                  Apple Wallet & Google Pay Integration for Digital Gift Cards
+                <h3>
+                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
+                    Apple Wallet & Google Wallet Integration for Digital Gift Cards
+                  </a>
                 </h3>
-                <p className="lp-inside-page__description">
-                  Deliver gift cards directly to Apple Wallet and Google Pay in seconds. Customers can save, share, and
-                  redeem from their phone—increasing redemption rates and eliminating lost cards.
-                </p>
-                <div className="lp-inside-page__benefits lp-inside-page__benefits--pink">
-                  <div className="lp-benefit-item">
-                    <CheckCircle size={18} className="lp-benefit-icon lp-benefit-icon--pink" />
-                    <span>Instant delivery via email, SMS, or mobile wallet</span>
-                  </div>
-                  <div className="lp-benefit-item">
-                    <CheckCircle size={18} className="lp-benefit-icon lp-benefit-icon--pink" />
-                    <span>One-tap redemption from customer's phone</span>
-                  </div>
-                  <div className="lp-benefit-item">
-                    <CheckCircle size={18} className="lp-benefit-icon lp-benefit-icon--pink" />
-                    <span>Cross-device compatibility (iOS, Android, desktop)</span>
-                  </div>
-                  <div className="lp-benefit-item">
-                    <CheckCircle size={18} className="lp-benefit-icon lp-benefit-icon--pink" />
-                    <span>Reduces physical card waste and processing costs</span>
-                  </div>
-                </div>
-                <button
-                  className="lp-inside-page__btn lp-inside-page__btn--pink"
-                  onClick={() => handleScrollTo("register")}
+                <a
+                  className="lp-creative-read-more-btn"
+                  href="#register"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
                 >
-                  Get Started
-                </button>
+                  <ArrowRight size={12} />
+                </a>
               </div>
             </div>
-          </div>
 
-          {/* Card 2 - Seasonal Campaigns */}
-          <div
-            className={`lp-book-card ${isCardsVisible ? "lp-book-card--animate" : ""}`}
-            style={{ "--card-index": 1 }}
-          >
-            <div className="lp-flip-card">
-              <div className="lp-flip-card__container">
-                <div className="lp-card-front">
-                  <div className="lp-card-front__tp lp-card-front__tp--cyan">
-                    <span className="lp-card-front__category lp-card-front__category--cyan">For instant</span>
-                    <img
-                      src="/images/feature-cards/seasonal-campaigns.png"
-                      alt="Seasonal Gift Card Campaigns"
-                      className="lp-card-front__image"
-                    />
-                    <h3 className="lp-card-front__heading">Seasonal Gift Card Campaigns & Promotion Management</h3>
-                    <button
-                      className="lp-card-mobile-btn lp-card-mobile-btn--cyan"
-                      onClick={() => handleScrollTo("register")}
-                    >
-                      Know More
-                    </button>
-                  </div>
+            {/* Card 2 - Seasonal Campaigns */}
+            <div className="lp-creative-column">
+              <div className="lp-creative-card-details">
+                <div className="lp-creative-card-icons">
+                  <Gift className="lp-creative-icon" size={45} />
                 </div>
-                <div className="lp-card-back lp-card-back--cyan"></div>
-              </div>
-            </div>
-            <div className="lp-inside-page">
-              <div className="lp-inside-page__container">
-                <h3 className="lp-inside-page__heading lp-inside-page__heading--cyan">
-                  Seasonal Gift Card Campaigns & Promotion Management
+                <h3>
+                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
+                    Seasonal Gift Card Campaigns & Promotion Management
+                  </a>
                 </h3>
-                <button
-                  className="lp-inside-page__btn lp-inside-page__btn--cyan"
-                  onClick={() => handleScrollTo("register")}
+                <a
+                  className="lp-creative-read-more-btn"
+                  href="#register"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
                 >
-                  View details
-                </button>
+                  <ArrowRight size={12} />
+                </a>
               </div>
             </div>
-          </div>
 
-          {/* Card 3 - Customer Acquisition */}
-          <div
-            className={`lp-book-card ${isCardsVisible ? "lp-book-card--animate" : ""}`}
-            style={{ "--card-index": 2 }}
-          >
-            <div className="lp-flip-card">
-              <div className="lp-flip-card__container">
-                <div className="lp-card-front">
-                  <div className="lp-card-front__tp lp-card-front__tp--orange">
-                    <img
-                      src="/images/feature-cards/customer-acquisition.png"
-                      alt="Customer Acquisition"
-                      className="lp-card-front__image"
-                    />
-                    <h3 className="lp-card-front__heading">Customer Acquisition Through Branded Digital Gift Cards</h3>
-                    <button
-                      className="lp-card-mobile-btn lp-card-mobile-btn--orange"
-                      onClick={() => handleScrollTo("register")}
-                    >
-                      Know More
-                    </button>
-                  </div>
+            {/* Card 3 - Customer Acquisition */}
+            <div className="lp-creative-column">
+              <div className="lp-creative-card-details">
+                <div className="lp-creative-card-icons">
+                  <Target className="lp-creative-icon" size={45} />
                 </div>
-                <div className="lp-card-back lp-card-back--orange"></div>
-              </div>
-            </div>
-            <div className="lp-inside-page">
-              <div className="lp-inside-page__container">
-                <h3 className="lp-inside-page__heading lp-inside-page__heading--orange">
-                  Customer Acquisition Through Branded Digital Gift Cards
+                <h3>
+                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
+                    Customer Acquisition Through Branded Digital Gift Cards
+                  </a>
                 </h3>
-                <button
-                  className="lp-inside-page__btn lp-inside-page__btn--orange"
-                  onClick={() => handleScrollTo("register")}
+                <a
+                  className="lp-creative-read-more-btn"
+                  href="#register"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
                 >
-                  View details
-                </button>
+                  <ArrowRight size={12} />
+                </a>
               </div>
             </div>
-          </div>
 
-          {/* Card 4 - Increase Revenue */}
-          <div
-            className={`lp-book-card ${isCardsVisible ? "lp-book-card--animate" : ""}`}
-            style={{ "--card-index": 3 }}
-          >
-            <div className="lp-flip-card">
-              <div className="lp-flip-card__container">
-                <div className="lp-card-front">
-                  <div className="lp-card-front__tp lp-card-front__tp--green">
-                    <img
-                      src="/images/feature-cards/increase-revenue.jpg"
-                      alt="Increase Revenue"
-                      className="lp-card-front__image"
-                    />
-                    <h3 className="lp-card-front__heading">Increase Revenue With Upfront Cash Flow & Breakage</h3>
-                    <button
-                      className="lp-card-mobile-btn lp-card-mobile-btn--green"
-                      onClick={() => handleScrollTo("register")}
-                    >
-                      Know More
-                    </button>
-                  </div>
+            {/* Card 4 - Increase Revenue */}
+            <div className="lp-creative-column">
+              <div className="lp-creative-card-details">
+                <div className="lp-creative-card-icons">
+                  <TrendingUp className="lp-creative-icon" size={45} />
                 </div>
-                <div className="lp-card-back lp-card-back--green"></div>
-              </div>
-            </div>
-            <div className="lp-inside-page">
-              <div className="lp-inside-page__container">
-                <h3 className="lp-inside-page__heading lp-inside-page__heading--green">
-                  Increase Revenue With Upfront Cash Flow & Breakage
+                <h3>
+                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
+                    Increase Revenue With Upfront Cash Flow & Breakage
+                  </a>
                 </h3>
-                <button
-                  className="lp-inside-page__btn lp-inside-page__btn--green"
-                  onClick={() => handleScrollTo("register")}
+                <a
+                  className="lp-creative-read-more-btn"
+                  href="#register"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
                 >
-                  View details
-                </button>
+                  <ArrowRight size={12} />
+                </a>
               </div>
             </div>
-          </div>
 
-          {/* Card 5 - Average Order Value */}
-          <div
-            className={`lp-book-card ${isCardsVisible ? "lp-book-card--animate" : ""}`}
-            style={{ "--card-index": 4 }}
-          >
-            <div className="lp-flip-card">
-              <div className="lp-flip-card__container">
-                <div className="lp-card-front">
-                  <div className="lp-card-front__tp lp-card-front__tp--purple">
-                    <img
-                      src="/images/feature-cards/average-order-value.png"
-                      alt="Average Order Value"
-                      className="lp-card-front__image"
-                    />
-                    <h3 className="lp-card-front__heading">Increase Average Order Value With Digital Gift Cards</h3>
-                    <button
-                      className="lp-card-mobile-btn lp-card-mobile-btn--purple"
-                      onClick={() => handleScrollTo("register")}
-                    >
-                      Know More
-                    </button>
-                  </div>
+            {/* Card 5 - Average Order Value */}
+            <div className="lp-creative-column">
+              <div className="lp-creative-card-details">
+                <div className="lp-creative-card-icons">
+                  <DollarSign className="lp-creative-icon" size={45} />
                 </div>
-                <div className="lp-card-back lp-card-back--purple"></div>
-              </div>
-            </div>
-            <div className="lp-inside-page">
-              <div className="lp-inside-page__container">
-                <h3 className="lp-inside-page__heading lp-inside-page__heading--purple">
-                  Increase Average Order Value With Digital Gift Cards
+                <h3>
+                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
+                    Increase Average Order Value With Digital Gift Cards
+                  </a>
                 </h3>
-                <button
-                  className="lp-inside-page__btn lp-inside-page__btn--purple"
-                  onClick={() => handleScrollTo("register")}
+                <a
+                  className="lp-creative-read-more-btn"
+                  href="#register"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
                 >
-                  View details
-                </button>
+                  <ArrowRight size={12} />
+                </a>
               </div>
             </div>
-          </div>
 
-          {/* Card 6 - Real-Time Analytics */}
-          <div
-            className={`lp-book-card ${isCardsVisible ? "lp-book-card--animate" : ""}`}
-            style={{ "--card-index": 5 }}
-          >
-            <div className="lp-flip-card">
-              <div className="lp-flip-card__container">
-                <div className="lp-card-front">
-                  <div className="lp-card-front__tp lp-card-front__tp--blue">
-                    <span className="lp-card-front__category lp-card-front__category--blue">For omnichannel</span>
-                    <img
-                      src="/images/feature-cards/real-time-analytics.jpg"
-                      alt="Real-Time Analytics"
-                      className="lp-card-front__image"
-                    />
-                    <h3 className="lp-card-front__heading">Real-Time Gift Card Analytics & Business Insights</h3>
-                    <button
-                      className="lp-card-mobile-btn lp-card-mobile-btn--blue"
-                      onClick={() => handleScrollTo("register")}
-                    >
-                      Know More
-                    </button>
-                  </div>
+            {/* Card 6 - Real-Time Analytics */}
+            <div className="lp-creative-column">
+              <div className="lp-creative-card-details">
+                <div className="lp-creative-card-icons">
+                  <BarChart3 className="lp-creative-icon" size={45} />
                 </div>
-                <div className="lp-card-back lp-card-back--blue"></div>
-              </div>
-            </div>
-            <div className="lp-inside-page">
-              <div className="lp-inside-page__container">
-                <h3 className="lp-inside-page__heading lp-inside-page__heading--blue">
-                  Real-Time Gift Card Analytics & Business Insights
+                <h3>
+                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
+                    Real-Time Gift Card Analytics & Business Insights
+                  </a>
                 </h3>
-                <button
-                  className="lp-inside-page__btn lp-inside-page__btn--blue"
-                  onClick={() => handleScrollTo("register")}
+                <a
+                  className="lp-creative-read-more-btn"
+                  href="#register"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
                 >
-                  View details
-                </button>
+                  <ArrowRight size={12} />
+                </a>
               </div>
             </div>
-          </div>
 
-          {/* Card 7 - Customer Retention */}
-          <div
-            className={`lp-book-card ${isCardsVisible ? "lp-book-card--animate" : ""}`}
-            style={{ "--card-index": 6 }}
-          >
-            <div className="lp-flip-card">
-              <div className="lp-flip-card__container">
-                <div className="lp-card-front">
-                  <div className="lp-card-front__tp lp-card-front__tp--teal">
-                    <img
-                      src="/images/feature-cards/customer-retention.jpg"
-                      alt="Customer Retention"
-                      className="lp-card-front__image"
-                    />
-                    <h3 className="lp-card-front__heading">
-                      Increase Customer Retention With Gift Card Loyalty Programs
-                    </h3>
-                    <button
-                      className="lp-card-mobile-btn lp-card-mobile-btn--teal"
-                      onClick={() => handleScrollTo("register")}
-                    >
-                      Know More
-                    </button>
-                  </div>
+            {/* Card 7 - Customer Retention */}
+            <div className="lp-creative-column">
+              <div className="lp-creative-card-details">
+                <div className="lp-creative-card-icons">
+                  <Users className="lp-creative-icon" size={45} />
                 </div>
-                <div className="lp-card-back lp-card-back--teal"></div>
-              </div>
-            </div>
-            <div className="lp-inside-page">
-              <div className="lp-inside-page__container">
-                <h3 className="lp-inside-page__heading lp-inside-page__heading--teal">
-                  Increase Customer Retention With Gift Card Loyalty Programs
+                <h3>
+                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
+                    Increase Customer Retention With Gift Card Loyalty Programs
+                  </a>
                 </h3>
-                <button
-                  className="lp-inside-page__btn lp-inside-page__btn--teal"
-                  onClick={() => handleScrollTo("register")}
+                <a
+                  className="lp-creative-read-more-btn"
+                  href="#register"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
                 >
-                  View details
-                </button>
+                  <ArrowRight size={12} />
+                </a>
               </div>
             </div>
-          </div>
 
-          {/* Card 8 - Multi-Channel Campaigns */}
-          <div
-            className={`lp-book-card ${isCardsVisible ? "lp-book-card--animate" : ""}`}
-            style={{ "--card-index": 7 }}
-          >
-            <div className="lp-flip-card">
-              <div className="lp-flip-card__container">
-                <div className="lp-card-front">
-                  <div className="lp-card-front__tp lp-card-front__tp--coral">
-                    <img
-                      src="/images/feature-cards/multi-channel-campaigns.jpg"
-                      alt="Multi-Channel Campaigns"
-                      className="lp-card-front__image"
-                    />
-                    <h3 className="lp-card-front__heading">Multi-Channel Promotional Campaigns</h3>
-                    <button
-                      className="lp-card-mobile-btn lp-card-mobile-btn--coral"
-                      onClick={() => handleScrollTo("register")}
-                    >
-                      Know More
-                    </button>
-                  </div>
+            {/* Card 8 - Multi-Channel Campaigns */}
+            <div className="lp-creative-column">
+              <div className="lp-creative-card-details">
+                <div className="lp-creative-card-icons">
+                  <Send className="lp-creative-icon" size={45} />
                 </div>
-                <div className="lp-card-back lp-card-back--coral"></div>
-              </div>
-            </div>
-            <div className="lp-inside-page">
-              <div className="lp-inside-page__container">
-                <h3 className="lp-inside-page__heading lp-inside-page__heading--coral">
-                  Multi-Channel Promotional Campaigns
+                <h3>
+                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
+                    Multi-Channel Promotional Campaigns
+                  </a>
                 </h3>
-                <button
-                  className="lp-inside-page__btn lp-inside-page__btn--coral"
-                  onClick={() => handleScrollTo("register")}
+                <a
+                  className="lp-creative-read-more-btn"
+                  href="#register"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
                 >
-                  View details
-                </button>
+                  <ArrowRight size={12} />
+                </a>
               </div>
             </div>
           </div>
