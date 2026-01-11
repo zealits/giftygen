@@ -6212,8 +6212,8 @@ html {
 .lp-creative-row {
   display: flex;
   flex-wrap: wrap;
-  margin-right: -15px;
-  margin-left: -15px;
+  margin-right: -8px;
+  margin-left: -8px;
 }
 
 .lp-creative-column {
@@ -6221,9 +6221,9 @@ html {
   width: 25%;
   text-align: center;
   max-width: 100%;
-  padding-right: 15px;
-  padding-left: 15px;
-  margin-bottom: 40px;
+  padding-right: 8px;
+  padding-left: 8px;
+  margin-bottom: 30px;
   opacity: 0;
   transform: translateY(50px);
   transition: none;
@@ -6278,17 +6278,18 @@ html {
 }
 
 .lp-creative-card-details {
-  width: 85%;
+  width: 95%;
   margin: auto;
   position: relative;
   transition: 0.3s ease-in-out;
   z-index: 1;
+  text-align: left;
 }
 
 .lp-creative-card-details::before {
   content: "";
   width: 200px;
-  height: 360px;
+  height: 280px;
   background: #e5e7eb;
   position: absolute;
   left: 50%;
@@ -6317,10 +6318,10 @@ html {
 }
 
 .lp-creative-card-icons {
-  width: 140px;
-  height: 150px;
+  width: 120px;
+  height: 130px;
   position: relative;
-  margin: auto;
+  margin: 0 auto 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6360,8 +6361,8 @@ html {
 
 .lp-creative-card-icons img {
   position: relative;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   z-index: 1;
   filter: none;
   transition: filter 0.3s ease;
@@ -6369,8 +6370,8 @@ html {
 
 .lp-creative-card-icons .lp-creative-icon {
   position: relative;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   z-index: 1;
   stroke-width: 1.5;
   transition: color 0.3s ease, stroke 0.3s ease;
@@ -6398,14 +6399,15 @@ html {
 }
 
 .lp-creative-card-details h3 {
-  margin-bottom: 15px;
-  margin-top: 50px;
+  margin-bottom: 12px;
+  margin-top: 25px;
   font-weight: 700;
   font-size: clamp(1.25rem, 1.5vw, 1.5rem);
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--white);
   letter-spacing: -0.02em;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  text-align: left;
 }
 
 .lp-root[data-theme='light'] .lp-creative-card-details h3 {
@@ -6431,7 +6433,7 @@ html {
   align-items: center;
   border: 1px solid;
   border-radius: 100%;
-  margin: auto;
+  margin: 0;
   background: var(--bg);
   transform: translateX(-10px);
   opacity: 0;
@@ -6472,7 +6474,7 @@ html {
   .lp-creative-column {
     flex: 0 0 auto;
     width: 33.33333333%;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
   }
 
   .lp-creative-column:nth-child(1).lp-creative-animate {
@@ -6518,7 +6520,7 @@ html {
 
   .lp-creative-card-details::before {
     width: 180px;
-    height: 340px;
+    height: 260px;
   }
 }
 
@@ -6590,7 +6592,7 @@ html {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     padding: 0;
     text-align: left;
   }

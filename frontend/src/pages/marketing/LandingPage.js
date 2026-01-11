@@ -678,7 +678,7 @@ function LandingPage() {
         <div className="lp-video-container">
           <div className="lp-video-wrapper">
             <iframe
-              src="https://www.youtube.com/embed/CbHRUmVvJ9A?autoplay=1&mute=1&rel=0&modestbranding=1&loop=1&playlist=CbHRUmVvJ9A"
+              src="https://www.youtube.com/embed/p7aVdnOlh80?autoplay=1&mute=1&rel=0&modestbranding=1&loop=1&playlist=p7aVdnOlh80"
               title="GiftyGen Introduction Video"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
