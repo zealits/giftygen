@@ -673,6 +673,22 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* Video Section */}
+      <section className="lp-section lp-video-section" id="video">
+        <div className="lp-video-container">
+          <div className="lp-video-wrapper">
+            <iframe
+              src="https://www.youtube.com/embed/CbHRUmVvJ9A?autoplay=1&mute=1&rel=0&modestbranding=1&loop=1&playlist=CbHRUmVvJ9A"
+              title="GiftyGen Introduction Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="lp-video-iframe"
+            ></iframe>
+          </div>
+        </div>
+      </section>
+
       {/* Gift Card Management Features */}
       <section className="lp-section lp-creative-cards-section" id="features" ref={creativeCardsRef}>
         <div className="lp-section__header">

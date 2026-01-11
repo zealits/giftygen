@@ -1,4 +1,4 @@
-import React, { useEffect, useState, lazy, Suspense } from "react";
+import React, { useEffect, lazy, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { loadUser } from "./services/Actions/authActions.js";
@@ -25,7 +25,6 @@ const RedeemGiftCard = lazy(() => import("./pages/admin/RedeemGiftCard.js"));
 const GiftCardDetails = lazy(() => import("./pages/user/GiftCardDetails.js"));
 const SuperAdminLogin = lazy(() => import("./components/SuperAdmin/SuperAdminLogin"));
 const SuperAdminDashboard = lazy(() => import("./components/SuperAdmin/SuperAdminDashboard"));
-const VideoModal = lazy(() => import("./components/VideoModal/VideoModal"));
 const SubscriptionManagement = lazy(() => import("./components/subscriptionManagement"));
 // import 'font-awesome/css/font-awesome.min.css';
 
@@ -148,22 +147,10 @@ function AppRoutes() {
 
 function App() {
   const dispatch = useDispatch();
-  const [showVideoModal, setShowVideoModal] = useState(false);
 
   useEffect(() => {
     dispatch(loadUser());
-
-    // Show video modal after a short delay when the app loads
-    const timer = setTimeout(() => {
-      setShowVideoModal(true);
-    }, 1000); // 1 second delay to ensure the app is fully loaded
-
-    return () => clearTimeout(timer);
   }, [dispatch]);
-
-  const handleCloseVideoModal = () => {
-    setShowVideoModal(false);
-  };
 
   return (
     <LoadingProvider>
@@ -171,9 +158,6 @@ function App() {
         <Router>
           <AppRoutes />
         </Router>
-        <Suspense fallback={null}>
-          <VideoModal isOpen={showVideoModal} onClose={handleCloseVideoModal} />
-        </Suspense>
       </div>
     </LoadingProvider>
   );
