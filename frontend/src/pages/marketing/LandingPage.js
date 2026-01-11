@@ -639,317 +639,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Animated Business Offer Section */}
-      <section
-        id="offer"
-        className={`lp-offer lp-animated-section lp-animated-section--${animationPhase}`}
-        ref={animationSectionRef}
-      >
-        <h2 className="lp-section__title lp-h2">{t("offer.title")}</h2>
-        <p className="lp-lead">{t("offer.description")}</p>
-
-        {/* Animated Gift Card Container */}
-        <div className="lp-gift-animation-container">
-          {/* The scanning gift card - visible only in initial and scanning phases */}
-          <div
-            className={`lp-scan-giftcard ${
-              animationPhase === "laptop-appear" || animationPhase === "zoom-in" || animationPhase === "revealed"
-                ? "lp-scan-giftcard--hidden"
-                : ""
-            }`}
-          >
-            {/* Floating particles background */}
-            <div className="lp-particles">
-              {[...Array(20)].map((_, i) => (
-                <div
-                  key={i}
-                  className="lp-particle"
-                  style={{
-                    "--delay": `${Math.random() * 2}s`,
-                    "--x": `${Math.random() * 100}%`,
-                    "--y": `${Math.random() * 100}%`,
-                    "--duration": `${2 + Math.random() * 3}s`,
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* The gift card */}
-            <div className="lp-scan-card">
-              <div className="lp-scan-card__glow" />
-              <div className="lp-scan-card__inner">
-                <div className="lp-scan-card__header">
-                  <CreditCard className="lp-scan-card__icon" size={24} />
-                  <span className="lp-scan-card__brand">GiftyGen</span>
-                </div>
-                <div className="lp-scan-card__chip" />
-                <div className="lp-scan-card__nfc">
-                  <Wifi size={18} />
-                </div>
-                <div className="lp-scan-card__title">{t("giftCard.digitalGiftCard")}</div>
-                <div className="lp-scan-card__amount">
-                  {formatCurrency(getCurrencyConfig.displayAmount, getCurrencyConfig.currency, {
-                    locale: getCurrencyConfig.locale,
-                  })}
-                </div>
-                <div className="lp-scan-card__qr">
-                  <div className="lp-qr-pattern">
-                    {[...Array(25)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="lp-qr-cell"
-                        style={{
-                          opacity: Math.random() > 0.5 ? 1 : 0.2,
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Scan line animation - only during scanning phase */}
-              {animationPhase === "scanning" && (
-                <>
-                  <div className="lp-scan-line" />
-                  <div className="lp-scan-glow" />
-                  <div className="lp-scan-pulse" />
-                  {/* NFC wave animation */}
-                  <div className="lp-nfc-waves">
-                    <div className="lp-nfc-wave" />
-                    <div className="lp-nfc-wave" style={{ animationDelay: "0.3s" }} />
-                    <div className="lp-nfc-wave" style={{ animationDelay: "0.6s" }} />
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Scanning status text */}
-            {animationPhase === "scanning" && (
-              <div className="lp-scan-status">
-                <div className="lp-scan-status__dot" />
-                <span>Scanning gift card...</span>
-              </div>
-            )}
-          </div>
-
-          {/* Laptop with category cards inside - appears after scan */}
-          <div
-            className={`lp-laptop-container ${
-              animationPhase === "laptop-appear" || animationPhase === "zoom-in" || animationPhase === "revealed"
-                ? "lp-laptop-container--visible"
-                : ""
-            } ${animationPhase === "zoom-in" || animationPhase === "revealed" ? "lp-laptop-container--zoomed" : ""}`}
-          >
-            {/* Laptop body */}
-            <div className="lp-laptop">
-              {/* Laptop screen */}
-              <div className="lp-laptop__screen">
-                <div className="lp-laptop__screen-bezel">
-                  {/* Camera dot */}
-                  <div className="lp-laptop__camera" />
-                  {/* Screen content - Category cards grid inside */}
-                  <div className="lp-laptop__display">
-                    {/* Header bar */}
-                    <div className="lp-laptop__header-bar">
-                      <div className="lp-laptop__logo">
-                        <CreditCard size={14} />
-                        <span>GiftyGen</span>
-                      </div>
-                      <div className="lp-laptop__nav-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                    </div>
-                    {/* Category cards grid */}
-                    <div className="lp-laptop__categories">
-                      {["restaurants", "hotels", "retail", "salons", "fitness", "seasonal"].map((category, index) => (
-                        <div
-                          key={category}
-                          className="lp-laptop__category-card"
-                          style={{ "--card-delay": `${index * 0.1}s` }}
-                        >
-                          <div
-                            className="lp-laptop__category-img"
-                            style={{ backgroundImage: `url(${businessCategoryImages[category]})` }}
-                          />
-                          <div className="lp-laptop__category-name">{t(`businessCategories.${category}.title`)}</div>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Screen glow effect */}
-                    <div className="lp-laptop__screen-glow" />
-                  </div>
-                </div>
-              </div>
-              {/* Laptop base/keyboard */}
-              <div className="lp-laptop__base">
-                <div className="lp-laptop__trackpad" />
-              </div>
-              {/* Laptop shadow */}
-              <div className="lp-laptop__shadow" />
-            </div>
-          </div>
-
-          {/* Burst particles during zoom transition */}
-          {animationPhase === "zoom-in" && (
-            <div className="lp-burst-container">
-              {[...Array(20)].map((_, i) => (
-                <div
-                  key={i}
-                  className="lp-burst-particle"
-                  style={{
-                    "--angle": `${(i / 20) * 360}deg`,
-                    "--distance": `${80 + Math.random() * 100}px`,
-                    "--delay": `${Math.random() * 0.3}s`,
-                    "--size": `${3 + Math.random() * 6}px`,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Business Category Cards - revealed after animation, in same position */}
-          <div
-            className={`lp-business-categories lp-business-categories--animated ${
-              animationPhase === "revealed" ? "lp-business-categories--visible" : ""
-            }`}
-          >
-            <div className="lp-business-categories__grid">
-              {["restaurants", "hotels", "retail", "salons", "fitness", "seasonal"].map((category, index) => (
-                <div
-                  key={category}
-                  className={`lp-business-card lp-business-card--${category} lp-business-card--animated`}
-                  style={{ "--reveal-delay": `${index * 0.12}s` }}
-                  onClick={() => navigate(`/category/${category}`)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      navigate(`/category/${category}`);
-                    }
-                  }}
-                  aria-label={`Learn how GiftyGen helps ${t(`businessCategories.${category}.title`)}`}
-                >
-                  <div className="lp-business-card__image">
-                    <img
-                      src={businessCategoryImages[category]}
-                      alt={t(`businessCategories.${category}.title`)}
-                      className="lp-business-card__img"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                        const gradient = e.target.nextElementSibling;
-                        if (gradient) {
-                          gradient.style.display = "block";
-                        }
-                      }}
-                    />
-                    <div className="lp-business-card__gradient" style={{ display: "none" }}></div>
-                    {/* Button overlaid on image */}
-                    <div className="lp-business-card__overlay">
-                      <button className="lp-business-card__button">
-                        <span>{t(`businessCategories.${category}.title`)}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Product Highlights */}
-      <section className="lp-section" id="highlights">
-        <div className="lp-section__header">
-          <h2 className="lp-section__title lp-h2">{t("highlights.title")}</h2>
-        </div>
-
-        <div className="lp-grid lp-grid--4">
-          <div className="lp-feature-card">
-            <div className="lp-feature-card__icon">
-              <Zap className="lp-feature-icon" />
-            </div>
-            <div className="lp-feature-card__content">
-              <h3 className="lp-h3">{t("highlights.smartDelivery.title")}</h3>
-              <p>{t("highlights.smartDelivery.description")}</p>
-              <div className="lp-feature-card__benefits">
-                <span className="lp-feature-benefit">
-                  <CheckCircle size={16} />
-                  {t("highlights.smartDelivery.benefit1")}
-                </span>
-                <span className="lp-feature-benefit">
-                  <CheckCircle size={16} />
-                  {t("highlights.smartDelivery.benefit2")}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lp-feature-card">
-            <div className="lp-feature-card__icon">
-              <Smartphone className="lp-feature-icon" />
-            </div>
-            <div className="lp-feature-card__content">
-              <h3 className="lp-h3">{t("highlights.integration.title")}</h3>
-              <p>{t("highlights.integration.description")}</p>
-              <div className="lp-feature-card__benefits">
-                <span className="lp-feature-benefit">
-                  <CheckCircle size={16} />
-                  {t("highlights.integration.benefit1")}
-                </span>
-                <span className="lp-feature-benefit">
-                  <CheckCircle size={16} />
-                  {t("highlights.integration.benefit2")}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lp-feature-card">
-            <div className="lp-feature-card__icon">
-              <Shield className="lp-feature-icon" />
-            </div>
-            <div className="lp-feature-card__content">
-              <h3 className="lp-h3">{t("highlights.security.title")}</h3>
-              <p>{t("highlights.security.description")}</p>
-              <div className="lp-feature-card__benefits">
-                <span className="lp-feature-benefit">
-                  <CheckCircle size={16} />
-                  {t("highlights.security.benefit1")}
-                </span>
-                <span className="lp-feature-benefit">
-                  <CheckCircle size={16} />
-                  {t("highlights.security.benefit2")}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lp-feature-card">
-            <div className="lp-feature-card__icon">
-              <Palette className="lp-feature-icon" />
-            </div>
-            <div className="lp-feature-card__content">
-              <h3 className="lp-h3">{t("highlights.branding.title")}</h3>
-              <p>{t("highlights.branding.description")}</p>
-              <div className="lp-feature-card__benefits">
-                <span className="lp-feature-benefit">
-                  <CheckCircle size={16} />
-                  {t("highlights.branding.benefit1")}
-                </span>
-                <span className="lp-feature-benefit">
-                  <CheckCircle size={16} />
-                  {t("highlights.branding.benefit2")}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Gift Card Management Features */}
       <section className="lp-section lp-book-features-section" id="features">
         <div className="lp-section__header">
@@ -968,7 +657,7 @@ function LandingPage() {
               <div className="lp-flip-card__container">
                 <div className="lp-card-front">
                   <div className="lp-card-front__tp lp-card-front__tp--pink">
-                    <span className="lp-card-front__category lp-card-front__category--pink">For data-driven</span>
+                    <span className="lp-card-front__category lp-card-front__category--pink">FOR DATA-DRIVEN</span>
                     <img
                       src="/images/feature-cards/apple-wallet-google-pay.png"
                       alt="Apple Wallet & Google Pay Integration"
@@ -993,11 +682,33 @@ function LandingPage() {
                 <h3 className="lp-inside-page__heading lp-inside-page__heading--pink">
                   Apple Wallet & Google Pay Integration for Digital Gift Cards
                 </h3>
+                <p className="lp-inside-page__description">
+                  Deliver gift cards directly to Apple Wallet and Google Pay in seconds. Customers can save, share, and
+                  redeem from their phone—increasing redemption rates and eliminating lost cards.
+                </p>
+                <div className="lp-inside-page__benefits lp-inside-page__benefits--pink">
+                  <div className="lp-benefit-item">
+                    <CheckCircle size={18} className="lp-benefit-icon lp-benefit-icon--pink" />
+                    <span>Instant delivery via email, SMS, or mobile wallet</span>
+                  </div>
+                  <div className="lp-benefit-item">
+                    <CheckCircle size={18} className="lp-benefit-icon lp-benefit-icon--pink" />
+                    <span>One-tap redemption from customer's phone</span>
+                  </div>
+                  <div className="lp-benefit-item">
+                    <CheckCircle size={18} className="lp-benefit-icon lp-benefit-icon--pink" />
+                    <span>Cross-device compatibility (iOS, Android, desktop)</span>
+                  </div>
+                  <div className="lp-benefit-item">
+                    <CheckCircle size={18} className="lp-benefit-icon lp-benefit-icon--pink" />
+                    <span>Reduces physical card waste and processing costs</span>
+                  </div>
+                </div>
                 <button
                   className="lp-inside-page__btn lp-inside-page__btn--pink"
                   onClick={() => handleScrollTo("register")}
                 >
-                  View details
+                  Get Started
                 </button>
               </div>
             </div>
@@ -1296,8 +1007,319 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* Animated Business Offer Section */}
+      <section
+        id="offer"
+        className={`lp-offer lp-animated-section lp-animated-section--${animationPhase}`}
+        ref={animationSectionRef}
+      >
+        <h2 className="lp-section__title lp-h2">{t("offer.title")}</h2>
+        <p className="lp-lead">{t("offer.description")}</p>
+
+        {/* Animated Gift Card Container */}
+        <div className="lp-gift-animation-container">
+          {/* The scanning gift card - visible only in initial and scanning phases */}
+          <div
+            className={`lp-scan-giftcard ${
+              animationPhase === "laptop-appear" || animationPhase === "zoom-in" || animationPhase === "revealed"
+                ? "lp-scan-giftcard--hidden"
+                : ""
+            }`}
+          >
+            {/* Floating particles background */}
+            <div className="lp-particles">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="lp-particle"
+                  style={{
+                    "--delay": `${Math.random() * 2}s`,
+                    "--x": `${Math.random() * 100}%`,
+                    "--y": `${Math.random() * 100}%`,
+                    "--duration": `${2 + Math.random() * 3}s`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* The gift card */}
+            <div className="lp-scan-card">
+              <div className="lp-scan-card__glow" />
+              <div className="lp-scan-card__inner">
+                <div className="lp-scan-card__header">
+                  <CreditCard className="lp-scan-card__icon" size={24} />
+                  <span className="lp-scan-card__brand">GiftyGen</span>
+                </div>
+                <div className="lp-scan-card__chip" />
+                <div className="lp-scan-card__nfc">
+                  <Wifi size={18} />
+                </div>
+                <div className="lp-scan-card__title">{t("giftCard.digitalGiftCard")}</div>
+                <div className="lp-scan-card__amount">
+                  {formatCurrency(getCurrencyConfig.displayAmount, getCurrencyConfig.currency, {
+                    locale: getCurrencyConfig.locale,
+                  })}
+                </div>
+                <div className="lp-scan-card__qr">
+                  <div className="lp-qr-pattern">
+                    {[...Array(25)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="lp-qr-cell"
+                        style={{
+                          opacity: Math.random() > 0.5 ? 1 : 0.2,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Scan line animation - only during scanning phase */}
+              {animationPhase === "scanning" && (
+                <>
+                  <div className="lp-scan-line" />
+                  <div className="lp-scan-glow" />
+                  <div className="lp-scan-pulse" />
+                  {/* NFC wave animation */}
+                  <div className="lp-nfc-waves">
+                    <div className="lp-nfc-wave" />
+                    <div className="lp-nfc-wave" style={{ animationDelay: "0.3s" }} />
+                    <div className="lp-nfc-wave" style={{ animationDelay: "0.6s" }} />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Scanning status text */}
+            {animationPhase === "scanning" && (
+              <div className="lp-scan-status">
+                <div className="lp-scan-status__dot" />
+                <span>Scanning gift card...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Laptop with category cards inside - appears after scan */}
+          <div
+            className={`lp-laptop-container ${
+              animationPhase === "laptop-appear" || animationPhase === "zoom-in" || animationPhase === "revealed"
+                ? "lp-laptop-container--visible"
+                : ""
+            } ${animationPhase === "zoom-in" || animationPhase === "revealed" ? "lp-laptop-container--zoomed" : ""}`}
+          >
+            {/* Laptop body */}
+            <div className="lp-laptop">
+              {/* Laptop screen */}
+              <div className="lp-laptop__screen">
+                <div className="lp-laptop__screen-bezel">
+                  {/* Camera dot */}
+                  <div className="lp-laptop__camera" />
+                  {/* Screen content - Category cards grid inside */}
+                  <div className="lp-laptop__display">
+                    {/* Header bar */}
+                    <div className="lp-laptop__header-bar">
+                      <div className="lp-laptop__logo">
+                        <CreditCard size={14} />
+                        <span>GiftyGen</span>
+                      </div>
+                      <div className="lp-laptop__nav-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                    </div>
+                    {/* Category cards grid */}
+                    <div className="lp-laptop__categories">
+                      {["restaurants", "hotels", "retail", "salons", "fitness", "seasonal"].map((category, index) => (
+                        <div
+                          key={category}
+                          className="lp-laptop__category-card"
+                          style={{ "--card-delay": `${index * 0.1}s` }}
+                        >
+                          <div
+                            className="lp-laptop__category-img"
+                            style={{ backgroundImage: `url(${businessCategoryImages[category]})` }}
+                          />
+                          <div className="lp-laptop__category-name">{t(`businessCategories.${category}.title`)}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Screen glow effect */}
+                    <div className="lp-laptop__screen-glow" />
+                  </div>
+                </div>
+              </div>
+              {/* Laptop base/keyboard */}
+              <div className="lp-laptop__base">
+                <div className="lp-laptop__trackpad" />
+              </div>
+              {/* Laptop shadow */}
+              <div className="lp-laptop__shadow" />
+            </div>
+          </div>
+
+          {/* Burst particles during zoom transition */}
+          {animationPhase === "zoom-in" && (
+            <div className="lp-burst-container">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="lp-burst-particle"
+                  style={{
+                    "--angle": `${(i / 20) * 360}deg`,
+                    "--distance": `${80 + Math.random() * 100}px`,
+                    "--delay": `${Math.random() * 0.3}s`,
+                    "--size": `${3 + Math.random() * 6}px`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Business Category Cards - revealed after animation, in same position */}
+          <div
+            className={`lp-business-categories lp-business-categories--animated ${
+              animationPhase === "revealed" ? "lp-business-categories--visible" : ""
+            }`}
+          >
+            <div className="lp-business-categories__grid">
+              {["restaurants", "hotels", "retail", "salons", "fitness", "seasonal"].map((category, index) => (
+                <div
+                  key={category}
+                  className={`lp-business-card lp-business-card--${category} lp-business-card--animated`}
+                  style={{ "--reveal-delay": `${index * 0.12}s` }}
+                  onClick={() => navigate(`/category/${category}`)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/category/${category}`);
+                    }
+                  }}
+                  aria-label={`Learn how GiftyGen helps ${t(`businessCategories.${category}.title`)}`}
+                >
+                  <div className="lp-business-card__image">
+                    <img
+                      src={businessCategoryImages[category]}
+                      alt={t(`businessCategories.${category}.title`)}
+                      className="lp-business-card__img"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        const gradient = e.target.nextElementSibling;
+                        if (gradient) {
+                          gradient.style.display = "block";
+                        }
+                      }}
+                    />
+                    <div className="lp-business-card__gradient" style={{ display: "none" }}></div>
+                    {/* Button overlaid on image */}
+                    <div className="lp-business-card__overlay">
+                      <button className="lp-business-card__button">
+                        <span>{t(`businessCategories.${category}.title`)}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Product Highlights */}
+      {/* <section className="lp-section" id="highlights">
+        <div className="lp-section__header">
+          <h2 className="lp-section__title lp-h2">{t("highlights.title")}</h2>
+        </div>
+
+        <div className="lp-grid lp-grid--4">
+          <div className="lp-feature-card">
+            <div className="lp-feature-card__icon">
+              <Zap className="lp-feature-icon" />
+            </div>
+            <div className="lp-feature-card__content">
+              <h3 className="lp-h3">{t("highlights.smartDelivery.title")}</h3>
+              <p>{t("highlights.smartDelivery.description")}</p>
+              <div className="lp-feature-card__benefits">
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  {t("highlights.smartDelivery.benefit1")}
+                </span>
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  {t("highlights.smartDelivery.benefit2")}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="lp-feature-card">
+            <div className="lp-feature-card__icon">
+              <Smartphone className="lp-feature-icon" />
+            </div>
+            <div className="lp-feature-card__content">
+              <h3 className="lp-h3">{t("highlights.integration.title")}</h3>
+              <p>{t("highlights.integration.description")}</p>
+              <div className="lp-feature-card__benefits">
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  {t("highlights.integration.benefit1")}
+                </span>
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  {t("highlights.integration.benefit2")}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="lp-feature-card">
+            <div className="lp-feature-card__icon">
+              <Shield className="lp-feature-icon" />
+            </div>
+            <div className="lp-feature-card__content">
+              <h3 className="lp-h3">{t("highlights.security.title")}</h3>
+              <p>{t("highlights.security.description")}</p>
+              <div className="lp-feature-card__benefits">
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  {t("highlights.security.benefit1")}
+                </span>
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  {t("highlights.security.benefit2")}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="lp-feature-card">
+            <div className="lp-feature-card__icon">
+              <Palette className="lp-feature-icon" />
+            </div>
+            <div className="lp-feature-card__content">
+              <h3 className="lp-h3">{t("highlights.branding.title")}</h3>
+              <p>{t("highlights.branding.description")}</p>
+              <div className="lp-feature-card__benefits">
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  {t("highlights.branding.benefit1")}
+                </span>
+                <span className="lp-feature-benefit">
+                  <CheckCircle size={16} />
+                  {t("highlights.branding.benefit2")}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section> */}
+
       {/* Why giftygen / Benefits */}
-      <section className="lp-section" id="benefits">
+      {/* <section className="lp-section" id="benefits">
         <div className="lp-section__header">
           <h2 className="lp-section__title lp-h2">{t("benefits.title")}</h2>
           <p className="lp-section__subtitle">{t("benefits.subtitle")}</p>
@@ -1355,7 +1377,7 @@ function LandingPage() {
             />
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Registration */}
       <section className="lp-section lp-register" id="register">

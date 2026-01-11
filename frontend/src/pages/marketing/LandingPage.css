@@ -4724,6 +4724,7 @@ html {
   perspective: 2000px;
   perspective-origin: center;
   transform-style: preserve-3d;
+  isolation: isolate;
 }
 
 /* Individual Card Container */
@@ -4740,6 +4741,7 @@ html {
   overflow: visible;
   transform-style: preserve-3d;
   perspective: 1000px;
+  z-index: 1;
 }
 
 /* Hide cards initially on desktop only */
@@ -4817,6 +4819,8 @@ html {
 .lp-book-card--animate:hover {
   transform: translateY(-8px) rotateX(0) scale(1);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  position: relative;
 }
 
 /* Flip Card - Outer container */
@@ -5081,9 +5085,11 @@ html {
   width: 100%;
   font-size: clamp(1rem, 1.2vw, 1.3rem);
   font-weight: 700;
-  margin-top: 0.2rem;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
   line-height: 1.3;
-  text-align: center;
+  text-align: left;
+  letter-spacing: -0.01em;
 }
 
 .lp-inside-page__heading--pink { color: #ff40a1; }
@@ -5125,9 +5131,9 @@ html {
   background-color: transparent;
   border: 3px solid;
   border-radius: 0.5rem;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  margin-top: 2rem;
+  margin-top: auto;
   overflow: hidden;
   padding: 0.7rem 0.75rem;
   position: relative;
@@ -5137,6 +5143,8 @@ html {
   z-index: 10;
   cursor: pointer;
   color: inherit;
+  align-self: center;
+  letter-spacing: 0.5px;
 }
 
 .lp-inside-page__btn::before {
@@ -5231,6 +5239,129 @@ html {
   transform: scaleY(1);
 }
 
+/* Inside Page Description */
+.lp-inside-page__description {
+  color: #555;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  margin: 0 0 1rem;
+  text-align: left;
+  width: 100%;
+  padding: 0;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.lp-root[data-theme='dark'] .lp-inside-page__description {
+  color: #d0d0d0;
+}
+
+/* Inside Page Benefits List */
+.lp-inside-page__benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  width: 100%;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  text-align: left;
+}
+
+.lp-benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  color: #444;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  transition: transform 0.2s ease, color 0.2s ease;
+  font-weight: 400;
+}
+
+.lp-benefit-item:hover {
+  transform: translateX(4px);
+  color: #333;
+}
+
+.lp-root[data-theme='dark'] .lp-benefit-item {
+  color: #c0c0c0;
+}
+
+.lp-root[data-theme='dark'] .lp-benefit-item:hover {
+  color: #e0e0e0;
+}
+
+.lp-benefit-icon {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  stroke-width: 2.5;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.lp-benefit-item:hover .lp-benefit-icon {
+  transform: scale(1.1);
+}
+
+/* Color variants for benefit icons */
+.lp-benefit-icon--pink {
+  color: #ff40a1;
+}
+
+.lp-benefit-icon--cyan {
+  color: #279eb2;
+}
+
+.lp-benefit-icon--orange {
+  color: #f86647;
+}
+
+.lp-benefit-icon--green {
+  color: #00b97d;
+}
+
+.lp-benefit-icon--purple {
+  color: #8e24aa;
+}
+
+.lp-benefit-icon--blue {
+  color: #1e88e5;
+}
+
+.lp-benefit-icon--teal {
+  color: #00897b;
+}
+
+.lp-benefit-icon--coral {
+  color: #ff5722;
+}
+
+/* Adjust container for better spacing with description and benefits */
+.lp-inside-page__container {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 1.5rem 0.75rem 1rem;
+  overflow-y: auto;
+  max-height: 100%;
+  gap: 0;
+}
+
+.lp-inside-page__container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.lp-inside-page__container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lp-inside-page__container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.lp-root[data-theme='dark'] .lp-inside-page__container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* Dark theme adjustments */
 .lp-root[data-theme='dark'] .lp-card-front,
 .lp-root[data-theme='dark'] .lp-inside-page {
@@ -5247,6 +5378,8 @@ html {
 
 .lp-root[data-theme='dark'] .lp-book-card--animate:hover {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  position: relative;
 }
 
 .lp-root[data-theme='dark'] .lp-card-front__category {
@@ -5257,6 +5390,8 @@ html {
 /* Functionality - Hover Effects */
 .lp-book-card--animate:hover {
   width: 30rem;
+  z-index: 1000;
+  position: relative;
 }
 
 .lp-book-card--animate:hover .lp-flip-card__container {
@@ -5306,6 +5441,8 @@ html {
   
   .lp-book-card--animate:hover {
     width: 28rem;
+    z-index: 1000;
+    position: relative;
   }
   
   .lp-flip-card {
@@ -5344,6 +5481,8 @@ html {
     width: 100%;
     max-width: 16rem;
     transform: translateY(-4px);
+    z-index: 1000;
+    position: relative;
   }
   
   .lp-flip-card {
@@ -5475,10 +5614,34 @@ html {
   .lp-inside-page__text {
     font-size: 0.9rem;
   }
-  
+
+  .lp-inside-page__description {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 0.875rem;
+  }
+
+  .lp-inside-page__benefits {
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .lp-benefit-item {
+    font-size: 0.8rem;
+    gap: 0.6rem;
+    line-height: 1.5;
+  }
+
+  .lp-benefit-icon {
+    width: 16px;
+    height: 16px;
+    margin-top: 0.1rem;
+  }
+
   .lp-inside-page__btn {
     font-size: 1rem;
     padding: 0.6rem 0.65rem;
+    margin-top: 0.75rem;
   }
 }
 
@@ -5546,6 +5709,8 @@ html {
   
   .lp-book-card--animate:hover {
     transform: none;
+    z-index: 1000;
+    position: relative;
   }
   
   .lp-flip-card {
