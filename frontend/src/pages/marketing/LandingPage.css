@@ -1316,7 +1316,23 @@
   }
   
   .lp-offer {
-    padding: 24px 16px 12px;
+    padding: 24px 16px 48px;
+  }
+  
+  .lp-offer .lp-lead {
+    margin-bottom: 50px;
+  }
+  
+  .lp-business-categories {
+    margin-top: 80px;
+  }
+  
+  .lp-business-categories__grid {
+    gap: 40px;
+  }
+  
+  .lp-business-card {
+    margin-bottom: 12px;
   }
   
   .lp-form {
@@ -2894,16 +2910,17 @@
 
 @media (max-width: 767px) {
   .lp-business-categories {
-    margin-top: 40px;
+    margin-top: 60px;
   }
   
   .lp-business-categories__grid {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 40px;
   }
   
   .lp-business-card {
     border-radius: 16px;
+    margin-bottom: 12px;
   }
   
   .lp-business-card__image {
@@ -3253,7 +3270,23 @@ html {
   }
   
   .lp-offer {
-    padding: 24px 16px 12px;
+    padding: 24px 16px 48px;
+  }
+  
+  .lp-offer .lp-lead {
+    margin-bottom: 50px;
+  }
+  
+  .lp-business-categories {
+    margin-top: 80px;
+  }
+  
+  .lp-business-categories__grid {
+    gap: 40px;
+  }
+  
+  .lp-business-card {
+    margin-bottom: 12px;
   }
   
   .lp-form {
@@ -4081,7 +4114,7 @@ html {
 @media (max-width: 767px) {
   .lp-gift-animation-container {
     min-height: 400px;
-    margin: 32px 0;
+    margin: 32px 0 40px;
   }
   
   .lp-animated-section--revealed .lp-gift-animation-container {
@@ -4090,6 +4123,7 @@ html {
   
   .lp-business-categories--animated {
     padding: 0 16px;
+    top: 55%;
   }
   
   .lp-scan-card {
@@ -4146,7 +4180,7 @@ html {
 @media (max-width: 480px) {
   .lp-gift-animation-container {
     min-height: 350px;
-    margin: 24px 0;
+    margin: 24px 0 40px;
   }
   
   .lp-animated-section--revealed .lp-gift-animation-container {
@@ -4155,6 +4189,11 @@ html {
   
   .lp-business-categories--animated {
     padding: 0 12px;
+    top: 58%;
+  }
+  
+  .lp-offer .lp-lead {
+    margin-bottom: 50px;
   }
   
   .lp-scan-card {
