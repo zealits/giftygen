@@ -39,6 +39,11 @@ import {
   Lock,
   Send,
   Layers,
+  Info,
+  Sparkles,
+  HelpCircle,
+  Mail,
+  Home,
 } from "lucide-react";
 
 function LandingPage() {
@@ -53,6 +58,9 @@ function LandingPage() {
   const [userLocation, setUserLocation] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
+  const mobileMenuRef = useRef(null);
+  const touchStartX = useRef(null);
+  const touchEndX = useRef(null);
 
   // Determine currency and amount based on user location
   const getCurrencyConfig = useMemo(() => {
@@ -173,6 +181,71 @@ function LandingPage() {
     );
   };
 
+  const FeatureModal = ({ isOpen, onClose, feature }) => {
+    if (!isOpen || !feature) return null;
+
+    return (
+      <div className="lp-modal-overlay" onClick={onClose}>
+        <div
+          className="lp-feature-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="feature-modal-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button className="lp-feature-modal__close" onClick={onClose} aria-label="Close modal">
+            <X size={24} />
+          </button>
+          <div className="lp-feature-modal__header">
+            <div className="lp-feature-modal__icon-wrapper">
+              {feature.icon}
+            </div>
+            <h2 id="feature-modal-title" className="lp-feature-modal__title">
+              {feature.title}
+            </h2>
+            <div className="lp-feature-modal__keywords">
+              {feature.keywords.split(", ").map((keyword, index) => (
+                <span key={index} className="lp-feature-modal__keyword-tag">
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="lp-feature-modal__content">
+            <div className="lp-feature-modal__description">
+              <p>{feature.description}</p>
+            </div>
+            <div className="lp-feature-modal__benefits">
+              <h3 className="lp-feature-modal__benefits-title">Key Benefits</h3>
+              <ul className="lp-feature-modal__benefits-list">
+                {feature.benefits.map((benefit, index) => (
+                  <li key={index}>
+                    <CheckCircle size={18} />
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="lp-feature-modal__actions">
+            <button
+              className="lp-btn"
+              onClick={() => {
+                onClose();
+                handleScrollTo("register");
+              }}
+            >
+              Get Started
+            </button>
+            <button className="lp-btn lp-btn--ghost" onClick={onClose}>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Detect and set language based on geolocation
   useEffect(() => {
     const initializeLanguage = async () => {
@@ -210,6 +283,120 @@ function LandingPage() {
     isOpen: false,
     selectedBusiness: null,
   });
+
+  const [featureModalState, setFeatureModalState] = useState({
+    isOpen: false,
+    selectedFeature: null,
+  });
+
+  // Feature data structure
+  const featuresData = [
+    {
+      id: 1,
+      title: "Apple Wallet & Google Pay Integration for Digital Gift Cards",
+      keywords: "Apple Wallet, Google Pay, digital gift cards, mobile wallet",
+      description: "Deliver gift cards directly to Apple Wallet and Google Pay in seconds. Customers can save, share, and redeem from their phone—increasing redemption rates and eliminating lost cards.",
+      benefits: [
+        "Instant delivery via email, SMS, or mobile wallet",
+        "One-tap redemption from customer's phone",
+        "Cross-device compatibility (iOS, Android, desktop)",
+        "Reduces physical card waste and processing costs"
+      ],
+      icon: <Smartphone size={45} />
+    },
+    {
+      id: 2,
+      title: "Seasonal Promotions & Campaign Management",
+      keywords: "seasonal campaigns, promotion management, automated campaigns",
+      description: "Launch, schedule, and automate promotional gift card campaigns for holidays, events, and seasonal peaks. Adjust pricing, limits, and messaging in real-time without code.",
+      benefits: [
+        "Pre-built templates for holidays (Christmas, Mother's Day, Black Friday)",
+        "A/B test promotion messaging and designs",
+        "Set expiration dates, purchase limits, and bulk discounts",
+        "Track promotion performance in real-time"
+      ],
+      icon: <Gift size={45} />
+    },
+    {
+      id: 3,
+      title: "Increase Customer Acquisition With Branded Digital Gift Cards",
+      keywords: "customer acquisition, branded gift cards, viral sharing",
+      description: "Convert gift givers into brand advocates. Branded digital gift cards introduce new customers to your business through personal recommendations and viral sharing—at lower acquisition cost than paid ads.",
+      benefits: [
+        "Personalized recipient experience drives 40%+ first purchase conversion",
+        "Shareable gift cards extend reach beyond initial buyer",
+        "Track acquisition source to optimize future campaigns",
+        "Lower CAC than paid advertising"
+      ],
+      icon: <Target size={45} />
+    },
+    {
+      id: 4,
+      title: "Boost Revenue With Upfront Cash Flow & Breakage",
+      keywords: "increase revenue, cash flow, breakage, customer spending",
+      description: "Receive upfront payment when customers purchase gift cards. Studies show 71% of customers spend beyond the card value (breakage)—turning gift cards into pure profit. Plus, unredeemed balances create additional revenue.",
+      benefits: [
+        "Average customer overspend: 70%+ beyond card value",
+        "Improve cash flow by 15-30% with advance payments",
+        "Capitalize on breakage (2-5% of total gift card sales)",
+        "Reduce dependency on discounts (better margins)"
+      ],
+      icon: <TrendingUp size={45} />
+    },
+    {
+      id: 5,
+      title: "Increase AOV With Gift Card Bundling & Smart Recommendations",
+      keywords: "average order value, increase AOV, customer spending",
+      description: "Increase average order value by 30-50%. Customers using gift cards typically spend beyond the card value, and bundling gift cards with other products drives larger baskets and higher margins.",
+      benefits: [
+        "Smart bundling: gift card + premium product = higher AOV",
+        "Track AOV by gift card value to optimize pricing",
+        "Upsell complementary items at redemption time",
+        "Mobile wallet display drives impulse purchases"
+      ],
+      icon: <DollarSign size={45} />
+    },
+    {
+      id: 6,
+      title: "Real-Time Analytics & Business Intelligence",
+      keywords: "real-time analytics, gift card tracking, business insights",
+      description: "Access real-time analytics on gift card sales, redemption rates, customer behavior, and revenue impact. Track redemption by location, channel, and customer segment. Use data-driven insights to forecast inventory, optimize campaigns, and measure ROI.",
+      benefits: [
+        "Dashboard shows sales, redemptions, revenue impact, and breakage",
+        "Export reports for CFO/board presentations",
+        "Track redemption by: location, channel, customer segment, time period",
+        "Measure campaign ROI and optimize future promotions",
+        "Forecast cash flow based on historical redemption patterns"
+      ],
+      icon: <BarChart3 size={45} />
+    },
+    {
+      id: 7,
+      title: "Drive Repeat Visits & Customer Loyalty",
+      keywords: "customer retention, loyalty programs, repeat visits",
+      description: "Drive repeat visits and build customer loyalty with gift cards. Customers who receive gift cards return 51% more often and spend 40% more per visit. Create referral programs where customers earn gift card rewards for advocacy.",
+      benefits: [
+        "51% repeat visit rate among gift card recipients vs. 12% baseline",
+        "Integrate with loyalty program to automate tier rewards",
+        "Create referral bonuses (gift card incentives for new customers)",
+        "Personalized offers based on purchase history"
+      ],
+      icon: <Users size={45} />
+    },
+    {
+      id: 8,
+      title: "Multi-Channel Campaigns & A/B Testing",
+      keywords: "multi-channel, promotional campaigns, A/B testing",
+      description: "Run multi-channel gift card campaigns across email, SMS, social media, and in-store. Test different designs, messages, and pricing with A/B testing. Pause, refund, or adjust campaigns instantly based on real-time performance data.",
+      benefits: [
+        "Create SMS campaigns for flash sales and seasonal promotions",
+        "Run contests where customers win gift cards",
+        "A/B test card designs and messaging for conversion",
+        "Refund or modify campaigns without technical support"
+      ],
+      icon: <Send size={45} />
+    }
+  ];
 
   // Animation states for the gift card reveal section
   // Phases: initial -> scanning -> laptop-appear -> zoom-in -> revealed
@@ -438,9 +625,9 @@ function LandingPage() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             // Add animation class to all card columns
-            const cardColumns = entry.target.querySelectorAll('.lp-creative-column');
+            const cardColumns = entry.target.querySelectorAll(".lp-creative-column");
             cardColumns.forEach((col) => {
-              col.classList.add('lp-creative-animate');
+              col.classList.add("lp-creative-animate");
             });
             // Unobserve after animation is triggered
             observer.unobserve(entry.target);
@@ -449,7 +636,7 @@ function LandingPage() {
       },
       {
         threshold: 0.1, // Trigger when 10% of section is visible
-        rootMargin: '0px 0px -50px 0px', // Trigger 50px before bottom of viewport
+        rootMargin: "0px 0px -50px 0px", // Trigger 50px before bottom of viewport
       }
     );
 
@@ -513,6 +700,51 @@ function LandingPage() {
     handleScrollTo(scrollToId);
     closeMobileMenu();
   };
+
+  // Swipe to close functionality
+  const handleTouchStart = (e) => {
+    // Only start tracking if touch starts near the right edge (within 30px)
+    const touchX = e.touches[0].clientX;
+    const menuElement = mobileMenuRef.current;
+    if (menuElement) {
+      const menuRect = menuElement.getBoundingClientRect();
+      // Check if touch starts near the right edge of the menu
+      if (touchX >= menuRect.right - 30) {
+        touchStartX.current = touchX;
+      }
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (touchStartX.current !== null) {
+      touchEndX.current = e.touches[0].clientX;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50; // Minimum distance for swipe
+    
+    // Swipe right to close (swiping from right edge to left)
+    if (distance > minSwipeDistance && isMobileMenuOpen) {
+      closeMobileMenu();
+    }
+    
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
+  // Navigation items with icons
+  const mobileNavItems = [
+    { id: "about", label: t("nav.about"), icon: <Info size={20} /> },
+    { id: "highlights", label: t("nav.highlights"), icon: <Sparkles size={20} /> },
+    { id: "benefits", label: t("nav.benefits"), icon: <Star size={20} /> },
+    { id: "register", label: t("nav.register"), icon: <CreditCard size={20} /> },
+    { id: "faq", label: "FAQ", icon: <HelpCircle size={20} /> },
+    { id: "contact", label: t("nav.contact"), icon: <Mail size={20} /> },
+  ];
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -601,7 +833,13 @@ function LandingPage() {
       </header>
 
       {/* Mobile Navigation Menu */}
-      <div className={`lp-mobile-menu ${isMobileMenuOpen ? "lp-mobile-menu--open" : ""}`}>
+      <div
+        ref={mobileMenuRef}
+        className={`lp-mobile-menu ${isMobileMenuOpen ? "lp-mobile-menu--open" : ""}`}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div className="lp-mobile-header">
           <div className="lp-mobile-header__brand">
             <img src={theme === "light" ? logoWhiteBg : logo} alt="giftygen logo" className="lp-mobile-header__logo" />
@@ -612,26 +850,55 @@ function LandingPage() {
           </button>
         </div>
 
-        <nav className="lp-mobile-nav">
-          <button onClick={() => handleMobileNavClick("about")}>{t("nav.about")}</button>
-          <button onClick={() => handleMobileNavClick("highlights")}>{t("nav.highlights")}</button>
-          <button onClick={() => handleMobileNavClick("benefits")}>{t("nav.benefits")}</button>
-          <button onClick={() => handleMobileNavClick("register")}>{t("nav.register")}</button>
-          <button onClick={() => handleMobileNavClick("faq")}>FAQ</button>
-          <button onClick={() => handleMobileNavClick("contact")}>{t("nav.contact")}</button>
+        <nav className="lp-mobile-nav" aria-label="Main navigation">
+          {mobileNavItems.map((item, index) => (
+            <button
+              key={item.id}
+              onClick={() => handleMobileNavClick(item.id)}
+              className="lp-mobile-nav__item"
+              style={{ "--delay": `${index * 0.05}s` }}
+              aria-label={`Navigate to ${item.label}`}
+            >
+              <span className="lp-mobile-nav__icon">{item.icon}</span>
+              <span className="lp-mobile-nav__label">{item.label}</span>
+              <ArrowRight size={16} className="lp-mobile-nav__arrow" />
+            </button>
+          ))}
         </nav>
+
+        <div className="lp-mobile-divider"></div>
+
         <div className="lp-mobile-cta">
-          <button className="lp-btn lp-btn--ghost" onClick={() => navigate("/login")}>
+          <button
+            className="lp-btn lp-btn--ghost"
+            onClick={() => {
+              navigate("/login");
+              closeMobileMenu();
+            }}
+          >
             {t("nav.signIn")}
           </button>
-          <button className="lp-btn" onClick={() => navigate("/explore")}>
+          <button
+            className="lp-btn"
+            onClick={() => {
+              navigate("/explore");
+              closeMobileMenu();
+            }}
+          >
             {t("nav.explore")}
           </button>
         </div>
-        <div className="lp-mobile-theme">
-          <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-            {theme === "dark" ? "☀️ Switch to Light" : "🌙 Switch to Dark"}
-          </button>
+
+        <div className="lp-mobile-actions">
+          <div className="lp-mobile-theme">
+            <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === "dark" ? "☀️" : "🌙"}
+              <span>{theme === "dark" ? "Switch to Light" : "Switch to Dark"}</span>
+            </button>
+          </div>
+          <div className="lp-mobile-language">
+            <LanguageDropdown variant="mobile" />
+          </div>
         </div>
       </div>
 
@@ -699,173 +966,34 @@ function LandingPage() {
 
         <div className="lp-creative-container">
           <div className="lp-creative-row">
-            {/* Card 1 - Apple Wallet & Google Pay */}
-            <div className="lp-creative-column">
-              <div className="lp-creative-card-details">
-                <div className="lp-creative-card-icons">
-                  <Smartphone className="lp-creative-icon" size={45} />
-                </div>
-                <h3>
-                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
-                    Apple Wallet & Google Wallet Integration for Digital Gift Cards
-                  </a>
-                </h3>
-                <a
-                  className="lp-creative-read-more-btn"
-                  href="#register"
-                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
+            {featuresData.map((feature) => (
+              <div key={feature.id} className="lp-creative-column">
+                <div 
+                  className="lp-creative-card-details"
+                  onClick={() => setFeatureModalState({ isOpen: true, selectedFeature: feature })}
+                  style={{ cursor: "pointer" }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setFeatureModalState({ isOpen: true, selectedFeature: feature });
+                    }
+                  }}
+                  aria-label={`Learn more about ${feature.title}`}
                 >
-                  <ArrowRight size={12} />
-                </a>
-              </div>
-            </div>
-
-            {/* Card 2 - Seasonal Campaigns */}
-            <div className="lp-creative-column">
-              <div className="lp-creative-card-details">
-                <div className="lp-creative-card-icons">
-                  <Gift className="lp-creative-icon" size={45} />
+                  <div className="lp-creative-card-icons">
+                    {feature.icon}
+                  </div>
+                  <h3>
+                    {feature.title}
+                  </h3>
+                  <div className="lp-creative-read-more-btn">
+                    <ArrowRight size={12} />
+                  </div>
                 </div>
-                <h3>
-                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
-                    Seasonal Gift Card Campaigns & Promotion Management
-                  </a>
-                </h3>
-                <a
-                  className="lp-creative-read-more-btn"
-                  href="#register"
-                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
-                >
-                  <ArrowRight size={12} />
-                </a>
               </div>
-            </div>
-
-            {/* Card 3 - Customer Acquisition */}
-            <div className="lp-creative-column">
-              <div className="lp-creative-card-details">
-                <div className="lp-creative-card-icons">
-                  <Target className="lp-creative-icon" size={45} />
-                </div>
-                <h3>
-                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
-                    Customer Acquisition Through Branded Digital Gift Cards
-                  </a>
-                </h3>
-                <a
-                  className="lp-creative-read-more-btn"
-                  href="#register"
-                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
-                >
-                  <ArrowRight size={12} />
-                </a>
-              </div>
-            </div>
-
-            {/* Card 4 - Increase Revenue */}
-            <div className="lp-creative-column">
-              <div className="lp-creative-card-details">
-                <div className="lp-creative-card-icons">
-                  <TrendingUp className="lp-creative-icon" size={45} />
-                </div>
-                <h3>
-                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
-                    Increase Revenue With Upfront Cash Flow & Breakage
-                  </a>
-                </h3>
-                <a
-                  className="lp-creative-read-more-btn"
-                  href="#register"
-                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
-                >
-                  <ArrowRight size={12} />
-                </a>
-              </div>
-            </div>
-
-            {/* Card 5 - Average Order Value */}
-            <div className="lp-creative-column">
-              <div className="lp-creative-card-details">
-                <div className="lp-creative-card-icons">
-                  <DollarSign className="lp-creative-icon" size={45} />
-                </div>
-                <h3>
-                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
-                    Increase Average Order Value With Digital Gift Cards
-                  </a>
-                </h3>
-                <a
-                  className="lp-creative-read-more-btn"
-                  href="#register"
-                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
-                >
-                  <ArrowRight size={12} />
-                </a>
-              </div>
-            </div>
-
-            {/* Card 6 - Real-Time Analytics */}
-            <div className="lp-creative-column">
-              <div className="lp-creative-card-details">
-                <div className="lp-creative-card-icons">
-                  <BarChart3 className="lp-creative-icon" size={45} />
-                </div>
-                <h3>
-                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
-                    Real-Time Gift Card Analytics & Business Insights
-                  </a>
-                </h3>
-                <a
-                  className="lp-creative-read-more-btn"
-                  href="#register"
-                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
-                >
-                  <ArrowRight size={12} />
-                </a>
-              </div>
-            </div>
-
-            {/* Card 7 - Customer Retention */}
-            <div className="lp-creative-column">
-              <div className="lp-creative-card-details">
-                <div className="lp-creative-card-icons">
-                  <Users className="lp-creative-icon" size={45} />
-                </div>
-                <h3>
-                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
-                    Increase Customer Retention With Gift Card Loyalty Programs
-                  </a>
-                </h3>
-                <a
-                  className="lp-creative-read-more-btn"
-                  href="#register"
-                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
-                >
-                  <ArrowRight size={12} />
-                </a>
-              </div>
-            </div>
-
-            {/* Card 8 - Multi-Channel Campaigns */}
-            <div className="lp-creative-column">
-              <div className="lp-creative-card-details">
-                <div className="lp-creative-card-icons">
-                  <Send className="lp-creative-icon" size={45} />
-                </div>
-                <h3>
-                  <a href="#register" onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}>
-                    Multi-Channel Promotional Campaigns
-                  </a>
-                </h3>
-                <a
-                  className="lp-creative-read-more-btn"
-                  href="#register"
-                  onClick={(e) => { e.preventDefault(); handleScrollTo("register"); }}
-                >
-                  <ArrowRight size={12} />
-                </a>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1526,6 +1654,11 @@ function LandingPage() {
         isOpen={businessModalState.isOpen}
         onClose={() => setBusinessModalState({ isOpen: false, selectedBusiness: null })}
         businessType={businessModalState.selectedBusiness}
+      />
+      <FeatureModal
+        isOpen={featureModalState.isOpen}
+        onClose={() => setFeatureModalState({ isOpen: false, selectedFeature: null })}
+        feature={featureModalState.selectedFeature}
       />
     </div>
   );

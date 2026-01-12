@@ -22,7 +22,7 @@ const LANGS = [
   { code: "ch", label: "Chinese" },
 ];
 
-export default function LanguageDropdown() {
+export default function LanguageDropdown({ variant = "desktop" }) {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const current = i18n.language;
@@ -44,19 +44,21 @@ export default function LanguageDropdown() {
     return () => document.removeEventListener("mousedown", closeOnOutsideClick);
   }, []);
 
+  const isMobile = variant === "mobile";
+
   return (
-    <div className="lp-language-selector" ref={ref}>
+    <div className={`lp-language-selector ${isMobile ? "lp-language-selector--mobile" : ""}`} ref={ref}>
       <button
-        className="lp-language-dropdown-trigger"
+        className={`lp-language-dropdown-trigger ${isMobile ? "lp-language-dropdown-trigger--mobile" : ""}`}
         onClick={() => setOpen((o) => !o)}
       >
-        <Globe size={16} style={{ marginRight: "6px" }} />
+        <Globe size={isMobile ? 18 : 16} style={{ marginRight: "6px" }} />
         {LANGS.find((l) => l.code === current)?.label || "Language"}
         <span className={`arrow ${open ? "up" : ""}`}>▾</span>
       </button>
 
       {open && (
-        <div className="lp-language-dropdown-menu">
+        <div className={`lp-language-dropdown-menu ${isMobile ? "lp-language-dropdown-menu--mobile" : ""}`}>
           {LANGS.map((lang) => (
             <div
               key={lang.code}
