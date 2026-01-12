@@ -49,6 +49,19 @@
       "benefit2": "专业外观"
     }
   },
+  "features": {
+    "title": "推动收入和客户忠诚度的礼品卡管理功能",
+    "items": {
+      "walletIntegration": "数字礼品卡的 Apple Wallet 和 Google Wallet 集成",
+      "seasonalPromotions": "季节性促销和活动管理",
+      "customerAcquisition": "通过品牌数字礼品卡增加客户获取",
+      "revenueBoost": "通过预付现金流和损耗提高收入",
+      "aovIncrease": "通过礼品卡捆绑和智能推荐提高 AOV",
+      "analytics": "实时分析和商业智能",
+      "repeatVisits": "推动重复访问和客户忠诚度",
+      "multiChannel": "多渠道活动和 A/B 测试"
+    }
+  },
   "benefits": {
     "title": "为什么选择 giftygen? 礼品卡促销对商业的好处",
     "subtitle": "发现数字礼品卡如何改变你的商业策略",

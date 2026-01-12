@@ -84,7 +84,7 @@ const SquarePaymentForm = () => {
             className={`payment-method ${selectedMethod === "google-pay" ? "active" : ""}`}
             onClick={() => handleMethodSelect("google-pay")}
           >
-            <img src={GpayIcon} alt="Google Pay" />
+            <img src={GpayIcon} alt="Google Wallet" />
           </div>
         </div>
       </div>

@@ -49,6 +49,19 @@
       "benefit2": "Professionelles Erscheinungsbild"
     }
   },
+  "features": {
+    "title": "Geschenkkarten-Management-Funktionen, die Umsatz und Kundentreue fördern",
+    "items": {
+      "walletIntegration": "Apple Wallet & Google Wallet Integration für digitale Geschenkkarten",
+      "seasonalPromotions": "Saisonale Aktionen und Kampagnenmanagement",
+      "customerAcquisition": "Kundengewinnung mit gebrandeten digitalen Geschenkkarten steigern",
+      "revenueBoost": "Umsatz durch Vorauszahlung und Breakage steigern",
+      "aovIncrease": "AOV durch Geschenkkarten-Bündelung und intelligente Empfehlungen steigern",
+      "analytics": "Echtzeit-Analysen und Business Intelligence",
+      "repeatVisits": "Wiederholungsbesuche und Kundentreue fördern",
+      "multiChannel": "Multi-Channel-Kampagnen und A/B-Tests"
+    }
+  },
   "benefits": {
     "title": "Warum giftygen? Geschäftliche Vorteile von Geschenkkartenaktionen",
     "subtitle": "Entdecken Sie, wie digitale Geschenkkarten Ihre Geschäftsstrategie verändern können",

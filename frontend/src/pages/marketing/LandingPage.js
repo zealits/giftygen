@@ -290,12 +290,12 @@ function LandingPage() {
   });
 
   // Feature data structure
-  const featuresData = [
+  const featuresData = useMemo(() => [
     {
       id: 1,
-      title: "Apple Wallet & Google Pay Integration for Digital Gift Cards",
-      keywords: "Apple Wallet, Google Pay, digital gift cards, mobile wallet",
-      description: "Deliver gift cards directly to Apple Wallet and Google Pay in seconds. Customers can save, share, and redeem from their phone—increasing redemption rates and eliminating lost cards.",
+      title: t("features.items.walletIntegration"),
+      keywords: "Apple Wallet, Google Wallet, digital gift cards, mobile wallet",
+      description: "Deliver gift cards directly to Apple Wallet and Google Wallet in seconds. Customers can save, share, and redeem from their phone—increasing redemption rates and eliminating lost cards.",
       benefits: [
         "Instant delivery via email, SMS, or mobile wallet",
         "One-tap redemption from customer's phone",
@@ -306,7 +306,7 @@ function LandingPage() {
     },
     {
       id: 2,
-      title: "Seasonal Promotions & Campaign Management",
+      title: t("features.items.seasonalPromotions"),
       keywords: "seasonal campaigns, promotion management, automated campaigns",
       description: "Launch, schedule, and automate promotional gift card campaigns for holidays, events, and seasonal peaks. Adjust pricing, limits, and messaging in real-time without code.",
       benefits: [
@@ -319,7 +319,7 @@ function LandingPage() {
     },
     {
       id: 3,
-      title: "Increase Customer Acquisition With Branded Digital Gift Cards",
+      title: t("features.items.customerAcquisition"),
       keywords: "customer acquisition, branded gift cards, viral sharing",
       description: "Convert gift givers into brand advocates. Branded digital gift cards introduce new customers to your business through personal recommendations and viral sharing—at lower acquisition cost than paid ads.",
       benefits: [
@@ -332,7 +332,7 @@ function LandingPage() {
     },
     {
       id: 4,
-      title: "Boost Revenue With Upfront Cash Flow & Breakage",
+      title: t("features.items.revenueBoost"),
       keywords: "increase revenue, cash flow, breakage, customer spending",
       description: "Receive upfront payment when customers purchase gift cards. Studies show 71% of customers spend beyond the card value (breakage)—turning gift cards into pure profit. Plus, unredeemed balances create additional revenue.",
       benefits: [
@@ -345,7 +345,7 @@ function LandingPage() {
     },
     {
       id: 5,
-      title: "Increase AOV With Gift Card Bundling & Smart Recommendations",
+      title: t("features.items.aovIncrease"),
       keywords: "average order value, increase AOV, customer spending",
       description: "Increase average order value by 30-50%. Customers using gift cards typically spend beyond the card value, and bundling gift cards with other products drives larger baskets and higher margins.",
       benefits: [
@@ -358,7 +358,7 @@ function LandingPage() {
     },
     {
       id: 6,
-      title: "Real-Time Analytics & Business Intelligence",
+      title: t("features.items.analytics"),
       keywords: "real-time analytics, gift card tracking, business insights",
       description: "Access real-time analytics on gift card sales, redemption rates, customer behavior, and revenue impact. Track redemption by location, channel, and customer segment. Use data-driven insights to forecast inventory, optimize campaigns, and measure ROI.",
       benefits: [
@@ -372,7 +372,7 @@ function LandingPage() {
     },
     {
       id: 7,
-      title: "Drive Repeat Visits & Customer Loyalty",
+      title: t("features.items.repeatVisits"),
       keywords: "customer retention, loyalty programs, repeat visits",
       description: "Drive repeat visits and build customer loyalty with gift cards. Customers who receive gift cards return 51% more often and spend 40% more per visit. Create referral programs where customers earn gift card rewards for advocacy.",
       benefits: [
@@ -385,7 +385,7 @@ function LandingPage() {
     },
     {
       id: 8,
-      title: "Multi-Channel Campaigns & A/B Testing",
+      title: t("features.items.multiChannel"),
       keywords: "multi-channel, promotional campaigns, A/B testing",
       description: "Run multi-channel gift card campaigns across email, SMS, social media, and in-store. Test different designs, messages, and pricing with A/B testing. Pause, refund, or adjust campaigns instantly based on real-time performance data.",
       benefits: [
@@ -396,7 +396,7 @@ function LandingPage() {
       ],
       icon: <Send size={45} />
     }
-  ];
+  ], [t]);
 
   // Animation states for the gift card reveal section
   // Phases: initial -> scanning -> laptop-appear -> zoom-in -> revealed
@@ -960,7 +960,7 @@ function LandingPage() {
       <section className="lp-section lp-creative-cards-section" id="features" ref={creativeCardsRef}>
         <div className="lp-section__header">
           <h2 className="lp-section__title lp-h2">
-            Gift Card Management Features That Drive Revenue & Customer Loyalty
+            {t("features.title")}
           </h2>
         </div>
 
@@ -1004,7 +1004,7 @@ function LandingPage() {
         className={`lp-offer lp-animated-section lp-animated-section--${animationPhase}`}
         ref={animationSectionRef}
       >
-        <h2 className="lp-section__title lp-h2">Digital Gift Card Solutions Tailored to Your Industry</h2>
+        <h2 className="lp-section__title lp-h2">{t("offer.title")}</h2>
         <p className="lp-lead">{t("offer.description")}</p>
 
         {/* Animated Gift Card Container */}
