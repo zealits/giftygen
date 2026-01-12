@@ -3,6 +3,8 @@
     "about": "Über uns",
     "highlights": "Highlights",
     "benefits": "Vorteile",
+    "features": "Funktionen",
+    "solutions": "Lösungen",
     "register": "Registrieren",
     "contact": "Kontakt",
     "signIn": "Anmelden",
@@ -17,8 +19,8 @@
     "buyGiftCard": "Geschenkkarte kaufen"
   },
   "offer": {
-    "title": "Eine komplette Plattform zum Erstellen und Verkaufen von Geschenkkarten",
-    "description": "Transformieren Sie Ihre Kundenbindung mit unserer innovativen Digital-Gift-Card-Plattform – entwickelt für die einfache Erstellung, den Verkauf und die Einlösung von Geschenkkartenaktionen. Perfekt, um den Umsatz zu steigern, neue Kunden zu gewinnen und die Markentreue zu stärken. Funktioniert nahtlos für stationäre und Online-Geschäfte. Schnell, sicher und anpassbar."
+    "title": "Digitale Geschenkarten-Lösungen, die auf Ihre Branche zugeschnitten sind",
+    "description": "Von Restaurants bis zu Fitnesscentern – finden Sie die perfekte Geschenkarten-Software, die speziell für Ihr Geschäftsmodell entwickelt wurde"
   },
   "highlights": {
     "title": "Produkt-Highlights",

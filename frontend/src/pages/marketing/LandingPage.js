@@ -739,8 +739,8 @@ function LandingPage() {
   // Navigation items with icons
   const mobileNavItems = [
     { id: "about", label: t("nav.about"), icon: <Info size={20} /> },
-    { id: "highlights", label: t("nav.highlights"), icon: <Sparkles size={20} /> },
-    { id: "benefits", label: t("nav.benefits"), icon: <Star size={20} /> },
+    { id: "features", label: t("nav.features"), icon: <Sparkles size={20} /> },
+    { id: "solutions", label: t("nav.solutions"), icon: <Star size={20} /> },
     { id: "register", label: t("nav.register"), icon: <CreditCard size={20} /> },
     { id: "faq", label: "FAQ", icon: <HelpCircle size={20} /> },
     { id: "contact", label: t("nav.contact"), icon: <Mail size={20} /> },
@@ -805,8 +805,8 @@ function LandingPage() {
         {/* Desktop Navigation */}
         <nav className="lp-nav__links">
           <button onClick={() => handleScrollTo("about")}>{t("nav.about")}</button>
-          <button onClick={() => handleScrollTo("highlights")}>{t("nav.highlights")}</button>
-          <button onClick={() => handleScrollTo("benefits")}>{t("nav.benefits")}</button>
+          <button onClick={() => handleScrollTo("features")}>{t("nav.features")}</button>
+          <button onClick={() => handleScrollTo("solutions")}>{t("nav.solutions")}</button>
           <button onClick={() => handleScrollTo("register")}>{t("nav.register")}</button>
           <button onClick={() => handleScrollTo("faq")}>FAQ</button>
           <button onClick={() => handleScrollTo("contact")}>{t("nav.contact")}</button>
@@ -1000,11 +1000,11 @@ function LandingPage() {
 
       {/* Animated Business Offer Section */}
       <section
-        id="offer"
+        id="solutions"
         className={`lp-offer lp-animated-section lp-animated-section--${animationPhase}`}
         ref={animationSectionRef}
       >
-        <h2 className="lp-section__title lp-h2">{t("offer.title")}</h2>
+        <h2 className="lp-section__title lp-h2">Digital Gift Card Solutions Tailored to Your Industry</h2>
         <p className="lp-lead">{t("offer.description")}</p>
 
         {/* Animated Gift Card Container */}
@@ -1565,18 +1565,51 @@ function LandingPage() {
         </div>
         <div className="lp-faq__container">
           {[
-            "How long does it take to set up Giftygen?",
-            "What's the cost? Do you have a free trial?",
-            "Which POS systems do you integrate with?",
-            "How secure is customer data? Is this PCI compliant?",
-            "How do customers redeem gift cards?",
-            "What if customers don't redeem their gift cards? Do we keep the money?",
-            "Can we customize the gift card design? Can I add our logo?",
-            "Do you own my customer data? Can I export it? What if I want to cancel?",
-            "Can we run seasonal promotions?",
-            "Can we sell multi-denomination cards?",
-            "How does payment processing work?",
-          ].map((question, index) => (
+            {
+              question: "How long does it take to set up Giftygen?",
+              answer: "Setup is quick. After registration, you can start creating gift cards immediately. Basic setup (account creation, business profile, first gift card) typically takes 15–30 minutes. POS integration may require additional configuration depending on your system, but the platform is ready to use right away."
+            },
+            {
+              question: "What's the cost? Do you have a free trial?",
+              answer: "We offer three subscription plans: Monthly Plan (₹1,499/month), Quarterly Plan (₹3,999/3 months - most popular), and Yearly Plan (₹14,999/year - best value). All plans include unlimited gift cards, full dashboard access, real-time analytics, email support, and order management. The yearly plan includes priority support. Currently, there is no free trial, but you can start with the monthly plan to test the platform."
+            },
+            {
+              question: "Which POS systems do you integrate with?",
+              answer: "We integrate with 50+ POS systems including Quick Serve (Toast, Square, Clover), Fine Dining (Micros Oracle, MarginEdge), Pizza/QSR (Lightspeed, Revel, TouchBistro), Hotels (Oracle Hospitality, IHG, Marriott, Hilton, Fidelio), E-commerce (Shopify, WooCommerce, BigCommerce, Wix), Salon/Wellness (Mindbody, Acuity Scheduling, Vagaro, Booker, Square Appointments), and Custom Systems via API integration. Gift card balances sync in real-time, and redemption is automatic at checkout."
+            },
+            {
+              question: "How secure is customer data? Is this PCI compliant?",
+              answer: "Yes. We use Razorpay, a PCI DSS Level 1 compliant payment gateway. Customer payment data is not stored on our servers; all transactions are processed through Razorpay's secure infrastructure. Customer information (names, emails, purchase history) is encrypted and stored securely. We follow industry-standard security practices to protect your data."
+            },
+            {
+              question: "How do customers redeem gift cards?",
+              answer: "Customers can redeem gift cards in multiple ways: QR Code Scanning (staff scans the QR code at checkout using the admin dashboard), OTP Verification (for security, an OTP is sent to the customer's registered email/phone), Automatic POS Integration (if integrated with your POS, redemption happens automatically), Partial Redemption (customers can redeem any amount up to the available balance; remaining balance is tracked automatically), and Digital Wallets (gift cards can be added to Google Wallet and Apple Wallet for easy access)."
+            },
+            {
+              question: "What if customers don't redeem their gift cards? Do we keep the money?",
+              answer: "Yes. When a customer purchases a gift card, you receive the payment immediately. If the gift card is never redeemed or only partially redeemed, you keep the full amount paid. This is standard practice in the gift card industry and helps improve your cash flow. You can track unredeemed balances in your analytics dashboard."
+            },
+            {
+              question: "Can we customize the gift card design? Can I add our logo?",
+              answer: "Yes. You can customize your logo (upload your business logo displayed on gift cards and QR code pages), gift card images (add custom images/backgrounds), colors (customize background colors and branding), text (customize card titles, descriptions, and messages), and various design elements to match your brand. Customization options are available in your admin dashboard settings."
+            },
+            {
+              question: "Do you own my customer data? Can I export it? What if I want to cancel?",
+              answer: "You own your customer data. You can export it anytime in multiple formats: CSV (for spreadsheet analysis), PDF (for reports and presentations), and Excel/XLSX (for detailed analysis). Available exports include customer purchase reports, sales reports, revenue reports, gift card performance reports, redemption reports, and financial summaries. If you cancel your subscription, you can export all your data before cancellation. Your data remains accessible until the end of your billing period."
+            },
+            {
+              question: "Can we run seasonal promotions?",
+              answer: "Yes. You can create seasonal pricing (set different prices for peak, shoulder, and low seasons), limited-time offers (create time-bound promotional campaigns), holiday campaigns (launch holiday-specific gift card campaigns for Christmas, Diwali, New Year, etc.), discount management (apply percentage discounts to gift cards), targeted promotions (create campaigns for specific customer segments), and pre-holiday sales (build anticipation with early-bird offers). The platform tracks seasonal trends and performance to help optimize your campaigns."
+            },
+            {
+              question: "Can we sell multi-denomination cards?",
+              answer: "Yes. You can create gift cards with fixed amounts or allow customers to choose custom amounts. The platform supports fixed amount cards (pre-set denominations like ₹500, ₹1,000, ₹2,000), variable amount cards (customers can enter any amount within your specified range), and multiple options (offer both fixed and variable options simultaneously). Each gift card tracks its specific amount and redemption history individually."
+            },
+            {
+              question: "How does payment processing work?",
+              answer: "Payment processing is handled through Razorpay, a secure payment gateway. The process works as follows: Customer selects a gift card and proceeds to payment, payment is processed through Razorpay's secure checkout (supports credit/debit cards, UPI, net banking, wallets), upon successful payment the gift card is immediately generated, gift card is delivered via email with QR code and redemption instructions, customers can add the gift card to Google Wallet or Apple Wallet, and all transactions are recorded in your dashboard with receipts and invoices. You receive payments directly to your connected account."
+            },
+          ].map((faq, index) => (
             <div key={index} className="lp-faq__item">
               <button
                 className={`lp-faq__question ${openFaqIndex === index ? "lp-faq__question--open" : ""}`}
@@ -1585,7 +1618,7 @@ function LandingPage() {
                 aria-controls={`faq-answer-${index}`}
               >
                 <span className="lp-faq__number">FAQ #{index + 1}:</span>
-                <span className="lp-faq__text">{question}</span>
+                <span className="lp-faq__text">{faq.question}</span>
                 <span className="lp-faq__icon">{openFaqIndex === index ? "−" : "+"}</span>
               </button>
               <div
@@ -1594,8 +1627,7 @@ function LandingPage() {
                 aria-hidden={openFaqIndex !== index}
               >
                 <p className="lp-faq__answer-text">
-                  {/* Placeholder for answer - you can add actual answers later */}
-                  Answer to this question will be added here.
+                  {faq.answer}
                 </p>
               </div>
             </div>

@@ -3,6 +3,8 @@
     "about": "About",
     "highlights": "Highlights",
     "benefits": "Benefits",
+    "features": "Features",
+    "solutions": "Solutions",
     "register": "Register",
     "contact": "Contact",
     "signIn": "Sign in",
@@ -17,8 +19,8 @@
     "scheduleDemo": "Schedule a demo"
   },
   "offer": {
-    "title": "A complete platform for creating and selling gift cards",
-    "description": "Transform the way you engage customers with our innovative Digital Gift Card platform – designed for easy creation, sale, and redemption of gift card promotions. Perfect for boosting sales, attracting new customers, and enhancing brand loyalty. Works seamlessly for in-store and online businesses. Fast, secure, and customizable."
+    "title": "Digital Gift Card Solutions Tailored to Your Industry",
+    "description": "From restaurants to fitness centers, find the perfect gift card software designed specifically for your business mode"
   },
   "highlights": {
     "title": "Product Highlights",
