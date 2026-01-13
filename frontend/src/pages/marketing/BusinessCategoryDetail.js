@@ -116,50 +116,50 @@ function BusinessCategoryDetail() {
   };
 
   const restaurantTOC = [
-    { id: "section-hero", title: "Stop Leaving Revenue on the Table" },
-    { id: "section-why", title: "Why Restaurant Gift Cards Are Your Highest-ROI Tool" },
-    { id: "section-solution", title: "Giftygen's Restaurant-Specific Solution" },
-    { id: "section-faq", title: "Common Questions (FAQ)" },
-    { id: "section-cta", title: "Get Started" },
+    { id: "section-hero", title: t("businessCategories.restaurants.toc.hero") },
+    { id: "section-why", title: t("businessCategories.restaurants.toc.why") },
+    { id: "section-solution", title: t("businessCategories.restaurants.toc.solution") },
+    { id: "section-faq", title: t("businessCategories.restaurants.toc.faq") },
+    { id: "section-cta", title: t("businessCategories.restaurants.toc.cta") },
   ];
 
   const hotelTOC = [
-    { id: "section-hero", title: "Drive Direct Bookings, Increase Occupancy" },
-    { id: "section-problem", title: "The Hidden Cost of OTA Dependence" },
-    { id: "section-solution", title: "Your Direct Booking Solution" },
-    { id: "section-platform", title: "Platform Designed by Hospitality Professionals" },
-    { id: "section-faq", title: "Questions Hotels Ask" },
-    { id: "section-cta", title: "Get Started" },
+    { id: "section-hero", title: t("businessCategories.hotels.toc.hero") },
+    { id: "section-problem", title: t("businessCategories.hotels.toc.problem") },
+    { id: "section-solution", title: t("businessCategories.hotels.toc.solution") },
+    { id: "section-platform", title: t("businessCategories.hotels.toc.platform") },
+    { id: "section-faq", title: t("businessCategories.hotels.toc.faq") },
+    { id: "section-cta", title: t("businessCategories.hotels.toc.cta") },
   ];
 
   const retailTOC = [
-    { id: "section-hero", title: "Increase Holiday Sales 25-40% & Customer Lifetime Value 3x" },
-    { id: "section-solution", title: "Your Digital Gift Card Solution" },
-    { id: "section-platform", title: "The Gift Card Platform Built for Ecommerce" },
-    { id: "section-faq", title: "Questions Retail Brands Ask" },
-    { id: "section-cta", title: "Capture Q4. Build Your Audience" },
+    { id: "section-hero", title: t("businessCategories.retail.toc.hero") },
+    { id: "section-solution", title: t("businessCategories.retail.toc.solution") },
+    { id: "section-platform", title: t("businessCategories.retail.toc.platform") },
+    { id: "section-faq", title: t("businessCategories.retail.toc.faq") },
+    { id: "section-cta", title: t("businessCategories.retail.toc.cta") },
   ];
 
   const salonTOC = [
-    { id: "section-hero", title: "Increase Retention 51%, Reduce Churn 40%" },
-    { id: "section-problem", title: "The Churn Epidemic: Why Salons Lose 40% of Clients" },
-    { id: "section-solution", title: "The Salon Gift Card Solution" },
-    { id: "section-cta", title: "Stop Losing Clients to Churn" },
+    { id: "section-hero", title: t("businessCategories.salons.toc.hero") },
+    { id: "section-problem", title: t("businessCategories.salons.toc.problem") },
+    { id: "section-solution", title: t("businessCategories.salons.toc.solution") },
+    { id: "section-cta", title: t("businessCategories.salons.toc.cta") },
   ];
 
   const fitnessTOC = [
-    { id: "section-hero", title: "Convert Trials 55%, Reduce Member Churn 30%" },
-    { id: "section-problem", title: "Why Fitness Gyms Struggle with Growth" },
-    { id: "section-solution", title: "Your Fitness Membership Solution" },
-    { id: "section-platform", title: "The Fitness Gift Card Platform Built for Growth" },
-    { id: "section-cta", title: "Convert Trials. Reduce Churn. Grow Year-Round" },
+    { id: "section-hero", title: t("businessCategories.fitness.toc.hero") },
+    { id: "section-problem", title: t("businessCategories.fitness.toc.problem") },
+    { id: "section-solution", title: t("businessCategories.fitness.toc.solution") },
+    { id: "section-platform", title: t("businessCategories.fitness.toc.platform") },
+    { id: "section-cta", title: t("businessCategories.fitness.toc.cta") },
   ];
 
   const seasonalTOC = [
-    { id: "section-hero", title: "Build Client Relationships, Drive Referrals" },
-    { id: "section-problem", title: "Why Client Relationships Are Slipping" },
-    { id: "section-solution", title: "Strategic Gifting for Professional Services" },
-    { id: "section-cta", title: "Transform Client Relationships Into Referrals" },
+    { id: "section-hero", title: t("businessCategories.seasonal.toc.hero") },
+    { id: "section-problem", title: t("businessCategories.seasonal.toc.problem") },
+    { id: "section-solution", title: t("businessCategories.seasonal.toc.solution") },
+    { id: "section-cta", title: t("businessCategories.seasonal.toc.cta") },
   ];
 
   // Handle back button - navigate to landing page and scroll to offer section
@@ -413,47 +413,39 @@ function BusinessCategoryDetail() {
               {/* Hero Section */}
               <section id="section-hero" className="category-detail__section">
                 <h2 className="category-detail__hero-headline">
-                  Stop Leaving Revenue on the Table: 70-80% Redemption Rate with Digital Gift Cards
+                  {t("businessCategories.restaurants.hero.headline")}
                 </h2>
                 <p className="category-detail__hero-subheading">
-                  Your competitors are using Apple Wallet integration to capture gift card sales you're missing. 40-50%
-                  of physical gift cards never get redeemed. Digital changes the game.
+                  {t("businessCategories.restaurants.hero.subheading")}
                 </p>
                 <p className="category-detail__paragraph category-detail__paragraph--lead">
-                  Physical gift cards are leaving money on your table. They get lost, forgotten, and tossed in junk
-                  drawers. The average physical gift card has a 40-50% redemption rate—meaning half your revenue
-                  disappears.
+                  {t("businessCategories.restaurants.hero.paragraph1")}
                 </p>
                 <p className="category-detail__paragraph">
-                  Digital gift cards solve this completely. With Apple Wallet integration, customers save your gift card
-                  in one tap. At checkout, they open their wallet and show their phone. No searching through email. No
-                  lost plastic cards.
+                  {t("businessCategories.restaurants.hero.paragraph2")}
                 </p>
                 <div className="category-detail__stats-grid">
                   <div className="category-detail__stat-card">
                     <div className="category-detail__stat-value">70-80%</div>
-                    <div className="category-detail__stat-label">Redemption Rate</div>
+                    <div className="category-detail__stat-label">{t("businessCategories.restaurants.hero.stats.redemptionRate")}</div>
                   </div>
                   <div className="category-detail__stat-card">
                     <div className="category-detail__stat-value">+40%</div>
-                    <div className="category-detail__stat-label">Average Spending</div>
+                    <div className="category-detail__stat-label">{t("businessCategories.restaurants.hero.stats.avgSpending")}</div>
                   </div>
                   <div className="category-detail__stat-card">
                     <div className="category-detail__stat-value">+51%</div>
-                    <div className="category-detail__stat-label">Repeat Visits</div>
+                    <div className="category-detail__stat-label">{t("businessCategories.restaurants.hero.stats.repeatVisits")}</div>
                   </div>
                 </div>
                 <p className="category-detail__paragraph">
-                  The result: 70-80% redemption rates (a 32-percentage-point increase), higher average spending per
-                  visit (+40%), and increased repeat visits (+51%).
+                  {t("businessCategories.restaurants.hero.paragraph3")}
                 </p>
                 <p className="category-detail__paragraph">
-                  Giftygen is purpose-built for restaurants. We integrate with Toast, Square, Lightspeed, and 50+ POS
-                  systems. Setup takes 10 minutes. Your first sale arrives by Day 1.
+                  {t("businessCategories.restaurants.hero.paragraph4")}
                 </p>
                 <p className="category-detail__paragraph">
-                  More than 2,000 restaurants already use Giftygen. They're capturing lost revenue, building customer
-                  loyalty, and automating redemption. You can too.
+                  {t("businessCategories.restaurants.hero.paragraph5")}
                 </p>
                 <div className="category-detail__cta-buttons" style={{ marginTop: "32px" }}>
                   <button
@@ -468,13 +460,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>
@@ -482,140 +474,106 @@ function BusinessCategoryDetail() {
               {/* Why Restaurant Gift Cards Section */}
               <section id="section-why" className="category-detail__section">
                 <h2 className="category-detail__section-title">
-                  Why Restaurant Gift Cards Are Your Highest-ROI Revenue Tool
+                  {t("businessCategories.restaurants.why.title")}
                 </h2>
-                <h3 className="category-detail__challenge-title">The Challenge Every Restaurant Faces</h3>
+                <h3 className="category-detail__challenge-title">{t("businessCategories.restaurants.why.challengeTitle")}</h3>
                 <p className="category-detail__paragraph">
-                  You know the feeling: it's Tuesday night, your reservation book is half-full, and you're wondering
-                  where the revenue went. Seasonal slumps are killing your margins. Valentine's Day and Mother's Day are
-                  golden, but January through March? Brutal.
+                  {t("businessCategories.restaurants.why.intro1")}
                 </p>
                 <p className="category-detail__paragraph">
-                  Meanwhile, your competitors are using digital gift cards to solve this exact problem. They're not just
-                  selling gift cards—they're building a predictable revenue engine.
+                  {t("businessCategories.restaurants.why.intro2")}
                 </p>
                 <p className="category-detail__paragraph" style={{ fontWeight: 600, marginTop: "24px" }}>
-                  Here's what restaurants struggle with today:
+                  {t("businessCategories.restaurants.why.intro3")}
                 </p>
 
                 <div className="category-detail__numbered-item">
-                  <h4 className="category-detail__numbered-item-title">1. Redemption Hell with Physical Cards</h4>
+                  <h4 className="category-detail__numbered-item-title">{t("businessCategories.restaurants.why.problems.redemption.title")}</h4>
                   <p className="category-detail__numbered-item-content">
-                    You sell a $100 gift card. The customer loves your restaurant, but they lose the card. Or they
-                    forget about it. Industry data shows 40-50% of physical gift cards never get redeemed. That's $40-50
-                    of every $100 sold that disappears.
+                    {t("businessCategories.restaurants.why.problems.redemption.desc1")}
                   </p>
                   <p className="category-detail__numbered-item-content">
-                    With digital, customers save the card to Apple Wallet with one tap. They see it every time they open
-                    their phone. Redemption jumps to 70-80%.
+                    {t("businessCategories.restaurants.why.problems.redemption.desc2")}
                   </p>
                 </div>
 
                 <div className="category-detail__numbered-item">
-                  <h4 className="category-detail__numbered-item-title">2. Manual Tracking Across Locations</h4>
+                  <h4 className="category-detail__numbered-item-title">{t("businessCategories.restaurants.why.problems.tracking.title")}</h4>
                   <p className="category-detail__numbered-item-content">
-                    If you have multiple locations, managing gift card inventory is a nightmare. Which location sold it?
-                    Where was it redeemed? How much is left? Spreadsheets and manual processes create errors, lost
-                    revenue, and frustrated staff.
+                    {t("businessCategories.restaurants.why.problems.tracking.desc1")}
                   </p>
                   <p className="category-detail__numbered-item-content">
-                    Digital solves this instantly. Every sale, redemption, and balance is synced to your POS
-                    automatically.
+                    {t("businessCategories.restaurants.why.problems.tracking.desc2")}
                   </p>
                 </div>
 
                 <div className="category-detail__numbered-item">
-                  <h4 className="category-detail__numbered-item-title">3. Missing Upsell Opportunities</h4>
+                  <h4 className="category-detail__numbered-item-title">{t("businessCategories.restaurants.why.problems.upsell.title")}</h4>
                   <p className="category-detail__numbered-item-content">
-                    Here's what most restaurants miss: when customers redeem a gift card, they often spend MORE than the
-                    card balance. They add drinks, dessert, appetizers. Average spending is 40% higher for gift card
-                    redemptions.
+                    {t("businessCategories.restaurants.why.problems.upsell.desc1")}
                   </p>
                   <p className="category-detail__numbered-item-content">
-                    But your staff doesn't know which customers are redeeming gift cards. So upsells happen by accident,
-                    not by strategy.
+                    {t("businessCategories.restaurants.why.problems.upsell.desc2")}
                   </p>
                 </div>
 
                 <div className="category-detail__numbered-item">
-                  <h4 className="category-detail__numbered-item-title">4. No Visibility Into Customer Behavior</h4>
+                  <h4 className="category-detail__numbered-item-title">{t("businessCategories.restaurants.why.problems.visibility.title")}</h4>
                   <p className="category-detail__numbered-item-content">
-                    When customers buy physical gift cards, you capture zero data. Where do they come from? What do they
-                    like to order? Will they be repeat customers? You're blind to the insights that drive business.
+                    {t("businessCategories.restaurants.why.problems.visibility.desc1")}
                   </p>
                   <p className="category-detail__numbered-item-content">
-                    Digital gives you complete visibility. You see which customers redeem, what they order, when they
-                    visit, and their lifetime value.
+                    {t("businessCategories.restaurants.why.problems.visibility.desc2")}
                   </p>
                 </div>
 
                 <div className="category-detail__numbered-item">
                   <h4 className="category-detail__numbered-item-title">
-                    5. Seasonal Revenue Fluctuations Are Predictable and Avoidable
+                    {t("businessCategories.restaurants.why.problems.seasonal.title")}
                   </h4>
                   <p className="category-detail__numbered-item-content">
-                    Your restaurant probably sees dramatic swings:
+                    {t("businessCategories.restaurants.why.problems.seasonal.desc1")}
                   </p>
                   <ul className="category-detail__bullet-list">
-                    <li className="category-detail__bullet-item">Summer slump (vacations, outdoor dining)</li>
-                    <li className="category-detail__bullet-item">January/February (post-holiday spending decline)</li>
-                    <li className="category-detail__bullet-item">Spring lull (Easter to Mother's Day)</li>
-                    <li className="category-detail__bullet-item">
-                      Holiday rush (Thanksgiving, Christmas, New Year's Eve)
-                    </li>
+                    {t("businessCategories.restaurants.why.problems.seasonal.bullets", { returnObjects: true }).map((item, index) => (
+                      <li key={index} className="category-detail__bullet-item">{item}</li>
+                    ))}
                   </ul>
                   <p className="category-detail__numbered-item-content">
-                    Physical gift cards can't solve this. But strategic digital campaigns CAN.
+                    {t("businessCategories.restaurants.why.problems.seasonal.desc2")}
                   </p>
                   <p className="category-detail__numbered-item-content">
-                    You create targeted campaigns for Valentine's Day (gift cards as gifts +150%), Mother's Day (+120%),
-                    holiday season (+300-500%), and off-season discounts to drive traffic. Marketing becomes
-                    data-driven, not guesswork.
+                    {t("businessCategories.restaurants.why.problems.seasonal.desc3")}
                   </p>
                 </div>
               </section>
 
               {/* Giftygen's Restaurant-Specific Solution */}
               <section id="section-solution" className="category-detail__section">
-                <h2 className="category-detail__section-title">Giftygen's Restaurant-Specific Solution</h2>
+                <h2 className="category-detail__section-title">{t("businessCategories.restaurants.solution.title")}</h2>
                 <p className="category-detail__paragraph">
-                  Giftygen is purpose-built for restaurants. We've integrated with 2,000+ restaurants and understand
-                  your business model completely. Here's exactly how we solve each problem:
+                  {t("businessCategories.restaurants.solution.intro")}
                 </p>
 
                 <div className="category-detail__numbered-item">
                   <h4 className="category-detail__numbered-item-title">
-                    1. Apple Wallet Integration: 70-80% Redemption
+                    {t("businessCategories.restaurants.solution.items.walletIntegration.title")}
                   </h4>
                   <div className="category-detail__table-container">
                     <table className="category-detail__table">
                       <thead>
                         <tr>
-                          <th>How it works</th>
-                          <th>Why it works</th>
+                          <th>{t("businessCategories.restaurants.solution.items.walletIntegration.tableHeaders.0")}</th>
+                          <th>{t("businessCategories.restaurants.solution.items.walletIntegration.tableHeaders.1")}</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr>
-                          <td>Customer buys gift card on your website or in-store</td>
-                          <td>No searching through email</td>
-                        </tr>
-                        <tr>
-                          <td>They get an email with a redemption link</td>
-                          <td>No lost cards</td>
-                        </tr>
-                        <tr>
-                          <td>One tap adds card to Apple Wallet</td>
-                          <td>No friction</td>
-                        </tr>
-                        <tr>
-                          <td>At checkout, they open wallet and show phone</td>
-                          <td>One-tap experience (customers love it)</td>
-                        </tr>
-                        <tr>
-                          <td>Card code auto-applies to transaction</td>
-                          <td></td>
-                        </tr>
+                        {t("businessCategories.restaurants.solution.items.walletIntegration.tableRows", { returnObjects: true }).map((row, index) => (
+                          <tr key={index}>
+                            <td>{row[0]}</td>
+                            <td>{row[1]}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -623,187 +581,134 @@ function BusinessCategoryDetail() {
 
                 <div className="category-detail__numbered-item">
                   <h4 className="category-detail__numbered-item-title">
-                    2. POS Integration: Automatic Redemption & Tracking
+                    {t("businessCategories.restaurants.solution.items.posIntegration.title")}
                   </h4>
-                  <p className="category-detail__numbered-item-content">We integrate with 50+ POS systems:</p>
+                  <p className="category-detail__numbered-item-content">{t("businessCategories.restaurants.solution.items.posIntegration.intro")}</p>
                   <div style={{ marginBottom: "16px" }}>
                     <div style={{ marginBottom: "12px" }}>
-                      <strong style={{ color: "#93a8ff" }}>Quick Serve:</strong>
+                      <strong style={{ color: "#93a8ff" }}>{t("businessCategories.restaurants.solution.items.posIntegration.quickServe")}</strong>
                       <div className="category-detail__pos-list">
-                        <span className="category-detail__pos-tag">Toast</span>
-                        <span className="category-detail__pos-tag">Square</span>
-                        <span className="category-detail__pos-tag">Clover</span>
+                        {t("businessCategories.restaurants.solution.items.posIntegration.quickServePOS", { returnObjects: true }).map((pos, index) => (
+                          <span key={index} className="category-detail__pos-tag">{pos}</span>
+                        ))}
                       </div>
                     </div>
                     <div style={{ marginBottom: "12px" }}>
-                      <strong style={{ color: "#93a8ff" }}>Fine Dining:</strong>
+                      <strong style={{ color: "#93a8ff" }}>{t("businessCategories.restaurants.solution.items.posIntegration.fineDining")}</strong>
                       <div className="category-detail__pos-list">
-                        <span className="category-detail__pos-tag">Micros Oracle</span>
-                        <span className="category-detail__pos-tag">MarginEdge</span>
+                        {t("businessCategories.restaurants.solution.items.posIntegration.fineDiningPOS", { returnObjects: true }).map((pos, index) => (
+                          <span key={index} className="category-detail__pos-tag">{pos}</span>
+                        ))}
                       </div>
                     </div>
                     <div style={{ marginBottom: "12px" }}>
-                      <strong style={{ color: "#93a8ff" }}>Pizza/QSR:</strong>
+                      <strong style={{ color: "#93a8ff" }}>{t("businessCategories.restaurants.solution.items.posIntegration.pizza")}</strong>
                       <div className="category-detail__pos-list">
-                        <span className="category-detail__pos-tag">Lightspeed</span>
-                        <span className="category-detail__pos-tag">Revel</span>
-                        <span className="category-detail__pos-tag">Touchbistro</span>
+                        {t("businessCategories.restaurants.solution.items.posIntegration.pizzaPOS", { returnObjects: true }).map((pos, index) => (
+                          <span key={index} className="category-detail__pos-tag">{pos}</span>
+                        ))}
                       </div>
                     </div>
                     <div>
-                      <strong style={{ color: "#93a8ff" }}>Custom Systems:</strong>
+                      <strong style={{ color: "#93a8ff" }}>{t("businessCategories.restaurants.solution.items.posIntegration.custom")}</strong>
                       <div className="category-detail__pos-list">
-                        <span className="category-detail__pos-tag">API integration available</span>
+                        {t("businessCategories.restaurants.solution.items.posIntegration.customPOS", { returnObjects: true }).map((pos, index) => (
+                          <span key={index} className="category-detail__pos-tag">{pos}</span>
+                        ))}
                       </div>
                     </div>
                   </div>
                   <p className="category-detail__numbered-item-content" style={{ fontWeight: 600, marginTop: "16px" }}>
-                    What happens:
+                    {t("businessCategories.restaurants.solution.items.posIntegration.whatHappens")}
                   </p>
                   <ul className="category-detail__bullet-list">
-                    <li className="category-detail__bullet-item">Gift card balance syncs in real-time to your POS</li>
-                    <li className="category-detail__bullet-item">
-                      Redemption is automatic at checkout (staff doesn't have to look anything up)
-                    </li>
-                    <li className="category-detail__bullet-item">Remaining balance displays instantly</li>
-                    <li className="category-detail__bullet-item">Multi-location balance tracks automatically</li>
-                    <li className="category-detail__bullet-item">Zero manual work</li>
+                    {t("businessCategories.restaurants.solution.items.posIntegration.bullets", { returnObjects: true }).map((item, index) => (
+                      <li key={index} className="category-detail__bullet-item">{item}</li>
+                    ))}
                   </ul>
                 </div>
 
                 <div className="category-detail__numbered-item">
-                  <h4 className="category-detail__numbered-item-title">3. Real-Time Analytics: Know Your Data</h4>
-                  <p className="category-detail__numbered-item-content">Dashboard shows:</p>
+                  <h4 className="category-detail__numbered-item-title">{t("businessCategories.restaurants.solution.items.analytics.title")}</h4>
+                  <p className="category-detail__numbered-item-content">{t("businessCategories.restaurants.solution.items.analytics.intro")}</p>
                   <ul className="category-detail__bullet-list">
-                    <li className="category-detail__bullet-item">Total gift card sales (revenue)</li>
-                    <li className="category-detail__bullet-item">Redemption rate (%)</li>
-                    <li className="category-detail__bullet-item">Average spend per redemption</li>
-                    <li className="category-detail__bullet-item">Customer repeat visit frequency</li>
-                    <li className="category-detail__bullet-item">Which menu items gift card customers order</li>
-                    <li className="category-detail__bullet-item">Revenue from breakage (unredeemed balances)</li>
+                    {t("businessCategories.restaurants.solution.items.analytics.bullets", { returnObjects: true }).map((item, index) => (
+                      <li key={index} className="category-detail__bullet-item">{item}</li>
+                    ))}
                   </ul>
                 </div>
 
                 <div className="category-detail__numbered-item">
                   <h4 className="category-detail__numbered-item-title">
-                    4. Seasonal Campaign Tools: Revenue During Slow Periods
+                    {t("businessCategories.restaurants.solution.items.campaigns.title")}
                   </h4>
-                  <p className="category-detail__numbered-item-content">Pre-built seasonal campaigns:</p>
+                  <p className="category-detail__numbered-item-content">{t("businessCategories.restaurants.solution.items.campaigns.intro")}</p>
                   <ul className="category-detail__campaign-list">
-                    <li className="category-detail__campaign-item">
-                      <div className="category-detail__campaign-name">
-                        Valentine's Day: "Perfect Gift for Your Sweetheart"
-                      </div>
-                      <div className="category-detail__campaign-desc">+150% sales spike</div>
-                    </li>
-                    <li className="category-detail__campaign-item">
-                      <div className="category-detail__campaign-name">
-                        Mother's Day: "Treat Mom to a Special Experience"
-                      </div>
-                      <div className="category-detail__campaign-desc">+120%</div>
-                    </li>
-                    <li className="category-detail__campaign-item">
-                      <div className="category-detail__campaign-name">Holiday Season: "The Gift Everyone Loves"</div>
-                      <div className="category-detail__campaign-desc">+300-500%</div>
-                    </li>
-                    <li className="category-detail__campaign-item">
-                      <div className="category-detail__campaign-name">New Year's: "Fitness + Dining Bundling"</div>
-                      <div className="category-detail__campaign-desc">Jan health resolutions</div>
-                    </li>
-                    <li className="category-detail__campaign-item">
-                      <div className="category-detail__campaign-name">Summer Slump Fix: "Summer Dining Series"</div>
-                      <div className="category-detail__campaign-desc">with outdoor events</div>
-                    </li>
-                    <li className="category-detail__campaign-item">
-                      <div className="category-detail__campaign-name">Black Friday: "Flash Gift Card Deals"</div>
-                    </li>
+                    {t("businessCategories.restaurants.solution.items.campaigns.list", { returnObjects: true }).map((campaign, index) => (
+                      <li key={index} className="category-detail__campaign-item">
+                        <div className="category-detail__campaign-name">{campaign.name}</div>
+                        {campaign.desc && <div className="category-detail__campaign-desc">{campaign.desc}</div>}
+                      </li>
+                    ))}
                   </ul>
-                  <p className="category-detail__numbered-item-content">Each campaign includes:</p>
+                  <p className="category-detail__numbered-item-content">{t("businessCategories.restaurants.solution.items.campaigns.includes")}</p>
                   <ul className="category-detail__bullet-list">
-                    <li className="category-detail__bullet-item">Email template (pre-written)</li>
-                    <li className="category-detail__bullet-item">Social media copy (ready to post)</li>
-                    <li className="category-detail__bullet-item">Landing page (custom to your restaurant)</li>
-                    <li className="category-detail__bullet-item">Analytics tracking (see what works)</li>
+                    {t("businessCategories.restaurants.solution.items.campaigns.includesBullets", { returnObjects: true }).map((item, index) => (
+                      <li key={index} className="category-detail__bullet-item">{item}</li>
+                    ))}
                   </ul>
                   <div className="category-detail__highlight-box">
                     <p className="category-detail__highlight-text">
-                      <strong>How it drives revenue:</strong> Instead of hoping people buy gift cards, you're actively
-                      promoting them during peak gifting seasons. Result: predictable 25-40% revenue increase during
-                      promotional periods.
+                      {t("businessCategories.restaurants.solution.items.campaigns.highlight")}
                     </p>
                   </div>
                 </div>
 
                 <div className="category-detail__numbered-item">
-                  <h4 className="category-detail__numbered-item-title">5. Upsell Automation</h4>
-                  <p className="category-detail__numbered-item-content">At redemption, staff sees:</p>
+                  <h4 className="category-detail__numbered-item-title">{t("businessCategories.restaurants.solution.items.upsell.title")}</h4>
+                  <p className="category-detail__numbered-item-content">{t("businessCategories.restaurants.solution.items.upsell.intro")}</p>
                   <ul className="category-detail__bullet-list">
-                    <li className="category-detail__bullet-item">
-                      "This customer has redeemed 8 times this year—suggest wine pairing"
-                    </li>
-                    <li className="category-detail__bullet-item">
-                      "They ordered pasta last time—recommend our new sauce"
-                    </li>
-                    <li className="category-detail__bullet-item">
-                      "They always order alone—suggest appetizer to start"
-                    </li>
+                    {t("businessCategories.restaurants.solution.items.upsell.bullets", { returnObjects: true }).map((item, index) => (
+                      <li key={index} className="category-detail__bullet-item">{item}</li>
+                    ))}
                   </ul>
-                  <p className="category-detail__numbered-item-content">Result: +$8-15 average upsell per redemption</p>
+                  <p className="category-detail__numbered-item-content">{t("businessCategories.restaurants.solution.items.upsell.result")}</p>
                 </div>
 
                 <div className="category-detail__numbered-item">
-                  <h4 className="category-detail__numbered-item-title">6. Fully Branded Design</h4>
+                  <h4 className="category-detail__numbered-item-title">{t("businessCategories.restaurants.solution.items.branding.title")}</h4>
                   <p className="category-detail__numbered-item-content">
-                    Choose from restaurant-specific templates or upload your logo. Customize:
+                    {t("businessCategories.restaurants.solution.items.branding.intro")}
                   </p>
                   <ul className="category-detail__bullet-list">
-                    <li className="category-detail__bullet-item">Colors matching your brand</li>
-                    <li className="category-detail__bullet-item">Restaurant background image (food, ambiance)</li>
-                    <li className="category-detail__bullet-item">Custom messaging</li>
-                    <li className="category-detail__bullet-item">QR code placement</li>
+                    {t("businessCategories.restaurants.solution.items.branding.bullets", { returnObjects: true }).map((item, index) => (
+                      <li key={index} className="category-detail__bullet-item">{item}</li>
+                    ))}
                   </ul>
                   <p className="category-detail__numbered-item-content">
-                    They can create Gift card using AI. Design done in 3 minutes. No designer needed.
+                    {t("businessCategories.restaurants.solution.items.branding.outro")}
                   </p>
                 </div>
               </section>
 
               {/* FAQ Section */}
               <section id="section-faq" className="category-detail__section category-detail__faq-section">
-                <h2 className="category-detail__faq-title">Common Questions (FAQ)</h2>
-                <div className="category-detail__faq-item">
-                  <div className="category-detail__faq-question">Q1: How much does Giftygen cost?</div>
-                </div>
-                <div className="category-detail__faq-item">
-                  <div className="category-detail__faq-question">Q2: Will this work with our POS system?</div>
-                </div>
-                <div className="category-detail__faq-item">
-                  <div className="category-detail__faq-question">Q3: Can we customize the gift card design?</div>
-                </div>
-                <div className="category-detail__faq-item">
-                  <div className="category-detail__faq-question">Q4: How do customers redeem?</div>
-                </div>
-                <div className="category-detail__faq-item">
-                  <div className="category-detail__faq-question">Q5: Is our customer data secure?</div>
-                </div>
-                <div className="category-detail__faq-item">
-                  <div className="category-detail__faq-question">Q6: What if customers don't redeem?</div>
-                </div>
-                <div className="category-detail__faq-item">
-                  <div className="category-detail__faq-question">Q7: Can we run seasonal campaigns?</div>
-                </div>
+                <h2 className="category-detail__faq-title">{t("businessCategories.restaurants.faq.title")}</h2>
+                {t("businessCategories.restaurants.faq.items", { returnObjects: true }).map((faqItem, index) => (
+                  <div key={index} className="category-detail__faq-item">
+                    <div className="category-detail__faq-question">{faqItem.q}</div>
+                  </div>
+                ))}
               </section>
 
               {/* Final CTA Section */}
               <section id="section-cta" className="category-detail__section">
                 <div className="category-detail__highlight-box">
                   <p className="category-detail__highlight-text">
-                    The restaurants winning right now aren't spending more on marketing. They're using digital gift
-                    cards to capture revenue they were leaving on the table.
+                    {t("businessCategories.restaurants.cta.text1")}
                   </p>
                   <p className="category-detail__highlight-text" style={{ marginTop: "16px" }}>
-                    They've increased redemption from 40% to 75%. They've turned one-time gift card buyers into repeat
-                    customers.
+                    {t("businessCategories.restaurants.cta.text2")}
                   </p>
                 </div>
                 <div className="category-detail__cta-buttons" style={{ marginTop: "32px", justifyContent: "center" }}>
@@ -888,13 +793,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>
@@ -1417,13 +1322,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>
@@ -1779,13 +1684,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>
@@ -1853,13 +1758,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>
@@ -2258,13 +2163,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>
@@ -2331,13 +2236,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>
@@ -2763,13 +2668,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>
@@ -2840,13 +2745,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>
@@ -3152,13 +3057,13 @@ function BusinessCategoryDetail() {
                       }, 100);
                     }}
                   >
-                    Start Your Free Trial
+                    {t("businessCategories.cta.startFreeTrial")}
                   </button>
                   <button
                     className="category-detail__btn category-detail__btn--secondary"
                     onClick={() => navigate("/explore")}
                   >
-                    Schedule Demo
+                    {t("businessCategories.cta.scheduleDemo")}
                   </button>
                 </div>
               </section>

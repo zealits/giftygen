@@ -383,5 +383,50 @@
     "successTitle": "成功！",
     "errorTitle": "错误",
     "close": "关闭"
+  },
+  "businessCategories": {
+    "cta": {
+      "startFreeTrial": "开始免费试用",
+      "scheduleDemo": "预约演示"
+    },
+    "restaurants": {
+      "title": "餐厅和精致餐饮",
+      "toc": {
+        "hero": "停止在桌上留下收入",
+        "why": "为什么餐厅礼品卡是您最高投资回报率工具",
+        "solution": "Giftygen的餐厅专用解决方案",
+        "faq": "常见问题",
+        "cta": "开始使用"
+      },
+      "hero": {
+        "headline": "停止在桌上留下收入：数字礼品卡70-80%的兑换率",
+        "subheading": "您的竞争对手正在使用 Apple Wallet 集成来捕获您错过的礼品卡销售。40-50% 的实体礼品卡从未被兑换。数字改变游戏规则。",
+        "paragraph1": "实体礼品卡正在您的桌上留下金钱。它们会丢失、被遗忘，并被扔进垃圾抽屉。平均实体礼品卡的兑换率为 40-50%——这意味着您的一半收入消失了。",
+        "paragraph2": "数字礼品卡完全解决了这个问题。通过 Apple Wallet 集成，客户只需一次点击即可保存您的礼品卡。在结账时，他们打开钱包并展示手机。无需在电子邮件中搜索。没有丢失的塑料卡。",
+        "paragraph3": "结果：70-80% 的兑换率（增加 32 个百分点），每次访问的平均支出更高（+40%），重复访问增加（+51%）。",
+        "paragraph4": "Giftygen 专为餐厅打造。我们与 Toast、Square、Lightspeed 和 50 多个 POS 系统集成。设置只需 10 分钟。您的第一笔销售在第一天就能完成。",
+        "paragraph5": "2,000 多家餐厅已经在使用 Giftygen。他们正在捕获失去的收入，建立客户忠诚度，并自动化兑换。您也可以。",
+        "stats": {
+          "redemptionRate": "兑换率",
+          "avgSpending": "平均支出",
+          "repeatVisits": "重复访问"
+        }
+      }
+    },
+    "hotels": {
+      "title": "酒店和度假村"
+    },
+    "retail": {
+      "title": "零售和电子商务"
+    },
+    "salons": {
+      "title": "美容和个人护理"
+    },
+    "fitness": {
+      "title": "健身和健康会员"
+    },
+    "seasonal": {
+      "title": "季节性礼品"
+    }
   }
 }

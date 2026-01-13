@@ -383,5 +383,50 @@
     "successTitle": "Erfolg!",
     "errorTitle": "Fehler",
     "close": "Schließen"
+  },
+  "businessCategories": {
+    "cta": {
+      "startFreeTrial": "Kostenlose Testversion starten",
+      "scheduleDemo": "Demo planen"
+    },
+    "restaurants": {
+      "title": "Restaurant und Fine Dining",
+      "toc": {
+        "hero": "Hören Sie auf, Umsatz auf dem Tisch zu lassen",
+        "why": "Warum Restaurant-Geschenkkarten Ihr höchstes ROI-Tool sind",
+        "solution": "Giftygens restaurantspezifische Lösung",
+        "faq": "Häufig gestellte Fragen",
+        "cta": "Loslegen"
+      },
+      "hero": {
+        "headline": "Hören Sie auf, Umsatz auf dem Tisch zu lassen: 70-80% Einlösungsrate mit digitalen Geschenkkarten",
+        "subheading": "Ihre Konkurrenten nutzen die Apple Wallet-Integration, um Geschenkkartenverkäufe zu erfassen, die Sie verpassen. 40-50% der physischen Geschenkkarten werden nie eingelöst. Digital ändert das Spiel.",
+        "paragraph1": "Physische Geschenkkarten lassen Geld auf Ihrem Tisch liegen. Sie gehen verloren, werden vergessen und in Schubladen geworfen. Die durchschnittliche physische Geschenkkarte hat eine Einlösungsrate von 40-50%—das bedeutet, dass die Hälfte Ihres Umsatzes verschwindet.",
+        "paragraph2": "Digitale Geschenkkarten lösen dies vollständig. Mit der Apple Wallet-Integration speichern Kunden Ihre Geschenkkarte mit einem Tippen. Beim Bezahlen öffnen sie ihre Wallet und zeigen ihr Telefon. Kein Durchsuchen von E-Mails. Keine verlorenen Plastikkarten.",
+        "paragraph3": "Das Ergebnis: 70-80% Einlösungsraten (eine Steigerung um 32 Prozentpunkte), höhere durchschnittliche Ausgaben pro Besuch (+40%) und erhöhte Wiederholungsbesuche (+51%).",
+        "paragraph4": "Giftygen ist speziell für Restaurants entwickelt. Wir integrieren mit Toast, Square, Lightspeed und über 50 POS-Systemen. Die Einrichtung dauert 10 Minuten. Ihr erster Verkauf kommt am Tag 1 an.",
+        "paragraph5": "Mehr als 2.000 Restaurants nutzen bereits Giftygen. Sie erfassen verlorene Einnahmen, bauen Kundenloyalität auf und automatisieren die Einlösung. Das können Sie auch.",
+        "stats": {
+          "redemptionRate": "Einlösungsrate",
+          "avgSpending": "Durchschnittliche Ausgaben",
+          "repeatVisits": "Wiederholungsbesuche"
+        }
+      }
+    },
+    "hotels": {
+      "title": "Hotels & Resorts"
+    },
+    "retail": {
+      "title": "Einzelhandel & E-Commerce"
+    },
+    "salons": {
+      "title": "Schönheit und Körperpflege"
+    },
+    "fitness": {
+      "title": "Fitness- und Wellness-Mitgliedschaften"
+    },
+    "seasonal": {
+      "title": "Saisonale Geschenke"
+    }
   }
 }

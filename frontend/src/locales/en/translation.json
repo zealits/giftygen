@@ -388,10 +388,175 @@
     "cta": {
       "register": "Register Your Business",
       "close": "Close",
-      "learnMore": "Learn More"
+      "learnMore": "Learn More",
+      "startFreeTrial": "Start Your Free Trial",
+      "scheduleDemo": "Schedule Demo"
     },
     "restaurants": {
       "title": "Restaurant And Fine Dining",
+      "toc": {
+        "hero": "Stop Leaving Revenue on the Table",
+        "why": "Why Restaurant Gift Cards Are Your Highest-ROI Tool",
+        "solution": "Giftygen's Restaurant-Specific Solution",
+        "faq": "Common Questions (FAQ)",
+        "cta": "Get Started"
+      },
+      "hero": {
+        "headline": "Stop Leaving Revenue on the Table: 70-80% Redemption Rate with Digital Gift Cards",
+        "subheading": "Your competitors are using Apple Wallet integration to capture gift card sales you're missing. 40-50% of physical gift cards never get redeemed. Digital changes the game.",
+        "paragraph1": "Physical gift cards are leaving money on your table. They get lost, forgotten, and tossed in junk drawers. The average physical gift card has a 40-50% redemption rate—meaning half your revenue disappears.",
+        "paragraph2": "Digital gift cards solve this completely. With Apple Wallet integration, customers save your gift card in one tap. At checkout, they open their wallet and show their phone. No searching through email. No lost plastic cards.",
+        "paragraph3": "The result: 70-80% redemption rates (a 32-percentage-point increase), higher average spending per visit (+40%), and increased repeat visits (+51%).",
+        "paragraph4": "Giftygen is purpose-built for restaurants. We integrate with Toast, Square, Lightspeed, and 50+ POS systems. Setup takes 10 minutes. Your first sale arrives by Day 1.",
+        "paragraph5": "More than 2,000 restaurants already use Giftygen. They're capturing lost revenue, building customer loyalty, and automating redemption. You can too.",
+        "stats": {
+          "redemptionRate": "Redemption Rate",
+          "avgSpending": "Average Spending",
+          "repeatVisits": "Repeat Visits"
+        }
+      },
+      "why": {
+        "title": "Why Restaurant Gift Cards Are Your Highest-ROI Revenue Tool",
+        "challengeTitle": "The Challenge Every Restaurant Faces",
+        "intro1": "You know the feeling: it's Tuesday night, your reservation book is half-full, and you're wondering where the revenue went. Seasonal slumps are killing your margins. Valentine's Day and Mother's Day are golden, but January through March? Brutal.",
+        "intro2": "Meanwhile, your competitors are using digital gift cards to solve this exact problem. They're not just selling gift cards—they're building a predictable revenue engine.",
+        "intro3": "Here's what restaurants struggle with today:",
+        "problems": {
+          "redemption": {
+            "title": "1. Redemption Hell with Physical Cards",
+            "desc1": "You sell a $100 gift card. The customer loves your restaurant, but they lose the card. Or they forget about it. Industry data shows 40-50% of physical gift cards never get redeemed. That's $40-50 of every $100 sold that disappears.",
+            "desc2": "With digital, customers save the card to Apple Wallet with one tap. They see it every time they open their phone. Redemption jumps to 70-80%."
+          },
+          "tracking": {
+            "title": "2. Manual Tracking Across Locations",
+            "desc1": "If you have multiple locations, managing gift card inventory is a nightmare. Which location sold it? Where was it redeemed? How much is left? Spreadsheets and manual processes create errors, lost revenue, and frustrated staff.",
+            "desc2": "Digital solves this instantly. Every sale, redemption, and balance is synced to your POS automatically."
+          },
+          "upsell": {
+            "title": "3. Missing Upsell Opportunities",
+            "desc1": "Here's what most restaurants miss: when customers redeem a gift card, they often spend MORE than the card balance. They add drinks, dessert, appetizers. Average spending is 40% higher for gift card redemptions.",
+            "desc2": "But your staff doesn't know which customers are redeeming gift cards. So upsells happen by accident, not by strategy."
+          },
+          "visibility": {
+            "title": "4. No Visibility Into Customer Behavior",
+            "desc1": "When customers buy physical gift cards, you capture zero data. Where do they come from? What do they like to order? Will they be repeat customers? You're blind to the insights that drive business.",
+            "desc2": "Digital gives you complete visibility. You see which customers redeem, what they order, when they visit, and their lifetime value."
+          },
+          "seasonal": {
+            "title": "5. Seasonal Revenue Fluctuations Are Predictable and Avoidable",
+            "desc1": "Your restaurant probably sees dramatic swings:",
+            "bullets": ["Summer slump (vacations, outdoor dining)", "January/February (post-holiday spending decline)", "Spring lull (Easter to Mother's Day)", "Holiday rush (Thanksgiving, Christmas, New Year's Eve)"],
+            "desc2": "Physical gift cards can't solve this. But strategic digital campaigns CAN.",
+            "desc3": "You create targeted campaigns for Valentine's Day (gift cards as gifts +150%), Mother's Day (+120%), holiday season (+300-500%), and off-season discounts to drive traffic. Marketing becomes data-driven, not guesswork."
+          }
+        }
+      },
+      "solution": {
+        "title": "Giftygen's Restaurant-Specific Solution",
+        "intro": "Giftygen is purpose-built for restaurants. We've integrated with 2,000+ restaurants and understand your business model completely. Here's exactly how we solve each problem:",
+        "items": {
+          "walletIntegration": {
+            "title": "1. Apple Wallet Integration: 70-80% Redemption",
+            "tableHeaders": ["How it works", "Why it works"],
+            "tableRows": [
+              ["Customer buys gift card on your website or in-store", "No searching through email"],
+              ["They get an email with a redemption link", "No lost cards"],
+              ["One tap adds card to Apple Wallet", "No friction"],
+              ["At checkout, they open wallet and show phone", "One-tap experience (customers love it)"],
+              ["Card code auto-applies to transaction", ""]
+            ]
+          },
+          "posIntegration": {
+            "title": "2. POS Integration: Automatic Redemption & Tracking",
+            "intro": "We integrate with 50+ POS systems:",
+            "quickServe": "Quick Serve:",
+            "quickServePOS": ["Toast", "Square", "Clover"],
+            "fineDining": "Fine Dining:",
+            "fineDiningPOS": ["Micros Oracle", "MarginEdge"],
+            "pizza": "Pizza/QSR:",
+            "pizzaPOS": ["Lightspeed", "Revel", "Touchbistro"],
+            "custom": "Custom Systems:",
+            "customPOS": ["API integration available"],
+            "whatHappens": "What happens:",
+            "bullets": [
+              "Gift card balance syncs in real-time to your POS",
+              "Redemption is automatic at checkout (staff doesn't have to look anything up)",
+              "Remaining balance displays instantly",
+              "Multi-location balance tracks automatically",
+              "Zero manual work"
+            ]
+          },
+          "analytics": {
+            "title": "3. Real-Time Analytics: Know Your Data",
+            "intro": "Dashboard shows:",
+            "bullets": [
+              "Total gift card sales (revenue)",
+              "Redemption rate (%)",
+              "Average spend per redemption",
+              "Customer repeat visit frequency",
+              "Which menu items gift card customers order",
+              "Revenue from breakage (unredeemed balances)"
+            ]
+          },
+          "campaigns": {
+            "title": "4. Seasonal Campaign Tools: Revenue During Slow Periods",
+            "intro": "Pre-built seasonal campaigns:",
+            "list": [
+              {"name": "Valentine's Day: \"Perfect Gift for Your Sweetheart\"", "desc": "+150% sales spike"},
+              {"name": "Mother's Day: \"Treat Mom to a Special Experience\"", "desc": "+120%"},
+              {"name": "Holiday Season: \"The Gift Everyone Loves\"", "desc": "+300-500%"},
+              {"name": "New Year's: \"Fitness + Dining Bundling\"", "desc": "Jan health resolutions"},
+              {"name": "Summer Slump Fix: \"Summer Dining Series\"", "desc": "with outdoor events"},
+              {"name": "Black Friday: \"Flash Gift Card Deals\"", "desc": ""}
+            ],
+            "includes": "Each campaign includes:",
+            "includesBullets": [
+              "Email template (pre-written)",
+              "Social media copy (ready to post)",
+              "Landing page (custom to your restaurant)",
+              "Analytics tracking (see what works)"
+            ],
+            "highlight": "How it drives revenue: Instead of hoping people buy gift cards, you're actively promoting them during peak gifting seasons. Result: predictable 25-40% revenue increase during promotional periods."
+          },
+          "upsell": {
+            "title": "5. Upsell Automation",
+            "intro": "At redemption, staff sees:",
+            "bullets": [
+              "\"This customer has redeemed 8 times this year—suggest wine pairing\"",
+              "\"They ordered pasta last time—recommend our new sauce\"",
+              "\"They always order alone—suggest appetizer to start\""
+            ],
+            "result": "Result: +$8-15 average upsell per redemption"
+          },
+          "branding": {
+            "title": "6. Fully Branded Design",
+            "intro": "Choose from restaurant-specific templates or upload your logo. Customize:",
+            "bullets": [
+              "Colors matching your brand",
+              "Restaurant background image (food, ambiance)",
+              "Custom messaging",
+              "QR code placement"
+            ],
+            "outro": "They can create Gift card using AI. Design done in 3 minutes. No designer needed."
+          }
+        }
+      },
+      "faq": {
+        "title": "Common Questions (FAQ)",
+        "items": [
+          {"q": "Q1: How much does Giftygen cost?"},
+          {"q": "Q2: Will this work with our POS system?"},
+          {"q": "Q3: Can we customize the gift card design?"},
+          {"q": "Q4: How do customers redeem?"},
+          {"q": "Q5: Is our customer data secure?"},
+          {"q": "Q6: What if customers don't redeem?"},
+          {"q": "Q7: Can we run seasonal campaigns?"}
+        ]
+      },
+      "cta": {
+        "text1": "The restaurants winning right now aren't spending more on marketing. They're using digital gift cards to capture revenue they were leaving on the table.",
+        "text2": "They've increased redemption from 40% to 75%. They've turned one-time gift card buyers into repeat customers."
+      },
       "subtitle": "Boost your restaurant's revenue and customer loyalty with digital gift cards",
       "description": "GiftyGen helps restaurants increase revenue, attract new customers, and build lasting relationships. Our digital gift card platform is perfect for restaurants looking to boost sales during peak seasons, reward loyal customers, and create memorable dining experiences.",
       "featuresTitle": "How GiftyGen Helps Restaurants",
