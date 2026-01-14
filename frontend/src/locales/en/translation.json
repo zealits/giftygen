@@ -365,10 +365,25 @@
   },
   "contact": {
     "title": "Contact us",
-    "description": "Visit giftygen.com to learn more.",
+    "description": "contact@giftygen.com for communication",
+    "address": "30 N Gould St Ste R, Sheridan, WY 82801 USA",
     "visitWebsite": "Visit website",
     "exploreCards": "Explore gift cards",
-    "scanText": "Scan to learn more"
+    "scanText": "Scan to learn more",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "your.email@example.com",
+      "message": "Message",
+      "messagePlaceholder": "Your message...",
+      "submit": "Send Message",
+      "sending": "Sending...",
+      "success": "Thank you! Your message has been sent successfully. We'll get back to you soon.",
+      "error": "Sorry, something went wrong. Please try again later.",
+      "errorRequired": "Please fill in all fields.",
+      "errorEmail": "Please enter a valid email address."
+    }
   },
   "footer": {
     "rights": "All rights reserved."

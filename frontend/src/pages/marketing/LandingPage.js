@@ -83,6 +83,12 @@ function LandingPage() {
     contactName: false,
     email: false,
   });
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [isSubmittingContact, setIsSubmittingContact] = useState(false);
   const [isCardsVisible, setIsCardsVisible] = useState(false);
   const cardsGridRef = useRef(null);
   const creativeCardsRef = useRef(null);
@@ -916,7 +922,7 @@ function LandingPage() {
             <button className="lp-btn" onClick={() => handleScrollTo("register")}>
               {t("hero.startFreeTrial")}
             </button>
-            <button className="lp-btn" onClick={() => handleScrollTo("register")}>
+            <button className="lp-btn lp-btn--ghost" onClick={() => handleScrollTo("register")}>
               {t("hero.scheduleDemo")}
             </button>
           </div>
@@ -1637,28 +1643,144 @@ function LandingPage() {
 
       {/* Contact */}
       <section className="lp-section lp-contact" id="contact">
+        <div className="lp-contact__header">
+          <h2 className="lp-contact__title">
+            Contact <span>Us</span>
+          </h2>
+        </div>
         <div className="lp-contact__content">
-          <div>
-            <h2>{t("nav.contact")}</h2>
-            <p className="lp-contact__lead">{t("contact.description")}</p>
-            <div className="lp-contact__actions">
-              <a className="lp-btn" href="https://giftygen.com" target="_blank" rel="noreferrer">
-                {t("contact.visitWebsite")}
-              </a>
-              <a href="/explore" className="lp-btn">
-                {t("contact.exploreCards")}
-              </a>
+          <div className="lp-contact__info">
+            <h3 className="lp-contact__info-title">Contact details</h3>
+            <p className="lp-contact__lead">
+              Reach out to us for any questions, feedback, or partnership opportunities.
+            </p>
+            <div className="lp-contact__detail-list">
+              <div className="lp-contact__detail-item">
+                <div className="lp-contact__detail-icon">
+                  <Mail size={22} />
+                </div>
+                <div>
+                  <div className="lp-contact__detail-label">Email</div>
+                  <a href="mailto:contact@giftygen.com" className="lp-contact__detail-value">
+                    contact@giftygen.com
+                  </a>
+                </div>
+              </div>
+              <div className="lp-contact__detail-item">
+                <div className="lp-contact__detail-icon">
+                  <Home size={22} />
+                </div>
+                <div>
+                  <div className="lp-contact__detail-label">Address</div>
+                  <p className="lp-contact__detail-value">
+                    30 N Gould St Ste R, Sheridan, WY 82801 USA
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-          {/* <div className="lp-qr">
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-                "https://giftygen.com"
-              )}&size=160x160`}
-              alt="QR code for giftygen.com"
-            />
-            <span>{t("contact.scanText")}</span>
-          </div> */}
+          <div className="lp-contact__form-wrapper">
+            <form 
+              className="lp-contact__form"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!contactForm.name || !contactForm.email || !contactForm.message) {
+                  setModalState({
+                    isOpen: true,
+                    type: "error",
+                    message: t("contact.form.errorRequired"),
+                  });
+                  return;
+                }
+
+                // Basic email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(contactForm.email)) {
+                  setModalState({
+                    isOpen: true,
+                    type: "error",
+                    message: t("contact.form.errorEmail"),
+                  });
+                  return;
+                }
+
+                setIsSubmittingContact(true);
+                try {
+                  const res = await fetch("/api/v1/admin/contact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(contactForm),
+                  });
+
+                  if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || "Failed to send message");
+                  }
+
+                  setModalState({
+                    isOpen: true,
+                    type: "success",
+                    message: t("contact.form.success"),
+                  });
+                  setContactForm({ name: "", email: "", message: "" });
+                } catch (err) {
+                  setModalState({
+                    isOpen: true,
+                    type: "error",
+                    message: err.message || t("contact.form.error"),
+                  });
+                } finally {
+                  setIsSubmittingContact(false);
+                }
+              }}
+            >
+              <div className="lp-contact__form-row">
+                <div className="lp-contact__form-group">
+                  <label htmlFor="contact-name">{t("contact.form.name")}</label>
+                  <input
+                    type="text"
+                    id="contact-name"
+                    name="name"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                    placeholder={t("contact.form.namePlaceholder")}
+                    required
+                  />
+                </div>
+                <div className="lp-contact__form-group">
+                  <label htmlFor="contact-email">{t("contact.form.email")}</label>
+                  <input
+                    type="email"
+                    id="contact-email"
+                    name="email"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    placeholder={t("contact.form.emailPlaceholder")}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="lp-contact__form-group">
+                <label htmlFor="contact-message">{t("contact.form.message")}</label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  value={contactForm.message}
+                  onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                  placeholder={t("contact.form.messagePlaceholder")}
+                  rows="5"
+                  required
+                />
+              </div>
+              <button 
+                type="submit" 
+                className="lp-btn lp-contact__submit"
+                disabled={isSubmittingContact}
+              >
+                {isSubmittingContact ? t("contact.form.sending") : t("contact.form.submit")}
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 

@@ -388,4 +388,151 @@ const sendAdminNotificationEmail = async (formData) => {
   }
 };
 
-module.exports = { sendEmail, sendRegistrationConfirmationEmail, sendAdminNotificationEmail };
+// Function to send contact form notification email
+const sendContactFormEmail = async (formData) => {
+  const { name, email, message } = formData;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New Contact Form Submission - GiftyGen</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f8f9fa;
+            }
+            .email-container {
+                background-color: #ffffff;
+                border-radius: 10px;
+                padding: 40px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #e9ecef;
+            }
+            .logo {
+                font-size: 28px;
+                font-weight: bold;
+                color: #007bff;
+                margin-bottom: 10px;
+            }
+            .tagline {
+                color: #6c757d;
+                font-size: 16px;
+            }
+            .content {
+                margin-bottom: 30px;
+            }
+            .title {
+                font-size: 22px;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 20px;
+            }
+            .info-section {
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                padding: 25px;
+                margin: 20px 0;
+            }
+            .info-row {
+                margin-bottom: 15px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #e9ecef;
+            }
+            .info-row:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+            .info-label {
+                font-weight: 600;
+                color: #495057;
+                font-size: 14px;
+                margin-bottom: 5px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .info-value {
+                color: #212529;
+                font-size: 16px;
+                word-break: break-word;
+            }
+            .message-box {
+                background-color: #ffffff;
+                border-left: 4px solid #007bff;
+                padding: 15px;
+                margin-top: 10px;
+                border-radius: 4px;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #e9ecef;
+                color: #6c757d;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <div class="logo">GiftyGen</div>
+                <div class="tagline">Digital Gift Card Management Platform</div>
+            </div>
+            
+            <div class="content">
+                <div class="title">📧 New Contact Form Submission</div>
+                
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-label">Name</div>
+                        <div class="info-value">${name || "Not provided"}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Email</div>
+                        <div class="info-value"><a href="mailto:${email}">${email || "Not provided"}</a></div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Message</div>
+                        <div class="message-box">${message ? message.replace(/\n/g, '<br>') : "Not provided"}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>This is an automated notification from GiftyGen Contact Form</p>
+                <p>© ${new Date().getFullYear()} GiftyGen. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    await sendEmail({
+      email: "aniketkhillare17@gmail.com, contact@giftygen.com",
+      subject: `New Contact Form Submission from ${name || "Visitor"}`,
+      html: htmlContent,
+    });
+  } catch (error) {
+    console.error("Error sending contact form email:", error);
+    throw error;
+  }
+};
+
+module.exports = { sendEmail, sendRegistrationConfirmationEmail, sendAdminNotificationEmail, sendContactFormEmail };

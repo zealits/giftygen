@@ -13,6 +13,7 @@ const {
   captureRegistrationInterest,
   changePassword,
   getBusinessBySlug,
+  submitContactForm,
 } = require("../controllers/restaurantAdminController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const upload = require("../middleware/multer");
@@ -37,6 +38,9 @@ router.post("/verify-otp", verifyOTP);
 
 // Public endpoint for landing page to capture registration/demo interest
 router.post("/registration-interest", captureRegistrationInterest);
+
+// Public endpoint for contact form submission
+router.post("/contact", submitContactForm);
 
 router.get("/logout", logout);
 

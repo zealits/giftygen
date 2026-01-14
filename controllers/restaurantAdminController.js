@@ -2,7 +2,7 @@ const RestaurantAdmin = require("../models/restaurantAdminSchema");
 const RegistrationRequest = require("../models/registrationRequestSchema");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
-const { sendEmail, sendRegistrationConfirmationEmail, sendAdminNotificationEmail } = require("../utils/sendEmail"); // Utility for sending emails
+const { sendEmail, sendRegistrationConfirmationEmail, sendAdminNotificationEmail, sendContactFormEmail } = require("../utils/sendEmail"); // Utility for sending emails
 const catchAsyncErrors = require("../middleware/catchAsyncErrors"); // Middleware for handling async errors
 const sendToken = require("../utils/jwtToken");
 const ErrorHander = require("../utils/errorhander");
@@ -309,6 +309,31 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
   }
 
   return res.status(200).json({ success: true, message: "Request received" });
+});
+
+// Handle contact form submission
+exports.submitContactForm = catchAsyncErrors(async (req, res, next) => {
+  const { name, email, message } = req.body || {};
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ success: false, message: "Name, email, and message are required" });
+  }
+
+  // Basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ success: false, message: "Please provide a valid email address" });
+  }
+
+  // Send contact form notification email
+  try {
+    await sendContactFormEmail({ name, email, message });
+  } catch (emailError) {
+    console.error("Failed to send contact form email:", emailError);
+    return res.status(500).json({ success: false, message: "Failed to send message. Please try again later." });
+  }
+
+  return res.status(200).json({ success: true, message: "Message sent successfully" });
 });
 
 exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
