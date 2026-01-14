@@ -196,7 +196,7 @@ const sendRegistrationConfirmationEmail = async (email, restaurantName, adminNam
             
             <div class="footer">
                 <p>Thank you for choosing GiftyGen!</p>
-                <p>© 2024 GiftyGen. All rights reserved.</p>
+                <p>© 2026 GiftyGen. All rights reserved.</p>
                 <p>This is an automated message, please do not reply directly to this email.</p>
             </div>
         </div>
@@ -216,4 +216,168 @@ const sendRegistrationConfirmationEmail = async (email, restaurantName, adminNam
   }
 };
 
-module.exports = { sendEmail, sendRegistrationConfirmationEmail };
+// Function to send admin notification email with registration form details
+const sendAdminNotificationEmail = async (formData) => {
+  const { businessName, businessType, contactName, email, phone, website, notes } = formData;
+  
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New Registration Request - GiftyGen</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f8f9fa;
+            }
+            .email-container {
+                background-color: #ffffff;
+                border-radius: 10px;
+                padding: 40px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #e9ecef;
+            }
+            .logo {
+                font-size: 28px;
+                font-weight: bold;
+                color: #007bff;
+                margin-bottom: 10px;
+            }
+            .tagline {
+                color: #6c757d;
+                font-size: 16px;
+            }
+            .content {
+                margin-bottom: 30px;
+            }
+            .title {
+                font-size: 22px;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 20px;
+            }
+            .info-section {
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                padding: 25px;
+                margin: 20px 0;
+            }
+            .info-row {
+                margin-bottom: 15px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #e9ecef;
+            }
+            .info-row:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+            .info-label {
+                font-weight: 600;
+                color: #495057;
+                font-size: 14px;
+                margin-bottom: 5px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .info-value {
+                color: #212529;
+                font-size: 16px;
+                word-break: break-word;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #e9ecef;
+                color: #6c757d;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <div class="logo">GiftyGen</div>
+                <div class="tagline">Digital Gift Card Management Platform</div>
+            </div>
+            
+            <div class="content">
+                <div class="title">📋 New Registration Request</div>
+                
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-label">Business Name</div>
+                        <div class="info-value">${businessName || "Not provided"}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Business Type</div>
+                        <div class="info-value">${businessType || "Not provided"}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Contact Name</div>
+                        <div class="info-value">${contactName || "Not provided"}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">${email || "Not provided"}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Phone</div>
+                        <div class="info-value">${phone || "Not provided"}</div>
+                    </div>
+                    
+                    ${website ? `
+                    <div class="info-row">
+                        <div class="info-label">Website</div>
+                        <div class="info-value">${website}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${notes ? `
+                    <div class="info-row">
+                        <div class="info-label">Notes</div>
+                        <div class="info-value">${notes}</div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>This is an automated notification from GiftyGen Registration System</p>
+                <p>© 2026 GiftyGen. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    await sendEmail({
+      email: "aniketkhillare17@gmail.com, contact@giftygen.com",
+      subject: `New Registration Request - ${businessName || "Business Registration"}`,
+      html: htmlContent,
+    });
+  } catch (error) {
+    console.error("Error sending admin notification email:", error);
+    throw error;
+  }
+};
+
+module.exports = { sendEmail, sendRegistrationConfirmationEmail, sendAdminNotificationEmail };

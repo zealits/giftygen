@@ -1678,7 +1678,10 @@ function LandingPage() {
       </footer>
       <SuccessModal
         isOpen={modalState.isOpen}
-        onClose={() => setModalState({ ...modalState, isOpen: false })}
+        onClose={() => {
+          setModalState({ ...modalState, isOpen: false });
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
         message={modalState.message}
         type={modalState.type}
       />

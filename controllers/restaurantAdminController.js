@@ -2,7 +2,7 @@ const RestaurantAdmin = require("../models/restaurantAdminSchema");
 const RegistrationRequest = require("../models/registrationRequestSchema");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
-const { sendEmail, sendRegistrationConfirmationEmail } = require("../utils/sendEmail"); // Utility for sending emails
+const { sendEmail, sendRegistrationConfirmationEmail, sendAdminNotificationEmail } = require("../utils/sendEmail"); // Utility for sending emails
 const catchAsyncErrors = require("../middleware/catchAsyncErrors"); // Middleware for handling async errors
 const sendToken = require("../utils/jwtToken");
 const ErrorHander = require("../utils/errorhander");
@@ -289,6 +289,22 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
     await sendRegistrationConfirmationEmail(email, businessName, contactName);
   } catch (emailError) {
     console.error("Failed to send registration confirmation email:", emailError);
+    // Don't fail the request if email fails
+  }
+
+  // Send admin notification email with form details
+  try {
+    await sendAdminNotificationEmail({
+      businessName,
+      businessType,
+      contactName,
+      email,
+      phone,
+      website,
+      notes,
+    });
+  } catch (adminEmailError) {
+    console.error("Failed to send admin notification email:", adminEmailError);
     // Don't fail the request if email fails
   }
 

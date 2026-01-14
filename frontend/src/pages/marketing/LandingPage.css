@@ -413,13 +413,13 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--text-1);
+  color: var(--text-1, #ffffff);
 }
 
 .lp-modal__message {
   font-size: 1rem;
   line-height: 1.6;
-  color: var(--text-2);
+  color: var(--text-2, #d1d5db);
   margin-bottom: 2rem;
 }
 
@@ -466,6 +466,39 @@
     width: 36px;
     height: 36px;
   }
+}
+
+/* Light theme modal styles */
+.lp-root[data-theme='light'] .lp-modal-overlay {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.lp-root[data-theme='light'] .lp-modal {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.lp-root[data-theme='light'] .lp-modal__title {
+  color: #0b0c10;
+}
+
+.lp-root[data-theme='light'] .lp-modal__message {
+  color: #4b5563;
+}
+
+.lp-root[data-theme='light'] .lp-modal__icon--success {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+}
+
+.lp-root[data-theme='light'] .lp-modal__icon--error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.lp-root[data-theme='light'] .lp-modal__btn {
+  color: #ffffff;
 }
 
 .lp-mobile-header__brand {
