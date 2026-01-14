@@ -219,7 +219,7 @@ const sendRegistrationConfirmationEmail = async (email, restaurantName, adminNam
 // Function to send admin notification email with registration form details
 const sendAdminNotificationEmail = async (formData) => {
   const { businessName, businessType, contactName, email, phone, website, notes } = formData;
-  
+
   const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
@@ -343,19 +343,27 @@ const sendAdminNotificationEmail = async (formData) => {
                         <div class="info-value">${phone || "Not provided"}</div>
                     </div>
                     
-                    ${website ? `
+                    ${
+                      website
+                        ? `
                     <div class="info-row">
                         <div class="info-label">Website</div>
                         <div class="info-value">${website}</div>
                     </div>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                     
-                    ${notes ? `
+                    ${
+                      notes
+                        ? `
                     <div class="info-row">
                         <div class="info-label">Notes</div>
                         <div class="info-value">${notes}</div>
                     </div>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                 </div>
             </div>
             
