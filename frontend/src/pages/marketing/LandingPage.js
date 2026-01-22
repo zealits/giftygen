@@ -44,6 +44,7 @@ import {
   HelpCircle,
   Mail,
   Home,
+  ChevronDown,
 } from "lucide-react";
 
 function LandingPage() {
@@ -54,6 +55,7 @@ function LandingPage() {
   const { t, i18n } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSolutionsDropdownOpen, setIsSolutionsDropdownOpen] = useState(false);
   const [isLoadingLanguage, setIsLoadingLanguage] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -767,6 +769,23 @@ function LandingPage() {
     };
   }, [isMobileMenuOpen]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isSolutionsDropdownOpen && !event.target.closest('.lp-nav__dropdown')) {
+        setIsSolutionsDropdownOpen(false);
+      }
+    };
+
+    if (isSolutionsDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSolutionsDropdownOpen]);
+
   /* // Show loading state while detecting language
   if (isLoadingLanguage) {
     return (
@@ -812,7 +831,89 @@ function LandingPage() {
         <nav className="lp-nav__links">
           <button onClick={() => handleScrollTo("about")}>{t("nav.about")}</button>
           <button onClick={() => handleScrollTo("features")}>{t("nav.features")}</button>
-          <button onClick={() => handleScrollTo("solutions")}>{t("nav.solutions")}</button>
+          <div 
+            className="lp-nav__dropdown"
+            onMouseEnter={() => setIsSolutionsDropdownOpen(true)}
+            onMouseLeave={() => setIsSolutionsDropdownOpen(false)}
+          >
+            <button 
+              onClick={() => handleScrollTo("solutions")}
+              className={isSolutionsDropdownOpen ? "active" : ""}
+            >
+              {t("nav.solutions")}
+              <ChevronDown size={16} className="lp-nav__dropdown-icon" />
+            </button>
+            {isSolutionsDropdownOpen && (
+              <div className="lp-nav__dropdown-menu">
+                <a 
+                  href="/category/restaurants" 
+                  className="lp-nav__dropdown-item"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/category/restaurants");
+                    setIsSolutionsDropdownOpen(false);
+                  }}
+                >
+                  {t("businessCategories.restaurants.title")}
+                </a>
+                <a 
+                  href="/category/hotels" 
+                  className="lp-nav__dropdown-item"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/category/hotels");
+                    setIsSolutionsDropdownOpen(false);
+                  }}
+                >
+                  {t("businessCategories.hotels.title")}
+                </a>
+                <a 
+                  href="/category/retail" 
+                  className="lp-nav__dropdown-item"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/category/retail");
+                    setIsSolutionsDropdownOpen(false);
+                  }}
+                >
+                  {t("businessCategories.retail.title")}
+                </a>
+                <a 
+                  href="/category/salons" 
+                  className="lp-nav__dropdown-item"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/category/salons");
+                    setIsSolutionsDropdownOpen(false);
+                  }}
+                >
+                  {t("businessCategories.salons.title")}
+                </a>
+                <a 
+                  href="/category/fitness" 
+                  className="lp-nav__dropdown-item"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/category/fitness");
+                    setIsSolutionsDropdownOpen(false);
+                  }}
+                >
+                  {t("businessCategories.fitness.title")}
+                </a>
+                <a 
+                  href="/category/seasonal" 
+                  className="lp-nav__dropdown-item"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/category/seasonal");
+                    setIsSolutionsDropdownOpen(false);
+                  }}
+                >
+                  {t("businessCategories.seasonal.title")}
+                </a>
+              </div>
+            )}
+          </div>
           <button onClick={() => handleScrollTo("register")}>{t("nav.register")}</button>
           <button onClick={() => handleScrollTo("faq")}>FAQ</button>
           <button onClick={() => handleScrollTo("contact")}>{t("nav.contact")}</button>

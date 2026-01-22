@@ -295,6 +295,92 @@
   left: 100%;
 }
 
+/* Solutions Dropdown */
+.lp-nav__dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.lp-nav__dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lp-nav__dropdown-icon {
+  transition: transform 0.3s ease;
+}
+
+.lp-nav__dropdown button.active .lp-nav__dropdown-icon,
+.lp-nav__dropdown:hover .lp-nav__dropdown-icon {
+  transform: rotate(180deg);
+}
+
+.lp-nav__dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 240px;
+  backdrop-filter: saturate(140%) blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 8px;
+  z-index: 1000;
+  animation: dropdownFadeIn 0.2s ease;
+  opacity: 1;
+}
+
+/* Dark theme dropdown */
+.lp-nav__dropdown-menu {
+  background: rgba(11, 12, 16, 0.98);
+}
+
+/* Light theme dropdown */
+.lp-root[data-theme='light'] .lp-nav__dropdown-menu {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lp-nav__dropdown-item {
+  display: block;
+  padding: 12px 16px;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+/* Light theme dropdown items */
+.lp-root[data-theme='light'] .lp-nav__dropdown-item {
+  color: #0b0c10;
+}
+
+.lp-nav__dropdown-item:hover {
+  background: rgba(147, 168, 255, 0.15);
+  transform: translateX(4px);
+}
+
+/* Light theme hover */
+.lp-root[data-theme='light'] .lp-nav__dropdown-item:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
 .lp-nav__cta { 
   display: none; 
   gap: 12px; 
@@ -1806,6 +1892,8 @@
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .lp-btn::before {

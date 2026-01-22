@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "./BusinessCategoryDetail.css";
-import { ArrowLeft, CheckCircle, Star, List, Menu, X } from "lucide-react";
+import { CheckCircle, Star, List, Menu, X } from "lucide-react";
 import SEO from "../../components/SEO";
 import LanguageDropdown from "../../components/LanguageDropdown";
 import logo from "../../assets/giftygen_logo.svg";
@@ -162,17 +162,6 @@ function BusinessCategoryDetail() {
     { id: "section-cta", title: t("businessCategories.seasonal.toc.cta") },
   ];
 
-  // Handle back button - navigate to landing page and scroll to offer section
-  const handleBack = () => {
-    navigate("/");
-    setTimeout(() => {
-      const element = document.getElementById("offer");
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 100);
-  };
-
   const businessCategoryImages = {
     restaurants: "/images/business-categories/restaurants.png",
     hotels: "/images/business-categories/hotels.png",
@@ -188,10 +177,6 @@ function BusinessCategoryDetail() {
     return (
       <div className="category-detail" data-theme={theme}>
         <div className="category-detail__container">
-          <button className="category-detail__back-btn" onClick={handleBack}>
-            <ArrowLeft size={20} />
-            Back
-          </button>
           <div className="category-detail__error">
             <h2>Category not found</h2>
             <p>The category you're looking for doesn't exist.</p>
@@ -317,11 +302,6 @@ function BusinessCategoryDetail() {
         </div>
       )}
       <div className="category-detail__container">
-        <button className="category-detail__back-btn" onClick={handleBack}>
-          <ArrowLeft size={20} />
-          Back
-        </button>
-
         <header className="category-detail__header">
           <div className="category-detail__image-container">
             <img

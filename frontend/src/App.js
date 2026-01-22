@@ -10,6 +10,10 @@ const Login = lazy(() => import("./components/Auth/Login"));
 const Register = lazy(() => import("./components/Register"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.js"));
 const UserLanding = lazy(() => import("./pages/user/UserLanding.js"));
+const UnderConstruction = lazy(() => import("./pages/user/UnderConstruction.js"));
+const Explore = lazy(() => import("./pages/user/Explore.js"));
+const ExploreCategory = lazy(() => import("./pages/user/ExploreCategory.js"));
+const ExploreBrand = lazy(() => import("./pages/user/ExploreBrand.js"));
 const LandingPage = lazy(() => import("./pages/marketing/LandingPage"));
 const PrivacyPolicy = lazy(() => import("./pages/marketing/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/marketing/TermsOfService"));
@@ -53,7 +57,7 @@ function AppRoutes() {
         <Routes>
         <Route
           path="/login"
-          element={user ? <Navigate to={userDetails?.role === "Admin" ? "/dashboard" : "/explore"} /> : <Login />}
+          element={user ? <Navigate to={userDetails?.role === "Admin" ? "/dashboard" : "/oldexplore"} /> : <Login />}
         />
         <Route path="/register" element={<Register />} />
 
@@ -129,7 +133,10 @@ function AppRoutes() {
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/benefit/:benefitId" element={<BenefitDetail />} />
         <Route path="/category/:categoryId" element={<BusinessCategoryDetail />} />
-        <Route path="/explore" element={<UserLanding />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/explore/:categoryId" element={<ExploreCategory />} />
+        <Route path="/explore/:categoryId/:brandId" element={<ExploreBrand />} />
+        <Route path="/oldexplore" element={<UserLanding />} />
         <Route path="/gift-card/:id" element={<GiftCardDetails />} />
         <Route path="/:businessSlug/giftcards" element={<UserLanding />} />
         <Route path="/:businessSlug/gift-card/:id" element={<GiftCardDetails />} />
