@@ -13,11 +13,15 @@ const restaurantAdminSchema = new mongoose.Schema(
     restaurantName: { type: String }, // Name of the restaurant
     businessSlug: { type: String, unique: true, sparse: true }, // URL-friendly business identifier
     logoUrl: { type: String }, // Business logo stored on Cloudinary
+    industry: { type: String }, // Industry category
+    businessDescription: { type: String }, // Business description
     restaurantAddress: {
       street: { type: String },
       city: { type: String },
       state: { type: String },
       zipCode: { type: String },
+      latitude: { type: Number }, // Map coordinates
+      longitude: { type: Number }, // Map coordinates
     },
     role: { type: String, default: "Admin" }, // Role of the user
     isVerified: { type: Boolean, default: false }, // For OTP verification

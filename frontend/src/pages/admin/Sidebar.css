@@ -20,14 +20,16 @@
     top: 0;
     height: 100vh;
     width: var(--sidebar-width-collapsed);
-    background: var(--sidebar-bg);
+    background: var(--sidebar-bg) !important;
     padding: 6px 5px; /* Reduced horizontal padding */
     z-index: 99;
     transition: width var(--transition-speed) ease;
     border-right: 1px solid var(--border-color);
     box-shadow: 5px 0 25px rgba(0, 0, 0, 0.2);
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar.open {
@@ -45,6 +47,7 @@
     padding: 0 5px;
     margin-bottom: 10px;
     border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .sidebar .logo-details .logo-image {
@@ -121,11 +124,44 @@
 /* Navigation list */
 .sidebar .nav-list {
     margin-top: 20px;
-    height: calc(100% - 150px);
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 5px;
     padding: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+    margin-right: -4px;
+}
+
+/* Custom scrollbar styling */
+.sidebar .nav-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar .nav-list::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.3);
+    border-radius: 10px;
+    margin: 5px 0;
+}
+
+.sidebar .nav-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.4));
+    border-radius: 10px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), rgba(59, 130, 246, 0.6));
+    border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+/* Firefox scrollbar styling */
+.sidebar .nav-list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.6) rgba(15, 23, 42, 0.3);
 }
 
 .sidebar li {
@@ -196,45 +232,282 @@
     opacity: 1;
 }
 
-.profile {
-    margin-top: auto;
-    padding: 10px 0;
+/* Ensure Settings trigger matches other menu items */
+.settings-trigger.linke {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all var(--transition-speed) ease;
+    padding: 12px 8px;
+    gap: 12px;
+    white-space: nowrap;
     width: 100%;
 }
 
-.profile-details {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 8px;
-    background-color: #dc2626;
-    border-radius: 10px;
-    transition: all var(--transition-speed) ease;
-    cursor: pointer;
-    width: calc(100% - 10px);
-    margin: 0 auto;
-    position: relative; /* Added */
-    overflow: hidden; /* Added */
-}
-
-.sidebar.open .profile-details {
+.sidebar.open .settings-trigger.linke {
     padding: 12px;
 }
 
-.profile-details:hover {
-    background-color: #b91c1c;
-    transform: translateY(-2px);
+/* Settings dropdown styles */
+.settings-menu-item {
+    position: relative;
 }
 
-.profile-details i {
+.settings-trigger {
+    cursor: pointer;
+    position: relative;
+    color: var(--text-secondary) !important;
+}
+
+/* Ensure Settings trigger has proper icon and text colors */
+.settings-trigger .icon {
+    color: var(--text-secondary) !important;
     min-width: 35px;
     height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
-    color: var(--text-primary);
+    transition: all var(--transition-speed) ease;
     margin: 0 auto;
+}
+
+.sidebar.open .settings-trigger .icon {
+    margin: 0;
+}
+
+.settings-trigger:hover .icon,
+.settings-trigger.active .icon {
+    color: var(--accent-primary) !important;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+}
+
+.settings-trigger .links_name {
+    color: var(--text-secondary) !important;
+    font-size: 15px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.sidebar.open .settings-trigger .links_name {
+    opacity: 1;
+}
+
+.settings-trigger:hover .links_name,
+.settings-trigger.active .links_name {
+    color: var(--accent-primary) !important;
+}
+
+.settings-trigger .dropdown-arrow {
+    margin-left: auto;
+    color: var(--text-secondary);
+    font-size: 12px;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidebar.open .settings-trigger .dropdown-arrow {
+    opacity: 1;
+    visibility: visible;
+}
+
+.settings-trigger:hover .dropdown-arrow,
+.settings-trigger.active .dropdown-arrow {
+    color: var(--accent-primary);
+}
+
+.settings-trigger.active-parent {
+    background: var(--hover-bg);
+    border-left: 2px solid var(--accent-primary);
+}
+
+.settings-trigger.active-parent .icon {
+    color: var(--accent-primary) !important;
+}
+
+.settings-trigger.active-parent .links_name {
+    color: var(--accent-primary) !important;
+}
+
+.settings-trigger:hover {
+    background: var(--hover-bg);
+}
+
+.settings-dropdown {
+    list-style: none;
+    padding: 0;
+    margin: 5px 0 0 0;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    animation: slideDown 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 200px;
+    }
+}
+
+.settings-dropdown li {
+    margin: 0;
+    padding: 0;
+}
+
+.settings-dropdown .dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px 10px 40px;
+    color: var(--text-secondary) !important;
+    text-decoration: none;
+    transition: all var(--transition-speed) ease;
+    border-left: 2px solid transparent;
+    position: relative;
+}
+
+.settings-dropdown .dropdown-link span {
+    color: var(--text-secondary) !important;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.settings-dropdown .dropdown-link:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-primary) !important;
+    border-left-color: var(--accent-primary);
+    padding-left: 45px;
+}
+
+.settings-dropdown .dropdown-link:hover span {
+    color: var(--accent-primary) !important;
+}
+
+.settings-dropdown .dropdown-link:hover .dropdown-icon {
+    color: var(--accent-primary) !important;
+}
+
+.settings-dropdown .dropdown-link.active {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-primary) !important;
+    border-left-color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.settings-dropdown .dropdown-link.active span {
+    color: var(--accent-primary) !important;
+}
+
+.settings-dropdown .dropdown-link.active .dropdown-icon {
+    color: var(--accent-primary) !important;
+}
+
+.settings-dropdown .dropdown-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 0 2px 2px 0;
+}
+
+.settings-dropdown .dropdown-icon {
+    min-width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text-secondary);
+    transition: all var(--transition-speed) ease;
+}
+
+.settings-dropdown .dropdown-link:hover .dropdown-icon,
+.settings-dropdown .dropdown-link.active .dropdown-icon {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.4));
+    color: var(--accent-primary) !important;
+}
+
+.profile {
+    margin-top: auto;
+    padding: 0;
+    width: 100%;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.sidebar.open .profile {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.profile-details {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 8px;
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    border-radius: 10px;
+    transition: all var(--transition-speed) ease;
+    cursor: pointer;
+    width: 100%;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.sidebar.open .profile-details {
+    padding: 10px 12px;
+    width: 100%;
+}
+
+.profile-details:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.profile-details i {
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #ffffff !important;
+    margin: 0;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    flex-shrink: 0;
 }
 
 /* Added new styles for the login text */
@@ -254,6 +527,30 @@
 
 .sidebar.open .profile-details i {
     margin: 0;
+}
+
+.profile-details .name_job {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-details .name {
+    color: #ffffff !important;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    line-height: 1.2;
+}
+
+.sidebar.open .profile-details .name {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Glow animation */

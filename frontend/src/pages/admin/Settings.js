@@ -1,14 +1,42 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import MapLocationPicker from "../../components/MapLocationPicker";
 import "./Settings.css";
 
-const Settings = () => {
+const Settings = ({ section: sectionProp }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Determine which section to show based on route or prop
+  const getSection = () => {
+    if (sectionProp) return sectionProp;
+    const path = location.pathname;
+    if (path === "/settings/security") return "security";
+    if (path === "/settings/business-profile") return "business-profile";
+    if (path === "/settings/payment") return "payment";
+    // Default to security if just /settings
+    if (path === "/settings") return "security";
+    return "security";
+  };
+
+  const currentSection = getSection();
   const { user } = useSelector((state) => state.auth);
   const initial = user?.user || {};
   const [form, setForm] = useState({
     restaurantName: initial.restaurantName || "",
     businessSlug: initial.businessSlug || "",
+    industry: initial.industry || "",
+    businessDescription: initial.businessDescription || "",
+        restaurantAddress: {
+          street: initial.restaurantAddress?.street || "",
+          city: initial.restaurantAddress?.city || "",
+          state: initial.restaurantAddress?.state || "",
+          zipCode: initial.restaurantAddress?.zipCode || "",
+          latitude: initial.restaurantAddress?.latitude || null,
+          longitude: initial.restaurantAddress?.longitude || null,
+        },
     // SQUARE API COMMENTED OUT
     // squareApplicationId: initial.squareApplicationId || "",
     // squareLocationId: initial.squareLocationId || "",
@@ -30,6 +58,7 @@ const Settings = () => {
   const [logoUrl, setLogoUrl] = useState(initial.logoUrl || "");
   const [downloading, setDownloading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [showMapPicker, setShowMapPicker] = useState(false);
   // SQUARE API COMMENTED OUT
   // const [showSquareInstructions, setShowSquareInstructions] = useState(false);
   const [showRazorpayInstructions, setShowRazorpayInstructions] = useState(false);
@@ -44,6 +73,16 @@ const Settings = () => {
     setForm({
       restaurantName: initial.restaurantName || "",
       businessSlug: initial.businessSlug || "",
+      industry: initial.industry || "",
+      businessDescription: initial.businessDescription || "",
+      restaurantAddress: {
+        street: initial.restaurantAddress?.street || "",
+        city: initial.restaurantAddress?.city || "",
+        state: initial.restaurantAddress?.state || "",
+        zipCode: initial.restaurantAddress?.zipCode || "",
+        latitude: initial.restaurantAddress?.latitude || null,
+        longitude: initial.restaurantAddress?.longitude || null,
+      },
       // SQUARE API COMMENTED OUT
       // squareApplicationId: initial.squareApplicationId || "",
       // squareLocationId: initial.squareLocationId || "",
@@ -56,6 +95,9 @@ const Settings = () => {
   }, [
     initial.restaurantName,
     initial.businessSlug,
+    initial.industry,
+    initial.businessDescription,
+    initial.restaurantAddress,
     // SQUARE API COMMENTED OUT
     // initial.squareApplicationId,
     // initial.squareLocationId,
@@ -68,6 +110,52 @@ const Settings = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      restaurantAddress: {
+        ...prev.restaurantAddress,
+        [name]: value,
+      },
+    }));
+  };
+
+  const handleMapLocationSelect = (lat, lng, address = null) => {
+    // Ensure lat and lng are numbers, not strings
+    const latitude = typeof lat === 'number' ? lat : parseFloat(lat);
+    const longitude = typeof lng === 'number' ? lng : parseFloat(lng);
+    
+    if (isNaN(latitude) || isNaN(longitude)) {
+      setSettingsMessage("Invalid location coordinates. Please try again.");
+      setTimeout(() => setSettingsMessage(""), 3000);
+      return;
+    }
+    
+    // Auto-fill address fields if address data is available
+    setForm((prev) => ({
+      ...prev,
+      restaurantAddress: {
+        ...prev.restaurantAddress,
+        latitude: latitude,
+        longitude: longitude,
+        // Auto-fill address fields if available
+        street: address?.street || prev.restaurantAddress.street || "",
+        city: address?.city || prev.restaurantAddress.city || "",
+        state: address?.state || prev.restaurantAddress.state || "",
+        zipCode: address?.zipCode || prev.restaurantAddress.zipCode || "",
+      },
+    }));
+    
+    // Show confirmation message with address info
+    if (address && address.fullAddress) {
+      setSettingsMessage(`Location selected: ${address.fullAddress}. Don't forget to click 'Save Business Profile' to save your changes.`);
+    } else {
+      setSettingsMessage("Location selected! Don't forget to click 'Save Business Profile' to save your changes.");
+    }
+    setTimeout(() => setSettingsMessage(""), 5000);
   };
 
   const handlePasswordInputChange = (e) => {
@@ -96,7 +184,25 @@ const Settings = () => {
     setSaving(true);
     setSettingsMessage("");
     try {
-      await axios.put("/api/v1/admin/settings", form);
+      // Ensure latitude and longitude are numbers or null, not empty strings
+      const formData = {
+        ...form,
+        restaurantAddress: {
+          ...form.restaurantAddress,
+          latitude: form.restaurantAddress.latitude 
+            ? (typeof form.restaurantAddress.latitude === 'number' 
+                ? form.restaurantAddress.latitude 
+                : parseFloat(form.restaurantAddress.latitude) || null)
+            : null,
+          longitude: form.restaurantAddress.longitude 
+            ? (typeof form.restaurantAddress.longitude === 'number' 
+                ? form.restaurantAddress.longitude 
+                : parseFloat(form.restaurantAddress.longitude) || null)
+            : null,
+        },
+      };
+      
+      await axios.put("/api/v1/admin/settings", formData);
       setSettingsMessage("Settings saved successfully!");
       setTimeout(() => setSettingsMessage(""), 3000);
     } catch (e) {
@@ -209,16 +315,15 @@ const Settings = () => {
     }
   };
 
-  return (
-    <div className="settings-page">
-      <div className="settings-header">
-        <h1 className="settings-title">Settings</h1>
-        <p className="settings-subtitle">Manage your business profile, security, and payment settings</p>
-      </div>
+  // Redirect to specific section if on base /settings route
+  useEffect(() => {
+    if (location.pathname === "/settings" && !sectionProp) {
+      navigate("/settings/security", { replace: true });
+    }
+  }, [location.pathname, navigate, sectionProp]);
 
-      <div className="settings-container">
-        {/* Security Section */}
-        <div className="settings-section">
+  const renderSecuritySection = () => (
+    <div className="settings-section">
           <div className="section-header">
             <div className="section-icon">🔐</div>
             <div>
@@ -279,9 +384,10 @@ const Settings = () => {
             </div>
           </div>
         </div>
+  );
 
-        {/* Business Profile Section */}
-        <div className="settings-section">
+  const renderBusinessProfileSection = () => (
+    <div className="settings-section">
           <div className="section-header">
             <div className="section-icon">🏢</div>
             <div>
@@ -344,18 +450,151 @@ const Settings = () => {
                 </div>
 
                 <div className="form_group">
-                  <label className="form_label">Business Slug (Auto-generated)</label>
-                  <input
-                    name="businessSlug"
-                    value={form.businessSlug}
-                    readOnly
-                    className="form-input readonly"
-                    placeholder="Business slug will be generated automatically"
-                  />
-                  <p className="form-hint">
-                    This is automatically generated from your business name and cannot be edited.
-                  </p>
+                  <label className="form_label">Industry</label>
+                  <select
+                    name="industry"
+                    value={form.industry}
+                    onChange={handleChange}
+                    className="form-input"
+                  >
+                    <option value="">Select an industry</option>
+                    <option value="Restaurant And Fine Dining">Restaurant And Fine Dining</option>
+                    <option value="Hotels & Resorts">Hotels & Resorts</option>
+                    <option value="Fitness and Wellness memberships">Fitness and Wellness memberships</option>
+                    <option value="Retail & E-commerce">Retail & E-commerce</option>
+                    <option value="Beauty and Personal care">Beauty and Personal care</option>
+                    <option value="Seasonal Gifting">Seasonal Gifting</option>
+                  </select>
                 </div>
+
+                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                  <label className="form_label">Business Description</label>
+                  <textarea
+                    name="businessDescription"
+                    value={form.businessDescription}
+                    onChange={handleChange}
+                    placeholder="Describe your business..."
+                    className="form-input"
+                    rows="4"
+                    style={{ resize: "vertical", minHeight: "100px" }}
+                  />
+                </div>
+              </div>
+
+              <div className="address-section">
+                <h3 className="card-title">Business Address</h3>
+                <div className="form-grid">
+                  <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                    <label className="form_label">Street Address</label>
+                    <input
+                      name="street"
+                      value={form.restaurantAddress.street}
+                      onChange={handleAddressChange}
+                      placeholder="Enter street address"
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form_group">
+                    <label className="form_label">City</label>
+                    <input
+                      name="city"
+                      value={form.restaurantAddress.city}
+                      onChange={handleAddressChange}
+                      placeholder="Enter city"
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form_group">
+                    <label className="form_label">State</label>
+                    <input
+                      name="state"
+                      value={form.restaurantAddress.state}
+                      onChange={handleAddressChange}
+                      placeholder="Enter state"
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form_group">
+                    <label className="form_label">Zip Code</label>
+                    <input
+                      name="zipCode"
+                      value={form.restaurantAddress.zipCode}
+                      onChange={handleAddressChange}
+                      placeholder="Enter zip code"
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form_group">
+                    <label className="form_label">Latitude</label>
+                    <input
+                      name="latitude"
+                      type="number"
+                      step="any"
+                      value={form.restaurantAddress.latitude}
+                      onChange={handleAddressChange}
+                      placeholder="e.g., 28.6139"
+                      className="form-input"
+                      readOnly
+                    />
+                    <p className="form-hint">Set via map picker below</p>
+                  </div>
+                  <div className="form_group">
+                    <label className="form_label">Longitude</label>
+                    <input
+                      name="longitude"
+                      type="number"
+                      step="any"
+                      value={form.restaurantAddress.longitude}
+                      onChange={handleAddressChange}
+                      placeholder="e.g., 77.2090"
+                      className="form-input"
+                      readOnly
+                    />
+                    <p className="form-hint">Set via map picker below</p>
+                  </div>
+                </div>
+                <div style={{ marginTop: "16px", display: "flex", gap: "12px", alignItems: "center" }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => {
+                      console.log("Opening map picker...");
+                      setShowMapPicker(true);
+                    }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
+                  >
+                    <span>📍</span>
+                    Pick Location on Map
+                  </button>
+                  {form.restaurantAddress.latitude && form.restaurantAddress.longitude && (
+                    <span className="form-hint" style={{ margin: 0 }}>
+                      Location set: {form.restaurantAddress.latitude.toFixed(6)}, {form.restaurantAddress.longitude.toFixed(6)}
+                    </span>
+                  )}
+                </div>
+                {form.restaurantAddress.latitude && form.restaurantAddress.longitude && (
+                  <div className="map-preview" style={{ marginTop: "16px" }}>
+                    <iframe
+                      width="100%"
+                      height="300"
+                      style={{ border: 0, borderRadius: "12px" }}
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://www.google.com/maps?q=${form.restaurantAddress.latitude},${form.restaurantAddress.longitude}&output=embed`}
+                    ></iframe>
+                    <p className="form-hint" style={{ marginTop: "8px" }}>
+                      <a
+                        href={`https://www.google.com/maps?q=${form.restaurantAddress.latitude},${form.restaurantAddress.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#6366f1", textDecoration: "underline" }}
+                      >
+                        View in Google Maps
+                      </a>
+                    </p>
+                  </div>
+                )}
               </div>
 
               {publicUrl && (
@@ -390,9 +629,10 @@ const Settings = () => {
             </div>
           </div>
         </div>
+  );
 
-        {/* Razorpay Payment Configuration Section */}
-        <div className="settings-section">
+  const renderPaymentSection = () => (
+    <div className="settings-section">
           <div className="section-header">
             <div className="section-icon">💳</div>
             <div>
@@ -477,8 +717,9 @@ const Settings = () => {
             </div>
           </div>
         </div>
+  );
 
-        {/* SQUARE API COMMENTED OUT - Payment Configuration Section */}
+  // SQUARE API COMMENTED OUT - Payment Configuration Section
         {/* <div className="settings-section">
           <div className="section-header">
             <div className="section-icon">💳</div>
@@ -571,7 +812,28 @@ const Settings = () => {
             </div>
           </div>
         </div> */}
+
+  return (
+    <div className="settings-page">
+      <div className="settings-header">
+        <h1 className="settings-title">Settings</h1>
+        <p className="settings-subtitle">Manage your business profile, security, and payment settings</p>
       </div>
+
+      <div className="settings-container">
+        {currentSection === "security" && renderSecuritySection()}
+        {currentSection === "business-profile" && renderBusinessProfileSection()}
+        {currentSection === "payment" && renderPaymentSection()}
+      </div>
+
+      {showMapPicker && (
+        <MapLocationPicker
+          latitude={form.restaurantAddress.latitude || null}
+          longitude={form.restaurantAddress.longitude || null}
+          onLocationSelect={handleMapLocationSelect}
+          onClose={() => setShowMapPicker(false)}
+        />
+      )}
     </div>
   );
 };

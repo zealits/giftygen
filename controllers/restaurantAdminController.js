@@ -379,7 +379,16 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
 // Update business settings (name, slug, square config, razorpay config)
 exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
   // SQUARE FIELDS COMMENTED OUT
-  const { restaurantName, businessSlug, razorpayKeyId, razorpayKeySecret /* , squareApplicationId, squareLocationId, squareAccessToken */ } = req.body;
+  const { 
+    restaurantName, 
+    businessSlug, 
+    industry,
+    businessDescription,
+    restaurantAddress,
+    razorpayKeyId, 
+    razorpayKeySecret 
+    /* , squareApplicationId, squareLocationId, squareAccessToken */ 
+  } = req.body;
   const admin = await RestaurantAdmin.findById(req.user.id);
   if (!admin) {
     return next(new ErrorHander("Admin not found", 404));
@@ -387,6 +396,22 @@ exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
 
   if (restaurantName) admin.restaurantName = restaurantName;
   if (businessSlug) admin.businessSlug = businessSlug;
+  if (industry !== undefined) admin.industry = industry;
+  if (businessDescription !== undefined) admin.businessDescription = businessDescription;
+  
+  // Update restaurant address if provided
+  if (restaurantAddress) {
+    if (!admin.restaurantAddress) {
+      admin.restaurantAddress = {};
+    }
+    if (restaurantAddress.street !== undefined) admin.restaurantAddress.street = restaurantAddress.street;
+    if (restaurantAddress.city !== undefined) admin.restaurantAddress.city = restaurantAddress.city;
+    if (restaurantAddress.state !== undefined) admin.restaurantAddress.state = restaurantAddress.state;
+    if (restaurantAddress.zipCode !== undefined) admin.restaurantAddress.zipCode = restaurantAddress.zipCode;
+    if (restaurantAddress.latitude !== undefined) admin.restaurantAddress.latitude = restaurantAddress.latitude;
+    if (restaurantAddress.longitude !== undefined) admin.restaurantAddress.longitude = restaurantAddress.longitude;
+  }
+  
   // SQUARE API COMMENTED OUT
   // if (squareApplicationId !== undefined) admin.squareApplicationId = squareApplicationId;
   // if (squareLocationId !== undefined) admin.squareLocationId = squareLocationId;

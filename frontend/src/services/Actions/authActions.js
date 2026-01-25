@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../../utils/axiosConfig";
 import {
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
@@ -25,7 +25,10 @@ export const loginUser = (email, password, navigate) => async (dispatch) => {
       payload: res.data, // Assuming the response data contains user info or a token
     });
 
-    // localStorage.setItem("token", token);
+    // Store token in localStorage as backup (cookie is httpOnly and handled automatically)
+    if (token) {
+      localStorage.setItem("token", token);
+    }
 
     console.log("Login Successful:", res.data);
     navigate("/dashboard");
@@ -43,24 +46,10 @@ export const loginUser = (email, password, navigate) => async (dispatch) => {
 // Load User
 export const loadUser = () => async (dispatch) => {
   try {
-    // Check if there's a token in cookies or localStorage before making the API call
-    const getCookie = (name) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(";").shift();
-      return null;
-    };
-
-    const token = getCookie("token") || localStorage.getItem("superAdminToken");
-
-    if (!token) {
-      // No token found, user is not authenticated
-      dispatch({ type: LOAD_USER_FAIL, payload: null });
-      return;
-    }
-
     dispatch({ type: LOAD_USER_REQUEST });
 
+    // Make API call - cookie will be sent automatically if axios is configured with withCredentials
+    // The httpOnly cookie cannot be read by JavaScript, but axios will send it automatically
     const { data } = await axios.get(`/api/v1/admin/me`);
 
     dispatch({ type: LOAD_USER_SUCCESS, payload: data });
@@ -68,7 +57,8 @@ export const loadUser = () => async (dispatch) => {
     // For loadUser failures, don't set error messages that would show modals
     // This prevents showing "Please Login to access this resource" on the login page
     if (error.response?.status === 401) {
-      // Token expired or invalid, just clear the user state without error
+      // Token expired or invalid, clear localStorage backup token and user state
+      localStorage.removeItem("token");
       dispatch({ type: LOAD_USER_FAIL, payload: null });
     } else {
       // Other errors (network, server errors) - set error but don't show modal
@@ -81,9 +71,15 @@ export const logout = () => async (dispatch) => {
   try {
     await axios.get(`/api/v1/admin/logout`);
 
+    // Clear localStorage token on logout
+    localStorage.removeItem("token");
+    localStorage.removeItem("superAdminToken");
+
     dispatch({ type: LOGOUT_SUCCESS });
   } catch (error) {
     // Even if logout fails on the backend, clear the local state
+    localStorage.removeItem("token");
+    localStorage.removeItem("superAdminToken");
     dispatch({ type: LOGOUT_SUCCESS });
   }
 };

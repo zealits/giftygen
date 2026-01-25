@@ -16,7 +16,7 @@
 
 .auth-container {
   position: relative;
-  z-index: 2; 
+  z-index: 2;
   display: grid;
   grid-template-columns: 1fr 1.5fr;
   min-height: 85vh;
@@ -55,9 +55,17 @@
   transform-style: preserve-3d;
   animation: float 6s ease-in-out infinite;
 }
+
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 /* Ribbon Styles */
@@ -172,6 +180,7 @@
 .bow-right {
   right: -15px;
 }
+
 .bow-circle {
   position: absolute;
   width: 25px;
@@ -187,6 +196,7 @@
 .bow-circle.right {
   right: -12px;
 }
+
 .bow-center {
   position: absolute;
   width: 20px;
@@ -197,6 +207,7 @@
   top: 50%;
   transform: translate(-50%, -50%);
 }
+
 .bow-knot {
   position: absolute;
   width: 15px;
@@ -209,8 +220,15 @@
 }
 
 @keyframes bowPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 /* Box Lid Animation */
@@ -225,9 +243,21 @@
 }
 
 @keyframes openCloseLid {
-  0%, 10% { transform: rotateX(0); }
-  25%, 75% { transform: rotateX(-110deg); }
-  90%, 100% { transform: rotateX(0); }
+
+  0%,
+  10% {
+    transform: rotateX(0);
+  }
+
+  25%,
+  75% {
+    transform: rotateX(-110deg);
+  }
+
+  90%,
+  100% {
+    transform: rotateX(0);
+  }
 }
 
 .box-base {
@@ -272,24 +302,78 @@
 }
 
 @keyframes sparkleRise1 {
-  0%, 20% { opacity: 0; transform: translate(0, 100px) scale(0); }
-  30% { opacity: 1; transform: translate(-20px, -20px) scale(1); }
-  35% { opacity: 1; transform: translate(-30px, -40px) scale(1.2); }
-  45%, 100% { opacity: 0; transform: translate(-40px, -100px) scale(0); }
+
+  0%,
+  20% {
+    opacity: 0;
+    transform: translate(0, 100px) scale(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translate(-20px, -20px) scale(1);
+  }
+
+  35% {
+    opacity: 1;
+    transform: translate(-30px, -40px) scale(1.2);
+  }
+
+  45%,
+  100% {
+    opacity: 0;
+    transform: translate(-40px, -100px) scale(0);
+  }
 }
 
 @keyframes sparkleRise2 {
-  0%, 25% { opacity: 0; transform: translate(0, 100px) scale(0); }
-  35% { opacity: 1; transform: translate(0, -30px) scale(1); }
-  40% { opacity: 1; transform: translate(0, -50px) scale(1.2); }
-  50%, 100% { opacity: 0; transform: translate(0, -120px) scale(0); }
+
+  0%,
+  25% {
+    opacity: 0;
+    transform: translate(0, 100px) scale(0);
+  }
+
+  35% {
+    opacity: 1;
+    transform: translate(0, -30px) scale(1);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translate(0, -50px) scale(1.2);
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+    transform: translate(0, -120px) scale(0);
+  }
 }
 
 @keyframes sparkleRise3 {
-  0%, 30% { opacity: 0; transform: translate(0, 100px) scale(0); }
-  40% { opacity: 1; transform: translate(20px, -20px) scale(1); }
-  45% { opacity: 1; transform: translate(30px, -40px) scale(1.2); }
-  55%, 100% { opacity: 0; transform: translate(40px, -100px) scale(0); }
+
+  0%,
+  30% {
+    opacity: 0;
+    transform: translate(0, 100px) scale(0);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translate(20px, -20px) scale(1);
+  }
+
+  45% {
+    opacity: 1;
+    transform: translate(30px, -40px) scale(1.2);
+  }
+
+  55%,
+  100% {
+    opacity: 0;
+    transform: translate(40px, -100px) scale(0);
+  }
 }
 
 /* Box Sides */
@@ -343,12 +427,29 @@
 }
 
 @keyframes twinkle {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0.5); opacity: 0.5; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
 }
+
 @keyframes sparkle {
-  0%, 100% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1); opacity: 0.8; }
+
+  0%,
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
 }
 
 /* Box Sides */
@@ -627,9 +728,17 @@
 
 /* Animations */
 @keyframes gradientMove {
-  0% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
-  100% { background-position: 0% 0%; }
+  0% {
+    background-position: 0% 0%;
+  }
+
+  50% {
+    background-position: 100% 100%;
+  }
+
+  100% {
+    background-position: 0% 0%;
+  }
 }
 
 /* Responsive Design */
@@ -637,11 +746,11 @@
   .auth-container {
     grid-template-columns: 1fr;
   }
-  
+
   .logo-section {
     display: none;
   }
-  
+
   .content-section {
     padding: 2rem;
   }
@@ -652,15 +761,19 @@
     transform: translateY(-10vh) rotate(0deg) scale(1);
     opacity: 0;
   }
+
   10% {
     opacity: 1;
   }
+
   50% {
     transform: translateY(50vh) rotate(180deg) scale(1.1);
   }
+
   90% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(110vh) rotate(360deg) scale(1);
     opacity: 0;

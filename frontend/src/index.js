@@ -6,6 +6,8 @@ import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux"; 
 import store from "./store"; 
 import { HelmetProvider } from "react-helmet-async";
+// Configure axios to send credentials (cookies) with requests
+import "./utils/axiosConfig";
 // Giriraj Code
 import "./i18n"; // 🔥 import i18n setup
 // End Giriraj Code

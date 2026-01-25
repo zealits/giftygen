@@ -118,6 +118,30 @@ function AppRoutes() {
               }
             />
             <Route
+              path="/settings/security"
+              element={
+                <div className="content">
+                  <Settings section="security" />
+                </div>
+              }
+            />
+            <Route
+              path="/settings/business-profile"
+              element={
+                <div className="content">
+                  <Settings section="business-profile" />
+                </div>
+              }
+            />
+            <Route
+              path="/settings/payment"
+              element={
+                <div className="content">
+                  <Settings section="payment" />
+                </div>
+              }
+            />
+            <Route
               path="/redeem"
               element={
                 <div className="content">

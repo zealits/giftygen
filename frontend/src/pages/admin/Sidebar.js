@@ -1,22 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Sidebar.css";
 import { useDispatch } from "react-redux";
 import { logout } from "../../services/Actions/authActions";
 import { Link, useLocation } from "react-router-dom";
-import { FaCog, FaSignOutAlt, FaAngleLeft, FaTachometerAlt, FaGift, FaShoppingCart, FaChartLine, FaCreditCard, FaBars } from "react-icons/fa";
+import { FaCog, FaSignOutAlt, FaAngleLeft, FaTachometerAlt, FaGift, FaShoppingCart, FaChartLine, FaCreditCard, FaBars, FaChevronDown, FaChevronUp, FaLock, FaBuilding, FaCreditCard as FaCard } from "react-icons/fa";
 import AiiLogo from "../../assets/Aii_logo.png";
 
 const Sidebar = () => {
   const location = useLocation();
   const dispatch = useDispatch();
 
-  // Updated isActive function to match exact paths
+  // Updated isActive function to match exact paths and nested routes
   const isActive = (path) => {
+    if (path === "/settings") {
+      return location.pathname.startsWith("/settings");
+    }
     return location.pathname === path;
   };
 
+  // Check if any settings sub-route is active
+  const isSettingsActive = () => {
+    return location.pathname.startsWith("/settings");
+  };
 
   const [isOpen, setIsOpen] = useState(true);
+  const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
+
+  // Auto-open dropdown when on a settings route
+  useEffect(() => {
+    if (location.pathname.startsWith("/settings") && isOpen) {
+      setSettingsDropdownOpen(true);
+    }
+  }, [location.pathname, isOpen]);
+
+  // Close dropdown when sidebar is collapsed
+  useEffect(() => {
+    if (!isOpen) {
+      setSettingsDropdownOpen(false);
+    }
+  }, [isOpen]);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -80,14 +102,62 @@ const Sidebar = () => {
           {isActive("/subscription") && <span className="active-indicator"></span>}
         </Link>
       </li>
-      <li>
-        <Link to="/settings" className={`linke ${isActive("/settings") ? "active" : ""}`}>
+      <li className={`settings-menu-item ${isSettingsActive() ? "active-parent" : ""}`}>
+        <div 
+          className={`linke settings-trigger ${isSettingsActive() ? "active" : ""}`}
+          onClick={() => setSettingsDropdownOpen(!settingsDropdownOpen)}
+        >
           <i className="bx bx-folder">
             <FaCog className="icon" />
           </i>
           <span className="links_name">Settings</span>
-          {isActive("/settings") && <span className="active-indicator"></span>}
-        </Link>
+          {isOpen && (
+            <span className="dropdown-arrow">
+              {settingsDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
+            </span>
+          )}
+          {isSettingsActive() && <span className="active-indicator"></span>}
+        </div>
+        {isOpen && settingsDropdownOpen && (
+          <ul className="settings-dropdown">
+            <li>
+              <Link 
+                to="/settings/security" 
+                className={`dropdown-link ${location.pathname === "/settings/security" || location.pathname === "/settings" ? "active" : ""}`}
+                onClick={() => setSettingsDropdownOpen(false)}
+              >
+                <i className="dropdown-icon">
+                  <FaLock />
+                </i>
+                <span>Security & Access</span>
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/settings/business-profile" 
+                className={`dropdown-link ${location.pathname === "/settings/business-profile" ? "active" : ""}`}
+                onClick={() => setSettingsDropdownOpen(false)}
+              >
+                <i className="dropdown-icon">
+                  <FaBuilding />
+                </i>
+                <span>Business Profile</span>
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/settings/payment" 
+                className={`dropdown-link ${location.pathname === "/settings/payment" ? "active" : ""}`}
+                onClick={() => setSettingsDropdownOpen(false)}
+              >
+                <i className="dropdown-icon">
+                  <FaCard />
+                </i>
+                <span>Payment Configuration</span>
+              </Link>
+            </li>
+          </ul>
+        )}
       </li>
       <li>
         <Link to="/redeem" className={`linke ${isActive("/redeem") ? "active" : ""}`}>
@@ -98,18 +168,19 @@ const Sidebar = () => {
           {isActive("/redeem") && <span className="active-indicator"></span>}
         </Link>
       </li>
-
-      <li className="profile">
-        <div className="profile-details" onClick={handleLogout}>
-          <i className="bx bx-export">
-            <FaSignOutAlt className="icon" />
-          </i>
-          <div className="name_job">
-            <div className="name">Logout</div>
-          </div>
-        </div>
-      </li>
     </ul>
+    
+    <div className="profile">
+      <div className="profile-details" onClick={handleLogout}>
+        <i className="bx bx-export">
+          <FaSignOutAlt className="icon" />
+        </i>
+        <div className="name_job">
+          <div className="name">Logout</div>
+        </div>
+      </div>
+    </div>
+    
     <div className="sidebar-overlay" onClick={toggleSidebar}></div>
   </div>
 );
