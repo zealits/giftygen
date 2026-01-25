@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 import "./Explore.css";
 import logo from "../../assets/giftygen_logo.svg";
 import logoWhiteBg from "../../assets/giftgen_whitebg_logo.png";
@@ -16,58 +17,62 @@ import {
   ArrowRight,
   Search,
   Filter,
+  Building2,
 } from "lucide-react";
 
-const industries = [
-  {
+// Industry mapping configuration
+const industryConfig = {
+  "Restaurant And Fine Dining": {
     id: "restaurants",
-    name: "Restaurant And Fine Dining",
     icon: UtensilsCrossed,
     description: "Discover amazing dining experiences across India",
     color: "#ff6b6b",
     gradient: "linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)",
   },
-  {
+  "Hotels & Resorts": {
     id: "hotels",
-    name: "Hotels & Resorts",
     icon: Hotel,
     description: "Luxury stays and memorable getaways",
     color: "#4ecdc4",
     gradient: "linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)",
   },
-  {
+  "Fitness and Wellness memberships": {
     id: "fitness",
-    name: "Fitness and Wellness memberships",
     icon: Dumbbell,
     description: "Stay fit with premium gym and wellness centers",
     color: "#95e1d3",
     gradient: "linear-gradient(135deg, #95e1d3 0%, #f38181 100%)",
   },
-  {
+  "Retail & E-commerce": {
     id: "retail",
-    name: "Retail & E-commerce",
     icon: ShoppingBag,
     description: "Shop from your favorite brands",
     color: "#f093fb",
     gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
   },
-  {
+  "Beauty and Personal care": {
     id: "beauty",
-    name: "Beauty and Personal care",
     icon: Sparkles,
     description: "Pamper yourself with beauty and wellness",
     color: "#ffecd2",
     gradient: "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
   },
-  {
+  "Seasonal Gifting": {
     id: "seasonal",
-    name: "Seasonal Gifting",
     icon: Calendar,
     description: "Perfect gifts for every occasion",
     color: "#a8edea",
     gradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
   },
-];
+};
+
+// Default config for unknown industries
+const defaultIndustryConfig = {
+  icon: Building2,
+  description: "Explore businesses in this industry",
+  color: "#6c8cff",
+  gradient: "linear-gradient(135deg, #6c8cff 0%, #93a8ff 100%)",
+};
 
 function Explore() {
   const navigate = useNavigate();
@@ -75,14 +80,56 @@ function Explore() {
   const [theme] = useState(() => localStorage.getItem("giftygen_theme") || "dark");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [industries, setIndustries] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch industries from API
+  useEffect(() => {
+    const fetchIndustries = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("/api/v1/admin/industries");
+        const industryNames = response.data.industries || [];
+
+        // Map industry names to full industry objects
+        const mappedIndustries = industryNames.map((industryName) => {
+          const config = industryConfig[industryName] || {
+            ...defaultIndustryConfig,
+            id: industryName.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and"),
+          };
+
+          return {
+            id: config.id,
+            name: industryName,
+            icon: config.icon,
+            description: config.description,
+            color: config.color,
+            gradient: config.gradient,
+          };
+        });
+
+        setIndustries(mappedIndustries);
+      } catch (error) {
+        console.error("Error fetching industries:", error);
+        // Fallback to empty array if API fails
+        setIndustries([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIndustries();
+  }, []);
 
   const filteredIndustries = industries.filter((industry) => {
     const matchesSearch = industry.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 
-  const handleIndustryClick = (industryId) => {
-    navigate(`/explore/${industryId}`);
+  const handleIndustryClick = (industryName) => {
+    // Use the industry name as the route parameter
+    const industryId = industryName.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and");
+    navigate(`/explore/${encodeURIComponent(industryName)}`);
   };
 
   return (
@@ -165,39 +212,47 @@ function Explore() {
             </p>
           </div>
 
-          <div className="explore-industries__grid">
-            {filteredIndustries.map((industry) => {
-              const IconComponent = industry.icon;
-              return (
-                <div
-                  key={industry.id}
-                  className="explore-industry-card"
-                  onClick={() => handleIndustryClick(industry.id)}
-                  style={{
-                    "--industry-color": industry.color,
-                    "--industry-gradient": industry.gradient,
-                  }}
-                >
-                  <div className="explore-industry-card__icon-wrapper">
-                    <IconComponent className="explore-industry-card__icon" size={32} />
-                  </div>
-                  <h3 className="explore-industry-card__title">{industry.name}</h3>
-                  <p className="explore-industry-card__description">{industry.description}</p>
-                  <div className="explore-industry-card__footer">
-                    <span className="explore-industry-card__cta">
-                      Explore <ArrowRight size={16} />
-                    </span>
-                  </div>
-                  <div className="explore-industry-card__hover-effect"></div>
-                </div>
-              );
-            })}
-          </div>
-
-          {filteredIndustries.length === 0 && (
+          {loading ? (
             <div className="explore-empty">
-              <p>No industries found matching your search.</p>
+              <p>Loading industries...</p>
             </div>
+          ) : (
+            <>
+              <div className="explore-industries__grid">
+                {filteredIndustries.map((industry) => {
+                  const IconComponent = industry.icon;
+                  return (
+                    <div
+                      key={industry.id}
+                      className="explore-industry-card"
+                      onClick={() => handleIndustryClick(industry.name)}
+                      style={{
+                        "--industry-color": industry.color,
+                        "--industry-gradient": industry.gradient,
+                      }}
+                    >
+                      <div className="explore-industry-card__icon-wrapper">
+                        <IconComponent className="explore-industry-card__icon" size={32} />
+                      </div>
+                      <h3 className="explore-industry-card__title">{industry.name}</h3>
+                      <p className="explore-industry-card__description">{industry.description}</p>
+                      <div className="explore-industry-card__footer">
+                        <span className="explore-industry-card__cta">
+                          Explore <ArrowRight size={16} />
+                        </span>
+                      </div>
+                      <div className="explore-industry-card__hover-effect"></div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {filteredIndustries.length === 0 && !loading && (
+                <div className="explore-empty">
+                  <p>No industries found matching your search.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

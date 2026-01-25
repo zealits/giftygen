@@ -644,3 +644,55 @@ exports.getBusinessBySlug = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHander(error.message, 500));
   }
 });
+
+// Get all unique industries from verified businesses (public endpoint)
+exports.getIndustries = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const industries = await RestaurantAdmin.distinct("industry", {
+      isVerified: true,
+      industry: { $exists: true, $ne: null, $ne: "" },
+    });
+
+    res.status(200).json({
+      success: true,
+      industries: industries.filter(Boolean), // Remove any null/undefined values
+    });
+  } catch (error) {
+    console.error("Error fetching industries:", error);
+    return next(new ErrorHander(error.message, 500));
+  }
+});
+
+// Get businesses by industry (public endpoint)
+exports.getBusinessesByIndustry = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const { industry } = req.params;
+
+    if (!industry) {
+      return next(new ErrorHander("Industry is required", 400));
+    }
+
+    const businesses = await RestaurantAdmin.find({
+      industry: industry,
+      isVerified: true,
+    })
+      .select("restaurantName logoUrl businessSlug restaurantAddress businessDescription industry")
+      .sort({ restaurantName: 1 });
+
+    res.status(200).json({
+      success: true,
+      businesses: businesses.map((business) => ({
+        id: business.businessSlug,
+        name: business.restaurantName,
+        description: business.businessDescription,
+        location: business.restaurantAddress?.city || business.restaurantAddress?.state || "Location not specified",
+        logoUrl: business.logoUrl,
+        businessSlug: business.businessSlug,
+        address: business.restaurantAddress,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching businesses by industry:", error);
+    return next(new ErrorHander(error.message, 500));
+  }
+});

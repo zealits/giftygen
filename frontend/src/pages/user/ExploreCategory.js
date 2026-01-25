@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 import "./Explore.css";
 import logo from "../../assets/giftygen_logo.svg";
 import logoWhiteBg from "../../assets/giftgen_whitebg_logo.png";
-import { getIndustryData } from "../../data/exploreData";
 import {
   ArrowLeft,
   MapPin,
@@ -13,6 +13,27 @@ import {
   Building2,
 } from "lucide-react";
 
+// Calculate distance between two coordinates using Haversine formula
+// Returns distance in kilometers
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  if (!lat1 || !lon1 || !lat2 || !lon2) {
+    return null; // Return null if coordinates are missing
+  }
+
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  return distance;
+}
+
 function ExploreCategory() {
   const { categoryId } = useParams();
   const navigate = useNavigate();
@@ -20,47 +41,123 @@ function ExploreCategory() {
   const [theme] = useState(() => localStorage.getItem("giftygen_theme") || "dark");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("all");
+  const [businesses, setBusinesses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [industryName, setIndustryName] = useState("");
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
 
-  const categoryData = getIndustryData(categoryId);
+  // Decode the industry name from URL
+  const decodedIndustryName = decodeURIComponent(categoryId);
 
-  if (!categoryData) {
-    return (
-      <div className="explore-page" data-theme={theme}>
-        <div className="explore-empty">
-          <p>Category not found</p>
-          <button onClick={() => navigate("/explore")} className="explore-btn">
-            Back to Explore
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Get all locations/categories
-  const locations = categoryData.locations || categoryData.categories || {};
-  const locationKeys = Object.keys(locations);
-
-  // Filter brands based on search and location
-  const filteredData = {};
-  locationKeys.forEach((locationKey) => {
-    if (selectedLocation !== "all" && selectedLocation !== locationKey) {
-      return;
+  // Get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+          setLocationError(error.message);
+          // Continue without location - businesses will be sorted alphabetically
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    } else {
+      setLocationError("Geolocation is not supported by your browser");
     }
+  }, []);
 
-    const brands = locations[locationKey].filter((brand) => {
-      const matchesSearch =
-        brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        brand.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSearch;
-    });
+  // Fetch businesses by industry
+  useEffect(() => {
+    const fetchBusinesses = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/v1/admin/industries/${encodeURIComponent(decodedIndustryName)}`);
+        const fetchedBusinesses = response.data.businesses || [];
+        
+        setBusinesses(fetchedBusinesses);
+        setIndustryName(decodedIndustryName);
+      } catch (error) {
+        console.error("Error fetching businesses:", error);
+        setBusinesses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (brands.length > 0) {
-      filteredData[locationKey] = brands;
+    if (decodedIndustryName) {
+      fetchBusinesses();
     }
+  }, [decodedIndustryName]);
+
+  // Calculate distances and sort businesses by proximity
+  const businessesWithDistance = businesses.map((business) => {
+    let distance = null;
+    if (userLocation && business.address?.latitude && business.address?.longitude) {
+      distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        business.address.latitude,
+        business.address.longitude
+      );
+    }
+    return {
+      ...business,
+      distance,
+    };
   });
 
-  const handleBrandClick = (brandId) => {
-    navigate(`/explore/${categoryId}/${brandId}`);
+  // Sort businesses by distance (nearest first), then alphabetically for businesses without location
+  const sortedBusinesses = [...businessesWithDistance].sort((a, b) => {
+    // If both have distances, sort by distance
+    if (a.distance !== null && b.distance !== null) {
+      return a.distance - b.distance;
+    }
+    // If only one has distance, prioritize it
+    if (a.distance !== null && b.distance === null) {
+      return -1;
+    }
+    if (a.distance === null && b.distance !== null) {
+      return 1;
+    }
+    // If neither has distance, sort alphabetically
+    return a.name.localeCompare(b.name);
+  });
+
+  // Filter businesses based on search
+  const filteredBusinesses = sortedBusinesses.filter((business) => {
+    const matchesSearch =
+      business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      business.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Filter by location if selected
+    if (selectedLocation !== "all" && business.location !== selectedLocation) {
+      return false;
+    }
+    
+    return matchesSearch;
+  });
+
+  // Format distance for display
+  const formatDistance = (distance) => {
+    if (distance === null) return null;
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)}m away`;
+    }
+    return `${distance.toFixed(1)}km away`;
+  };
+
+  const handleBrandClick = (businessSlug) => {
+    navigate(`/explore/${encodeURIComponent(decodedIndustryName)}/${businessSlug}`);
   };
 
   return (
@@ -112,8 +209,12 @@ function ExploreCategory() {
             <ArrowLeft size={20} />
             Back to Explore
           </button>
-          <h1 className="explore-category-header__title">{categoryData.name}</h1>
-          <p className="explore-category-header__description">{categoryData.description}</p>
+          <h1 className="explore-category-header__title">{industryName || decodedIndustryName}</h1>
+          <p className="explore-category-header__description">
+            {businesses.length > 0 
+              ? `Discover ${businesses.length} ${businesses.length === 1 ? 'business' : 'businesses'} in this industry`
+              : "Explore businesses in this industry"}
+          </p>
 
           {/* Search and Filter */}
           <div className="explore-category-filters">
@@ -138,75 +239,116 @@ function ExploreCategory() {
               </div>
             </div>
 
-            {locationKeys.length > 1 && (
-              <div className="explore-location-filter">
-                <select
-                  className="explore-location-filter__select"
-                  value={selectedLocation}
-                  onChange={(e) => setSelectedLocation(e.target.value)}
-                >
-                  <option value="all">All Locations</option>
-                  {locationKeys.map((location) => (
-                    <option key={location} value={location}>
-                      {location}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {/* Location filter - get unique locations from businesses */}
+            {(() => {
+              const uniqueLocations = [...new Set(businesses.map(b => b.location).filter(Boolean))];
+              return uniqueLocations.length > 1 && (
+                <div className="explore-location-filter">
+                  <select
+                    className="explore-location-filter__select"
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                  >
+                    <option value="all">All Locations</option>
+                    {uniqueLocations.map((location) => (
+                      <option key={location} value={location}>
+                        {location}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </section>
 
-      {/* Brands by Location */}
+      {/* Brands sorted by distance */}
       <section className="explore-brands">
         <div className="explore-brands__container">
-          {Object.keys(filteredData).length === 0 ? (
+          {loading ? (
             <div className="explore-empty">
-              <p>No brands found matching your search.</p>
+              <p>Loading businesses...</p>
+            </div>
+          ) : filteredBusinesses.length === 0 ? (
+            <div className="explore-empty">
+              <p>No businesses found {searchQuery ? "matching your search" : "in this industry yet"}.</p>
             </div>
           ) : (
-            Object.entries(filteredData).map(([location, brands]) => (
-              <div key={location} className="explore-location-section">
-                <div className="explore-location-section__header">
+            <div className="explore-brands-section">
+              {userLocation && (
+                <div className="explore-location-section__header" style={{ marginBottom: "24px" }}>
                   <MapPin className="explore-location-section__icon" size={24} />
-                  <h2 className="explore-location-section__title">{location}</h2>
+                  <h2 className="explore-location-section__title">Sorted by Distance</h2>
                   <span className="explore-location-section__count">
-                    {brands.length} {brands.length === 1 ? "brand" : "brands"}
+                    {filteredBusinesses.length} {filteredBusinesses.length === 1 ? "business" : "businesses"}
                   </span>
                 </div>
-                <div className="explore-brands__grid">
-                  {brands.map((brand) => (
-                    <div
-                      key={brand.id}
-                      className="explore-brand-card"
-                      onClick={() => handleBrandClick(brand.id)}
-                    >
+              )}
+              {!userLocation && !locationError && (
+                <div className="explore-location-section__header" style={{ marginBottom: "24px" }}>
+                  <MapPin className="explore-location-section__icon" size={24} />
+                  <h2 className="explore-location-section__title">All Businesses</h2>
+                  <span className="explore-location-section__count">
+                    {filteredBusinesses.length} {filteredBusinesses.length === 1 ? "business" : "businesses"}
+                  </span>
+                </div>
+              )}
+              {locationError && (
+                <div style={{ 
+                  padding: "12px 16px", 
+                  marginBottom: "24px", 
+                  background: "var(--explore-card)", 
+                  border: "1px solid var(--explore-border)", 
+                  borderRadius: "12px",
+                  color: "var(--explore-muted)",
+                  fontSize: "14px"
+                }}>
+                  Location access denied. Showing businesses sorted alphabetically.
+                </div>
+              )}
+              <div className="explore-brands__grid">
+                {filteredBusinesses.map((business) => (
+                  <div
+                    key={business.businessSlug}
+                    className="explore-brand-card"
+                    onClick={() => handleBrandClick(business.businessSlug)}
+                  >
+                    {business.logoUrl ? (
+                      <div className="explore-brand-card__logo">
+                        <img src={business.logoUrl} alt={business.name} />
+                      </div>
+                    ) : (
                       <div className="explore-brand-card__icon">
                         <Building2 size={24} />
                       </div>
-                      <h3 className="explore-brand-card__title">{brand.name}</h3>
-                      {brand.description && (
-                        <p className="explore-brand-card__description">
-                          {brand.description}
-                        </p>
-                      )}
-                      {brand.location && (
-                        <div className="explore-brand-card__location">
-                          <MapPin size={14} />
-                          <span>{brand.location}</span>
-                        </div>
-                      )}
-                      <div className="explore-brand-card__footer">
-                        <span className="explore-brand-card__cta">
-                          View Gift Cards <ChevronRight size={16} />
-                        </span>
-                      </div>
+                    )}
+                    <h3 className="explore-brand-card__title">{business.name}</h3>
+                    {business.description && (
+                      <p className="explore-brand-card__description">
+                        {business.description}
+                      </p>
+                    )}
+                    <div className="explore-brand-card__location">
+                      <MapPin size={14} />
+                      <span>
+                        {business.location || "Location not specified"}
+                        {business.distance !== null && (
+                          <span style={{ marginLeft: "8px", color: "var(--explore-primary)", fontWeight: "600" }}>
+                            • {formatDistance(business.distance)}
+                          </span>
+                        )}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <div className="explore-brand-card__footer">
+                      <span className="explore-brand-card__cta">
+                        View Gift Cards <ChevronRight size={16} />
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))
+            </div>
           )}
         </div>
       </section>

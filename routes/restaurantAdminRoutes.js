@@ -14,6 +14,8 @@ const {
   changePassword,
   getBusinessBySlug,
   submitContactForm,
+  getIndustries,
+  getBusinessesByIndustry,
 } = require("../controllers/restaurantAdminController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const upload = require("../middleware/multer");
@@ -58,5 +60,11 @@ router.get("/settings/qr-poster", isAuthenticatedUser, authorizeRoles("Admin"), 
 
 // Public endpoint to get business information by slug
 router.get("/business/:businessSlug", getBusinessBySlug);
+
+// Public endpoint to get all industries
+router.get("/industries", getIndustries);
+
+// Public endpoint to get businesses by industry
+router.get("/industries/:industry", getBusinessesByIndustry);
 
 module.exports = router;
