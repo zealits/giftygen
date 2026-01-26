@@ -15,8 +15,6 @@ import {
   Calendar,
   MapPin,
   ArrowRight,
-  Search,
-  Filter,
   Building2,
 } from "lucide-react";
 
@@ -78,8 +76,6 @@ function Explore() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [theme] = useState(() => localStorage.getItem("giftygen_theme") || "dark");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("all");
   const [industries, setIndustries] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -121,11 +117,6 @@ function Explore() {
     fetchIndustries();
   }, []);
 
-  const filteredIndustries = industries.filter((industry) => {
-    const matchesSearch = industry.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
-  });
-
   const handleIndustryClick = (industryName) => {
     // Use the industry name as the route parameter
     const industryId = industryName.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and");
@@ -165,43 +156,6 @@ function Explore() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="explore-hero">
-        <div className="explore-hero__container">
-          <div className="explore-hero__content">
-            <h1 className="explore-hero__title">
-              Discover Gift Cards
-              <span className="explore-hero__title-accent"> That Perfectly Match</span>
-            </h1>
-            <p className="explore-hero__subtitle">
-              Explore thousands of gift cards from your favorite restaurants, hotels, fitness centers, and more. Find the perfect gift for any occasion.
-            </p>
-
-            {/* Search Bar */}
-            <div className="explore-search">
-              <div className="explore-search__wrapper">
-                <Search className="explore-search__icon" size={20} />
-                <input
-                  type="text"
-                  className="explore-search__input"
-                  placeholder="Search by industry or category..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {searchQuery && (
-                  <button
-                    className="explore-search__clear"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Industries Grid */}
       <section className="explore-industries">
         <div className="explore-industries__container">
@@ -219,7 +173,7 @@ function Explore() {
           ) : (
             <>
               <div className="explore-industries__grid">
-                {filteredIndustries.map((industry) => {
+                {industries.map((industry) => {
                   const IconComponent = industry.icon;
                   return (
                     <div
@@ -247,9 +201,9 @@ function Explore() {
                 })}
               </div>
 
-              {filteredIndustries.length === 0 && !loading && (
+              {industries.length === 0 && !loading && (
                 <div className="explore-empty">
-                  <p>No industries found matching your search.</p>
+                  <p>No industries available at the moment.</p>
                 </div>
               )}
             </>

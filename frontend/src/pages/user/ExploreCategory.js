@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Building2,
 } from "lucide-react";
+import { getDetailedLocation } from "../../utils/geolocationLanguage";
 
 // Calculate distance between two coordinates using Haversine formula
 // Returns distance in kilometers
@@ -46,6 +47,7 @@ function ExploreCategory() {
   const [industryName, setIndustryName] = useState("");
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
+  const [detectedRegion, setDetectedRegion] = useState(null);
 
   // Decode the industry name from URL
   const decodedIndustryName = decodeURIComponent(categoryId);
@@ -60,10 +62,25 @@ function ExploreCategory() {
             longitude: position.coords.longitude,
           });
         },
-        (error) => {
+        async (error) => {
           console.error("Error getting user location:", error);
           setLocationError(error.message);
-          // Continue without location - businesses will be sorted alphabetically
+          // When location access is denied, try to detect region from IP
+          try {
+            const locationData = await getDetailedLocation();
+            if (locationData) {
+              setDetectedRegion({
+                city: locationData.city,
+                state: locationData.region || locationData.regionName,
+                country: locationData.country,
+                latitude: locationData.latitude,
+                longitude: locationData.longitude,
+              });
+            }
+          } catch (regionError) {
+            console.error("Error detecting region:", regionError);
+            // Continue without region detection
+          }
         },
         {
           enableHighAccuracy: true,
@@ -73,6 +90,22 @@ function ExploreCategory() {
       );
     } else {
       setLocationError("Geolocation is not supported by your browser");
+      // Try to detect region from IP when geolocation is not supported
+      getDetailedLocation()
+        .then((locationData) => {
+          if (locationData) {
+            setDetectedRegion({
+              city: locationData.city,
+              state: locationData.region || locationData.regionName,
+              country: locationData.country,
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+            });
+          }
+        })
+        .catch((regionError) => {
+          console.error("Error detecting region:", regionError);
+        });
     }
   }, []);
 
@@ -110,26 +143,95 @@ function ExploreCategory() {
         business.address.longitude
       );
     }
+    
+    // Calculate distance from detected region if available and user location is not available
+    let regionDistance = null;
+    if (!userLocation && detectedRegion && detectedRegion.latitude && detectedRegion.longitude && business.address?.latitude && business.address?.longitude) {
+      regionDistance = calculateDistance(
+        detectedRegion.latitude,
+        detectedRegion.longitude,
+        business.address.latitude,
+        business.address.longitude
+      );
+    }
+    
+    // Determine region match priority
+    let regionPriority = 0; // 0 = no match, 1 = country match, 2 = state match, 3 = city match
+    if (detectedRegion && !userLocation) {
+      // Normalize strings for comparison (trim, lowercase, remove extra spaces)
+      const normalizeString = (str) => (str || "").toLowerCase().trim().replace(/\s+/g, " ");
+      
+      const businessCity = normalizeString(business.address?.city);
+      const businessState = normalizeString(business.address?.state);
+      const detectedCity = normalizeString(detectedRegion.city);
+      const detectedState = normalizeString(detectedRegion.state);
+      const detectedCountry = normalizeString(detectedRegion.country);
+      
+      // Check for city match (exact or partial)
+      if (businessCity && detectedCity) {
+        if (businessCity === detectedCity || businessCity.includes(detectedCity) || detectedCity.includes(businessCity)) {
+          regionPriority = 3; // Same city
+        }
+      }
+      
+      // Check for state match if city didn't match
+      if (regionPriority < 3 && businessState && detectedState) {
+        if (businessState === detectedState || businessState.includes(detectedState) || detectedState.includes(businessState)) {
+          regionPriority = 2; // Same state
+        }
+      }
+      
+      // If no city or state match, assume same country if country is detected
+      if (regionPriority === 0 && detectedCountry) {
+        regionPriority = 1; // Same country
+      }
+    }
+    
     return {
       ...business,
       distance,
+      regionDistance,
+      regionPriority,
     };
   });
 
-  // Sort businesses by distance (nearest first), then alphabetically for businesses without location
+  // Sort businesses by distance (nearest first), then by region, then alphabetically
   const sortedBusinesses = [...businessesWithDistance].sort((a, b) => {
-    // If both have distances, sort by distance
-    if (a.distance !== null && b.distance !== null) {
-      return a.distance - b.distance;
+    // If user location is available, sort by distance
+    if (userLocation) {
+      // If both have distances, sort by distance
+      if (a.distance !== null && b.distance !== null) {
+        return a.distance - b.distance;
+      }
+      // If only one has distance, prioritize it
+      if (a.distance !== null && b.distance === null) {
+        return -1;
+      }
+      if (a.distance === null && b.distance !== null) {
+        return 1;
+      }
     }
-    // If only one has distance, prioritize it
-    if (a.distance !== null && b.distance === null) {
-      return -1;
+    
+    // If location access denied but region detected, sort by region priority and distance
+    if (locationError && detectedRegion) {
+      // First, sort by region priority (city > state > country > no match)
+      if (a.regionPriority !== b.regionPriority) {
+        return b.regionPriority - a.regionPriority;
+      }
+      
+      // If same priority, sort by distance from detected region
+      if (a.regionDistance !== null && b.regionDistance !== null) {
+        return a.regionDistance - b.regionDistance;
+      }
+      if (a.regionDistance !== null && b.regionDistance === null) {
+        return -1;
+      }
+      if (a.regionDistance === null && b.regionDistance !== null) {
+        return 1;
+      }
     }
-    if (a.distance === null && b.distance !== null) {
-      return 1;
-    }
-    // If neither has distance, sort alphabetically
+    
+    // Fallback to alphabetical sorting
     return a.name.localeCompare(b.name);
   });
 
@@ -218,9 +320,9 @@ function ExploreCategory() {
 
           {/* Search and Filter */}
           <div className="explore-category-filters">
-            <div className="explore-search">
+            <div className="explore-search explore-search--category">
               <div className="explore-search__wrapper">
-                <Search className="explore-search__icon" size={20} />
+                <Search className="explore-search__icon" size={18} />
                 <input
                   type="text"
                   className="explore-search__input"
@@ -244,6 +346,7 @@ function ExploreCategory() {
               const uniqueLocations = [...new Set(businesses.map(b => b.location).filter(Boolean))];
               return uniqueLocations.length > 1 && (
                 <div className="explore-location-filter">
+                  <MapPin className="explore-location-filter__icon" size={16} />
                   <select
                     className="explore-location-filter__select"
                     value={selectedLocation}
@@ -304,7 +407,9 @@ function ExploreCategory() {
                   color: "var(--explore-muted)",
                   fontSize: "14px"
                 }}>
-                  Location access denied. Showing businesses sorted alphabetically.
+                  {detectedRegion 
+                    ? `Location access denied. Showing businesses near ${detectedRegion.city || detectedRegion.state || detectedRegion.country} first.`
+                    : "Location access denied. Showing businesses sorted alphabetically."}
                 </div>
               )}
               <div className="explore-brands__grid">
