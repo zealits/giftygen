@@ -298,7 +298,30 @@ function ExploreCategory() {
       </nav>
 
       {/* Header */}
-      <section className="explore-category-header">
+      <section
+        className={`explore-category-header ${(() => {
+          const name = industryName || decodedIndustryName;
+          const hasBg =
+            name === "Beauty and Personal care" ||
+            name === "Fitness and Wellness memberships" ||
+            name === "Hotels & Resorts" ||
+            name === "Restaurant And Fine Dining" ||
+            name === "Retail & E-commerce";
+          return hasBg ? "has-bg-image" : "";
+        })()}`}
+        data-category={industryName || decodedIndustryName}
+        style={(() => {
+          const name = industryName || decodedIndustryName;
+          const bgImages = {
+            "Beauty and Personal care": "url(/images/business-categories/salons.jpg)",
+            "Fitness and Wellness memberships": "url(/images/business-categories/jym.jpg)",
+            "Hotels & Resorts": "url(/images/business-categories/hotel.jpg)",
+            "Restaurant And Fine Dining": "url(/images/business-categories/restaurant.jpg)",
+            "Retail & E-commerce": "url(/images/business-categories/supermart.jpg)",
+          };
+          return bgImages[name] ? { "--category-bg-image": bgImages[name] } : {};
+        })()}
+      >
         <div className="explore-category-header__container">
           <button className="explore-back-btn" onClick={() => navigate("/explore")}>
             <ArrowLeft size={20} />
