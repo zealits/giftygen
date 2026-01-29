@@ -5,14 +5,9 @@ import axios from "axios";
 import "./Explore.css";
 import logo from "../../assets/giftygen_logo.svg";
 import logoWhiteBg from "../../assets/giftgen_whitebg_logo.png";
-import {
-  ArrowLeft,
-  MapPin,
-  Search,
-  ChevronRight,
-  Building2,
-} from "lucide-react";
+import { ArrowLeft, MapPin, Search, ChevronRight, Building2 } from "lucide-react";
 import { getDetailedLocation } from "../../utils/geolocationLanguage";
+import EnhancedSearchBar from "../../components/EnhancedSearchBar";
 
 // Calculate distance between two coordinates using Haversine formula
 // Returns distance in kilometers
@@ -26,10 +21,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
   return distance;
@@ -86,7 +78,7 @@ function ExploreCategory() {
           enableHighAccuracy: true,
           timeout: 10000,
           maximumAge: 0,
-        }
+        },
       );
     } else {
       setLocationError("Geolocation is not supported by your browser");
@@ -116,7 +108,7 @@ function ExploreCategory() {
         setLoading(true);
         const response = await axios.get(`/api/v1/admin/industries/${encodeURIComponent(decodedIndustryName)}`);
         const fetchedBusinesses = response.data.businesses || [];
-        
+
         setBusinesses(fetchedBusinesses);
         setIndustryName(decodedIndustryName);
       } catch (error) {
@@ -140,53 +132,68 @@ function ExploreCategory() {
         userLocation.latitude,
         userLocation.longitude,
         business.address.latitude,
-        business.address.longitude
+        business.address.longitude,
       );
     }
-    
+
     // Calculate distance from detected region if available and user location is not available
     let regionDistance = null;
-    if (!userLocation && detectedRegion && detectedRegion.latitude && detectedRegion.longitude && business.address?.latitude && business.address?.longitude) {
+    if (
+      !userLocation &&
+      detectedRegion &&
+      detectedRegion.latitude &&
+      detectedRegion.longitude &&
+      business.address?.latitude &&
+      business.address?.longitude
+    ) {
       regionDistance = calculateDistance(
         detectedRegion.latitude,
         detectedRegion.longitude,
         business.address.latitude,
-        business.address.longitude
+        business.address.longitude,
       );
     }
-    
+
     // Determine region match priority
     let regionPriority = 0; // 0 = no match, 1 = country match, 2 = state match, 3 = city match
     if (detectedRegion && !userLocation) {
       // Normalize strings for comparison (trim, lowercase, remove extra spaces)
       const normalizeString = (str) => (str || "").toLowerCase().trim().replace(/\s+/g, " ");
-      
+
       const businessCity = normalizeString(business.address?.city);
       const businessState = normalizeString(business.address?.state);
       const detectedCity = normalizeString(detectedRegion.city);
       const detectedState = normalizeString(detectedRegion.state);
       const detectedCountry = normalizeString(detectedRegion.country);
-      
+
       // Check for city match (exact or partial)
       if (businessCity && detectedCity) {
-        if (businessCity === detectedCity || businessCity.includes(detectedCity) || detectedCity.includes(businessCity)) {
+        if (
+          businessCity === detectedCity ||
+          businessCity.includes(detectedCity) ||
+          detectedCity.includes(businessCity)
+        ) {
           regionPriority = 3; // Same city
         }
       }
-      
+
       // Check for state match if city didn't match
       if (regionPriority < 3 && businessState && detectedState) {
-        if (businessState === detectedState || businessState.includes(detectedState) || detectedState.includes(businessState)) {
+        if (
+          businessState === detectedState ||
+          businessState.includes(detectedState) ||
+          detectedState.includes(businessState)
+        ) {
           regionPriority = 2; // Same state
         }
       }
-      
+
       // If no city or state match, assume same country if country is detected
       if (regionPriority === 0 && detectedCountry) {
         regionPriority = 1; // Same country
       }
     }
-    
+
     return {
       ...business,
       distance,
@@ -211,14 +218,14 @@ function ExploreCategory() {
         return 1;
       }
     }
-    
+
     // If location access denied but region detected, sort by region priority and distance
     if (locationError && detectedRegion) {
       // First, sort by region priority (city > state > country > no match)
       if (a.regionPriority !== b.regionPriority) {
         return b.regionPriority - a.regionPriority;
       }
-      
+
       // If same priority, sort by distance from detected region
       if (a.regionDistance !== null && b.regionDistance !== null) {
         return a.regionDistance - b.regionDistance;
@@ -230,7 +237,7 @@ function ExploreCategory() {
         return 1;
       }
     }
-    
+
     // Fallback to alphabetical sorting
     return a.name.localeCompare(b.name);
   });
@@ -240,12 +247,16 @@ function ExploreCategory() {
     const matchesSearch =
       business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       business.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    // Filter by location if selected
-    if (selectedLocation !== "all" && business.location !== selectedLocation) {
-      return false;
+
+    // Filter by location if selected (city name)
+    if (selectedLocation !== "all" && selectedLocation) {
+      const businessCity = business.address?.city || "";
+
+      if (businessCity !== selectedLocation) {
+        return false;
+      }
     }
-    
+
     return matchesSearch;
   });
 
@@ -259,7 +270,9 @@ function ExploreCategory() {
   };
 
   const handleBrandClick = (businessSlug) => {
-    navigate(`/explore/${encodeURIComponent(decodedIndustryName)}/${businessSlug}`);
+    // Navigate to the dedicated business gift cards page
+    // This page shows all active gift cards for the selected business
+    navigate(`/${businessSlug}/giftcards`);
   };
 
   return (
@@ -267,34 +280,17 @@ function ExploreCategory() {
       {/* Navigation */}
       <nav className="explore-nav">
         <div className="explore-nav__container">
-          <div
-            className="explore-nav__brand"
-            onClick={() => navigate("/")}
-            style={{ cursor: "pointer" }}
-          >
-            <img
-              src={theme === "light" ? logoWhiteBg : logo}
-              alt="GiftyGen"
-              className="explore-nav__logo"
-            />
+          <div className="explore-nav__brand" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+            <img src={theme === "light" ? logoWhiteBg : logo} alt="GiftyGen" className="explore-nav__logo" />
           </div>
           <div className="explore-nav__actions">
-            <button
-              className="explore-nav__link"
-              onClick={() => navigate("/explore")}
-            >
+            <button className="explore-nav__link" onClick={() => navigate("/explore")}>
               Explore
             </button>
-            <button
-              className="explore-nav__link"
-              onClick={() => navigate("/")}
-            >
+            <button className="explore-nav__link" onClick={() => navigate("/")}>
               Home
             </button>
-            <button
-              className="explore-nav__link explore-nav__link--primary"
-              onClick={() => navigate("/login")}
-            >
+            <button className="explore-nav__link explore-nav__link--primary" onClick={() => navigate("/login")}>
               Sign In
             </button>
           </div>
@@ -304,64 +300,54 @@ function ExploreCategory() {
       {/* Header */}
       <section className="explore-category-header">
         <div className="explore-category-header__container">
-          <button
-            className="explore-back-btn"
-            onClick={() => navigate("/explore")}
-          >
+          <button className="explore-back-btn" onClick={() => navigate("/explore")}>
             <ArrowLeft size={20} />
             Back to Explore
           </button>
           <h1 className="explore-category-header__title">{industryName || decodedIndustryName}</h1>
           <p className="explore-category-header__description">
-            {businesses.length > 0 
-              ? `Discover ${businesses.length} ${businesses.length === 1 ? 'business' : 'businesses'} in this industry`
+            {businesses.length > 0
+              ? `Discover ${businesses.length} ${businesses.length === 1 ? "business" : "businesses"} in this industry`
               : "Explore businesses in this industry"}
           </p>
 
-          {/* Search and Filter */}
-          <div className="explore-category-filters">
-            <div className="explore-search explore-search--category">
-              <div className="explore-search__wrapper">
-                <Search className="explore-search__icon" size={18} />
-                <input
-                  type="text"
-                  className="explore-search__input"
-                  placeholder="Search brands..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {searchQuery && (
-                  <button
-                    className="explore-search__clear"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Location filter - get unique locations from businesses */}
-            {(() => {
-              const uniqueLocations = [...new Set(businesses.map(b => b.location).filter(Boolean))];
-              return uniqueLocations.length > 1 && (
-                <div className="explore-location-filter">
-                  <MapPin className="explore-location-filter__icon" size={16} />
-                  <select
-                    className="explore-location-filter__select"
-                    value={selectedLocation}
-                    onChange={(e) => setSelectedLocation(e.target.value)}
-                  >
-                    <option value="all">All Locations</option>
-                    {uniqueLocations.map((location) => (
-                      <option key={location} value={location}>
-                        {location}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              );
-            })()}
+          {/* Enhanced Search Bar */}
+          <div className="explore-category-search-wrapper">
+            <EnhancedSearchBar
+              onLocationChange={(location, lat, lng) => {
+                console.log("Location changed:", location, lat, lng);
+                // Filter businesses based on location if needed
+                setSelectedLocation(location);
+              }}
+              onSearchChange={(value) => setSearchQuery(value)}
+              placeholder={`Search ${industryName.toLowerCase() || "businesses"}...`}
+              searchValue={searchQuery}
+              locationValue={
+                selectedLocation !== "all" && selectedLocation
+                  ? selectedLocation
+                  : detectedRegion
+                    ? `${detectedRegion.city || ""}, ${detectedRegion.state || ""}`.trim()
+                    : "Select your location"
+              }
+              availableLocations={(() => {
+                const locations = [
+                  ...new Set(
+                    businesses
+                      .map((b) => {
+                        // Just return city name
+                        return b.address?.city || null;
+                      })
+                      .filter(Boolean),
+                  ),
+                ];
+                console.log("📍 Available locations:", locations);
+                console.log("📊 Total businesses:", businesses.length);
+                if (businesses.length > 0) {
+                  console.log("🏢 Sample business address:", businesses[0]?.address);
+                }
+                return locations;
+              })()}
+            />
           </div>
         </div>
       </section>
@@ -398,16 +384,18 @@ function ExploreCategory() {
                 </div>
               )}
               {locationError && (
-                <div style={{ 
-                  padding: "12px 16px", 
-                  marginBottom: "24px", 
-                  background: "var(--explore-card)", 
-                  border: "1px solid var(--explore-border)", 
-                  borderRadius: "12px",
-                  color: "var(--explore-muted)",
-                  fontSize: "14px"
-                }}>
-                  {detectedRegion 
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    marginBottom: "24px",
+                    background: "var(--explore-card)",
+                    border: "1px solid var(--explore-border)",
+                    borderRadius: "12px",
+                    color: "var(--explore-muted)",
+                    fontSize: "14px",
+                  }}
+                >
+                  {detectedRegion
                     ? `Location access denied. Showing businesses near ${detectedRegion.city || detectedRegion.state || detectedRegion.country} first.`
                     : "Location access denied. Showing businesses sorted alphabetically."}
                 </div>
@@ -429,15 +417,11 @@ function ExploreCategory() {
                       </div>
                     )}
                     <h3 className="explore-brand-card__title">{business.name}</h3>
-                    {business.description && (
-                      <p className="explore-brand-card__description">
-                        {business.description}
-                      </p>
-                    )}
+                    {business.description && <p className="explore-brand-card__description">{business.description}</p>}
                     <div className="explore-brand-card__location">
                       <MapPin size={14} />
                       <span>
-                        {business.location || "Location not specified"}
+                        {business.address?.city || "Location not specified"}
                         {business.distance !== null && (
                           <span style={{ marginLeft: "8px", color: "var(--explore-primary)", fontWeight: "600" }}>
                             • {formatDistance(business.distance)}

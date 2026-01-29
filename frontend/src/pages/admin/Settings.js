@@ -8,7 +8,7 @@ import "./Settings.css";
 const Settings = ({ section: sectionProp }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Determine which section to show based on route or prop
   const getSection = () => {
     if (sectionProp) return sectionProp;
@@ -29,14 +29,14 @@ const Settings = ({ section: sectionProp }) => {
     businessSlug: initial.businessSlug || "",
     industry: initial.industry || "",
     businessDescription: initial.businessDescription || "",
-        restaurantAddress: {
-          street: initial.restaurantAddress?.street || "",
-          city: initial.restaurantAddress?.city || "",
-          state: initial.restaurantAddress?.state || "",
-          zipCode: initial.restaurantAddress?.zipCode || "",
-          latitude: initial.restaurantAddress?.latitude || null,
-          longitude: initial.restaurantAddress?.longitude || null,
-        },
+    restaurantAddress: {
+      street: initial.restaurantAddress?.street || "",
+      city: initial.restaurantAddress?.city || "",
+      state: initial.restaurantAddress?.state || "",
+      zipCode: initial.restaurantAddress?.zipCode || "",
+      latitude: initial.restaurantAddress?.latitude || null,
+      longitude: initial.restaurantAddress?.longitude || null,
+    },
     // SQUARE API COMMENTED OUT
     // squareApplicationId: initial.squareApplicationId || "",
     // squareLocationId: initial.squareLocationId || "",
@@ -56,8 +56,10 @@ const Settings = ({ section: sectionProp }) => {
   const [showToken, setShowToken] = useState(false);
   const [showRazorpayToken, setShowRazorpayToken] = useState(false);
   const [logoUrl, setLogoUrl] = useState(initial.logoUrl || "");
+  const [galleryImages, setGalleryImages] = useState(initial.galleryImages || []);
   const [downloading, setDownloading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [showMapPicker, setShowMapPicker] = useState(false);
   // SQUARE API COMMENTED OUT
   // const [showSquareInstructions, setShowSquareInstructions] = useState(false);
@@ -92,6 +94,7 @@ const Settings = ({ section: sectionProp }) => {
       razorpayKeySecret: initial.razorpayKeySecret || "",
     });
     setLogoUrl(initial.logoUrl || "");
+    setGalleryImages(initial.galleryImages || []);
   }, [
     initial.restaurantName,
     initial.businessSlug,
@@ -105,6 +108,7 @@ const Settings = ({ section: sectionProp }) => {
     initial.razorpayKeyId,
     initial.razorpayKeySecret,
     initial.logoUrl,
+    initial.galleryImages,
   ]);
 
   const handleChange = (e) => {
@@ -125,15 +129,15 @@ const Settings = ({ section: sectionProp }) => {
 
   const handleMapLocationSelect = (lat, lng, address = null) => {
     // Ensure lat and lng are numbers, not strings
-    const latitude = typeof lat === 'number' ? lat : parseFloat(lat);
-    const longitude = typeof lng === 'number' ? lng : parseFloat(lng);
-    
+    const latitude = typeof lat === "number" ? lat : parseFloat(lat);
+    const longitude = typeof lng === "number" ? lng : parseFloat(lng);
+
     if (isNaN(latitude) || isNaN(longitude)) {
       setSettingsMessage("Invalid location coordinates. Please try again.");
       setTimeout(() => setSettingsMessage(""), 3000);
       return;
     }
-    
+
     // Auto-fill address fields if address data is available
     setForm((prev) => ({
       ...prev,
@@ -148,14 +152,29 @@ const Settings = ({ section: sectionProp }) => {
         zipCode: address?.zipCode || prev.restaurantAddress.zipCode || "",
       },
     }));
-    
+
     // Show confirmation message with address info
     if (address && address.fullAddress) {
-      setSettingsMessage(`Location selected: ${address.fullAddress}. Don't forget to click 'Save Business Profile' to save your changes.`);
+      setSettingsMessage(
+        `Location selected: ${address.fullAddress}. Don't forget to click 'Save Business Profile' to save your changes.`,
+      );
     } else {
       setSettingsMessage("Location selected! Don't forget to click 'Save Business Profile' to save your changes.");
     }
     setTimeout(() => setSettingsMessage(""), 5000);
+  };
+
+  const handleClearLocation = () => {
+    setForm((prev) => ({
+      ...prev,
+      restaurantAddress: {
+        ...prev.restaurantAddress,
+        latitude: null,
+        longitude: null,
+      },
+    }));
+    setSettingsMessage("Location cleared! Don't forget to click 'Save Business Profile' to save your changes.");
+    setTimeout(() => setSettingsMessage(""), 3000);
   };
 
   const handlePasswordInputChange = (e) => {
@@ -189,19 +208,19 @@ const Settings = ({ section: sectionProp }) => {
         ...form,
         restaurantAddress: {
           ...form.restaurantAddress,
-          latitude: form.restaurantAddress.latitude 
-            ? (typeof form.restaurantAddress.latitude === 'number' 
-                ? form.restaurantAddress.latitude 
-                : parseFloat(form.restaurantAddress.latitude) || null)
+          latitude: form.restaurantAddress.latitude
+            ? typeof form.restaurantAddress.latitude === "number"
+              ? form.restaurantAddress.latitude
+              : parseFloat(form.restaurantAddress.latitude) || null
             : null,
-          longitude: form.restaurantAddress.longitude 
-            ? (typeof form.restaurantAddress.longitude === 'number' 
-                ? form.restaurantAddress.longitude 
-                : parseFloat(form.restaurantAddress.longitude) || null)
+          longitude: form.restaurantAddress.longitude
+            ? typeof form.restaurantAddress.longitude === "number"
+              ? form.restaurantAddress.longitude
+              : parseFloat(form.restaurantAddress.longitude) || null
             : null,
         },
       };
-      
+
       await axios.put("/api/v1/admin/settings", formData);
       setSettingsMessage("Settings saved successfully!");
       setTimeout(() => setSettingsMessage(""), 3000);
@@ -272,6 +291,60 @@ const Settings = ({ section: sectionProp }) => {
     }
   };
 
+  const handlePhotoFiles = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const remainingSlots = 10 - galleryImages.length;
+    if (remainingSlots <= 0) {
+      setSettingsMessage("Maximum 10 photos allowed");
+      setTimeout(() => setSettingsMessage(""), 3000);
+      return;
+    }
+
+    if (files.length > remainingSlots) {
+      setSettingsMessage(`You can only upload ${remainingSlots} more photo(s)`);
+      setTimeout(() => setSettingsMessage(""), 3000);
+      return;
+    }
+
+    const formData = new FormData();
+    files.forEach((file) => formData.append("photos", file));
+
+    setUploadingPhotos(true);
+    setSettingsMessage("");
+    try {
+      const res = await axios.post("/api/v1/admin/settings/photos", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setGalleryImages(res.data.galleryImages || []);
+      setSettingsMessage(`${files.length} photo(s) uploaded successfully!`);
+      setTimeout(() => setSettingsMessage(""), 3000);
+    } catch (e) {
+      setSettingsMessage(e?.response?.data?.message || "Photo upload failed");
+    } finally {
+      setUploadingPhotos(false);
+    }
+  };
+
+  const handleRemovePhoto = async (photoUrl) => {
+    const updatedGallery = galleryImages.filter((url) => url !== photoUrl);
+    setGalleryImages(updatedGallery);
+
+    try {
+      await axios.put("/api/v1/admin/settings", {
+        ...form,
+        galleryImages: updatedGallery,
+      });
+      setSettingsMessage("Photo removed successfully!");
+      setTimeout(() => setSettingsMessage(""), 3000);
+    } catch (e) {
+      setSettingsMessage(e?.response?.data?.message || "Failed to remove photo");
+      // Revert on error
+      setGalleryImages(galleryImages);
+    }
+  };
+
   const downloadQrPoster = async () => {
     setDownloading(true);
     try {
@@ -294,7 +367,7 @@ const Settings = ({ section: sectionProp }) => {
           a.href = url;
           const safeName = (form.restaurantName || initial.restaurantName || "giftcards").replace(
             /[^a-z0-9-_]+/gi,
-            "_"
+            "_",
           );
           a.download = `${safeName}_Digital_Ad.png`;
           document.body.appendChild(a);
@@ -324,403 +397,533 @@ const Settings = ({ section: sectionProp }) => {
 
   const renderSecuritySection = () => (
     <div className="settings-section">
-          <div className="section-header">
-            <div className="section-icon">🔐</div>
-            <div>
-              <h2 className="section-title">Security & Access</h2>
-              <p className="section-description">Manage your account security and access credentials</p>
+      <div className="section-header">
+        <div className="section-icon">🔐</div>
+        <div>
+          <h2 className="section-title">Security & Access</h2>
+          <p className="section-description">Manage your account security and access credentials</p>
+        </div>
+      </div>
+
+      <div className="settings-card security-card">
+        <div className="card-content">
+          <h3 className="card-title">Password Management</h3>
+          <p className="card-subtitle">Update your login password for enhanced security</p>
+
+          <div className="form-grid">
+            <div className="form_group">
+              <label className="form_label">Current Password</label>
+              <input
+                type="password"
+                name="currentPassword"
+                value={passwordForm.currentPassword}
+                onChange={handlePasswordInputChange}
+                placeholder="Enter current password"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form_group">
+              <label className="form_label">New Password</label>
+              <input
+                type="password"
+                name="newPassword"
+                value={passwordForm.newPassword}
+                onChange={handlePasswordInputChange}
+                placeholder="Enter new password"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form_group">
+              <label className="form_label">Confirm New Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={passwordForm.confirmPassword}
+                onChange={handlePasswordInputChange}
+                placeholder="Confirm new password"
+                className="form-input"
+              />
             </div>
           </div>
 
-          <div className="settings-card security-card">
-            <div className="card-content">
-              <h3 className="card-title">Password Management</h3>
-              <p className="card-subtitle">Update your login password for enhanced security</p>
-
-              <div className="form-grid">
-                <div className="form_group">
-                  <label className="form_label">Current Password</label>
-                  <input
-                    type="password"
-                    name="currentPassword"
-                    value={passwordForm.currentPassword}
-                    onChange={handlePasswordInputChange}
-                    placeholder="Enter current password"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form_group">
-                  <label className="form_label">New Password</label>
-                  <input
-                    type="password"
-                    name="newPassword"
-                    value={passwordForm.newPassword}
-                    onChange={handlePasswordInputChange}
-                    placeholder="Enter new password"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form_group">
-                  <label className="form_label">Confirm New Password</label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={passwordForm.confirmPassword}
-                    onChange={handlePasswordInputChange}
-                    placeholder="Confirm new password"
-                    className="form-input"
-                  />
-                </div>
-              </div>
-
-              <div className="action-row">
-                <button onClick={handlePasswordChange} disabled={saving} className="btn btn-primary">
-                  {saving ? "Updating..." : "Update Password"}
-                </button>
-                {passwordMessage && <span className="message success">{passwordMessage}</span>}
-              </div>
-            </div>
+          <div className="action-row">
+            <button onClick={handlePasswordChange} disabled={saving} className="btn btn-primary">
+              {saving ? "Updating..." : "Update Password"}
+            </button>
+            {passwordMessage && <span className="message success">{passwordMessage}</span>}
           </div>
         </div>
+      </div>
+    </div>
   );
 
   const renderBusinessProfileSection = () => (
     <div className="settings-section">
-          <div className="section-header">
-            <div className="section-icon">🏢</div>
-            <div>
-              <h2 className="section-title">Business Profile</h2>
-              <p className="section-description">Customize your business branding and public information</p>
-            </div>
-          </div>
+      <div className="section-header">
+        <div className="section-icon">🏢</div>
+        <div>
+          <h2 className="section-title">Business Profile</h2>
+          <p className="section-description">Customize your business branding and public information</p>
+        </div>
+      </div>
 
-          <div className="settings-card business-card">
-            <div className="card-content">
-              <div className="profile-section">
-                <h3 className="card-title">Branding & Identity</h3>
+      <div className="settings-card business-card">
+        <div className="card-content">
+          <div className="profile-section">
+            <h3 className="card-title">Branding & Identity</h3>
 
-                <div className="logo-section">
-                  <label className="form_label">Business Logo</label>
-                  <div className="logo-upload">
-                    <div className="logo-preview">
-                      {logoUrl ? (
-                        <img src={logoUrl} alt="Business Logo" className="logo-image" />
-                      ) : (
-                        <div className="logo-placeholder">
-                          <span>📷</span>
-                          <span>No Logo</span>
-                        </div>
-                      )}
+            <div className="logo-section">
+              <label className="form_label">Business Logo</label>
+              <div className="logo-upload">
+                <div className="logo-preview">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt="Business Logo" className="logo-image" />
+                  ) : (
+                    <div className="logo-placeholder">
+                      <span>📷</span>
+                      <span>No Logo</span>
                     </div>
-                    <div className="logo-actions">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoFile}
-                        className="file-input"
-                        id="logo-upload"
-                      />
-                      <label htmlFor="logo-upload" className="btn btn-secondary">
-                        Choose File
-                      </label>
-                      <button
-                        disabled={uploadingLogo}
-                        type="button"
-                        className="btn btn-outline"
-                        onClick={() => document.getElementById("logo-upload").click()}
-                      >
-                        {uploadingLogo ? "Uploading..." : "Upload Logo"}
-                      </button>
-                    </div>
-                  </div>
-                  <p className="form-hint">PNG/JPG preferred. Stored securely on Cloudinary.</p>
-                </div>
-
-                <div className="form_group">
-                  <label className="form_label">Business Name</label>
-                  <input
-                    name="restaurantName"
-                    value={form.restaurantName}
-                    onChange={handleNameChange}
-                    placeholder="Enter your business name"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form_group">
-                  <label className="form_label">Industry</label>
-                  <select
-                    name="industry"
-                    value={form.industry}
-                    onChange={handleChange}
-                    className="form-input"
-                  >
-                    <option value="">Select an industry</option>
-                    <option value="Restaurant And Fine Dining">Restaurant And Fine Dining</option>
-                    <option value="Hotels & Resorts">Hotels & Resorts</option>
-                    <option value="Fitness and Wellness memberships">Fitness and Wellness memberships</option>
-                    <option value="Retail & E-commerce">Retail & E-commerce</option>
-                    <option value="Beauty and Personal care">Beauty and Personal care</option>
-                    <option value="Seasonal Gifting">Seasonal Gifting</option>
-                  </select>
-                </div>
-
-                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
-                  <label className="form_label">Business Description</label>
-                  <textarea
-                    name="businessDescription"
-                    value={form.businessDescription}
-                    onChange={handleChange}
-                    placeholder="Describe your business..."
-                    className="form-input"
-                    rows="4"
-                    style={{ resize: "vertical", minHeight: "100px" }}
-                  />
-                </div>
-              </div>
-
-              <div className="address-section">
-                <h3 className="card-title">Business Address</h3>
-                <div className="form-grid">
-                  <div className="form_group" style={{ gridColumn: "1 / -1" }}>
-                    <label className="form_label">Street Address</label>
-                    <input
-                      name="street"
-                      value={form.restaurantAddress.street}
-                      onChange={handleAddressChange}
-                      placeholder="Enter street address"
-                      className="form-input"
-                    />
-                  </div>
-                  <div className="form_group">
-                    <label className="form_label">City</label>
-                    <input
-                      name="city"
-                      value={form.restaurantAddress.city}
-                      onChange={handleAddressChange}
-                      placeholder="Enter city"
-                      className="form-input"
-                    />
-                  </div>
-                  <div className="form_group">
-                    <label className="form_label">State</label>
-                    <input
-                      name="state"
-                      value={form.restaurantAddress.state}
-                      onChange={handleAddressChange}
-                      placeholder="Enter state"
-                      className="form-input"
-                    />
-                  </div>
-                  <div className="form_group">
-                    <label className="form_label">Zip Code</label>
-                    <input
-                      name="zipCode"
-                      value={form.restaurantAddress.zipCode}
-                      onChange={handleAddressChange}
-                      placeholder="Enter zip code"
-                      className="form-input"
-                    />
-                  </div>
-                  <div className="form_group">
-                    <label className="form_label">Latitude</label>
-                    <input
-                      name="latitude"
-                      type="number"
-                      step="any"
-                      value={form.restaurantAddress.latitude}
-                      onChange={handleAddressChange}
-                      placeholder="e.g., 28.6139"
-                      className="form-input"
-                      readOnly
-                    />
-                    <p className="form-hint">Set via map picker below</p>
-                  </div>
-                  <div className="form_group">
-                    <label className="form_label">Longitude</label>
-                    <input
-                      name="longitude"
-                      type="number"
-                      step="any"
-                      value={form.restaurantAddress.longitude}
-                      onChange={handleAddressChange}
-                      placeholder="e.g., 77.2090"
-                      className="form-input"
-                      readOnly
-                    />
-                    <p className="form-hint">Set via map picker below</p>
-                  </div>
-                </div>
-                <div style={{ marginTop: "16px", display: "flex", gap: "12px", alignItems: "center" }}>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => {
-                      console.log("Opening map picker...");
-                      setShowMapPicker(true);
-                    }}
-                    style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
-                  >
-                    <span>📍</span>
-                    Pick Location on Map
-                  </button>
-                  {form.restaurantAddress.latitude && form.restaurantAddress.longitude && (
-                    <span className="form-hint" style={{ margin: 0 }}>
-                      Location set: {form.restaurantAddress.latitude.toFixed(6)}, {form.restaurantAddress.longitude.toFixed(6)}
-                    </span>
                   )}
                 </div>
-                {form.restaurantAddress.latitude && form.restaurantAddress.longitude && (
-                  <div className="map-preview" style={{ marginTop: "16px" }}>
-                    <iframe
-                      width="100%"
-                      height="300"
-                      style={{ border: 0, borderRadius: "12px" }}
-                      loading="lazy"
-                      allowFullScreen
-                      referrerPolicy="no-referrer-when-downgrade"
-                      src={`https://www.google.com/maps?q=${form.restaurantAddress.latitude},${form.restaurantAddress.longitude}&output=embed`}
-                    ></iframe>
-                    <p className="form-hint" style={{ marginTop: "8px" }}>
-                      <a
-                        href={`https://www.google.com/maps?q=${form.restaurantAddress.latitude},${form.restaurantAddress.longitude}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "#6366f1", textDecoration: "underline" }}
-                      >
-                        View in Google Maps
-                      </a>
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {publicUrl && (
-                <div className="url-section">
-                  <h3 className="card-title">Public Access</h3>
-                  <div className="url-display">
-                    <div className="url-info">
-                      <label className="form_label">Public Gift Cards Page</label>
-                      <div className="url-text">{publicUrl}</div>
-                    </div>
-                    <button type="button" className="btn btn-outline" onClick={copyPublicLink}>
-                      Copy URL
-                    </button>
-                  </div>
+                <div className="logo-actions">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoFile}
+                    className="file-input"
+                    id="logo-upload"
+                  />
+                  <label htmlFor="logo-upload" className="btn btn-secondary">
+                    Choose File
+                  </label>
+                  <button
+                    disabled={uploadingLogo}
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={() => document.getElementById("logo-upload").click()}
+                  >
+                    {uploadingLogo ? "Uploading..." : "Upload Logo"}
+                  </button>
                 </div>
-              )}
-
-              <div className="action-row">
-                <button onClick={handleSaveSettings} disabled={saving} className="btn btn-primary">
-                  {saving ? "Saving..." : "Save Business Profile"}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-success"
-                  disabled={downloading || !publicUrl}
-                  onClick={downloadQrPoster}
-                >
-                  {downloading ? "Generating..." : "Print Your Digital Ad"}
-                </button>
-                {settingsMessage && <span className="message success">{settingsMessage}</span>}
               </div>
+              <p className="form-hint">PNG/JPG preferred. Stored securely on Cloudinary.</p>
+            </div>
+
+            <div className="form_group">
+              <label className="form_label">Business Name</label>
+              <input
+                name="restaurantName"
+                value={form.restaurantName}
+                onChange={handleNameChange}
+                placeholder="Enter your business name"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form_group">
+              <label className="form_label">Industry</label>
+              <select name="industry" value={form.industry} onChange={handleChange} className="form-input">
+                <option value="">Select an industry</option>
+                <option value="Restaurant And Fine Dining">Restaurant And Fine Dining</option>
+                <option value="Hotels & Resorts">Hotels & Resorts</option>
+                <option value="Fitness and Wellness memberships">Fitness and Wellness memberships</option>
+                <option value="Retail & E-commerce">Retail & E-commerce</option>
+                <option value="Beauty and Personal care">Beauty and Personal care</option>
+                <option value="Seasonal Gifting">Seasonal Gifting</option>
+              </select>
+            </div>
+
+            <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+              <label className="form_label">Business Description</label>
+              <textarea
+                name="businessDescription"
+                value={form.businessDescription}
+                onChange={handleChange}
+                placeholder="Describe your business..."
+                className="form-input"
+                rows="4"
+                style={{ resize: "vertical", minHeight: "100px" }}
+              />
             </div>
           </div>
+
+          <div className="gallery-section" style={{ marginTop: "24px" }}>
+            <h3 className="card-title">Business Photos Gallery</h3>
+            <p className="form-hint">Upload up to 10 photos to showcase your business</p>
+
+            <div
+              className="gallery-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+                gap: "16px",
+                marginTop: "16px",
+                marginBottom: "16px",
+              }}
+            >
+              {galleryImages.map((photoUrl, index) => (
+                <div
+                  key={index}
+                  className="gallery-item"
+                  style={{
+                    position: "relative",
+                    aspectRatio: "1",
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    border: "2px solid #e5e7eb",
+                    backgroundColor: "#f9fafb",
+                  }}
+                >
+                  <img
+                    src={photoUrl}
+                    alt={`Business photo ${index + 1}`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemovePhoto(photoUrl)}
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      background: "rgba(239, 68, 68, 0.9)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "28px",
+                      height: "28px",
+                      cursor: "pointer",
+                      fontSize: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: "bold",
+                    }}
+                    title="Remove photo"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+
+              {galleryImages.length < 10 && (
+                <div
+                  className="gallery-upload-placeholder"
+                  style={{
+                    aspectRatio: "1",
+                    borderRadius: "12px",
+                    border: "2px dashed #d1d5db",
+                    backgroundColor: "#f9fafb",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                  onClick={() => document.getElementById("photos-upload").click()}
+                >
+                  <span style={{ fontSize: "32px", marginBottom: "8px" }}>📷</span>
+                  <span style={{ fontSize: "12px", color: "#6b7280", textAlign: "center", padding: "0 8px" }}>
+                    Add Photo
+                  </span>
+                  <span style={{ fontSize: "10px", color: "#9ca3af", marginTop: "4px" }}>
+                    {galleryImages.length}/10
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="photo-upload-actions">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoFiles}
+                className="file-input"
+                id="photos-upload"
+                style={{ display: "none" }}
+              />
+              <label htmlFor="photos-upload" className="btn btn-secondary">
+                Choose Photos
+              </label>
+              <button
+                disabled={uploadingPhotos || galleryImages.length >= 10}
+                type="button"
+                className="btn btn-outline"
+                onClick={() => document.getElementById("photos-upload").click()}
+              >
+                {uploadingPhotos ? "Uploading..." : `Upload Photos (${galleryImages.length}/10)`}
+              </button>
+            </div>
+          </div>
+
+          <div className="address-section">
+            <h3 className="card-title">Business Address</h3>
+            <div className="form-grid">
+              <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                <label className="form_label">Street Address</label>
+                <input
+                  name="street"
+                  value={form.restaurantAddress.street}
+                  onChange={handleAddressChange}
+                  placeholder="Enter street address"
+                  className="form-input"
+                />
+              </div>
+              <div className="form_group">
+                <label className="form_label">City</label>
+                <input
+                  name="city"
+                  value={form.restaurantAddress.city}
+                  onChange={handleAddressChange}
+                  placeholder="Enter city"
+                  className="form-input"
+                />
+              </div>
+              <div className="form_group">
+                <label className="form_label">State</label>
+                <input
+                  name="state"
+                  value={form.restaurantAddress.state}
+                  onChange={handleAddressChange}
+                  placeholder="Enter state"
+                  className="form-input"
+                />
+              </div>
+              <div className="form_group">
+                <label className="form_label">Zip Code</label>
+                <input
+                  name="zipCode"
+                  value={form.restaurantAddress.zipCode}
+                  onChange={handleAddressChange}
+                  placeholder="Enter zip code"
+                  className="form-input"
+                />
+              </div>
+              <div className="form_group">
+                <label className="form_label">Latitude</label>
+                <input
+                  name="latitude"
+                  type="text"
+                  value={form.restaurantAddress.latitude !== null ? form.restaurantAddress.latitude : ""}
+                  placeholder="Not set"
+                  className="form-input"
+                  readOnly
+                  style={{
+                    backgroundColor: "rgba(255, 255, 255, 0.04)",
+                    cursor: "not-allowed",
+                    color: "rgba(203, 213, 225, 0.6)",
+                  }}
+                />
+                <p className="form-hint">Set via map picker below</p>
+              </div>
+              <div className="form_group">
+                <label className="form_label">Longitude</label>
+                <input
+                  name="longitude"
+                  type="text"
+                  value={form.restaurantAddress.longitude !== null ? form.restaurantAddress.longitude : ""}
+                  placeholder="Not set"
+                  className="form-input"
+                  readOnly
+                  style={{
+                    backgroundColor: "rgba(255, 255, 255, 0.04)",
+                    cursor: "not-allowed",
+                    color: "rgba(203, 213, 225, 0.6)",
+                  }}
+                />
+                <p className="form-hint">Set via map picker below</p>
+              </div>
+            </div>
+            <div style={{ marginTop: "16px", display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  console.log("Opening map picker...");
+                  setShowMapPicker(true);
+                }}
+                style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
+              >
+                <span>📍</span>
+                Pick Location on Map
+              </button>
+              {form.restaurantAddress.latitude && form.restaurantAddress.longitude && (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={handleClearLocation}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
+                  >
+                    <span>🗑️</span>
+                    Clear Location
+                  </button>
+                  <span className="form-hint" style={{ margin: 0 }}>
+                    Location set: {form.restaurantAddress.latitude.toFixed(6)},{" "}
+                    {form.restaurantAddress.longitude.toFixed(6)}
+                  </span>
+                </>
+              )}
+            </div>
+            {form.restaurantAddress.latitude && form.restaurantAddress.longitude && (
+              <div className="map-preview" style={{ marginTop: "16px" }}>
+                <iframe
+                  width="100%"
+                  height="300"
+                  style={{ border: 0, borderRadius: "12px" }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps?q=${form.restaurantAddress.latitude},${form.restaurantAddress.longitude}&output=embed`}
+                ></iframe>
+                <p className="form-hint" style={{ marginTop: "8px" }}>
+                  <a
+                    href={`https://www.google.com/maps?q=${form.restaurantAddress.latitude},${form.restaurantAddress.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#6366f1", textDecoration: "underline" }}
+                  >
+                    View in Google Maps
+                  </a>
+                </p>
+              </div>
+            )}
+          </div>
+
+          {publicUrl && (
+            <div className="url-section">
+              <h3 className="card-title">Public Access</h3>
+              <div className="url-display">
+                <div className="url-info">
+                  <label className="form_label">Public Gift Cards Page</label>
+                  <div className="url-text">{publicUrl}</div>
+                </div>
+                <button type="button" className="btn btn-outline" onClick={copyPublicLink}>
+                  Copy URL
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="action-row">
+            <button onClick={handleSaveSettings} disabled={saving} className="btn btn-primary">
+              {saving ? "Saving..." : "Save Business Profile"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-success"
+              disabled={downloading || !publicUrl}
+              onClick={downloadQrPoster}
+            >
+              {downloading ? "Generating..." : "Print Your Digital Ad"}
+            </button>
+            {settingsMessage && <span className="message success">{settingsMessage}</span>}
+          </div>
         </div>
+      </div>
+    </div>
   );
 
   const renderPaymentSection = () => (
     <div className="settings-section">
-          <div className="section-header">
-            <div className="section-icon">💳</div>
-            <div>
-              <h2 className="section-title">Payment Configuration</h2>
-              <p className="section-description">Set up Razorpay payments to receive customer payments directly</p>
+      <div className="section-header">
+        <div className="section-icon">💳</div>
+        <div>
+          <h2 className="section-title">Payment Configuration</h2>
+          <p className="section-description">Set up Razorpay payments to receive customer payments directly</p>
+        </div>
+      </div>
+
+      <div className="settings-card payment-card">
+        <div className="card-content">
+          <div className="setup-header">
+            <h3 className="card-title">Razorpay Payments Setup</h3>
+            <button
+              type="button"
+              className="btn btn-info"
+              onClick={() => setShowRazorpayInstructions(!showRazorpayInstructions)}
+            >
+              {showRazorpayInstructions ? "Hide" : "Show"} Setup Guide
+            </button>
+          </div>
+
+          {showRazorpayInstructions && (
+            <div className="setup-guide">
+              <h4>How to get your Razorpay credentials:</h4>
+              <ol className="setup-steps">
+                <li>
+                  Log into your{" "}
+                  <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer">
+                    Razorpay Dashboard
+                  </a>
+                </li>
+                <li>Go to "Settings" → "API Keys"</li>
+                <li>Copy your Key ID (e.g., rzp_test_... or rzp_live_...)</li>
+                <li>Click "Reveal Key Secret" to get your Key Secret</li>
+                <li>Copy both Key ID and Key Secret (keep them secure)</li>
+                <li>Paste them below to use your own Razorpay account</li>
+              </ol>
+              <p className="form-hint">
+                <strong>Note:</strong> If you leave these empty, the system will use global Razorpay credentials from
+                environment variables.
+              </p>
+            </div>
+          )}
+
+          <div className="form-grid">
+            <div className="form_group">
+              <label className="form_label">Razorpay Key ID</label>
+              <input
+                name="razorpayKeyId"
+                value={form.razorpayKeyId}
+                onChange={handleChange}
+                placeholder="rzp_test_... or rzp_live_..."
+                className="form-input"
+              />
+              <p className="form-hint">Your Razorpay Key ID (starts with rzp_test_ or rzp_live_)</p>
+            </div>
+
+            <div className="form_group">
+              <label className="form_label">Razorpay Key Secret</label>
+              <div className="input-with-action">
+                <input
+                  name="razorpayKeySecret"
+                  type={showRazorpayToken ? "text" : "password"}
+                  value={form.razorpayKeySecret}
+                  onChange={handleChange}
+                  placeholder="Enter your Razorpay Key Secret"
+                  className="form-input"
+                />
+                <button type="button" className="btn btn-outline" onClick={() => setShowRazorpayToken((s) => !s)}>
+                  {showRazorpayToken ? "Hide" : "Show"}
+                </button>
+              </div>
+              <p className="form-hint">We store this key securely and use it only to process your sales.</p>
             </div>
           </div>
 
-          <div className="settings-card payment-card">
-            <div className="card-content">
-              <div className="setup-header">
-                <h3 className="card-title">Razorpay Payments Setup</h3>
-                <button
-                  type="button"
-                  className="btn btn-info"
-                  onClick={() => setShowRazorpayInstructions(!showRazorpayInstructions)}
-                >
-                  {showRazorpayInstructions ? "Hide" : "Show"} Setup Guide
-                </button>
-              </div>
-
-              {showRazorpayInstructions && (
-                <div className="setup-guide">
-                  <h4>How to get your Razorpay credentials:</h4>
-                  <ol className="setup-steps">
-                    <li>
-                      Log into your{" "}
-                      <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer">
-                        Razorpay Dashboard
-                      </a>
-                    </li>
-                    <li>Go to "Settings" → "API Keys"</li>
-                    <li>Copy your Key ID (e.g., rzp_test_... or rzp_live_...)</li>
-                    <li>Click "Reveal Key Secret" to get your Key Secret</li>
-                    <li>Copy both Key ID and Key Secret (keep them secure)</li>
-                    <li>Paste them below to use your own Razorpay account</li>
-                  </ol>
-                  <p className="form-hint">
-                    <strong>Note:</strong> If you leave these empty, the system will use global Razorpay credentials from environment variables.
-                  </p>
-                </div>
-              )}
-
-              <div className="form-grid">
-                <div className="form_group">
-                  <label className="form_label">Razorpay Key ID</label>
-                  <input
-                    name="razorpayKeyId"
-                    value={form.razorpayKeyId}
-                    onChange={handleChange}
-                    placeholder="rzp_test_... or rzp_live_..."
-                    className="form-input"
-                  />
-                  <p className="form-hint">Your Razorpay Key ID (starts with rzp_test_ or rzp_live_)</p>
-                </div>
-
-                <div className="form_group">
-                  <label className="form_label">Razorpay Key Secret</label>
-                  <div className="input-with-action">
-                    <input
-                      name="razorpayKeySecret"
-                      type={showRazorpayToken ? "text" : "password"}
-                      value={form.razorpayKeySecret}
-                      onChange={handleChange}
-                      placeholder="Enter your Razorpay Key Secret"
-                      className="form-input"
-                    />
-                    <button type="button" className="btn btn-outline" onClick={() => setShowRazorpayToken((s) => !s)}>
-                      {showRazorpayToken ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                  <p className="form-hint">We store this key securely and use it only to process your sales.</p>
-                </div>
-              </div>
-
-              <div className="action-row">
-                <button onClick={handleSaveSettings} disabled={saving} className="btn btn-primary">
-                  {saving ? "Saving..." : "Save Payment Settings"}
-                </button>
-                {settingsMessage && <span className="message success">{settingsMessage}</span>}
-              </div>
-            </div>
+          <div className="action-row">
+            <button onClick={handleSaveSettings} disabled={saving} className="btn btn-primary">
+              {saving ? "Saving..." : "Save Payment Settings"}
+            </button>
+            {settingsMessage && <span className="message success">{settingsMessage}</span>}
           </div>
         </div>
+      </div>
+    </div>
   );
 
   // SQUARE API COMMENTED OUT - Payment Configuration Section
-        {/* <div className="settings-section">
+  {
+    /* <div className="settings-section">
           <div className="section-header">
             <div className="section-icon">💳</div>
             <div>
@@ -811,7 +1014,8 @@ const Settings = ({ section: sectionProp }) => {
               </div>
             </div>
           </div>
-        </div> */}
+        </div> */
+  }
 
   return (
     <div className="settings-page">

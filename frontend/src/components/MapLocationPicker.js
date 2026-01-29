@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./MapLocationPicker.css";
+import { getDetailedLocation } from "../utils/geolocationLanguage";
 
 const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) => {
   const mapContainer = useRef(null);
@@ -19,109 +20,19 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchAttempted, setSearchAttempted] = useState(false);
+  // Prevent multiple initial region lookups (React StrictMode, re-renders, etc.)
+  const hasInitializedFromRegion = useRef(false);
+  // Simple in‑memory cache to avoid repeated reverse‑geocoding for same coords
+  const addressCacheRef = useRef({});
 
- 
+
   const MAPBOX_TOKEN = "pk.eyJ1IjoiYW5pa2V0MTciLCJhIjoiY2xlZ3FwOW02MGJ0NTN4bWNhMXBqY25lcCJ9.qjfXDd_p2yjXQz3wa2w2UQ";
-  
-  // Get Google Maps API key from environment
-  // To get your Google Maps API key: https://console.cloud.google.com/google/maps-apis
-  // Add REACT_APP_GOOGLE_MAPS_API_KEY=your_key_here to frontend/.env file
-  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "";
-  
+
   const [mapError, setMapError] = useState(null);
+  const mapLoadTimeoutRef = useRef(null);
 
-  // Function to fetch address from Google Maps Geocoding API (PRIMARY - More Accurate)
-  const fetchAddressFromGoogle = useCallback(async (lat, lng) => {
-    if (!GOOGLE_MAPS_API_KEY) {
-      console.log("Google Maps API key not configured. Using Mapbox as fallback.");
-      return null;
-    }
-    
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_MAPS_API_KEY}&language=en&result_type=street_address|route|premise|subpremise|locality|administrative_area_level_1|postal_code`
-      );
-      const data = await response.json();
-      
-      if (data.status === "OK" && data.results && data.results.length > 0) {
-        // Use the first result which is usually the most accurate
-        const result = data.results[0];
-        const placeName = result.formatted_address || "";
-        setSelectedPlaceName(placeName);
-        
-        // Parse address components from Google's response
-        let streetNumber = "";
-        let route = "";
-        let city = "";
-        let state = "";
-        let zipCode = "";
-        let sublocality = "";
-        
-        result.address_components.forEach((component) => {
-          const types = component.types || [];
-          
-          if (types.includes("street_number")) {
-            streetNumber = component.long_name || component.short_name || "";
-          } else if (types.includes("route")) {
-            route = component.long_name || component.short_name || "";
-          } else if (types.includes("sublocality") || types.includes("sublocality_level_1") || types.includes("sublocality_level_2")) {
-            if (!sublocality) {
-              sublocality = component.long_name || component.short_name || "";
-            }
-          } else if (types.includes("locality")) {
-            city = component.long_name || component.short_name || "";
-          } else if (types.includes("administrative_area_level_2") && !city) {
-            city = component.long_name || component.short_name || "";
-          } else if (types.includes("administrative_area_level_1")) {
-            state = component.long_name || component.short_name || "";
-          } else if (types.includes("postal_code")) {
-            zipCode = component.long_name || component.short_name || "";
-          }
-        });
-        
-        // Combine street number and route for complete street address
-        let street = "";
-        if (streetNumber && route) {
-          street = `${streetNumber} ${route}`.trim();
-        } else if (route) {
-          street = route;
-        } else if (streetNumber) {
-          street = streetNumber;
-        }
-        
-        // If street is still empty, extract from formatted_address
-        if (!street && placeName) {
-          const parts = placeName.split(",");
-          if (parts.length > 0) {
-            // Take the first part which is usually the street address
-            street = parts[0].trim();
-          }
-        }
-        
-        // Use sublocality if city is not available
-        if (!city && sublocality) {
-          city = sublocality;
-        }
-        
-        console.log("Google Maps address fetched:", { street, city, state, zipCode, fullAddress: placeName });
-        
-        return {
-          street: street || "",
-          city: city || "",
-          state: state || "",
-          zipCode: zipCode || "",
-          fullAddress: placeName || "",
-        };
-      } else {
-        console.log("Google Maps geocoding returned status:", data.status);
-      }
-    } catch (error) {
-      console.error("Error fetching address from Google Maps:", error);
-    }
-    return null;
-  }, [GOOGLE_MAPS_API_KEY]);
-
-  // Function to fetch address from Mapbox (fallback)
+  // Function to fetch address from Mapbox
   const fetchAddressFromMapbox = useCallback(async (lat, lng) => {
     if (!MAPBOX_TOKEN) return null;
     try {
@@ -134,22 +45,30 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
         const placeName = feature.place_name || feature.text || "";
         setSelectedPlaceName(placeName);
         
-        // Parse address components from context
+        // Parse address components from context – we care mainly about
+        // city / state / country. We intentionally avoid street‑level
+        // precision here so the header shows a broader region instead
+        // of a full street address.
         const context = feature.context || [];
         let street = "";
         let city = "";
         let state = "";
         let zipCode = "";
-        
-        // Extract address components from context array
+        let country = "";
+
         context.forEach((item) => {
           const id = item.id || "";
           if (id.startsWith("address")) {
+            // Only treat explicit address context as street; do NOT
+            // fall back to feature.text so we don't turn town names
+            // into street names.
             street = item.text || "";
           } else if (id.startsWith("place")) {
             city = item.text || "";
           } else if (id.startsWith("region")) {
             state = item.text || "";
+          } else if (id.startsWith("country")) {
+            country = item.text || "";
           } else if (id.startsWith("postcode")) {
             zipCode = item.text || "";
           } else if (id.startsWith("district") && !city) {
@@ -158,14 +77,11 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
             city = item.text || "";
           }
         });
-        
-        // If street is not in context, try to get it from properties or feature text
-        if (!street && feature.properties && feature.properties.address) {
-          street = feature.properties.address;
-        } else if (!street && feature.text) {
-          street = feature.text;
-        }
-        
+
+        // If street is not in context, we deliberately do NOT derive it
+        // from feature.properties or feature.text to avoid overly
+        // specific street addresses for approximate regions.
+
         // If city is not found, try to extract from place_name
         if (!city && placeName) {
           const parts = placeName.split(",");
@@ -173,13 +89,18 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
             city = parts[parts.length - 2]?.trim() || "";
           }
         }
-        
+
+        // Build a simplified full address that focuses on city/state/country
+        const simpleFullAddress = [city, state, country]
+          .filter(Boolean)
+          .join(", ") || placeName || feature.text || "";
+
         return {
           street: street || "",
           city: city || "",
           state: state || "",
           zipCode: zipCode || "",
-          fullAddress: placeName || "",
+          fullAddress: simpleFullAddress,
         };
       }
     } catch (error) {
@@ -188,26 +109,192 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
     return null;
   }, [MAPBOX_TOKEN]);
 
-  // Main function to fetch full address details - ALWAYS tries Google first (more accurate), then Mapbox as fallback
-  const fetchFullAddress = useCallback(async (lat, lng) => {
-    // ALWAYS try Google Maps first (more accurate address data)
-    let address = await fetchAddressFromGoogle(lat, lng);
-    
-    // Only use Mapbox as fallback if Google completely fails or returns no data
-    if (!address) {
-      console.log("Google Maps failed, trying Mapbox as fallback...");
-      const mapboxAddress = await fetchAddressFromMapbox(lat, lng);
-      if (mapboxAddress) {
-        address = mapboxAddress;
-        console.log("Using Mapbox address as fallback:", address);
+  // Main function to fetch full address details using Mapbox only
+  const fetchFullAddress = useCallback(
+    async (lat, lng) => {
+      if (!lat || !lng) return null;
+
+      // Round to ~300m to avoid re‑geocoding nearly identical points
+      const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+
+      // 1. Check cache to avoid multiple API calls for same coordinates
+      if (addressCacheRef.current[key]) {
+        return addressCacheRef.current[key];
       }
-    } else {
-      // Google Maps succeeded - use it exclusively (don't merge with Mapbox)
-      console.log("Using Google Maps address (more accurate):", address);
+
+      // 2. Fetch from Mapbox once and cache
+      let address = await fetchAddressFromMapbox(lat, lng);
+
+      // 3. If Mapbox cannot give us a usable city/state (e.g. very
+      // rural / unknown place), fall back to broader region from the
+      // language/IP location data (state/country only).
+      if (!address || (!address.city && !address.state)) {
+        try {
+          const stored = localStorage.getItem("giftygen_user_location");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed) {
+              const fallbackCity = parsed.city || "";
+              const fallbackState = parsed.region || "";
+              const fallbackCountry = parsed.countryName || parsed.country || "";
+
+              address = {
+                street: "",
+                city: fallbackCity,
+                state: fallbackState,
+                zipCode: "",
+                fullAddress: [fallbackCity, fallbackState, fallbackCountry]
+                  .filter(Boolean)
+                  .join(", "),
+              };
+            }
+          }
+        } catch (e) {
+          console.log("Failed to build fallback state-level address:", e);
+        }
+      }
+
+      if (address) {
+        addressCacheRef.current[key] = address;
+        console.log("Using Mapbox address:", address);
+      }
+
+      return address;
+    },
+    [fetchAddressFromMapbox]
+  );
+
+  // Helper to update map, marker and address from coordinates
+  const updateLocationFromCoords = useCallback(
+    async (lat, lng) => {
+      const newLocation = { lat, lng };
+      setSelectedLocation(newLocation);
+
+      // Fetch full address
+      const address = await fetchFullAddress(lat, lng);
+      if (onLocationSelect) {
+        onLocationSelect(lat, lng, address);
+      }
+
+      if (map.current) {
+        // Ensure map is properly sized before updating
+        map.current.resize();
+        
+        // Update marker position
+        if (marker.current) {
+          marker.current.setLngLat([lng, lat]);
+        } else {
+          marker.current = new mapboxgl.Marker({
+            draggable: true,
+            color: "#6366f1",
+          })
+            .setLngLat([lng, lat])
+            .addTo(map.current);
+
+          marker.current.on("dragend", async () => {
+            const lngLat = marker.current.getLngLat();
+            const updatedLocation = {
+              lat: lngLat.lat,
+              lng: lngLat.lng,
+            };
+            setSelectedLocation(updatedLocation);
+
+            // Reverse geocode when marker is dragged
+            const dragAddress = await fetchFullAddress(
+              updatedLocation.lat,
+              updatedLocation.lng
+            );
+            if (onLocationSelect) {
+              onLocationSelect(
+                updatedLocation.lat,
+                updatedLocation.lng,
+                dragAddress
+              );
+            }
+
+            // Zoom to dragged location
+            map.current.flyTo({
+              center: [lngLat.lng, lngLat.lat],
+              zoom: 16,
+              duration: 800,
+            });
+          });
+        }
+
+        // Center and zoom map on user location (higher zoom shows more place names)
+        map.current.flyTo({
+          center: [lng, lat],
+          zoom: 16, // Increased zoom to show more place names
+          duration: 1000,
+        });
+      }
+    },
+    [fetchFullAddress, onLocationSelect]
+  );
+
+  // Fallback when precise geolocation is unavailable – use approximate region
+  // from where the website is accessed. Just zoom to state/region level without
+  // setting marker or fetching full address. User will pick exact location.
+  const fallbackToApproximateLocation = useCallback(async (force = false) => {
+    try {
+      setIsLocating(false);
+
+      // Avoid running multiple times on initial mount due to StrictMode
+      if (hasInitializedFromRegion.current && !force) {
+        return;
+      }
+
+      let candidateLocation = null;
+
+      // 1. Try stored location from language detection
+      try {
+        const stored = localStorage.getItem("giftygen_user_location");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (
+            parsed &&
+            typeof parsed.latitude === "number" &&
+            typeof parsed.longitude === "number"
+          ) {
+            candidateLocation = parsed;
+          }
+        }
+      } catch (e) {
+        console.log("Failed to read stored user location:", e);
+      }
+
+      // 2. If not available, call IP-based API
+      if (!candidateLocation) {
+        const ipLocation = await getDetailedLocation();
+        if (
+          ipLocation &&
+          typeof ipLocation.latitude === "number" &&
+          typeof ipLocation.longitude === "number"
+        ) {
+          candidateLocation = ipLocation;
+        }
+      }
+
+      if (candidateLocation && map.current) {
+        // Just zoom to state/region level (zoom 8-9) without setting marker or fetching address
+        // User will click on map to select exact location
+        map.current.flyTo({
+          center: [candidateLocation.longitude, candidateLocation.latitude],
+          zoom: 8, // State/region level zoom, not street level
+          duration: 1000,
+        });
+        hasInitializedFromRegion.current = true;
+        // Map is now centered on the approximate region from which the website is accessed.
+        // No marker set, no address lookup - user picks exact location.
+      } else {
+        console.warn(
+          "Approximate region detection did not return coordinates; user must pick manually on map."
+        );
+      }
+    } catch (fallbackError) {
+      console.error("Approximate region fallback failed:", fallbackError);
     }
-    
-    return address;
-  }, [fetchAddressFromGoogle, fetchAddressFromMapbox]);
+  }, []);
 
   useEffect(() => {
     // Check for required API keys
@@ -216,16 +303,22 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
       setIsLoading(false);
       return;
     }
-    
-    // Warn if Google Maps API key is not set (addresses will be less accurate)
-    if (!GOOGLE_MAPS_API_KEY) {
-      console.warn("Google Maps API key not configured. Address accuracy may be reduced. Add REACT_APP_GOOGLE_MAPS_API_KEY to your .env file for better address data.");
-    }
 
     if (!mapContainer.current) {
       console.log("Map container not ready yet");
       return;
     }
+
+    // Set a timeout to force loading to stop after 10 seconds
+    mapLoadTimeoutRef.current = setTimeout(() => {
+      if (isLoading) {
+        console.warn("Map loading timeout - forcing loading state to complete");
+        setIsLoading(false);
+        if (!map.current) {
+          setMapError("Map failed to load. Please refresh the page and try again.");
+        }
+      }
+    }, 10000);
 
     try {
       // Initialize map
@@ -242,7 +335,11 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
         zoom: latitude && longitude ? 15 : 10, // Increased default zoom to show more place names
         minZoom: 3,
         maxZoom: 18,
+        preserveDrawingBuffer: true,
+        attributionControl: true,
       });
+
+      console.log("Map initialized with center:", initialCenter);
 
       // Ensure labels are visible by waiting for map to load
       map.current.on("style.load", () => {
@@ -374,59 +471,6 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
         });
       });
 
-      // Helper function to handle location update (defined before use)
-      const updateLocationFromCoords = async (lat, lng) => {
-        const newLocation = { lat, lng };
-        setSelectedLocation(newLocation);
-
-        // Fetch full address
-        const address = await fetchFullAddress(lat, lng);
-        if (onLocationSelect) {
-          onLocationSelect(lat, lng, address);
-        }
-
-        // Update marker position
-        if (marker.current) {
-          marker.current.setLngLat([lng, lat]);
-        } else {
-          marker.current = new mapboxgl.Marker({
-            draggable: true,
-            color: "#6366f1",
-          })
-            .setLngLat([lng, lat])
-            .addTo(map.current);
-
-          marker.current.on("dragend", async () => {
-            const lngLat = marker.current.getLngLat();
-            const updatedLocation = {
-              lat: lngLat.lat,
-              lng: lngLat.lng,
-            };
-            setSelectedLocation(updatedLocation);
-            
-            // Reverse geocode when marker is dragged
-            const address = await fetchFullAddress(updatedLocation.lat, updatedLocation.lng);
-            if (onLocationSelect) {
-              onLocationSelect(updatedLocation.lat, updatedLocation.lng, address);
-            }
-            
-            // Zoom to dragged location
-            map.current.flyTo({
-              center: [lngLat.lng, lngLat.lat],
-              zoom: 16,
-              duration: 800,
-            });
-          });
-        }
-
-        // Center and zoom map on user location (higher zoom shows more place names)
-        map.current.flyTo({
-          center: [lng, lat],
-          zoom: 16, // Increased zoom to show more place names
-          duration: 1000,
-        });
-      };
-
       // Handle geolocate events from Mapbox control
       geolocate.on("geolocate", (e) => {
         const { coords } = e;
@@ -449,57 +493,106 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
       geolocate.on("error", (e) => {
         console.log("Geolocation error:", e);
         setIsLocating(false);
-        // Fallback to browser geolocation API
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              updateLocationFromCoords(position.coords.latitude, position.coords.longitude);
-              setIsLocating(false);
-            },
-            (error) => {
-              console.log("Browser geolocation also failed:", error.message);
-              setIsLocating(false);
-              alert("Could not access your location. Please allow location access in your browser settings or click on the map to set your location manually.");
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0,
-            }
-          );
-        }
+        // Prefer approximate IP-based region when precise geolocation fails
+        fallbackToApproximateLocation(true);
       });
 
-      map.current.on("load", () => {
+      // Listen to multiple events to ensure we catch when map is ready
+      const handleMapReady = () => {
+        // Clear the timeout since map loaded successfully
+        if (mapLoadTimeoutRef.current) {
+          clearTimeout(mapLoadTimeoutRef.current);
+          mapLoadTimeoutRef.current = null;
+        }
         setIsLoading(false);
         
-        // Automatically trigger geolocation if no initial location is provided
+        // Force resize to ensure map renders properly in its container
+        setTimeout(() => {
+          if (map.current) {
+            map.current.resize();
+          }
+        }, 100);
+        
+        // If no explicit coordinates are provided, center map on approximate
+        // region based on where the website is accessed (IP-based API).
         if (!latitude || !longitude) {
-          // Small delay to ensure map is fully loaded
+          // Small delay to ensure map is fully loaded before flyTo
           setTimeout(() => {
-            // Programmatically trigger the geolocate control
-            try {
-              geolocate.trigger();
-            } catch (error) {
-              console.log("Could not auto-trigger geolocate:", error);
-            }
+            fallbackToApproximateLocation();
           }, 500);
         }
+      };
+
+      map.current.on("load", handleMapReady);
+      
+      // Fallback: also listen to style.load which fires earlier
+      map.current.on("style.load", () => {
+        // Give it a moment for tiles to start loading
+        setTimeout(() => {
+          if (isLoading) {
+            handleMapReady();
+          }
+        }, 1000);
       });
 
     } catch (error) {
       console.error("Error initializing map:", error);
       setMapError("Failed to initialize map. Please check your Mapbox token.");
       setIsLoading(false);
+      // Clear timeout on error
+      if (mapLoadTimeoutRef.current) {
+        clearTimeout(mapLoadTimeoutRef.current);
+        mapLoadTimeoutRef.current = null;
+      }
+    }
+
+    // Add error handler for map
+    if (map.current) {
+      map.current.on("error", (e) => {
+        console.error("Map error:", e);
+        // Don't show error for tile loading failures, just log them
+        if (e.error && e.error.status === 404) {
+          console.warn("Some map tiles failed to load, but map should still work");
+        }
+        setIsLoading(false);
+        if (mapLoadTimeoutRef.current) {
+          clearTimeout(mapLoadTimeoutRef.current);
+          mapLoadTimeoutRef.current = null;
+        }
+      });
+
+      // Add handler for when tiles start loading
+      map.current.on("data", (e) => {
+        if (e.dataType === "source" && e.isSourceLoaded) {
+          // Source loaded, map should be rendering
+          console.log("Map source loaded");
+        }
+      });
+
+      // Add idle handler to detect when map is fully rendered
+      map.current.on("idle", () => {
+        console.log("Map is idle and fully rendered");
+      });
     }
 
     // Cleanup
     return () => {
+      // Clear timeout on cleanup
+      if (mapLoadTimeoutRef.current) {
+        clearTimeout(mapLoadTimeoutRef.current);
+        mapLoadTimeoutRef.current = null;
+      }
+      // Clear search timeout
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
       if (map.current) {
         map.current.remove();
       }
     };
-  }, [latitude, longitude, MAPBOX_TOKEN, GOOGLE_MAPS_API_KEY, fetchFullAddress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [latitude, longitude, MAPBOX_TOKEN]);
 
   // Debounced search function
   const searchTimeoutRef = useRef(null);
@@ -514,33 +607,57 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
     if (!query || query.length < 2 || !MAPBOX_TOKEN) {
       setSearchResults([]);
       setShowSearchResults(false);
+      setSearchAttempted(false);
       return;
     }
 
     // Debounce search to avoid too many API calls
     searchTimeoutRef.current = setTimeout(async () => {
+      setSearchAttempted(true);
       try {
         const response = await fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&types=poi,address,place&limit=5`
         );
+        
+        if (!response.ok) {
+          console.error("Search API error:", response.status, response.statusText);
+          setSearchResults([]);
+          setShowSearchResults(true); // Show dropdown to display "no results"
+          return;
+        }
+        
         const data = await response.json();
-        if (data.features) {
+        if (data.features && data.features.length > 0) {
           setSearchResults(data.features);
           setShowSearchResults(true);
+        } else {
+          // No results found
+          setSearchResults([]);
+          setShowSearchResults(true); // Show dropdown to display "no results"
+          console.log("No search results found for:", query);
         }
       } catch (error) {
-        console.log("Search error:", error);
+        console.error("Search error:", error);
+        setSearchResults([]);
+        setShowSearchResults(true); // Show dropdown to display error
       }
     }, 300); // 300ms debounce
   };
 
   const handleSearchResultClick = async (result) => {
+    // Stop any ongoing searches
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = null;
+    }
+    
     const [lng, lat] = result.center;
     const placeName = result.place_name || result.text || "";
     
     setSelectedPlaceName(placeName);
     setSearchQuery(placeName);
     setShowSearchResults(false);
+    setSearchAttempted(false);
     
     // Update location first
     const newLocation = { lat, lng };
@@ -665,10 +782,9 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
               }
               setIsLocating(false);
             },
-            (error) => {
+            async (error) => {
               console.log("Geolocation error:", error);
-              setIsLocating(false);
-              alert("Could not access your location. Please allow location access in your browser settings.");
+              await fallbackToApproximateLocation(true);
             },
             {
               enableHighAccuracy: true,
@@ -676,8 +792,7 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
             }
           );
         } else {
-          setIsLocating(false);
-          alert("Geolocation is not supported by your browser.");
+          fallbackToApproximateLocation(true);
         }
       }
     } else {
@@ -713,10 +828,9 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
             }
             setIsLocating(false);
           },
-          (error) => {
+          async (error) => {
             console.log("Geolocation error:", error);
-            setIsLocating(false);
-            alert("Could not access your location. Please allow location access in your browser settings.");
+            await fallbackToApproximateLocation(true);
           },
           {
             enableHighAccuracy: true,
@@ -724,8 +838,7 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
           }
         );
       } else {
-        setIsLocating(false);
-        alert("Geolocation is not supported by your browser.");
+        fallbackToApproximateLocation(true);
       }
     }
   };
@@ -822,27 +935,38 @@ const MapLocationPicker = ({ latitude, longitude, onLocationSelect, onClose }) =
                 setTimeout(() => setShowSearchResults(false), 200);
               }}
             />
-            {showSearchResults && searchResults.length > 0 && (
+            {showSearchResults && (
               <div className="map-search-results">
-                {searchResults.map((result, index) => (
-                  <div
-                    key={index}
-                    className="map-search-result-item"
-                    onMouseDown={(e) => {
-                      e.preventDefault(); // Prevent input blur
-                      handleSearchResultClick(result);
-                    }}
-                  >
-                    <div className="map-search-result-name">
-                      {result.text || result.place_name}
-                    </div>
-                    {result.place_name && result.place_name !== result.text && (
-                      <div className="map-search-result-address">
-                        {result.place_name}
+                {searchResults.length > 0 ? (
+                  searchResults.map((result, index) => (
+                    <div
+                      key={index}
+                      className="map-search-result-item"
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent input blur
+                        handleSearchResultClick(result);
+                      }}
+                    >
+                      <div className="map-search-result-name">
+                        {result.text || result.place_name}
                       </div>
-                    )}
+                      {result.place_name && result.place_name !== result.text && (
+                        <div className="map-search-result-address">
+                          {result.place_name}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : searchAttempted && searchQuery.length >= 2 ? (
+                  <div className="map-search-result-item" style={{ 
+                    color: "#94a3b8", 
+                    fontStyle: "italic",
+                    cursor: "default",
+                    textAlign: "center"
+                  }}>
+                    No locations found for "{searchQuery}". Try clicking on the map or using "Use My Location".
                   </div>
-                ))}
+                ) : null}
               </div>
             )}
           </div>

@@ -13,6 +13,7 @@ const restaurantAdminSchema = new mongoose.Schema(
     restaurantName: { type: String }, // Name of the restaurant
     businessSlug: { type: String, unique: true, sparse: true }, // URL-friendly business identifier
     logoUrl: { type: String }, // Business logo stored on Cloudinary
+    galleryImages: [{ type: String }], // Up to 10 additional business photos (Cloudinary URLs)
     industry: { type: String }, // Industry category
     businessDescription: { type: String }, // Business description
     restaurantAddress: {

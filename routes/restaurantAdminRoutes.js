@@ -9,6 +9,7 @@ const {
   logout,
   updateBusinessSettings,
   uploadBusinessLogo,
+  uploadBusinessPhotos,
   generateQrPoster,
   captureRegistrationInterest,
   changePassword,
@@ -16,6 +17,7 @@ const {
   submitContactForm,
   getIndustries,
   getBusinessesByIndustry,
+  getAllBusinesses,
 } = require("../controllers/restaurantAdminController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const upload = require("../middleware/multer");
@@ -55,6 +57,15 @@ router.put("/change-password", isAuthenticatedUser, authorizeRoles("Admin"), cha
 // Upload logo
 router.post("/settings/logo", isAuthenticatedUser, authorizeRoles("Admin"), upload.single("logo"), uploadBusinessLogo);
 
+// Upload additional business photos (up to 10)
+router.post(
+  "/settings/photos",
+  isAuthenticatedUser,
+  authorizeRoles("Admin"),
+  upload.array("photos", 10),
+  uploadBusinessPhotos,
+);
+
 // Generate QR poster
 router.get("/settings/qr-poster", isAuthenticatedUser, authorizeRoles("Admin"), generateQrPoster);
 
@@ -66,5 +77,8 @@ router.get("/industries", getIndustries);
 
 // Public endpoint to get businesses by industry
 router.get("/industries/:industry", getBusinessesByIndustry);
+
+// Public endpoint to get all businesses
+router.get("/businesses", getAllBusinesses);
 
 module.exports = router;

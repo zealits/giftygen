@@ -107,6 +107,8 @@ export const fetchBusinessBySlug = (businessSlug) => async (dispatch) => {
       type: FETCH_BUSINESS_FAIL,
       payload: error.response?.data?.message || "Failed to fetch business information",
     });
-    throw error;
+    // Do not rethrow here; let the Redux state capture the error
+    // Rethrowing causes unhandled promise rejections in components using this action
+    console.error("fetchBusinessBySlug failed:", error);
   }
 };

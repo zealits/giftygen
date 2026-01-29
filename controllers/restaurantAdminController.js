@@ -2,7 +2,12 @@ const RestaurantAdmin = require("../models/restaurantAdminSchema");
 const RegistrationRequest = require("../models/registrationRequestSchema");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
-const { sendEmail, sendRegistrationConfirmationEmail, sendAdminNotificationEmail, sendContactFormEmail } = require("../utils/sendEmail"); // Utility for sending emails
+const {
+  sendEmail,
+  sendRegistrationConfirmationEmail,
+  sendAdminNotificationEmail,
+  sendContactFormEmail,
+} = require("../utils/sendEmail"); // Utility for sending emails
 const catchAsyncErrors = require("../middleware/catchAsyncErrors"); // Middleware for handling async errors
 const sendToken = require("../utils/jwtToken");
 const ErrorHander = require("../utils/errorhander");
@@ -341,22 +346,22 @@ exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
   console.log(req.cookies);
   const user = await RestaurantAdmin.findById(req.user.id);
   console.log("adfd df : ", user);
-  
+
   // Create a safe user object for frontend (decrypt keys for display)
   const userObj = user.toObject();
-  
+
   // Decrypt Razorpay keys for display (if they exist)
   if (userObj.razorpayKeyId) {
     userObj.razorpayKeyId = user.getDecryptedRazorpayKeyId() || userObj.razorpayKeyId;
   }
-  
+
   // For security, only show masked version of key secret (or decrypted if user is viewing settings)
   if (userObj.razorpayKeySecret) {
     const decryptedSecret = user.getDecryptedRazorpayKeySecret();
     // Show decrypted version for settings page (user needs to see what they entered)
     userObj.razorpayKeySecret = decryptedSecret || userObj.razorpayKeySecret;
   }
-  
+
   res.status(200).json({
     success: true,
     user: userObj,
@@ -379,15 +384,16 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
 // Update business settings (name, slug, square config, razorpay config)
 exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
   // SQUARE FIELDS COMMENTED OUT
-  const { 
-    restaurantName, 
-    businessSlug, 
+  const {
+    restaurantName,
+    businessSlug,
     industry,
     businessDescription,
     restaurantAddress,
-    razorpayKeyId, 
-    razorpayKeySecret 
-    /* , squareApplicationId, squareLocationId, squareAccessToken */ 
+    galleryImages,
+    razorpayKeyId,
+    razorpayKeySecret,
+    /* , squareApplicationId, squareLocationId, squareAccessToken */
   } = req.body;
   const admin = await RestaurantAdmin.findById(req.user.id);
   if (!admin) {
@@ -398,7 +404,12 @@ exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
   if (businessSlug) admin.businessSlug = businessSlug;
   if (industry !== undefined) admin.industry = industry;
   if (businessDescription !== undefined) admin.businessDescription = businessDescription;
-  
+
+  // Update gallery images if provided (for removal operations)
+  if (Array.isArray(galleryImages)) {
+    admin.galleryImages = galleryImages.slice(0, 10);
+  }
+
   // Update restaurant address if provided
   if (restaurantAddress) {
     if (!admin.restaurantAddress) {
@@ -411,12 +422,12 @@ exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
     if (restaurantAddress.latitude !== undefined) admin.restaurantAddress.latitude = restaurantAddress.latitude;
     if (restaurantAddress.longitude !== undefined) admin.restaurantAddress.longitude = restaurantAddress.longitude;
   }
-  
+
   // SQUARE API COMMENTED OUT
   // if (squareApplicationId !== undefined) admin.squareApplicationId = squareApplicationId;
   // if (squareLocationId !== undefined) admin.squareLocationId = squareLocationId;
   // if (squareAccessToken !== undefined) admin.squareAccessToken = squareAccessToken;
-  
+
   // Razorpay (per-business) configuration
   if (razorpayKeyId !== undefined) admin.razorpayKeyId = razorpayKeyId;
   if (razorpayKeySecret !== undefined) admin.razorpayKeySecret = razorpayKeySecret;
@@ -425,13 +436,18 @@ exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
 
   // Create a safe user object for response (decrypt keys for display)
   const userObj = admin.toObject();
-  
+
   // Decrypt Razorpay keys for display
   if (userObj.razorpayKeyId) {
     userObj.razorpayKeyId = admin.getDecryptedRazorpayKeyId() || userObj.razorpayKeyId;
   }
   if (userObj.razorpayKeySecret) {
     userObj.razorpayKeySecret = admin.getDecryptedRazorpayKeySecret() || userObj.razorpayKeySecret;
+  }
+
+  // Ensure galleryImages is included
+  if (!userObj.galleryImages) {
+    userObj.galleryImages = [];
   }
 
   res.status(200).json({ success: true, user: userObj });
@@ -464,6 +480,49 @@ exports.uploadBusinessLogo = catchAsyncErrors(async (req, res, next) => {
   await admin.save();
 
   return res.status(200).json({ success: true, logoUrl: admin.logoUrl });
+});
+
+// Upload up to 10 additional business photos to Cloudinary and save URLs
+exports.uploadBusinessPhotos = catchAsyncErrors(async (req, res, next) => {
+  const admin = await RestaurantAdmin.findById(req.user.id);
+  if (!admin) {
+    return next(new ErrorHander("Admin not found", 404));
+  }
+
+  const files = req.files || [];
+  if (!files.length) {
+    return res.status(400).json({ success: false, message: "No files uploaded" });
+  }
+
+  // Ensure existing array
+  if (!Array.isArray(admin.galleryImages)) {
+    admin.galleryImages = [];
+  }
+
+  const uploadedUrls = [];
+
+  for (const file of files) {
+    const uniqueFilename = `${Date.now()}-${file.originalname}`;
+    const result = await cloudinary.uploader.upload(file.path, {
+      public_id: `business_photos/${uniqueFilename}`,
+      resource_type: "image",
+      folder: "business_photos",
+    });
+
+    uploadedUrls.push(result.secure_url);
+
+    // Cleanup temp file
+    try {
+      fs.unlinkSync(file.path);
+    } catch (e) {}
+  }
+
+  // Append new images but cap total at 10
+  const combined = [...admin.galleryImages, ...uploadedUrls];
+  admin.galleryImages = combined.slice(0, 10);
+  await admin.save();
+
+  return res.status(200).json({ success: true, galleryImages: admin.galleryImages });
 });
 
 // Generate a QR poster PNG (base64) for the business giftcards link with branding
@@ -538,9 +597,9 @@ exports.generateQrPoster = catchAsyncErrors(async (req, res, next) => {
      <text x="0" y="${
        embeddedLogo ? "-480" : "-580"
      }" font-size="56" font-family="Arial, Helvetica, sans-serif" font-weight="700" fill="#111827" text-anchor="middle">${businessName.replace(
-    /&/g,
-    "&amp;"
-  )}</text>
+       /&/g,
+       "&amp;",
+     )}</text>
     
          <!-- Subtitle - centered -->
      <text x="0" y="${
@@ -554,13 +613,13 @@ exports.generateQrPoster = catchAsyncErrors(async (req, res, next) => {
      
      <!-- QR code - centered -->
      <image href="${qrDataUrl}" x="${-qrSizePx / 2}" y="${
-    embeddedLogo ? "-330" : "-430"
-  }" height="${qrSizePx}" width="${qrSizePx}"/>
+       embeddedLogo ? "-330" : "-430"
+     }" height="${qrSizePx}" width="${qrSizePx}"/>
     
     <!-- Link text - centered -->
     <text x="0" y="520" font-size="24" font-family="Arial, Helvetica, sans-serif" fill="#6B7280" text-anchor="middle">${link.replace(
       /&/g,
-      "&amp;"
+      "&amp;",
     )}</text>
     
     <!-- Divider line -->
@@ -624,7 +683,7 @@ exports.getBusinessBySlug = catchAsyncErrors(async (req, res, next) => {
     const business = await RestaurantAdmin.findOne({
       businessSlug,
       isVerified: true,
-    }).select("restaurantName logoUrl businessSlug restaurantAddress");
+    }).select("restaurantName logoUrl businessSlug restaurantAddress galleryImages businessDescription industry");
 
     if (!business) {
       return next(new ErrorHander("Business not found", 404));
@@ -637,6 +696,9 @@ exports.getBusinessBySlug = catchAsyncErrors(async (req, res, next) => {
         logoUrl: business.logoUrl,
         businessSlug: business.businessSlug,
         address: business.restaurantAddress,
+        galleryImages: business.galleryImages || [],
+        description: business.businessDescription,
+        industry: business.industry,
       },
     });
   } catch (error) {
@@ -693,6 +755,34 @@ exports.getBusinessesByIndustry = catchAsyncErrors(async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error fetching businesses by industry:", error);
+    return next(new ErrorHander(error.message, 500));
+  }
+});
+
+// Get all businesses (public endpoint)
+exports.getAllBusinesses = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const businesses = await RestaurantAdmin.find({
+      isVerified: true,
+    })
+      .select("restaurantName logoUrl businessSlug restaurantAddress businessDescription industry")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      businesses: businesses.map((business) => ({
+        id: business.businessSlug,
+        name: business.restaurantName,
+        description: business.businessDescription,
+        location: business.restaurantAddress?.city || business.restaurantAddress?.state || "Location not specified",
+        logoUrl: business.logoUrl,
+        businessSlug: business.businessSlug,
+        address: business.restaurantAddress,
+        industry: business.industry,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching all businesses:", error);
     return next(new ErrorHander(error.message, 500));
   }
 });
