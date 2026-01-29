@@ -260,17 +260,29 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .enhanced-search-container {
-    padding: 0 12px;
+    padding: 0;
   }
 
   .enhanced-search-bar {
     flex-direction: column;
-    border-radius: 10px;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   }
 
   .location-section {
-    padding: 12px 14px;
-    border-bottom: 1px solid #f3f4f6;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--explore-border, #f3f4f6);
+    border-radius: 14px 14px 0 0;
+    min-height: 52px;
+  }
+
+  .location-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .location-text {
+    font-size: 14px;
   }
 
   .search-divider {
@@ -278,35 +290,67 @@
   }
 
   .search-section {
-    padding: 12px 14px;
+    padding: 14px 16px;
+    border-radius: 0 0 14px 14px;
+    min-height: 52px;
+  }
+
+  .search-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .search-input {
+    font-size: 14px;
   }
 
   .location-dropdown {
     min-width: 100%;
+    max-width: calc(100vw - 32px);
+    left: 0;
+    right: 0;
   }
 
-  .location-text {
-    font-size: 13px;
+  .detect-location-option {
+    padding: 14px 16px;
+    min-height: 50px;
   }
 
-  .search-input {
-    font-size: 13px;
+  .recent-location-item {
+    padding: 12px 16px;
+    min-height: 48px;
+  }
+
+  .recent-locations-title {
+    padding: 10px 16px 8px;
   }
 }
 
 @media (max-width: 480px) {
   .enhanced-search-bar {
-    border-radius: 8px;
+    border-radius: 12px;
   }
 
-  .location-section,
+  .location-section {
+    padding: 12px 14px;
+    min-height: 48px;
+    border-radius: 12px 12px 0 0;
+  }
+
   .search-section {
-    padding: 11px 12px;
+    padding: 12px 14px;
+    min-height: 48px;
+    border-radius: 0 0 12px 12px;
   }
 
-  .detect-location-option,
+  .detect-location-option {
+    padding: 12px 14px;
+    min-height: 48px;
+  }
+
   .recent-location-item {
-    padding: 10px 14px;
+    padding: 11px 14px;
+    min-height: 46px;
   }
 
   .detect-title,
@@ -322,7 +366,7 @@
 
   .recent-locations-title {
     font-size: 12px;
-    padding: 6px 14px;
+    padding: 8px 14px;
   }
 }
 

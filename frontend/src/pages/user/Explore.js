@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Explore.css";
 import logo from "../../assets/giftygen_logo.svg";
 import logoWhiteBg from "../../assets/giftgen_whitebg_logo.png";
 import EnhancedSearchBar from "../../components/EnhancedSearchBar";
+import { BusinessCardSkeleton, IndustryChipSkeleton } from "../../components/SkeletonLoader";
 import { getDetailedLocation } from "../../utils/geolocationLanguage";
 import {
   UtensilsCrossed,
@@ -97,13 +98,19 @@ function Explore() {
   const [industries, setIndustries] = useState([]);
   const [businesses, setBusinesses] = useState([]);
   const [filteredBusinesses, setFilteredBusinesses] = useState([]);
+  const [displayedBusinesses, setDisplayedBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [userLocation, setUserLocation] = useState(null);
   const [detectedRegion, setDetectedRegion] = useState(null);
   const [locationError, setLocationError] = useState(null);
   const [availableLocations, setAvailableLocations] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef();
+  const ITEMS_PER_PAGE = 9;
 
   // Fetch industries and businesses from API
   useEffect(() => {
@@ -304,7 +311,40 @@ function Explore() {
     }
 
     setFilteredBusinesses(businessesWithDistance);
+    setPage(1); // Reset pagination when filters change
+    setHasMore(true);
   }, [searchQuery, selectedLocation, businesses, userLocation, detectedRegion]);
+
+  // Implement lazy loading with pagination
+  useEffect(() => {
+    const startIndex = 0;
+    const endIndex = page * ITEMS_PER_PAGE;
+    const newDisplayedBusinesses = filteredBusinesses.slice(startIndex, endIndex);
+
+    setDisplayedBusinesses(newDisplayedBusinesses);
+    setHasMore(endIndex < filteredBusinesses.length);
+  }, [filteredBusinesses, page]);
+
+  // Infinite scroll observer
+  const lastBusinessElementRef = useCallback(
+    (node) => {
+      if (loading || loadingMore) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setLoadingMore(true);
+          setTimeout(() => {
+            setPage((prevPage) => prevPage + 1);
+            setLoadingMore(false);
+          }, 500); // Simulate loading delay for smooth UX
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [loading, loadingMore, hasMore],
+  );
 
   const handleIndustryClick = (industryName) => {
     navigate(`/explore/${encodeURIComponent(industryName)}`);
@@ -356,9 +396,11 @@ function Explore() {
         <div className="explore-industries-row__container">
           <div className="explore-industries-row__scroll">
             {loading ? (
-              <div className="explore-empty-inline">
-                <p>Loading industries...</p>
-              </div>
+              <>
+                {[...Array(6)].map((_, index) => (
+                  <IndustryChipSkeleton key={index} />
+                ))}
+              </>
             ) : industries.length > 0 ? (
               industries.map((industry) => {
                 const IconComponent = industry.icon;
@@ -417,47 +459,66 @@ function Explore() {
           </div>
 
           {loading ? (
-            <div className="explore-empty">
-              <p>Loading businesses...</p>
-            </div>
-          ) : filteredBusinesses.length > 0 ? (
             <div className="explore-businesses__grid">
-              {filteredBusinesses.map((business) => (
-                <div
-                  key={business.id}
-                  className="explore-business-card"
-                  onClick={() => handleBusinessClick(business.businessSlug)}
-                >
-                  {business.logoUrl ? (
-                    <div className="explore-business-card__logo">
-                      <img src={business.logoUrl} alt={business.name} />
-                    </div>
-                  ) : (
-                    <div className="explore-business-card__icon">
-                      <Store size={28} />
-                    </div>
-                  )}
-                  <div className="explore-business-card__content">
-                    <h3 className="explore-business-card__title">{business.name}</h3>
-                    {business.description && (
-                      <p className="explore-business-card__description">{business.description}</p>
-                    )}
-                    <div className="explore-business-card__meta">
-                      <div className="explore-business-card__location">
-                        <MapPin size={14} />
-                        <span>{business.location}</span>
-                      </div>
-                      {business.industry && <div className="explore-business-card__industry">{business.industry}</div>}
-                    </div>
-                  </div>
-                  <div className="explore-business-card__footer">
-                    <span className="explore-business-card__cta">
-                      View Details <ArrowRight size={16} />
-                    </span>
-                  </div>
-                </div>
+              {[...Array(9)].map((_, index) => (
+                <BusinessCardSkeleton key={index} />
               ))}
             </div>
+          ) : filteredBusinesses.length > 0 ? (
+            <>
+              <div className="explore-businesses__grid">
+                {displayedBusinesses.map((business, index) => {
+                  const isLastElement = displayedBusinesses.length === index + 1;
+                  return (
+                    <div
+                      key={business.id}
+                      ref={isLastElement ? lastBusinessElementRef : null}
+                      className="explore-business-card"
+                      onClick={() => handleBusinessClick(business.businessSlug)}
+                    >
+                      {business.logoUrl ? (
+                        <div className="explore-business-card__logo">
+                          <img src={business.logoUrl} alt={business.name} />
+                        </div>
+                      ) : (
+                        <div className="explore-business-card__icon">
+                          <Store size={28} />
+                        </div>
+                      )}
+                      <div className="explore-business-card__content">
+                        <h3 className="explore-business-card__title">{business.name}</h3>
+                        {business.description && (
+                          <p className="explore-business-card__description">{business.description}</p>
+                        )}
+                        <div className="explore-business-card__meta">
+                          <div className="explore-business-card__location">
+                            <MapPin size={14} />
+                            <span>{business.location}</span>
+                          </div>
+                          {business.industry && (
+                            <div className="explore-business-card__industry">{business.industry}</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="explore-business-card__footer">
+                        <span className="explore-business-card__cta">
+                          View Details <ArrowRight size={16} />
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Loading more skeleton cards */}
+              {loadingMore && (
+                <div className="explore-businesses__grid" style={{ marginTop: "28px" }}>
+                  {[...Array(3)].map((_, index) => (
+                    <BusinessCardSkeleton key={`loading-${index}`} />
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
             <div className="explore-empty">
               <Store size={48} />
