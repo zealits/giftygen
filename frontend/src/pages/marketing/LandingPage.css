@@ -318,7 +318,7 @@
 
 .lp-nav__dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: 100%;
   left: 0;
   min-width: 240px;
   backdrop-filter: saturate(140%) blur(20px);
