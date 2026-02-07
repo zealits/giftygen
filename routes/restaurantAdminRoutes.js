@@ -4,6 +4,7 @@ const {
   registerRestaurantAdmin,
   loginRestaurantAdmin,
   requestPasswordReset,
+  resetPassword,
   verifyOTP,
   getUserDetails,
   logout,
@@ -36,6 +37,9 @@ router.post("/login", loginRestaurantAdmin);
 router.get("/me", isAuthenticatedUser, getUserDetails);
 // Route to request password reset
 router.post("/password-reset", requestPasswordReset);
+
+// Route to reset password with token
+router.put("/password-reset/:token", resetPassword);
 
 // Route to verify OTP
 router.post("/verify-otp", verifyOTP);

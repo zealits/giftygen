@@ -8,6 +8,7 @@ import "./App.css";
 // Lazy load components
 const Login = lazy(() => import("./components/Auth/Login"));
 const Register = lazy(() => import("./components/Register"));
+const ResetPassword = lazy(() => import("./components/Auth/ResetPassword"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.js"));
 const UserLanding = lazy(() => import("./pages/user/UserLanding.js"));
 const UnderConstruction = lazy(() => import("./pages/user/UnderConstruction.js"));
@@ -60,6 +61,7 @@ function AppRoutes() {
           element={user ? <Navigate to={userDetails?.role === "Admin" ? "/dashboard" : "/oldexplore"} /> : <Login />}
         />
         <Route path="/register" element={<Register />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {userDetails?.role === "Admin" && (
           <>

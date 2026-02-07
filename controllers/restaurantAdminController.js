@@ -8,6 +8,7 @@ const {
   sendAdminNotificationEmail,
   sendContactFormEmail,
   sendCredentialsEmail,
+  sendPasswordResetEmail,
 } = require("../utils/sendEmail"); // Utility for sending emails
 const catchAsyncErrors = require("../middleware/catchAsyncErrors"); // Middleware for handling async errors
 const sendToken = require("../utils/jwtToken");
@@ -198,26 +199,91 @@ exports.loginRestaurantAdmin = async (req, res) => {
   }
 };
 
-// Password Reset - Request Token
+// Password Reset - Request Token (send reset link via email if registered)
 exports.requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check if admin exists
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+
+    // Check if admin exists (registered user)
     const admin = await RestaurantAdmin.findOne({ email });
     if (!admin) {
-      return res.status(404).json({ success: false, message: "Admin not found" });
+      // Return same success message for security (don't reveal if email exists)
+      return res.status(200).json({
+        success: true,
+        message: "If an account exists for this email, you will receive a password reset link shortly.",
+      });
     }
 
     // Generate password reset token
     const resetToken = admin.getResetPasswordToken();
     await admin.save({ validateBeforeSave: false });
 
-    // In a real app, send resetToken via email
+    // Build reset URL (frontend route)
+    const baseUrl = process.env.FRONTEND_URL || `${req.protocol}://${req.get("host")}`;
+    const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
+
+    try {
+      await sendPasswordResetEmail(email, resetUrl, admin.name);
+    } catch (emailError) {
+      admin.resetPasswordToken = undefined;
+      admin.resetPasswordExpire = undefined;
+      await admin.save({ validateBeforeSave: false });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send reset email. Please try again later.",
+      });
+    }
+
     res.status(200).json({
       success: true,
-      message: "Password reset token generated",
-      resetToken,
+      message: "If an account exists for this email, you will receive a password reset link shortly.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Reset Password - Verify token and update password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ success: false, message: "Token and new password are required" });
+    }
+
+    // Hash the token to match what's stored
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const admin = await RestaurantAdmin.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!admin) {
+      return res.status(400).json({
+        success: false,
+        message: "Reset link is invalid or has expired. Please request a new one.",
+      });
+    }
+
+    admin.password = newPassword;
+    admin.resetPasswordToken = undefined;
+    admin.resetPasswordExpire = undefined;
+    await admin.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully. You can now sign in with your new password.",
     });
   } catch (error) {
     res.status(500).json({

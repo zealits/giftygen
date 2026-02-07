@@ -619,10 +619,72 @@ const sendCredentialsEmail = async (email, name, restaurantName, generatedPasswo
   }
 };
 
+// Send password reset link to registered user
+const sendPasswordResetEmail = async (email, resetUrl, name) => {
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Your Password - GiftyGen</title>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; }
+            .email-container { background-color: #ffffff; border-radius: 10px; padding: 40px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e9ecef; }
+            .logo { font-size: 28px; font-weight: bold; color: #007bff; margin-bottom: 10px; }
+            .tagline { color: #6c757d; font-size: 16px; }
+            .content { margin-bottom: 30px; }
+            .greeting { font-size: 20px; font-weight: 600; color: #2c3e50; margin-bottom: 20px; }
+            .message { font-size: 16px; line-height: 1.8; color: #495057; margin-bottom: 20px; }
+            .reset-button { display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #ffffff !important; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; font-size: 16px; }
+            .reset-button:hover { opacity: 0.9; }
+            .link-box { background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 20px 0; word-break: break-all; font-size: 14px; color: #6c757d; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px; }
+            .expiry-note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 5px; font-size: 14px; color: #856404; }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <div class="logo">GiftyGen</div>
+                <div class="tagline">Digital Gift Card Management Platform</div>
+            </div>
+            <div class="content">
+                <div class="greeting">Dear ${name || "Valued Partner"},</div>
+                <div class="message">You requested a password reset for your Giftcard Vault account. Click the button below to reset your password.</div>
+                <div style="text-align: center;">
+                    <a href="${resetUrl}" class="reset-button">Reset Password</a>
+                </div>
+                <div class="expiry-note">This link will expire in 15 minutes. If you did not request this reset, please ignore this email.</div>
+                <div class="message">If the button doesn't work, copy and paste this link into your browser:</div>
+                <div class="link-box">${resetUrl}</div>
+            </div>
+            <div class="footer">
+                <p>© ${new Date().getFullYear()} GiftyGen. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    await sendEmail({
+      email,
+      subject: "Reset Your Password - Giftcard Vault",
+      html: htmlContent,
+    });
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendEmail,
   sendRegistrationConfirmationEmail,
   sendAdminNotificationEmail,
   sendContactFormEmail,
   sendCredentialsEmail,
+  sendPasswordResetEmail,
 };

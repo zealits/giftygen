@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
 import { loginUser, clearErrors } from "../../services/Actions/authActions";
 import { useLoading } from "../../context/LoadingContext";
 import "./Login.css";
@@ -80,6 +81,12 @@ const GiftCardLogin = () => {
   const [isGiftOpen, setIsGiftOpen] = useState(false);
   const { setIsLoading } = useLoading();
 
+  // Forgot password state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState("");
+
   useEffect(() => {
     if (error && error !== null) {
       setShowModal(true);
@@ -135,6 +142,22 @@ const GiftCardLogin = () => {
   const handleInputFocus = () => {
     if (!formTouched) {
       setFormTouched(true);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail) return;
+    setForgotLoading(true);
+    setForgotMessage("");
+    try {
+      const res = await axios.post("/api/v1/admin/password-reset", { email: forgotEmail });
+      setForgotMessage(res.data.message || "If an account exists for this email, you will receive a password reset link shortly.");
+      setForgotEmail("");
+    } catch (err) {
+      setForgotMessage(err.response?.data?.message || "Something went wrong. Please try again.");
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -216,6 +239,13 @@ const GiftCardLogin = () => {
                   {showPassword ? "👁️" : "👁️‍🗨️"}
                 </button>
               </div>
+              <button
+                type="button"
+                className="forgot-password-link"
+                onClick={() => setShowForgotModal(true)}
+              >
+                Forgot password?
+              </button>
             </div>
 
             <button type="submit" className="submit-button">
@@ -236,6 +266,34 @@ const GiftCardLogin = () => {
             <button className="login-modal-close" onClick={() => setShowModal(false)}>
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {showForgotModal && (
+        <div className="login-modal-overlay" onClick={() => { setShowForgotModal(false); setForgotMessage(""); }}>
+          <div className="login-modal-content forgot-modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Forgot Password</h3>
+            <p className="forgot-subtitle">Enter your registered email and we&apos;ll send you a reset link.</p>
+            <form onSubmit={handleForgotPassword}>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                className="login-input-field forgot-input"
+                required
+              />
+              {forgotMessage && <p className="forgot-message">{forgotMessage}</p>}
+              <div className="forgot-buttons">
+                <button type="submit" className="submit-button forgot-submit" disabled={forgotLoading}>
+                  {forgotLoading ? "Sending..." : "Send Reset Link"}
+                </button>
+                <button type="button" className="login-modal-close forgot-cancel" onClick={() => { setShowForgotModal(false); setForgotMessage(""); }}>
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
