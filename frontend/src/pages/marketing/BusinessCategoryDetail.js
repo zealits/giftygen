@@ -166,7 +166,7 @@ function BusinessCategoryDetail() {
     restaurants: "/images/business-categories/restaurants.png",
     hotels: "/images/business-categories/hotels.png",
     retail: "/images/business-categories/retail.png",
-    salons: "/images/business-categories/salons.png",
+    salons: "/images/business-categories/salons.jpg",
     fitness: "/images/business-categories/fitness.png",
     seasonal: "/images/business-categories/seasonal.png",
   };

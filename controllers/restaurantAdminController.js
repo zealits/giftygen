@@ -7,6 +7,7 @@ const {
   sendRegistrationConfirmationEmail,
   sendAdminNotificationEmail,
   sendContactFormEmail,
+  sendCredentialsEmail,
 } = require("../utils/sendEmail"); // Utility for sending emails
 const catchAsyncErrors = require("../middleware/catchAsyncErrors"); // Middleware for handling async errors
 const sendToken = require("../utils/jwtToken");
@@ -256,7 +257,7 @@ exports.verifyOTP = async (req, res) => {
   }
 };
 
-// Capture Registration Interest (Landing page: Register your business / Request demo)
+// Capture Registration Interest (Landing page: Register your business) – auto-creates account and sends credentials
 exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) => {
   const { businessName, businessType, contactName, email, phone, website, notes } = req.body || {};
 
@@ -264,8 +265,20 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
     return res.status(400).json({ success: false, message: "Email is required" });
   }
 
-  let registrationRequest = await RegistrationRequest.findOne({ email });
+  // If business admin already exists for this email, ask user to sign in
+  const existingAdmin = await RestaurantAdmin.findOne({ email });
+  if (existingAdmin) {
+    return res.status(409).json({
+      success: false,
+      message: "An account already exists for this email. Please sign in with your credentials.",
+    });
+  }
 
+  const restaurantName = businessName || "My Business";
+  const name = contactName || restaurantName;
+
+  // Create or update registration request record (for audit)
+  let registrationRequest = await RegistrationRequest.findOne({ email });
   if (!registrationRequest) {
     registrationRequest = await RegistrationRequest.create({
       name: contactName,
@@ -276,7 +289,7 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
       website,
       notes,
       source: "landing_request_demo",
-      status: "pending",
+      status: "approved", // Auto-approved: account created immediately
     });
   } else {
     registrationRequest.name = contactName || registrationRequest.name;
@@ -286,18 +299,45 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
     if (website) registrationRequest.website = website;
     registrationRequest.source = registrationRequest.source || "landing_request_demo";
     if (notes) registrationRequest.notes = notes;
+    registrationRequest.status = "approved";
     await registrationRequest.save();
   }
 
-  // Send professional registration confirmation email for interest capture
-  try {
-    await sendRegistrationConfirmationEmail(email, businessName, contactName);
-  } catch (emailError) {
-    console.error("Failed to send registration confirmation email:", emailError);
-    // Don't fail the request if email fails
+  // Generate unique business slug
+  const slugFromName = (restaurantName || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const finalSlug = slugFromName.substring(0, 60);
+  let uniqueSlug = finalSlug;
+  let counter = 1;
+  while (await RestaurantAdmin.findOne({ businessSlug: uniqueSlug })) {
+    uniqueSlug = `${finalSlug}-${counter++}`;
   }
 
-  // Send admin notification email with form details
+  const generatedPassword = Math.random().toString(36).slice(-10) + "A1!";
+
+  const admin = new RestaurantAdmin({
+    name,
+    email,
+    password: generatedPassword,
+    phone: phone || undefined,
+    restaurantName,
+    businessSlug: uniqueSlug,
+    isVerified: true,
+  });
+  await admin.save();
+
+  // Send login credentials to the new business admin
+  try {
+    await sendCredentialsEmail(email, name, restaurantName, generatedPassword);
+  } catch (emailError) {
+    console.error("Failed to send credentials email:", emailError);
+    // Don't fail registration if email fails – admin account is already created
+  }
+
+  // Notify internal admin about new registration
   try {
     await sendAdminNotificationEmail({
       businessName,
@@ -310,10 +350,12 @@ exports.captureRegistrationInterest = catchAsyncErrors(async (req, res, next) =>
     });
   } catch (adminEmailError) {
     console.error("Failed to send admin notification email:", adminEmailError);
-    // Don't fail the request if email fails
   }
 
-  return res.status(200).json({ success: true, message: "Request received" });
+  return res.status(201).json({
+    success: true,
+    message: "Registration complete. Check your email for login credentials. You can sign in now.",
+  });
 });
 
 // Handle contact form submission

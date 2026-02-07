@@ -509,7 +509,7 @@ const sendContactFormEmail = async (formData) => {
                     
                     <div class="info-row">
                         <div class="info-label">Message</div>
-                        <div class="message-box">${message ? message.replace(/\n/g, '<br>') : "Not provided"}</div>
+                        <div class="message-box">${message ? message.replace(/\n/g, "<br>") : "Not provided"}</div>
                     </div>
                 </div>
             </div>
@@ -535,4 +535,94 @@ const sendContactFormEmail = async (formData) => {
   }
 };
 
-module.exports = { sendEmail, sendRegistrationConfirmationEmail, sendAdminNotificationEmail, sendContactFormEmail };
+// Send login credentials to new business admin (auto-registration or super admin approval)
+const sendCredentialsEmail = async (email, name, restaurantName, generatedPassword) => {
+  const credentialsHtml = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your GiftyGen Admin Account is Ready!</title>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; }
+            .email-container { background-color: #ffffff; border-radius: 10px; padding: 40px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e9ecef; }
+            .logo { font-size: 28px; font-weight: bold; color: #007bff; margin-bottom: 10px; }
+            .tagline { color: #6c757d; font-size: 16px; }
+            .content { margin-bottom: 30px; }
+            .greeting { font-size: 20px; font-weight: 600; color: #2c3e50; margin-bottom: 20px; }
+            .message { font-size: 16px; line-height: 1.8; color: #495057; margin-bottom: 20px; }
+            .credentials-box { background-color: #e8f5e8; border: 2px solid #28a745; border-radius: 8px; padding: 25px; margin: 25px 0; text-align: center; }
+            .credentials-title { font-weight: 600; color: #155724; margin-bottom: 15px; font-size: 18px; }
+            .credential-item { background-color: #ffffff; border: 1px solid #d4edda; border-radius: 5px; padding: 15px; margin: 10px 0; font-family: 'Courier New', monospace; font-size: 16px; color: #155724; }
+            .login-button { display: inline-block; background-color: #007bff; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; font-size: 16px; }
+            .next-steps { background-color: #f8f9fa; border-radius: 8px; padding: 25px; margin: 25px 0; }
+            .next-steps h3 { color: #495057; margin-bottom: 15px; font-size: 18px; }
+            .next-steps ul { margin: 0; padding-left: 20px; }
+            .next-steps li { margin-bottom: 8px; color: #6c757d; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px; }
+            .contact-info { background-color: #f1f3f4; border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center; }
+            .contact-info h4 { color: #495057; margin-bottom: 10px; font-size: 16px; }
+            .contact-info p { color: #6c757d; margin: 5px 0; font-size: 14px; }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <div class="logo">GiftyGen</div>
+                <div class="tagline">Digital Gift Card Management Platform</div>
+            </div>
+            <div class="content">
+                <div class="greeting">Dear ${name || "Valued Partner"},</div>
+                <div class="message">Great news! Your GiftyGen admin account is ready. Use the credentials below to sign in and start managing your digital gift cards.</div>
+                <div class="credentials-box">
+                    <div class="credentials-title">🔐 Your Login Credentials</div>
+                    <div class="credential-item"><strong>Email:</strong> ${email}</div>
+                    <div class="credential-item"><strong>Password:</strong> ${generatedPassword}</div>
+                    <div class="credential-item"><strong>Business Name:</strong> ${restaurantName}</div>
+                </div>
+                <div style="text-align: center;">
+                    <a href="https://giftygen.com/login" class="login-button">🚀 Access Your Dashboard</a>
+                </div>
+                <div class="next-steps">
+                    <h3>What You Can Do Now:</h3>
+                    <ul>
+                        <li><strong>Login:</strong> Use your credentials above to access your admin dashboard</li>
+                        <li><strong>Configure Settings:</strong> Set up your business profile and payment settings</li>
+                        <li><strong>Create Gift Cards:</strong> Start designing and managing your gift card inventory</li>
+                    </ul>
+                </div>
+                <div class="message"><strong>Security Note:</strong> Please change your password after your first login.</div>
+                <div class="contact-info">
+                    <h4>Need Help?</h4>
+                    <p>📧 Email: support@giftygen.com</p>
+                </div>
+            </div>
+            <div class="footer">
+                <p>Welcome to the GiftyGen family!</p>
+                <p>© 2024 GiftyGen. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+  try {
+    await sendEmail({
+      email,
+      subject: "Your GiftyGen Admin Account is Ready! 🎉",
+      html: credentialsHtml,
+    });
+  } catch (error) {
+    console.error("Error sending credentials email:", error);
+    throw error;
+  }
+};
+
+module.exports = {
+  sendEmail,
+  sendRegistrationConfirmationEmail,
+  sendAdminNotificationEmail,
+  sendContactFormEmail,
+  sendCredentialsEmail,
+};

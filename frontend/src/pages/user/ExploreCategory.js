@@ -313,7 +313,7 @@ function ExploreCategory() {
         style={(() => {
           const name = industryName || decodedIndustryName;
           const bgImages = {
-            "Beauty and Personal care": "url(/images/business-categories/salons.jpg)",
+            "Beauty and Personal care": "url(/images/business-categories/salons2.jpg)",
             "Fitness and Wellness memberships": "url(/images/business-categories/jym.jpg)",
             "Hotels & Resorts": "url(/images/business-categories/hotel.jpg)",
             "Restaurant And Fine Dining": "url(/images/business-categories/restaurant.jpg)",

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { loginUser, clearErrors } from "../../services/Actions/authActions";
 import { useLoading } from "../../context/LoadingContext";
 import "./Login.css";
@@ -71,6 +71,8 @@ const GiftCardLogin = () => {
   const [password, setPassword] = useState("");
   const [formTouched, setFormTouched] = useState(false);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showCredentialsMessage] = useState(() => searchParams.get("registered") === "1");
   const dispatch = useDispatch();
   const { error } = useSelector((state) => state.auth);
   const [showModal, setShowModal] = useState(false);
@@ -86,9 +88,15 @@ const GiftCardLogin = () => {
 
   // Clear any existing errors when component mounts
   useEffect(() => {
-    // Clear any existing auth errors when coming to login page
     dispatch(clearErrors());
   }, [dispatch]);
+
+  // Remove ?registered=1 from URL (keeps URL clean, message stays via state)
+  useEffect(() => {
+    if (showCredentialsMessage) {
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -174,7 +182,11 @@ const GiftCardLogin = () => {
 
         <div className="content-section">
           <h1 className="title">Login to Giftcard Vault</h1>
-          <p className="subtitle">Please sign in to continue</p>
+          <p className="subtitle">
+            {showCredentialsMessage
+              ? "Your login credentials have been sent to your email. Please check your inbox and sign in."
+              : "Please sign in to continue"}
+          </p>
 
           <form onSubmit={handleSubmit} className={`login-form ${formTouched ? "touched" : ""}`}>
             <div className="login-input-group">

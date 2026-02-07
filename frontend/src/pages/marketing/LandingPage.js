@@ -205,9 +205,7 @@ function LandingPage() {
             <X size={24} />
           </button>
           <div className="lp-feature-modal__header">
-            <div className="lp-feature-modal__icon-wrapper">
-              {feature.icon}
-            </div>
+            <div className="lp-feature-modal__icon-wrapper">{feature.icon}</div>
             <h2 id="feature-modal-title" className="lp-feature-modal__title">
               {feature.title}
             </h2>
@@ -298,113 +296,124 @@ function LandingPage() {
   });
 
   // Feature data structure
-  const featuresData = useMemo(() => [
-    {
-      id: 1,
-      title: t("features.items.walletIntegration"),
-      keywords: "Apple Wallet, Google Wallet, digital gift cards, mobile wallet",
-      description: "Deliver gift cards directly to Apple Wallet and Google Wallet in seconds. Customers can save, share, and redeem from their phone—increasing redemption rates and eliminating lost cards.",
-      benefits: [
-        "Instant delivery via email, SMS, or mobile wallet",
-        "One-tap redemption from customer's phone",
-        "Cross-device compatibility (iOS, Android, desktop)",
-        "Reduces physical card waste and processing costs"
-      ],
-      icon: <Smartphone size={45} />
-    },
-    {
-      id: 2,
-      title: t("features.items.seasonalPromotions"),
-      keywords: "seasonal campaigns, promotion management, automated campaigns",
-      description: "Launch, schedule, and automate promotional gift card campaigns for holidays, events, and seasonal peaks. Adjust pricing, limits, and messaging in real-time without code.",
-      benefits: [
-        "Pre-built templates for holidays (Christmas, Mother's Day, Black Friday)",
-        "A/B test promotion messaging and designs",
-        "Set expiration dates, purchase limits, and bulk discounts",
-        "Track promotion performance in real-time"
-      ],
-      icon: <Gift size={45} />
-    },
-    {
-      id: 3,
-      title: t("features.items.customerAcquisition"),
-      keywords: "customer acquisition, branded gift cards, viral sharing",
-      description: "Convert gift givers into brand advocates. Branded digital gift cards introduce new customers to your business through personal recommendations and viral sharing—at lower acquisition cost than paid ads.",
-      benefits: [
-        "Personalized recipient experience drives 40%+ first purchase conversion",
-        "Shareable gift cards extend reach beyond initial buyer",
-        "Track acquisition source to optimize future campaigns",
-        "Lower CAC than paid advertising"
-      ],
-      icon: <Target size={45} />
-    },
-    {
-      id: 4,
-      title: t("features.items.revenueBoost"),
-      keywords: "increase revenue, cash flow, breakage, customer spending",
-      description: "Receive upfront payment when customers purchase gift cards. Studies show 71% of customers spend beyond the card value (breakage)—turning gift cards into pure profit. Plus, unredeemed balances create additional revenue.",
-      benefits: [
-        "Average customer overspend: 70%+ beyond card value",
-        "Improve cash flow by 15-30% with advance payments",
-        "Capitalize on breakage (2-5% of total gift card sales)",
-        "Reduce dependency on discounts (better margins)"
-      ],
-      icon: <TrendingUp size={45} />
-    },
-    {
-      id: 5,
-      title: t("features.items.aovIncrease"),
-      keywords: "average order value, increase AOV, customer spending",
-      description: "Increase average order value by 30-50%. Customers using gift cards typically spend beyond the card value, and bundling gift cards with other products drives larger baskets and higher margins.",
-      benefits: [
-        "Smart bundling: gift card + premium product = higher AOV",
-        "Track AOV by gift card value to optimize pricing",
-        "Upsell complementary items at redemption time",
-        "Mobile wallet display drives impulse purchases"
-      ],
-      icon: <DollarSign size={45} />
-    },
-    {
-      id: 6,
-      title: t("features.items.analytics"),
-      keywords: "real-time analytics, gift card tracking, business insights",
-      description: "Access real-time analytics on gift card sales, redemption rates, customer behavior, and revenue impact. Track redemption by location, channel, and customer segment. Use data-driven insights to forecast inventory, optimize campaigns, and measure ROI.",
-      benefits: [
-        "Dashboard shows sales, redemptions, revenue impact, and breakage",
-        "Export reports for CFO/board presentations",
-        "Track redemption by: location, channel, customer segment, time period",
-        "Measure campaign ROI and optimize future promotions",
-        "Forecast cash flow based on historical redemption patterns"
-      ],
-      icon: <BarChart3 size={45} />
-    },
-    {
-      id: 7,
-      title: t("features.items.repeatVisits"),
-      keywords: "customer retention, loyalty programs, repeat visits",
-      description: "Drive repeat visits and build customer loyalty with gift cards. Customers who receive gift cards return 51% more often and spend 40% more per visit. Create referral programs where customers earn gift card rewards for advocacy.",
-      benefits: [
-        "51% repeat visit rate among gift card recipients vs. 12% baseline",
-        "Integrate with loyalty program to automate tier rewards",
-        "Create referral bonuses (gift card incentives for new customers)",
-        "Personalized offers based on purchase history"
-      ],
-      icon: <Users size={45} />
-    },
-    {
-      id: 8,
-      title: t("features.items.multiChannel"),
-      keywords: "multi-channel, promotional campaigns, A/B testing",
-      description: "Run multi-channel gift card campaigns across email, SMS, social media, and in-store. Test different designs, messages, and pricing with A/B testing. Pause, refund, or adjust campaigns instantly based on real-time performance data.",
-      benefits: [
-        "Create SMS campaigns for flash sales and seasonal promotions",
-        "Run contests where customers win gift cards",
-        "A/B test card designs and messaging for conversion",
-        "Refund or modify campaigns without technical support"
-      ],
-      icon: <Send size={45} />
-    }
-  ], [t]);
+  const featuresData = useMemo(
+    () => [
+      {
+        id: 1,
+        title: t("features.items.walletIntegration"),
+        keywords: "Apple Wallet, Google Wallet, digital gift cards, mobile wallet",
+        description:
+          "Deliver gift cards directly to Apple Wallet and Google Wallet in seconds. Customers can save, share, and redeem from their phone—increasing redemption rates and eliminating lost cards.",
+        benefits: [
+          "Instant delivery via email, SMS, or mobile wallet",
+          "One-tap redemption from customer's phone",
+          "Cross-device compatibility (iOS, Android, desktop)",
+          "Reduces physical card waste and processing costs",
+        ],
+        icon: <Smartphone size={45} />,
+      },
+      {
+        id: 2,
+        title: t("features.items.seasonalPromotions"),
+        keywords: "seasonal campaigns, promotion management, automated campaigns",
+        description:
+          "Launch, schedule, and automate promotional gift card campaigns for holidays, events, and seasonal peaks. Adjust pricing, limits, and messaging in real-time without code.",
+        benefits: [
+          "Pre-built templates for holidays (Christmas, Mother's Day, Black Friday)",
+          "A/B test promotion messaging and designs",
+          "Set expiration dates, purchase limits, and bulk discounts",
+          "Track promotion performance in real-time",
+        ],
+        icon: <Gift size={45} />,
+      },
+      {
+        id: 3,
+        title: t("features.items.customerAcquisition"),
+        keywords: "customer acquisition, branded gift cards, viral sharing",
+        description:
+          "Convert gift givers into brand advocates. Branded digital gift cards introduce new customers to your business through personal recommendations and viral sharing—at lower acquisition cost than paid ads.",
+        benefits: [
+          "Personalized recipient experience drives 40%+ first purchase conversion",
+          "Shareable gift cards extend reach beyond initial buyer",
+          "Track acquisition source to optimize future campaigns",
+          "Lower CAC than paid advertising",
+        ],
+        icon: <Target size={45} />,
+      },
+      {
+        id: 4,
+        title: t("features.items.revenueBoost"),
+        keywords: "increase revenue, cash flow, breakage, customer spending",
+        description:
+          "Receive upfront payment when customers purchase gift cards. Studies show 71% of customers spend beyond the card value (breakage)—turning gift cards into pure profit. Plus, unredeemed balances create additional revenue.",
+        benefits: [
+          "Average customer overspend: 70%+ beyond card value",
+          "Improve cash flow by 15-30% with advance payments",
+          "Capitalize on breakage (2-5% of total gift card sales)",
+          "Reduce dependency on discounts (better margins)",
+        ],
+        icon: <TrendingUp size={45} />,
+      },
+      {
+        id: 5,
+        title: t("features.items.aovIncrease"),
+        keywords: "average order value, increase AOV, customer spending",
+        description:
+          "Increase average order value by 30-50%. Customers using gift cards typically spend beyond the card value, and bundling gift cards with other products drives larger baskets and higher margins.",
+        benefits: [
+          "Smart bundling: gift card + premium product = higher AOV",
+          "Track AOV by gift card value to optimize pricing",
+          "Upsell complementary items at redemption time",
+          "Mobile wallet display drives impulse purchases",
+        ],
+        icon: <DollarSign size={45} />,
+      },
+      {
+        id: 6,
+        title: t("features.items.analytics"),
+        keywords: "real-time analytics, gift card tracking, business insights",
+        description:
+          "Access real-time analytics on gift card sales, redemption rates, customer behavior, and revenue impact. Track redemption by location, channel, and customer segment. Use data-driven insights to forecast inventory, optimize campaigns, and measure ROI.",
+        benefits: [
+          "Dashboard shows sales, redemptions, revenue impact, and breakage",
+          "Export reports for CFO/board presentations",
+          "Track redemption by: location, channel, customer segment, time period",
+          "Measure campaign ROI and optimize future promotions",
+          "Forecast cash flow based on historical redemption patterns",
+        ],
+        icon: <BarChart3 size={45} />,
+      },
+      {
+        id: 7,
+        title: t("features.items.repeatVisits"),
+        keywords: "customer retention, loyalty programs, repeat visits",
+        description:
+          "Drive repeat visits and build customer loyalty with gift cards. Customers who receive gift cards return 51% more often and spend 40% more per visit. Create referral programs where customers earn gift card rewards for advocacy.",
+        benefits: [
+          "51% repeat visit rate among gift card recipients vs. 12% baseline",
+          "Integrate with loyalty program to automate tier rewards",
+          "Create referral bonuses (gift card incentives for new customers)",
+          "Personalized offers based on purchase history",
+        ],
+        icon: <Users size={45} />,
+      },
+      {
+        id: 8,
+        title: t("features.items.multiChannel"),
+        keywords: "multi-channel, promotional campaigns, A/B testing",
+        description:
+          "Run multi-channel gift card campaigns across email, SMS, social media, and in-store. Test different designs, messages, and pricing with A/B testing. Pause, refund, or adjust campaigns instantly based on real-time performance data.",
+        benefits: [
+          "Create SMS campaigns for flash sales and seasonal promotions",
+          "Run contests where customers win gift cards",
+          "A/B test card designs and messaging for conversion",
+          "Refund or modify campaigns without technical support",
+        ],
+        icon: <Send size={45} />,
+      },
+    ],
+    [t],
+  );
 
   // Animation states for the gift card reveal section
   // Phases: initial -> scanning -> laptop-appear -> zoom-in -> revealed
@@ -449,7 +458,7 @@ function LandingPage() {
       {
         threshold: 0.3,
         rootMargin: "-50px 0px",
-      }
+      },
     );
 
     if (animationSectionRef.current) {
@@ -467,7 +476,7 @@ function LandingPage() {
     restaurants: "/images/business-categories/restaurants.png",
     hotels: "/images/business-categories/hotels.png",
     retail: "/images/business-categories/retail.png",
-    salons: "/images/business-categories/salons.png",
+    salons: "/images/business-categories/salons.jpg",
     fitness: "/images/business-categories/fitness.png",
     seasonal: "/images/business-categories/seasonal.png",
   };
@@ -538,7 +547,7 @@ function LandingPage() {
         color: "var(--primary-2)",
       },
     ],
-    [t]
+    [t],
   );
 
   const nextSlide = () => {
@@ -603,7 +612,7 @@ function LandingPage() {
         {
           threshold: 0.05, // Trigger when 5% of the section is visible
           rootMargin: "100px 0px 0px 0px", // Trigger 100px before it enters viewport
-        }
+        },
       );
 
       if (cardsGridRef.current) {
@@ -645,7 +654,7 @@ function LandingPage() {
       {
         threshold: 0.1, // Trigger when 10% of section is visible
         rootMargin: "0px 0px -50px 0px", // Trigger 50px before bottom of viewport
-      }
+      },
     );
 
     if (creativeCardsRef.current) {
@@ -731,15 +740,15 @@ function LandingPage() {
 
   const handleTouchEnd = () => {
     if (!touchStartX.current || !touchEndX.current) return;
-    
+
     const distance = touchStartX.current - touchEndX.current;
     const minSwipeDistance = 50; // Minimum distance for swipe
-    
+
     // Swipe right to close (swiping from right edge to left)
     if (distance > minSwipeDistance && isMobileMenuOpen) {
       closeMobileMenu();
     }
-    
+
     touchStartX.current = null;
     touchEndX.current = null;
   };
@@ -772,17 +781,17 @@ function LandingPage() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isSolutionsDropdownOpen && !event.target.closest('.lp-nav__dropdown')) {
+      if (isSolutionsDropdownOpen && !event.target.closest(".lp-nav__dropdown")) {
         setIsSolutionsDropdownOpen(false);
       }
     };
 
     if (isSolutionsDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isSolutionsDropdownOpen]);
 
@@ -831,22 +840,19 @@ function LandingPage() {
         <nav className="lp-nav__links">
           <button onClick={() => handleScrollTo("about")}>{t("nav.about")}</button>
           <button onClick={() => handleScrollTo("features")}>{t("nav.features")}</button>
-          <div 
+          <div
             className="lp-nav__dropdown"
             onMouseEnter={() => setIsSolutionsDropdownOpen(true)}
             onMouseLeave={() => setIsSolutionsDropdownOpen(false)}
           >
-            <button 
-              onClick={() => handleScrollTo("solutions")}
-              className={isSolutionsDropdownOpen ? "active" : ""}
-            >
+            <button onClick={() => handleScrollTo("solutions")} className={isSolutionsDropdownOpen ? "active" : ""}>
               {t("nav.solutions")}
               <ChevronDown size={16} className="lp-nav__dropdown-icon" />
             </button>
             {isSolutionsDropdownOpen && (
               <div className="lp-nav__dropdown-menu">
-                <a 
-                  href="/category/restaurants" 
+                <a
+                  href="/category/restaurants"
                   className="lp-nav__dropdown-item"
                   onClick={(e) => {
                     e.preventDefault();
@@ -856,8 +862,8 @@ function LandingPage() {
                 >
                   {t("businessCategories.restaurants.title")}
                 </a>
-                <a 
-                  href="/category/hotels" 
+                <a
+                  href="/category/hotels"
                   className="lp-nav__dropdown-item"
                   onClick={(e) => {
                     e.preventDefault();
@@ -867,8 +873,8 @@ function LandingPage() {
                 >
                   {t("businessCategories.hotels.title")}
                 </a>
-                <a 
-                  href="/category/retail" 
+                <a
+                  href="/category/retail"
                   className="lp-nav__dropdown-item"
                   onClick={(e) => {
                     e.preventDefault();
@@ -878,8 +884,8 @@ function LandingPage() {
                 >
                   {t("businessCategories.retail.title")}
                 </a>
-                <a 
-                  href="/category/salons" 
+                <a
+                  href="/category/salons"
                   className="lp-nav__dropdown-item"
                   onClick={(e) => {
                     e.preventDefault();
@@ -889,8 +895,8 @@ function LandingPage() {
                 >
                   {t("businessCategories.salons.title")}
                 </a>
-                <a 
-                  href="/category/fitness" 
+                <a
+                  href="/category/fitness"
                   className="lp-nav__dropdown-item"
                   onClick={(e) => {
                     e.preventDefault();
@@ -900,8 +906,8 @@ function LandingPage() {
                 >
                   {t("businessCategories.fitness.title")}
                 </a>
-                <a 
-                  href="/category/seasonal" 
+                <a
+                  href="/category/seasonal"
                   className="lp-nav__dropdown-item"
                   onClick={(e) => {
                     e.preventDefault();
@@ -1066,16 +1072,14 @@ function LandingPage() {
       {/* Gift Card Management Features */}
       <section className="lp-section lp-creative-cards-section" id="features" ref={creativeCardsRef}>
         <div className="lp-section__header">
-          <h2 className="lp-section__title lp-h2">
-            {t("features.title")}
-          </h2>
+          <h2 className="lp-section__title lp-h2">{t("features.title")}</h2>
         </div>
 
         <div className="lp-creative-container">
           <div className="lp-creative-row">
             {featuresData.map((feature) => (
               <div key={feature.id} className="lp-creative-column">
-                <div 
+                <div
                   className="lp-creative-card-details"
                   onClick={() => setFeatureModalState({ isOpen: true, selectedFeature: feature })}
                   style={{ cursor: "pointer" }}
@@ -1089,12 +1093,8 @@ function LandingPage() {
                   }}
                   aria-label={`Learn more about ${feature.title}`}
                 >
-                  <div className="lp-creative-card-icons">
-                    {feature.icon}
-                  </div>
-                  <h3>
-                    {feature.title}
-                  </h3>
+                  <div className="lp-creative-card-icons">{feature.icon}</div>
+                  <h3>{feature.title}</h3>
                   <div className="lp-creative-read-more-btn">
                     <ArrowRight size={12} />
                   </div>
@@ -1510,6 +1510,7 @@ function LandingPage() {
               return;
             }
             try {
+              setIsSubmitting(true);
               if (payload.phone) {
                 const cleanedPhone = payload.phone.replace(/\D/g, "");
                 const isIndia = userLocation?.country === "IN";
@@ -1544,17 +1545,23 @@ function LandingPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
               });
-              if (!res.ok) throw new Error("Failed to submit");
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) {
+                const msg = data?.message || "Sorry, something went wrong. Please try again later.";
+                setModalState({ isOpen: true, type: "error", message: msg });
+                setTimeout(() => setNotice(null), 8000);
+                return;
+              }
               setModalState({
                 isOpen: true,
                 type: "success",
-                message:
-                  "Registration submitted successfully! Please check your email for confirmation and next steps. We'll be in touch within 24 hours.",
+                message: "Registration complete! Check your email for your login credentials. You can sign in now.",
               });
               form.reset();
               setPhone("");
               setErrors({ businessName: false, businessType: false, contactName: false, email: false });
               setTimeout(() => setNotice(null), 60000);
+              setTimeout(() => navigate("/login?registered=1"), 2000);
             } catch (err) {
               setModalState({
                 isOpen: true,
@@ -1563,6 +1570,8 @@ function LandingPage() {
               });
 
               setTimeout(() => setNotice(null), 8000);
+            } finally {
+              setIsSubmitting(false);
             }
           }}
         >
@@ -1659,8 +1668,8 @@ function LandingPage() {
               {notice.text}
             </div>
           )}
-          <button className="lp-btn lp-btn--block lp-form__submit" type="submit">
-            {t("register.form.submit")}
+          <button className="lp-btn lp-btn--block lp-form__submit" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Registering..." : t("register.form.submit")}
           </button>
         </form>
       </section>
@@ -1674,47 +1683,58 @@ function LandingPage() {
           {[
             {
               question: "How long does it take to set up Giftygen?",
-              answer: "Setup is quick. After registration, you can start creating gift cards immediately. Basic setup (account creation, business profile, first gift card) typically takes 15–30 minutes. POS integration may require additional configuration depending on your system, but the platform is ready to use right away."
+              answer:
+                "Setup is quick. After registration, you can start creating gift cards immediately. Basic setup (account creation, business profile, first gift card) typically takes 15–30 minutes. POS integration may require additional configuration depending on your system, but the platform is ready to use right away.",
             },
             {
               question: "What's the cost? Do you have a free trial?",
-              answer: "We offer three subscription plans: Monthly Plan (₹1,499/month), Quarterly Plan (₹3,999/3 months - most popular), and Yearly Plan (₹14,999/year - best value). All plans include unlimited gift cards, full dashboard access, real-time analytics, email support, and order management. The yearly plan includes priority support. Currently, there is no free trial, but you can start with the monthly plan to test the platform."
+              answer:
+                "We offer three subscription plans: Monthly Plan (₹1,499/month), Quarterly Plan (₹3,999/3 months - most popular), and Yearly Plan (₹14,999/year - best value). All plans include unlimited gift cards, full dashboard access, real-time analytics, email support, and order management. The yearly plan includes priority support. Currently, there is no free trial, but you can start with the monthly plan to test the platform.",
             },
             {
               question: "Which POS systems do you integrate with?",
-              answer: "We integrate with 50+ POS systems including Quick Serve (Toast, Square, Clover), Fine Dining (Micros Oracle, MarginEdge), Pizza/QSR (Lightspeed, Revel, TouchBistro), Hotels (Oracle Hospitality, IHG, Marriott, Hilton, Fidelio), E-commerce (Shopify, WooCommerce, BigCommerce, Wix), Salon/Wellness (Mindbody, Acuity Scheduling, Vagaro, Booker, Square Appointments), and Custom Systems via API integration. Gift card balances sync in real-time, and redemption is automatic at checkout."
+              answer:
+                "We integrate with 50+ POS systems including Quick Serve (Toast, Square, Clover), Fine Dining (Micros Oracle, MarginEdge), Pizza/QSR (Lightspeed, Revel, TouchBistro), Hotels (Oracle Hospitality, IHG, Marriott, Hilton, Fidelio), E-commerce (Shopify, WooCommerce, BigCommerce, Wix), Salon/Wellness (Mindbody, Acuity Scheduling, Vagaro, Booker, Square Appointments), and Custom Systems via API integration. Gift card balances sync in real-time, and redemption is automatic at checkout.",
             },
             {
               question: "How secure is customer data? Is this PCI compliant?",
-              answer: "Yes. We use Razorpay, a PCI DSS Level 1 compliant payment gateway. Customer payment data is not stored on our servers; all transactions are processed through Razorpay's secure infrastructure. Customer information (names, emails, purchase history) is encrypted and stored securely. We follow industry-standard security practices to protect your data."
+              answer:
+                "Yes. We use Razorpay, a PCI DSS Level 1 compliant payment gateway. Customer payment data is not stored on our servers; all transactions are processed through Razorpay's secure infrastructure. Customer information (names, emails, purchase history) is encrypted and stored securely. We follow industry-standard security practices to protect your data.",
             },
             {
               question: "How do customers redeem gift cards?",
-              answer: "Customers can redeem gift cards in multiple ways: QR Code Scanning (staff scans the QR code at checkout using the admin dashboard), OTP Verification (for security, an OTP is sent to the customer's registered email/phone), Automatic POS Integration (if integrated with your POS, redemption happens automatically), Partial Redemption (customers can redeem any amount up to the available balance; remaining balance is tracked automatically), and Digital Wallets (gift cards can be added to Google Wallet and Apple Wallet for easy access)."
+              answer:
+                "Customers can redeem gift cards in multiple ways: QR Code Scanning (staff scans the QR code at checkout using the admin dashboard), OTP Verification (for security, an OTP is sent to the customer's registered email/phone), Automatic POS Integration (if integrated with your POS, redemption happens automatically), Partial Redemption (customers can redeem any amount up to the available balance; remaining balance is tracked automatically), and Digital Wallets (gift cards can be added to Google Wallet and Apple Wallet for easy access).",
             },
             {
               question: "What if customers don't redeem their gift cards? Do we keep the money?",
-              answer: "Yes. When a customer purchases a gift card, you receive the payment immediately. If the gift card is never redeemed or only partially redeemed, you keep the full amount paid. This is standard practice in the gift card industry and helps improve your cash flow. You can track unredeemed balances in your analytics dashboard."
+              answer:
+                "Yes. When a customer purchases a gift card, you receive the payment immediately. If the gift card is never redeemed or only partially redeemed, you keep the full amount paid. This is standard practice in the gift card industry and helps improve your cash flow. You can track unredeemed balances in your analytics dashboard.",
             },
             {
               question: "Can we customize the gift card design? Can I add our logo?",
-              answer: "Yes. You can customize your logo (upload your business logo displayed on gift cards and QR code pages), gift card images (add custom images/backgrounds), colors (customize background colors and branding), text (customize card titles, descriptions, and messages), and various design elements to match your brand. Customization options are available in your admin dashboard settings."
+              answer:
+                "Yes. You can customize your logo (upload your business logo displayed on gift cards and QR code pages), gift card images (add custom images/backgrounds), colors (customize background colors and branding), text (customize card titles, descriptions, and messages), and various design elements to match your brand. Customization options are available in your admin dashboard settings.",
             },
             {
               question: "Do you own my customer data? Can I export it? What if I want to cancel?",
-              answer: "You own your customer data. You can export it anytime in multiple formats: CSV (for spreadsheet analysis), PDF (for reports and presentations), and Excel/XLSX (for detailed analysis). Available exports include customer purchase reports, sales reports, revenue reports, gift card performance reports, redemption reports, and financial summaries. If you cancel your subscription, you can export all your data before cancellation. Your data remains accessible until the end of your billing period."
+              answer:
+                "You own your customer data. You can export it anytime in multiple formats: CSV (for spreadsheet analysis), PDF (for reports and presentations), and Excel/XLSX (for detailed analysis). Available exports include customer purchase reports, sales reports, revenue reports, gift card performance reports, redemption reports, and financial summaries. If you cancel your subscription, you can export all your data before cancellation. Your data remains accessible until the end of your billing period.",
             },
             {
               question: "Can we run seasonal promotions?",
-              answer: "Yes. You can create seasonal pricing (set different prices for peak, shoulder, and low seasons), limited-time offers (create time-bound promotional campaigns), holiday campaigns (launch holiday-specific gift card campaigns for Christmas, Diwali, New Year, etc.), discount management (apply percentage discounts to gift cards), targeted promotions (create campaigns for specific customer segments), and pre-holiday sales (build anticipation with early-bird offers). The platform tracks seasonal trends and performance to help optimize your campaigns."
+              answer:
+                "Yes. You can create seasonal pricing (set different prices for peak, shoulder, and low seasons), limited-time offers (create time-bound promotional campaigns), holiday campaigns (launch holiday-specific gift card campaigns for Christmas, Diwali, New Year, etc.), discount management (apply percentage discounts to gift cards), targeted promotions (create campaigns for specific customer segments), and pre-holiday sales (build anticipation with early-bird offers). The platform tracks seasonal trends and performance to help optimize your campaigns.",
             },
             {
               question: "Can we sell multi-denomination cards?",
-              answer: "Yes. You can create gift cards with fixed amounts or allow customers to choose custom amounts. The platform supports fixed amount cards (pre-set denominations like ₹500, ₹1,000, ₹2,000), variable amount cards (customers can enter any amount within your specified range), and multiple options (offer both fixed and variable options simultaneously). Each gift card tracks its specific amount and redemption history individually."
+              answer:
+                "Yes. You can create gift cards with fixed amounts or allow customers to choose custom amounts. The platform supports fixed amount cards (pre-set denominations like ₹500, ₹1,000, ₹2,000), variable amount cards (customers can enter any amount within your specified range), and multiple options (offer both fixed and variable options simultaneously). Each gift card tracks its specific amount and redemption history individually.",
             },
             {
               question: "How does payment processing work?",
-              answer: "Payment processing is handled through Razorpay, a secure payment gateway. The process works as follows: Customer selects a gift card and proceeds to payment, payment is processed through Razorpay's secure checkout (supports credit/debit cards, UPI, net banking, wallets), upon successful payment the gift card is immediately generated, gift card is delivered via email with QR code and redemption instructions, customers can add the gift card to Google Wallet or Apple Wallet, and all transactions are recorded in your dashboard with receipts and invoices. You receive payments directly to your connected account."
+              answer:
+                "Payment processing is handled through Razorpay, a secure payment gateway. The process works as follows: Customer selects a gift card and proceeds to payment, payment is processed through Razorpay's secure checkout (supports credit/debit cards, UPI, net banking, wallets), upon successful payment the gift card is immediately generated, gift card is delivered via email with QR code and redemption instructions, customers can add the gift card to Google Wallet or Apple Wallet, and all transactions are recorded in your dashboard with receipts and invoices. You receive payments directly to your connected account.",
             },
           ].map((faq, index) => (
             <div key={index} className="lp-faq__item">
@@ -1733,9 +1753,7 @@ function LandingPage() {
                 className={`lp-faq__answer ${openFaqIndex === index ? "lp-faq__answer--open" : ""}`}
                 aria-hidden={openFaqIndex !== index}
               >
-                <p className="lp-faq__answer-text">
-                  {faq.answer}
-                </p>
+                <p className="lp-faq__answer-text">{faq.answer}</p>
               </div>
             </div>
           ))}
@@ -1773,15 +1791,13 @@ function LandingPage() {
                 </div>
                 <div>
                   <div className="lp-contact__detail-label">Address</div>
-                  <p className="lp-contact__detail-value">
-                    30 N Gould St Ste R, Sheridan, WY 82801 USA
-                  </p>
+                  <p className="lp-contact__detail-value">30 N Gould St Ste R, Sheridan, WY 82801 USA</p>
                 </div>
               </div>
             </div>
           </div>
           <div className="lp-contact__form-wrapper">
-            <form 
+            <form
               className="lp-contact__form"
               onSubmit={async (e) => {
                 e.preventDefault();
@@ -1873,11 +1889,7 @@ function LandingPage() {
                   required
                 />
               </div>
-              <button 
-                type="submit" 
-                className="lp-btn lp-contact__submit"
-                disabled={isSubmittingContact}
-              >
+              <button type="submit" className="lp-btn lp-contact__submit" disabled={isSubmittingContact}>
                 {isSubmittingContact ? t("contact.form.sending") : t("contact.form.submit")}
               </button>
             </form>
@@ -1901,10 +1913,7 @@ function LandingPage() {
       </footer>
       <SuccessModal
         isOpen={modalState.isOpen}
-        onClose={() => {
-          setModalState({ ...modalState, isOpen: false });
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
+        onClose={() => setModalState((prev) => ({ ...prev, isOpen: false }))}
         message={modalState.message}
         type={modalState.type}
       />
