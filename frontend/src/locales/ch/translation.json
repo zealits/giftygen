@@ -5,6 +5,7 @@
     "benefits": "益处",
     "features": "功能",
     "solutions": "解决方案",
+    "pricing": "价格",
     "register": "注册",
     "contact": "联系",
     "signIn": "登录",
@@ -21,6 +22,66 @@
   "offer": {
     "title": "为您的行业量身定制的数字礼品卡解决方案",
     "description": "从餐厅到健身中心，寻找专门为您的商业模式设计的完美礼品卡软件"
+  },
+  "pricing": {
+    "title": "价格",
+    "subtitleIndia": "印度方案 — 以 ₹ INR 计价",
+    "subtitleUSA": "美国方案 — 以 $ USD 计价",
+    "regionIndia": "显示印度价格",
+    "regionUSA": "显示美国价格",
+    "feature": "功能",
+    "smallBusiness": "小型企业",
+    "mediumBusiness": "中型企业",
+    "largeBusiness": "大型企业",
+    "getStarted": "开始使用",
+    "included": "包含",
+    "notIncluded": "不包含",
+    "features": {
+      "idealFor": "适合",
+      "onboardingCost": "一次性入驻费",
+      "monthlyPlan": "月付计划",
+      "quarterlyPlan": "季付计划",
+      "yearlyPlan": "年付计划",
+      "giftCardsAllowed": "每月礼品卡数量",
+      "qrCode": "二维码与分享链接",
+      "marketplaceListing": "市场挂牌",
+      "marketplaceCommission": "市场佣金",
+      "commissionOwnQr": "自有二维码客户佣金",
+      "multiOutlet": "多门店支持",
+      "multiLocation": "多地点支持",
+      "apiPos": "API / POS 集成",
+      "support": "支持"
+    },
+    "badges": {
+      "mostPopular": "最受欢迎",
+      "bestValue": "最超值"
+    },
+    "india": {
+      "idealFor": {
+        "small": "小型餐厅、咖啡馆、沙龙",
+        "medium": "成长品牌，1–5 家门店",
+        "large": "加盟与大型企业"
+      },
+      "support": {
+        "small": "邮件",
+        "medium": "优先",
+        "large": "专属经理"
+      }
+    },
+    "usa": {
+      "idealFor": {
+        "small": "小型咖啡馆、沙龙、本地餐厅",
+        "medium": "成长品牌，1–5 个地点",
+        "large": "加盟与大型企业"
+      },
+      "support": {
+        "small": "邮件",
+        "medium": "优先",
+        "large": "专属客户经理"
+      }
+    },
+    "upTo": "最多",
+    "unlimited": "无限制"
   },
   "highlights": {
     "title": "产品亮点",

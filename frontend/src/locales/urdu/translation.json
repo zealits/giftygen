@@ -5,6 +5,7 @@
     "benefits": "فوائد",
     "features": "خصوصیات",
     "solutions": "حل",
+    "pricing": "قیمتیں",
     "register": "رجسٹر",
     "contact": "رابطہ",
     "signIn": "سائن ان",
@@ -21,6 +22,66 @@
   "offer": {
     "title": "آپ کی صنعت کے لیے خصوصی ڈیجیٹل گفٹ کارڈ حل",
     "description": "ریسٹورنٹ سے لے کر فٹنس سینٹر تک، آپ کے کاروباری ماڈل کے لیے خاص طور پر ڈیزائن کیا گیا بہترین گفٹ کارڈ سافٹ ویئر تلاش کریں"
+  },
+  "pricing": {
+    "title": "قیمتیں",
+    "subtitleIndia": "بھارت کے لیے پلان — ₹ INR میں",
+    "subtitleUSA": "امریکہ کے لیے پلان — $ USD میں",
+    "regionIndia": "بھارت کے لیے قیمتیں دکھائی جا رہی ہیں",
+    "regionUSA": "امریکہ کے لیے قیمتیں دکھائی جا رہی ہیں",
+    "feature": "خصوصیت",
+    "smallBusiness": "چھوٹا کاروبار",
+    "mediumBusiness": "درمیانہ کاروبار",
+    "largeBusiness": "بڑا کاروبار",
+    "getStarted": "شروع کریں",
+    "included": "شامل",
+    "notIncluded": "شامل نہیں",
+    "features": {
+      "idealFor": "موزوں",
+      "onboardingCost": "ایک بار کی آن بورڈنگ لاگت",
+      "monthlyPlan": "ماہانہ پلان",
+      "quarterlyPlan": "سہ ماہی پلان",
+      "yearlyPlan": "سالانہ پلان",
+      "giftCardsAllowed": "گفٹ کارڈز کی اجازت (فی مہینہ)",
+      "qrCode": "QR کوڈ اور شیئر ایبل لنک",
+      "marketplaceListing": "مارکیٹ پلیس لسٹنگ",
+      "marketplaceCommission": "مارکیٹ پلیس کمیشن",
+      "commissionOwnQr": "اپنے QR گاہکوں پر کمیشن",
+      "multiOutlet": "ملٹی آؤٹ لیٹ سپورٹ",
+      "multiLocation": "ملٹی لوکیشن سپورٹ",
+      "apiPos": "API / POS انٹیگریشن",
+      "support": "سپورٹ"
+    },
+    "badges": {
+      "mostPopular": "سب سے مقبول",
+      "bestValue": "بہترین قیمت"
+    },
+    "india": {
+      "idealFor": {
+        "small": "چھوٹے ریسٹورنٹس، کیفے، سیلون",
+        "medium": "بڑھتے ہوئے برانڈز، 1–5 آؤٹ لیٹس",
+        "large": "فرنچائزز، انٹرپرائزز"
+      },
+      "support": {
+        "small": "ای میل",
+        "medium": "ترجیح",
+        "large": "مختص منیجر"
+      }
+    },
+    "usa": {
+      "idealFor": {
+        "small": "چھوٹے کیفے، سیلون، مقامی ریسٹورنٹس",
+        "medium": "بڑھتے ہوئے برانڈز، 1–5 لوکیشنز",
+        "large": "فرنچائزز، انٹرپرائزز"
+      },
+      "support": {
+        "small": "ای میل",
+        "medium": "ترجیح",
+        "large": "مختص اکاؤنٹ منیجر"
+      }
+    },
+    "upTo": "تک",
+    "unlimited": "لامحدود"
   },
   "highlights": {
     "title": "مصنوعات کی نمایاں خصوصیات",

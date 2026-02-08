@@ -5,6 +5,7 @@
     "benefits": "ਲਾਭ",
     "features": "ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ",
     "solutions": "ਹੱਲ",
+    "pricing": "ਕੀਮਤਾਂ",
     "register": "ਰਜਿਸਟਰ",
     "contact": "ਸੰਪਰਕ",
     "signIn": "ਸਾਈਨ ਇਨ",
@@ -21,6 +22,66 @@
   "offer": {
     "title": "ਤੁਹਾਡੇ ਉਦਯੋਗ ਲਈ ਵਿਸ਼ੇਸ਼ ਡਿਜੀਟਲ ਗਿਫਟ ਕਾਰਡ ਹੱਲ",
     "description": "ਰੈਸਟੋਰੈਂਟਾਂ ਤੋਂ ਲੈ ਕੇ ਫਿਟਨੈਸ ਸੈਂਟਰਾਂ ਤੱਕ, ਆਪਣੇ ਕਾਰੋਬਾਰੀ ਮਾਡਲ ਲਈ ਵਿਸ਼ੇਸ਼ ਤੌਰ 'ਤੇ ਡਿਜ਼ਾਈਨ ਕੀਤਾ ਗਿਆ ਸਹੀ ਗਿਫਟ ਕਾਰਡ ਸਾਫਟਵੇਅਰ ਲੱਭੋ"
+  },
+  "pricing": {
+    "title": "ਕੀਮਤਾਂ",
+    "subtitleIndia": "ਭਾਰਤ ਲਈ ਯੋਜਨਾਵਾਂ — ₹ INR ਵਿੱਚ",
+    "subtitleUSA": "ਅਮਰੀਕਾ ਲਈ ਯੋਜਨਾਵਾਂ — $ USD ਵਿੱਚ",
+    "regionIndia": "ਭਾਰਤ ਲਈ ਕੀਮਤਾਂ ਦਿਖਾਈਆਂ ਜਾ ਰਹੀਆਂ ਹਨ",
+    "regionUSA": "ਅਮਰੀਕਾ ਲਈ ਕੀਮਤਾਂ ਦਿਖਾਈਆਂ ਜਾ ਰਹੀਆਂ ਹਨ",
+    "feature": "ਵਿਸ਼ੇਸ਼ਤਾ",
+    "smallBusiness": "ਛੋਟਾ ਕਾਰੋਬਾਰ",
+    "mediumBusiness": "ਦਰਮਿਆਨਾ ਕਾਰੋਬਾਰ",
+    "largeBusiness": "ਵੱਡਾ ਕਾਰੋਬਾਰ",
+    "getStarted": "ਸ਼ੁਰੂ ਕਰੋ",
+    "included": "ਸ਼ਾਮਲ",
+    "notIncluded": "ਸ਼ਾਮਲ ਨਹੀਂ",
+    "features": {
+      "idealFor": "ਵਾਸਤੇ ਢੁਕਵਾਂ",
+      "onboardingCost": "ਇਕ-ਵਾਰ ਓਨਬੋਰਡਿੰਗ ਲਾਗਤ",
+      "monthlyPlan": "ਮਹੀਨਾਵਾਰ ਯੋਜਨਾ",
+      "quarterlyPlan": "ਤਿਮਾਹੀ ਯੋਜਨਾ",
+      "yearlyPlan": "ਸਾਲਾਨਾ ਯੋਜਨਾ",
+      "giftCardsAllowed": "ਗਿਫਟ ਕਾਰਡ ਮਨਜ਼ੂਰ (ਪ੍ਰਤੀ ਮਹੀਨਾ)",
+      "qrCode": "QR ਕੋਡ ਅਤੇ ਸ਼ੇਅਰ ਕਰਨ ਯੋਗ ਲਿੰਕ",
+      "marketplaceListing": "ਮਾਰਕੀਟਪਲੇਸ ਲਿਸਟਿੰਗ",
+      "marketplaceCommission": "ਮਾਰਕੀਟਪਲੇਸ ਕਮਿਸ਼ਨ",
+      "commissionOwnQr": "ਆਪਣੇ QR ਗਾਹਕਾਂ 'ਤੇ ਕਮਿਸ਼ਨ",
+      "multiOutlet": "ਮਲਟੀ-ਆਉਟਲੈੱਟ ਸਹਾਇਤਾ",
+      "multiLocation": "ਮਲਟੀ-ਲੋਕੇਸ਼ਨ ਸਹਾਇਤਾ",
+      "apiPos": "API / POS ਇੰਟੀਗ੍ਰੇਸ਼ਨ",
+      "support": "ਸਹਾਇਤਾ"
+    },
+    "badges": {
+      "mostPopular": "ਸਭ ਤੋਂ ਪ੍ਰਸਿੱਧ",
+      "bestValue": "ਸਭ ਤੋਂ ਵਧੀਆ ਮੁੱਲ"
+    },
+    "india": {
+      "idealFor": {
+        "small": "ਛੋਟੇ ਰੈਸਟੋਰੈਂਟ, ਕੈਫੇ, ਸੈਲੂਨ",
+        "medium": "ਵਧ ਰਹੇ ਬ੍ਰਾਂਡ, 1–5 ਆਉਟਲੈੱਟ",
+        "large": "ਫ੍ਰੈਂਚਾਇਜ਼ੀ, ਐਂਟਰਪ੍ਰਾਈਜ਼"
+      },
+      "support": {
+        "small": "ਈਮੇਲ",
+        "medium": "ਤਰਜੀਹ",
+        "large": "ਸਮਰਪਿਤ ਮੈਨੇਜਰ"
+      }
+    },
+    "usa": {
+      "idealFor": {
+        "small": "ਛੋਟੇ ਕੈਫੇ, ਸੈਲੂਨ, ਸਥਾਨਕ ਰੈਸਟੋਰੈਂਟ",
+        "medium": "ਵਧ ਰਹੇ ਬ੍ਰਾਂਡ, 1–5 ਟਿਕਾਣੇ",
+        "large": "ਫ੍ਰੈਂਚਾਇਜ਼ੀ, ਐਂਟਰਪ੍ਰਾਈਜ਼"
+      },
+      "support": {
+        "small": "ਈਮੇਲ",
+        "medium": "ਤਰਜੀਹ",
+        "large": "ਸਮਰਪਿਤ ਖਾਤਾ ਮੈਨੇਜਰ"
+      }
+    },
+    "upTo": "ਤੱਕ",
+    "unlimited": "ਅਸੀਮਤ"
   },
   "highlights": {
     "title": "ਉਤਪਾਦ ਦੀਆਂ ਮੁੱਖ ਗੱਲਾਂ",

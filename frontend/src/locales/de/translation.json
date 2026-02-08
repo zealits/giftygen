@@ -5,6 +5,7 @@
     "benefits": "Vorteile",
     "features": "Funktionen",
     "solutions": "Lösungen",
+    "pricing": "Preise",
     "register": "Registrieren",
     "contact": "Kontakt",
     "signIn": "Anmelden",
@@ -21,6 +22,66 @@
   "offer": {
     "title": "Digitale Geschenkarten-Lösungen, die auf Ihre Branche zugeschnitten sind",
     "description": "Von Restaurants bis zu Fitnesscentern – finden Sie die perfekte Geschenkarten-Software, die speziell für Ihr Geschäftsmodell entwickelt wurde"
+  },
+  "pricing": {
+    "title": "Preise",
+    "subtitleIndia": "Pläne für Indien — in ₹ INR",
+    "subtitleUSA": "Pläne für die USA — in $ USD",
+    "regionIndia": "Preise für Indien werden angezeigt",
+    "regionUSA": "Preise für die USA werden angezeigt",
+    "feature": "Funktion",
+    "smallBusiness": "Kleinunternehmen",
+    "mediumBusiness": "Mittelständisches Unternehmen",
+    "largeBusiness": "Großunternehmen",
+    "getStarted": "Loslegen",
+    "included": "Enthalten",
+    "notIncluded": "Nicht enthalten",
+    "features": {
+      "idealFor": "Ideal für",
+      "onboardingCost": "Einmalige Einrichtungsgebühr",
+      "monthlyPlan": "Monatsplan",
+      "quarterlyPlan": "Quartalsplan",
+      "yearlyPlan": "Jahresplan",
+      "giftCardsAllowed": "Geschenkkarten erlaubt (pro Monat)",
+      "qrCode": "QR-Code & teilbarer Link",
+      "marketplaceListing": "Marktplatz-Listung",
+      "marketplaceCommission": "Marktplatz-Provision",
+      "commissionOwnQr": "Provision auf eigene QR-Kunden",
+      "multiOutlet": "Multi-Outlet-Support",
+      "multiLocation": "Multi-Standort-Support",
+      "apiPos": "API- / POS-Integration",
+      "support": "Support"
+    },
+    "badges": {
+      "mostPopular": "Am beliebtesten",
+      "bestValue": "Bester Wert"
+    },
+    "india": {
+      "idealFor": {
+        "small": "Kleine Restaurants, Cafés, Salons",
+        "medium": "Wachsende Marken, 1–5 Filialen",
+        "large": "Franchise, Unternehmen"
+      },
+      "support": {
+        "small": "E-Mail",
+        "medium": "Priorität",
+        "large": "Dedizierter Manager"
+      }
+    },
+    "usa": {
+      "idealFor": {
+        "small": "Kleine Cafés, Salons, lokale Restaurants",
+        "medium": "Wachsende Marken, 1–5 Standorte",
+        "large": "Franchise, Unternehmen"
+      },
+      "support": {
+        "small": "E-Mail",
+        "medium": "Priorität",
+        "large": "Dedizierter Kundenbetreuer"
+      }
+    },
+    "upTo": "Bis zu",
+    "unlimited": "Unbegrenzt"
   },
   "highlights": {
     "title": "Produkt-Highlights",

@@ -45,6 +45,7 @@ import {
   Mail,
   Home,
   ChevronDown,
+  Check,
 } from "lucide-react";
 
 function LandingPage() {
@@ -57,7 +58,16 @@ function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSolutionsDropdownOpen, setIsSolutionsDropdownOpen] = useState(false);
   const [isLoadingLanguage, setIsLoadingLanguage] = useState(true);
-  const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState(() => {
+    try {
+      const stored = typeof localStorage !== "undefined" ? localStorage.getItem("giftygen_user_location") : null;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed.country === "string") return parsed;
+      }
+    } catch (_) {}
+    return null;
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
   const mobileMenuRef = useRef(null);
@@ -251,6 +261,65 @@ function LandingPage() {
       </div>
     );
   };
+
+  // Region-based pricing: India (IN) vs USA / rest of world (translations via t())
+  // Use IP-based country when available; otherwise fall back to stored location or browser locale (India locale → INR)
+  const isIndiaPricing = useMemo(() => {
+    const country = userLocation?.country;
+    if (country === "IN") return true;
+    if (country && country !== "IN") return false; // Known non-India (e.g. US)
+    // No location or API failed: try localStorage from previous visit
+    try {
+      const stored = localStorage.getItem("giftygen_user_location");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.country === "IN") return true;
+        if (parsed?.country) return false;
+      }
+    } catch (_) {}
+    // Infer from browser locale (e.g. en-IN, hi-IN, or Indian language) when IP API failed or is wrong
+    const locale = typeof navigator !== "undefined" ? (navigator.language || navigator.userLanguage || "") : "";
+    const localeUpper = locale.toUpperCase();
+    if (localeUpper.includes("-IN") || localeUpper === "HI" || localeUpper === "MR" || localeUpper === "BN" || localeUpper === "TE" || localeUpper === "TA" || localeUpper === "KN" || localeUpper === "ML" || localeUpper === "GU" || localeUpper === "PA" || localeUpper === "OR" || localeUpper === "UR") return true;
+    return false;
+  }, [userLocation?.country]);
+  const pricingRows = useMemo(() => {
+    const check = "check";
+    const cross = "cross";
+    const upTo = (n) => `${t("pricing.upTo")} ${n}`;
+    if (isIndiaPricing) {
+      return [
+        { feature: t("pricing.features.idealFor"), small: t("pricing.india.idealFor.small"), medium: t("pricing.india.idealFor.medium"), large: t("pricing.india.idealFor.large") },
+        { feature: t("pricing.features.onboardingCost"), small: "₹1,999", medium: "₹3,999", large: "₹9,999" },
+        { feature: t("pricing.features.monthlyPlan"), small: "₹1,499 / month", medium: "₹3,999 / month", large: "₹9,999 / month" },
+        { feature: t("pricing.features.quarterlyPlan"), small: "₹3,999 / 3 months", medium: "₹10,999 / 3 months", large: "₹26,999 / 3 months", badgeSmall: "mostPopular" },
+        { feature: t("pricing.features.yearlyPlan"), small: "₹14,999 / year", medium: "₹44,999 / year", large: "₹99,999 / year", badgeSmall: "bestValue" },
+        { feature: t("pricing.features.giftCardsAllowed"), small: upTo("500"), medium: upTo("2,000"), large: t("pricing.unlimited") },
+        { feature: t("pricing.features.qrCode"), small: check, medium: check, large: check },
+        { feature: t("pricing.features.marketplaceListing"), small: check, medium: check, large: check },
+        { feature: t("pricing.features.marketplaceCommission"), small: "10%", medium: "6%", large: "3%" },
+        { feature: t("pricing.features.commissionOwnQr"), small: "0%", medium: "0%", large: "0%" },
+        { feature: t("pricing.features.multiOutlet"), small: cross, medium: cross, large: check },
+        { feature: t("pricing.features.apiPos"), small: cross, medium: cross, large: check },
+        { feature: t("pricing.features.support"), small: t("pricing.india.support.small"), medium: t("pricing.india.support.medium"), large: t("pricing.india.support.large") },
+      ];
+    }
+    return [
+      { feature: t("pricing.features.idealFor"), small: t("pricing.usa.idealFor.small"), medium: t("pricing.usa.idealFor.medium"), large: t("pricing.usa.idealFor.large") },
+      { feature: t("pricing.features.onboardingCost"), small: "$79", medium: "$149", large: "$299" },
+      { feature: t("pricing.features.monthlyPlan"), small: "$29 / month", medium: "$69 / month", large: "$129 / month" },
+      { feature: t("pricing.features.quarterlyPlan"), small: "$79 / 3 months", medium: "$199 / 3 months", large: "$349 / 3 months", badgeSmall: "mostPopular" },
+      { feature: t("pricing.features.yearlyPlan"), small: "$249 / year", medium: "$699 / year", large: "$1,299 / year", badgeSmall: "bestValue" },
+      { feature: t("pricing.features.giftCardsAllowed"), small: upTo("500"), medium: upTo("2,000"), large: t("pricing.unlimited") },
+      { feature: t("pricing.features.qrCode"), small: check, medium: check, large: check },
+      { feature: t("pricing.features.marketplaceListing"), small: check, medium: check, large: check },
+      { feature: t("pricing.features.marketplaceCommission"), small: "10%", medium: "6%", large: "3%" },
+      { feature: t("pricing.features.commissionOwnQr"), small: "0%", medium: "0%", large: "0%" },
+      { feature: t("pricing.features.multiLocation"), small: cross, medium: cross, large: check },
+      { feature: t("pricing.features.apiPos"), small: cross, medium: cross, large: check },
+      { feature: t("pricing.features.support"), small: t("pricing.usa.support.small"), medium: t("pricing.usa.support.medium"), large: t("pricing.usa.support.large") },
+    ];
+  }, [isIndiaPricing, t]);
 
   // Detect and set language based on geolocation
   useEffect(() => {
@@ -758,6 +827,7 @@ function LandingPage() {
     { id: "about", label: t("nav.about"), icon: <Info size={20} /> },
     { id: "features", label: t("nav.features"), icon: <Sparkles size={20} /> },
     { id: "solutions", label: t("nav.solutions"), icon: <Star size={20} /> },
+    { id: "pricing", label: t("nav.pricing"), icon: <DollarSign size={20} /> },
     { id: "register", label: t("nav.register"), icon: <CreditCard size={20} /> },
     { id: "faq", label: "FAQ", icon: <HelpCircle size={20} /> },
     { id: "contact", label: t("nav.contact"), icon: <Mail size={20} /> },
@@ -920,6 +990,7 @@ function LandingPage() {
               </div>
             )}
           </div>
+          <button onClick={() => handleScrollTo("pricing")}>{t("nav.pricing")}</button>
           <button onClick={() => handleScrollTo("register")}>{t("nav.register")}</button>
           <button onClick={() => handleScrollTo("faq")}>FAQ</button>
           <button onClick={() => handleScrollTo("contact")}>{t("nav.contact")}</button>
@@ -1476,6 +1547,86 @@ function LandingPage() {
           ))}
         </div>
       </section> */}
+
+      {/* Pricing */}
+      <section className="lp-section lp-pricing" id="pricing">
+        <div className="lp-section__header">
+          <h2 className="lp-section__title lp-h2">{t("pricing.title")}</h2>
+          <p className="lp-section__subtitle">
+            {isIndiaPricing ? t("pricing.subtitleIndia") : t("pricing.subtitleUSA")}
+          </p>
+          <div className="lp-pricing__region-badge" aria-live="polite">
+            {isIndiaPricing ? t("pricing.regionIndia") : t("pricing.regionUSA")}
+          </div>
+        </div>
+        <div className="lp-pricing__wrapper">
+          <div className="lp-pricing__table-wrap">
+            <table className="lp-pricing__table" role="grid">
+              <thead>
+                <tr>
+                  <th scope="col" className="lp-pricing__th lp-pricing__th--feature">{t("pricing.feature")}</th>
+                  <th scope="col" className="lp-pricing__th lp-pricing__th--small">
+                    <span className="lp-pricing__tier-dot lp-pricing__tier-dot--green" aria-hidden></span>
+                    {t("pricing.smallBusiness")}
+                  </th>
+                  <th scope="col" className="lp-pricing__th lp-pricing__th--medium">
+                    <span className="lp-pricing__tier-dot lp-pricing__tier-dot--blue" aria-hidden></span>
+                    {t("pricing.mediumBusiness")}
+                  </th>
+                  <th scope="col" className="lp-pricing__th lp-pricing__th--large">
+                    <span className="lp-pricing__tier-dot lp-pricing__tier-dot--purple" aria-hidden></span>
+                    {t("pricing.largeBusiness")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {pricingRows.map((row, index) => (
+                  <tr key={index} className="lp-pricing__row">
+                    <td className="lp-pricing__cell lp-pricing__cell--feature">{row.feature}</td>
+                    <td className="lp-pricing__cell lp-pricing__cell--small">
+                      {row.small === "check" ? (
+                        <span className="lp-pricing__icon lp-pricing__icon--check" aria-label={t("pricing.included")}><Check size={20} /></span>
+                      ) : row.small === "cross" ? (
+                        <span className="lp-pricing__icon lp-pricing__icon--cross" aria-label={t("pricing.notIncluded")}><X size={20} /></span>
+                      ) : (
+                        <>
+                          <span className="lp-pricing__value">{row.small}</span>
+                          {row.badgeSmall && (
+                            <span className="lp-pricing__badge lp-pricing__badge--popular">{row.badgeSmall === "mostPopular" ? "⭐ " : "💎 "}{t(`pricing.badges.${row.badgeSmall}`)}</span>
+                          )}
+                        </>
+                      )}
+                    </td>
+                    <td className="lp-pricing__cell lp-pricing__cell--medium">
+                      {row.medium === "check" ? (
+                        <span className="lp-pricing__icon lp-pricing__icon--check" aria-label={t("pricing.included")}><Check size={20} /></span>
+                      ) : row.medium === "cross" ? (
+                        <span className="lp-pricing__icon lp-pricing__icon--cross" aria-label={t("pricing.notIncluded")}><X size={20} /></span>
+                      ) : (
+                        <span className="lp-pricing__value">{row.medium}</span>
+                      )}
+                    </td>
+                    <td className="lp-pricing__cell lp-pricing__cell--large">
+                      {row.large === "check" ? (
+                        <span className="lp-pricing__icon lp-pricing__icon--check" aria-label={t("pricing.included")}><Check size={20} /></span>
+                      ) : row.large === "cross" ? (
+                        <span className="lp-pricing__icon lp-pricing__icon--cross" aria-label={t("pricing.notIncluded")}><X size={20} /></span>
+                      ) : (
+                        <span className="lp-pricing__value">{row.large}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div className="lp-pricing__cta">
+          <button className="lp-btn" onClick={() => handleScrollTo("register")}>
+            {t("pricing.getStarted")}
+          </button>
+        </div>
+      </section>
 
       {/* Registration */}
       <section className="lp-section lp-register" id="register">

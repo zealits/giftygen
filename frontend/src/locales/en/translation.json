@@ -5,6 +5,7 @@
     "benefits": "Benefits",
     "features": "Features",
     "solutions": "Solutions",
+    "pricing": "Pricing",
     "register": "Register",
     "contact": "Contact",
     "signIn": "Sign in",
@@ -21,6 +22,66 @@
   "offer": {
     "title": "Digital Gift Card Solutions Tailored to Your Industry",
     "description": "From restaurants to fitness centers, find the perfect gift card software designed specifically for your business mode"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "subtitleIndia": "Plans for India — in ₹ INR",
+    "subtitleUSA": "Plans for United States — in $ USD",
+    "regionIndia": "Showing pricing for India",
+    "regionUSA": "Showing pricing for United States",
+    "feature": "Feature",
+    "smallBusiness": "Small Business",
+    "mediumBusiness": "Medium Business",
+    "largeBusiness": "Large Business",
+    "getStarted": "Get started",
+    "included": "Included",
+    "notIncluded": "Not included",
+    "features": {
+      "idealFor": "Ideal For",
+      "onboardingCost": "One-Time Onboarding Cost",
+      "monthlyPlan": "Monthly Plan",
+      "quarterlyPlan": "Quarterly Plan",
+      "yearlyPlan": "Yearly Plan",
+      "giftCardsAllowed": "Gift Cards Allowed (per month)",
+      "qrCode": "QR Code & Shareable Link",
+      "marketplaceListing": "Marketplace Listing",
+      "marketplaceCommission": "Marketplace Commission",
+      "commissionOwnQr": "Commission on Own QR Customers",
+      "multiOutlet": "Multi-Outlet Support",
+      "multiLocation": "Multi-Location Support",
+      "apiPos": "API / POS Integration",
+      "support": "Support"
+    },
+    "badges": {
+      "mostPopular": "Most Popular",
+      "bestValue": "Best Value"
+    },
+    "india": {
+      "idealFor": {
+        "small": "Small restaurants, cafés, salons",
+        "medium": "Growing brands, 1–5 outlets",
+        "large": "Franchises, enterprises"
+      },
+      "support": {
+        "small": "Email",
+        "medium": "Priority",
+        "large": "Dedicated Manager"
+      }
+    },
+    "usa": {
+      "idealFor": {
+        "small": "Small cafés, salons, local restaurants",
+        "medium": "Growing brands, 1–5 locations",
+        "large": "Franchises, enterprises"
+      },
+      "support": {
+        "small": "Email",
+        "medium": "Priority",
+        "large": "Dedicated Account Manager"
+      }
+    },
+    "upTo": "Up to",
+    "unlimited": "Unlimited"
   },
   "highlights": {
     "title": "Product Highlights",
