@@ -289,35 +289,32 @@ function LandingPage() {
     const upTo = (n) => `${t("pricing.upTo")} ${n}`;
     if (isIndiaPricing) {
       return [
-        { feature: t("pricing.features.idealFor"), small: t("pricing.india.idealFor.small"), medium: t("pricing.india.idealFor.medium"), large: t("pricing.india.idealFor.large") },
-        { feature: t("pricing.features.onboardingCost"), small: "₹1,999", medium: "₹3,999", large: "₹9,999" },
-        { feature: t("pricing.features.monthlyPlan"), small: "₹1,499 / month", medium: "₹3,999 / month", large: "₹9,999 / month" },
-        { feature: t("pricing.features.quarterlyPlan"), small: "₹3,999 / 3 months", medium: "₹10,999 / 3 months", large: "₹26,999 / 3 months", badgeSmall: "mostPopular" },
-        { feature: t("pricing.features.yearlyPlan"), small: "₹14,999 / year", medium: "₹44,999 / year", large: "₹99,999 / year", badgeSmall: "bestValue" },
-        { feature: t("pricing.features.giftCardsAllowed"), small: upTo("500"), medium: upTo("2,000"), large: t("pricing.unlimited") },
-        { feature: t("pricing.features.qrCode"), small: check, medium: check, large: check },
-        { feature: t("pricing.features.marketplaceListing"), small: check, medium: check, large: check },
-        { feature: t("pricing.features.marketplaceCommission"), small: "10%", medium: "6%", large: "3%" },
-        { feature: t("pricing.features.commissionOwnQr"), small: "0%", medium: "0%", large: "0%" },
-        { feature: t("pricing.features.multiOutlet"), small: cross, medium: cross, large: check },
-        { feature: t("pricing.features.apiPos"), small: cross, medium: cross, large: check },
-        { feature: t("pricing.features.support"), small: t("pricing.india.support.small"), medium: t("pricing.india.support.medium"), large: t("pricing.india.support.large") },
-      ];
-    }
-    return [
-      { feature: t("pricing.features.idealFor"), small: t("pricing.usa.idealFor.small"), medium: t("pricing.usa.idealFor.medium"), large: t("pricing.usa.idealFor.large") },
-      { feature: t("pricing.features.onboardingCost"), small: "$79", medium: "$149", large: "$299" },
-      { feature: t("pricing.features.monthlyPlan"), small: "$29 / month", medium: "$69 / month", large: "$129 / month" },
-      { feature: t("pricing.features.quarterlyPlan"), small: "$79 / 3 months", medium: "$199 / 3 months", large: "$349 / 3 months", badgeSmall: "mostPopular" },
-      { feature: t("pricing.features.yearlyPlan"), small: "$249 / year", medium: "$699 / year", large: "$1,299 / year", badgeSmall: "bestValue" },
+      { feature: t("pricing.features.idealFor"), small: t("pricing.india.idealFor.small"), medium: t("pricing.india.idealFor.medium"), large: t("pricing.india.idealFor.large") },
+      { feature: t("pricing.features.onboardingCost"), small: "₹1,999", medium: "₹3,999", large: "₹9,999" },
+      { feature: t("pricing.features.monthlyPlan"), small: "₹1,499 / month", medium: "₹3,999 / month", large: "₹9,999 / month" },
+      { feature: t("pricing.features.quarterlyPlan"), small: "₹3,999 / 3 months", medium: "₹10,999 / 3 months", large: "₹26,999 / 3 months", badgeSmall: "mostPopular" },
+      { feature: t("pricing.features.yearlyPlan"), small: "₹14,999 / year", medium: "₹44,999 / year", large: "₹99,999 / year", badgeSmall: "bestValue" },
       { feature: t("pricing.features.giftCardsAllowed"), small: upTo("500"), medium: upTo("2,000"), large: t("pricing.unlimited") },
+      { feature: t("pricing.features.giftCardPromotion"), small: t("pricing.unlimited"), medium: t("pricing.unlimited"), large: t("pricing.unlimited") },
       { feature: t("pricing.features.qrCode"), small: check, medium: check, large: check },
       { feature: t("pricing.features.marketplaceListing"), small: check, medium: check, large: check },
       { feature: t("pricing.features.marketplaceCommission"), small: "10%", medium: "6%", large: "3%" },
       { feature: t("pricing.features.commissionOwnQr"), small: "0%", medium: "0%", large: "0%" },
-      { feature: t("pricing.features.multiLocation"), small: cross, medium: cross, large: check },
-      { feature: t("pricing.features.apiPos"), small: cross, medium: cross, large: check },
-      { feature: t("pricing.features.support"), small: t("pricing.usa.support.small"), medium: t("pricing.usa.support.medium"), large: t("pricing.usa.support.large") },
+      ];
+    }
+    return [
+    { feature: t("pricing.features.idealFor"), small: t("pricing.usa.idealFor.small"), medium: t("pricing.usa.idealFor.medium"), large: t("pricing.usa.idealFor.large") },
+    { feature: t("pricing.features.onboardingCost"), small: "$79", medium: "$149", large: "$299" },
+    { feature: t("pricing.features.monthlyPlan"), small: "$29 / month", medium: "$69 / month", large: "$129 / month" },
+    { feature: t("pricing.features.quarterlyPlan"), small: "$79 / 3 months", medium: "$199 / 3 months", large: "$349 / 3 months", badgeSmall: "mostPopular" },
+    { feature: t("pricing.features.yearlyPlan"), small: "$249 / year", medium: "$699 / year", large: "$1,299 / year", badgeSmall: "bestValue" },
+    { feature: t("pricing.features.giftCardsAllowed"), small: upTo("500"), medium: upTo("2,000"), large: t("pricing.unlimited") },
+    { feature: t("pricing.features.giftCardPromotion"), small: t("pricing.unlimited"), medium: t("pricing.unlimited"), large: t("pricing.unlimited") },
+    { feature: t("pricing.features.qrCode"), small: check, medium: check, large: check },
+    { feature: t("pricing.features.marketplaceListing"), small: check, medium: check, large: check },
+    { feature: t("pricing.features.marketplaceCommission"), small: "10%", medium: "6%", large: "3%" },
+    { feature: t("pricing.features.commissionOwnQr"), small: "0%", medium: "0%", large: "0%" },
+    { feature: t("pricing.features.multiLocation"), small: cross, medium: cross, large: check },
     ];
   }, [isIndiaPricing, t]);
 
