@@ -20,6 +20,12 @@ const PrivacyPolicy = lazy(() => import("./pages/marketing/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/marketing/TermsOfService"));
 const BenefitDetail = lazy(() => import("./pages/marketing/BenefitDetail"));
 const BusinessCategoryDetail = lazy(() => import("./pages/marketing/BusinessCategoryDetail"));
+const ExampleRestaurant = lazy(() => import("./pages/marketing/ExampleRestaurant"));
+const ExampleHotel = lazy(() => import("./pages/marketing/ExampleHotel"));
+const ExampleFitness = lazy(() => import("./pages/marketing/ExampleFitness"));
+const ExampleRetail = lazy(() => import("./pages/marketing/ExampleRetail"));
+const ExampleBeauty = lazy(() => import("./pages/marketing/ExampleBeauty"));
+const ExampleSeasonal = lazy(() => import("./pages/marketing/ExampleSeasonal"));
 const Sidebar = lazy(() => import("./pages/admin/Sidebar.js"));
 const GiftCards = lazy(() => import("./pages/admin/GiftCards.js"));
 const Orders = lazy(() => import("./pages/admin/Orders.js"));
@@ -159,6 +165,12 @@ function AppRoutes() {
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/benefit/:benefitId" element={<BenefitDetail />} />
         <Route path="/category/:categoryId" element={<BusinessCategoryDetail />} />
+        <Route path="/exampleresturant" element={<ExampleRestaurant />} />
+        <Route path="/examplehotel" element={<ExampleHotel />} />
+        <Route path="/examplefitness" element={<ExampleFitness />} />
+        <Route path="/exampleretail" element={<ExampleRetail />} />
+        <Route path="/examplebeauty" element={<ExampleBeauty />} />
+        <Route path="/exampleseasonal" element={<ExampleSeasonal />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/explore/:categoryId" element={<ExploreCategory />} />
         <Route path="/explore/:categoryId/:brandId" element={<ExploreBrand />} />
