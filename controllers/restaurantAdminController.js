@@ -499,6 +499,7 @@ exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
     businessDescription,
     restaurantAddress,
     galleryImages,
+    pageCustomization,
     razorpayKeyId,
     razorpayKeySecret,
     /* , squareApplicationId, squareLocationId, squareAccessToken */
@@ -516,6 +517,11 @@ exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
   // Update gallery images if provided (for removal operations)
   if (Array.isArray(galleryImages)) {
     admin.galleryImages = galleryImages.slice(0, 10);
+  }
+
+  // Update page customization if provided
+  if (pageCustomization && typeof pageCustomization === "object") {
+    admin.pageCustomization = { ...(admin.pageCustomization || {}), ...pageCustomization };
   }
 
   // Update restaurant address if provided
@@ -791,7 +797,7 @@ exports.getBusinessBySlug = catchAsyncErrors(async (req, res, next) => {
     const business = await RestaurantAdmin.findOne({
       businessSlug,
       isVerified: true,
-    }).select("restaurantName logoUrl businessSlug restaurantAddress galleryImages businessDescription industry");
+    }).select("restaurantName logoUrl businessSlug restaurantAddress galleryImages businessDescription industry phone pageCustomization");
 
     if (!business) {
       return next(new ErrorHander("Business not found", 404));
@@ -807,6 +813,8 @@ exports.getBusinessBySlug = catchAsyncErrors(async (req, res, next) => {
         galleryImages: business.galleryImages || [],
         description: business.businessDescription,
         industry: business.industry,
+        phone: business.phone,
+        pageCustomization: business.pageCustomization || {},
       },
     });
   } catch (error) {

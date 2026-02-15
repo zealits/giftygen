@@ -37,11 +37,7 @@ const Settings = ({ section: sectionProp }) => {
       latitude: initial.restaurantAddress?.latitude || null,
       longitude: initial.restaurantAddress?.longitude || null,
     },
-    // SQUARE API COMMENTED OUT
-    // squareApplicationId: initial.squareApplicationId || "",
-    // squareLocationId: initial.squareLocationId || "",
-    // squareAccessToken: initial.squareAccessToken || "",
-    // Razorpay (per-business) configuration
+    pageCustomization: initial.pageCustomization || {},
     razorpayKeyId: initial.razorpayKeyId || "",
     razorpayKeySecret: initial.razorpayKeySecret || "",
   });
@@ -85,11 +81,7 @@ const Settings = ({ section: sectionProp }) => {
         latitude: initial.restaurantAddress?.latitude || null,
         longitude: initial.restaurantAddress?.longitude || null,
       },
-      // SQUARE API COMMENTED OUT
-      // squareApplicationId: initial.squareApplicationId || "",
-      // squareLocationId: initial.squareLocationId || "",
-      // squareAccessToken: initial.squareAccessToken || "",
-      // Razorpay (per-business) configuration
+      pageCustomization: initial.pageCustomization || {},
       razorpayKeyId: initial.razorpayKeyId || "",
       razorpayKeySecret: initial.razorpayKeySecret || "",
     });
@@ -109,6 +101,7 @@ const Settings = ({ section: sectionProp }) => {
     initial.razorpayKeySecret,
     initial.logoUrl,
     initial.galleryImages,
+    initial.pageCustomization,
   ]);
 
   const handleChange = (e) => {
@@ -125,6 +118,61 @@ const Settings = ({ section: sectionProp }) => {
         [name]: value,
       },
     }));
+  };
+
+  const handlePageCustomizationChange = (field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      pageCustomization: {
+        ...(prev.pageCustomization || {}),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handlePageCustomizationArrayChange = (field, value) => {
+    const arr = typeof value === "string" ? value.split(",").map((s) => s.trim()).filter(Boolean) : value;
+    handlePageCustomizationChange(field, arr);
+  };
+
+  // Industry config: custom tab label and field hints
+  const INDUSTRY_CONFIG = {
+    "Restaurant And Fine Dining": {
+      customTabLabel: "Menu",
+      customTabPlaceholder: "e.g. STARTERS — Paneer Tikka, Mushroom...\nMAIN COURSE — Biryani, Curry...",
+      tagsLabel: "Cuisine tags (comma-separated)",
+      tagsPlaceholder: "North Indian, European, BBQ, Desserts",
+    },
+    "Hotels & Resorts": {
+      customTabLabel: "Rooms",
+      customTabPlaceholder: "e.g. SEA VIEW DELUXE — King bed, balcony...\nSUITE — Living area, pool access...",
+      tagsLabel: "Room types (comma-separated)",
+      tagsPlaceholder: "Sea View, Pool View, Suite, Family Room",
+    },
+    "Fitness and Wellness memberships": {
+      customTabLabel: "Classes",
+      customTabPlaceholder: "e.g. STRENGTH — Full-body workouts...\nYOGA — Flexibility, recovery...",
+      tagsLabel: "Class types (comma-separated)",
+      tagsPlaceholder: "Strength, Yoga, HIIT, Personal Training",
+    },
+    "Retail & E-commerce": {
+      customTabLabel: "Collections",
+      customTabPlaceholder: "e.g. CASUAL — Tees, jackets...\nFESTIVE — Diwali, Christmas edits...",
+      tagsLabel: "Categories (comma-separated)",
+      tagsPlaceholder: "Tees, Jackets, Footwear, Accessories",
+    },
+    "Beauty and Personal care": {
+      customTabLabel: "Services",
+      customTabPlaceholder: "e.g. HAIR — Haircut, colour...\nSPA — Massage, steam...",
+      tagsLabel: "Service types (comma-separated)",
+      tagsPlaceholder: "Hair, Skin, Spa, Makeup",
+    },
+    "Seasonal Gifting": {
+      customTabLabel: "Campaigns",
+      customTabPlaceholder: "e.g. DIWALI — Dining, shopping redeemable...\nNEW YEAR — Celebration experiences...",
+      tagsLabel: "Campaign tags (comma-separated)",
+      tagsPlaceholder: "Diwali, Christmas, New Year, Corporate",
+    },
   };
 
   const handleMapLocationSelect = (lat, lng, address = null) => {
@@ -548,6 +596,182 @@ const Settings = ({ section: sectionProp }) => {
               />
             </div>
           </div>
+
+          {form.industry && (
+            <div className="page-customization-section" style={{ marginTop: "24px" }}>
+              <h3 className="card-title">Page Customization</h3>
+              <p className="form-hint" style={{ marginBottom: 16 }}>
+                Customize how your public business page displays. These fields appear on your gift cards page.
+              </p>
+              <div className="form-grid">
+                <div className="form_group">
+                  <label className="form_label">Subtitle / Category</label>
+                  <input
+                    value={form.pageCustomization?.subtitle || ""}
+                    onChange={(e) => handlePageCustomizationChange("subtitle", e.target.value)}
+                    placeholder="e.g. Fine Dining, European, BBQ"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group">
+                  <label className="form_label">Status Badge</label>
+                  <input
+                    value={form.pageCustomization?.statusBadge || ""}
+                    onChange={(e) => handlePageCustomizationChange("statusBadge", e.target.value)}
+                    placeholder="e.g. Open now, Closes in 45 mins"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group">
+                  <label className="form_label">Timings</label>
+                  <input
+                    value={form.pageCustomization?.timings || ""}
+                    onChange={(e) => handlePageCustomizationChange("timings", e.target.value)}
+                    placeholder="e.g. 6pm – 11pm (Today)"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group">
+                  <label className="form_label">Price Range</label>
+                  <input
+                    value={form.pageCustomization?.priceRange || ""}
+                    onChange={(e) => handlePageCustomizationChange("priceRange", e.target.value)}
+                    placeholder="e.g. ₹5,000 for two"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                  <label className="form_label">Known For / Highlights</label>
+                  <input
+                    value={form.pageCustomization?.knownFor || ""}
+                    onChange={(e) => handlePageCustomizationChange("knownFor", e.target.value)}
+                    placeholder="Comma-separated: Host, Great Buffet, Friendly Service..."
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                  <label className="form_label">
+                    {INDUSTRY_CONFIG[form.industry]?.tagsLabel || "Tags"}
+                  </label>
+                  <input
+                    value={
+                      Array.isArray(form.pageCustomization?.tags)
+                        ? form.pageCustomization.tags.join(", ")
+                        : (form.pageCustomization?.tags || "")
+                    }
+                    onChange={(e) =>
+                      handlePageCustomizationArrayChange("tags", e.target.value)
+                    }
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.tagsPlaceholder || "Comma-separated tags"}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                  <label className="form_label">Amenities / Features</label>
+                  <input
+                    value={
+                      Array.isArray(form.pageCustomization?.amenities)
+                        ? form.pageCustomization.amenities.join(", ")
+                        : (form.pageCustomization?.amenities || "")
+                    }
+                    onChange={(e) =>
+                      handlePageCustomizationArrayChange("amenities", e.target.value)
+                    }
+                    placeholder="Comma-separated: Dinner, Lunch, Pool, WiFi..."
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group">
+                  <label className="form_label">
+                    {INDUSTRY_CONFIG[form.industry]?.customTabLabel || "Custom Tab"} Content
+                  </label>
+                  <textarea
+                    value={form.pageCustomization?.customTabContent || ""}
+                    onChange={(e) =>
+                      handlePageCustomizationChange("customTabContent", e.target.value)
+                    }
+                    placeholder={
+                      INDUSTRY_CONFIG[form.industry]?.customTabPlaceholder ||
+                      "Add content for your custom tab..."
+                    }
+                    className="form-input"
+                    rows="4"
+                    style={{ resize: "vertical", minHeight: "80px" }}
+                  />
+                </div>
+                <div className="form_group">
+                  <label className="form_label">Primary Rating</label>
+                  <input
+                    value={form.pageCustomization?.ratingPrimary || ""}
+                    onChange={(e) =>
+                      handlePageCustomizationChange("ratingPrimary", e.target.value)
+                    }
+                    placeholder="e.g. 4.8★"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group">
+                  <label className="form_label">Primary Rating Count</label>
+                  <input
+                    value={form.pageCustomization?.ratingPrimaryCount || ""}
+                    onChange={(e) =>
+                      handlePageCustomizationChange("ratingPrimaryCount", e.target.value)
+                    }
+                    placeholder="e.g. 428 Dining Ratings"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group">
+                  <label className="form_label">Secondary Rating</label>
+                  <input
+                    value={form.pageCustomization?.ratingSecondary || ""}
+                    onChange={(e) =>
+                      handlePageCustomizationChange("ratingSecondary", e.target.value)
+                    }
+                    placeholder="e.g. 4.6★"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group">
+                  <label className="form_label">Secondary Rating Count</label>
+                  <input
+                    value={form.pageCustomization?.ratingSecondaryCount || ""}
+                    onChange={(e) =>
+                      handlePageCustomizationChange("ratingSecondaryCount", e.target.value)
+                    }
+                    placeholder="e.g. 156 Gift Card Reviews"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                  <label className="form_label">Disclaimer</label>
+                  <input
+                    value={form.pageCustomization?.disclaimer || ""}
+                    onChange={(e) =>
+                      handlePageCustomizationChange("disclaimer", e.target.value)
+                    }
+                    placeholder="e.g. * Buffet prices may vary on festive dates"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                  <label className="form_label">Photo Filter Labels (comma-separated)</label>
+                  <input
+                    value={
+                      Array.isArray(form.pageCustomization?.photoFilterLabels)
+                        ? form.pageCustomization.photoFilterLabels.join(", ")
+                        : (form.pageCustomization?.photoFilterLabels || "")
+                    }
+                    onChange={(e) =>
+                      handlePageCustomizationArrayChange("photoFilterLabels", e.target.value)
+                    }
+                    placeholder="e.g. All (24), Food (18), Ambience (6)"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="gallery-section" style={{ marginTop: "24px" }}>
             <h3 className="card-title">Business Photos Gallery</h3>

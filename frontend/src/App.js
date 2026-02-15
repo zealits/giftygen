@@ -26,6 +26,7 @@ const ExampleFitness = lazy(() => import("./pages/marketing/ExampleFitness"));
 const ExampleRetail = lazy(() => import("./pages/marketing/ExampleRetail"));
 const ExampleBeauty = lazy(() => import("./pages/marketing/ExampleBeauty"));
 const ExampleSeasonal = lazy(() => import("./pages/marketing/ExampleSeasonal"));
+const BusinessPage = lazy(() => import("./pages/marketing/BusinessPage"));
 const Sidebar = lazy(() => import("./pages/admin/Sidebar.js"));
 const GiftCards = lazy(() => import("./pages/admin/GiftCards.js"));
 const Orders = lazy(() => import("./pages/admin/Orders.js"));
@@ -176,7 +177,7 @@ function AppRoutes() {
         <Route path="/explore/:categoryId/:brandId" element={<ExploreBrand />} />
         <Route path="/oldexplore" element={<UserLanding />} />
         <Route path="/gift-card/:id" element={<GiftCardDetails />} />
-        <Route path="/:businessSlug/giftcards" element={<UserLanding />} />
+        <Route path="/:businessSlug/giftcards" element={<BusinessPage />} />
         <Route path="/:businessSlug/gift-card/:id" element={<GiftCardDetails />} />
 
         {/* Super Admin Routes */}

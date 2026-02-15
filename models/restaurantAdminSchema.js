@@ -24,6 +24,11 @@ const restaurantAdminSchema = new mongoose.Schema(
       latitude: { type: Number }, // Map coordinates
       longitude: { type: Number }, // Map coordinates
     },
+    // Industry-specific page customization (displayed on public business page)
+    pageCustomization: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
     role: { type: String, default: "Admin" }, // Role of the user
     isVerified: { type: Boolean, default: false }, // For OTP verification
     verificationCode: { type: String }, // Hashed OTP

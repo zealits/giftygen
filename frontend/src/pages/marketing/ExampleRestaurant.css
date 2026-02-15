@@ -1,9 +1,27 @@
-/* Venue detail page (restaurant, hotel, etc.) */
+/* Venue detail page (restaurant, hotel, etc.) – single scroll container to avoid double scrollbar */
 .venue-page {
   font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #fff;
   color: #1c1c1c;
   min-height: 100vh;
+  overflow-x: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.venue-page::-webkit-scrollbar {
+  width: 8px;
+}
+.venue-page::-webkit-scrollbar-track {
+  background: transparent;
+}
+.venue-page::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
 }
 
 /* Header – compact info block */
@@ -203,6 +221,14 @@
   position: relative;
 }
 
+.venue-gallery-single {
+  grid-template-columns: 1fr;
+}
+
+.venue-gallery-single .venue-gallery-main {
+  grid-row: 1;
+}
+
 .venue-gallery-overlay {
   position: absolute;
   bottom: 8px;
@@ -251,6 +277,11 @@
   padding: 0 20px;
   border-bottom: 1px solid #e8e8e8;
   overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.venue-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .venue-tab {
