@@ -239,6 +239,9 @@
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 @media (max-width: 768px) {

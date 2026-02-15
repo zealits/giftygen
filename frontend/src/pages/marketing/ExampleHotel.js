@@ -127,7 +127,13 @@ const ExampleHotel = () => {
         </div>
         <div className="venue-gallery-bottom">
           <img src={galleryImages[2]} alt="Pool" />
-          <span className="venue-gallery-overlay">View Gallery</span>
+          <button
+            type="button"
+            className="venue-gallery-overlay"
+            onClick={() => handleTabClick("photos")}
+          >
+            View Gallery
+          </button>
         </div>
       </section>
 
