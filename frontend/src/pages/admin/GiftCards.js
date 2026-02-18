@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./GiftCards.css";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 import { createGiftCard, listGiftCards, updateGiftCard, deleteGiftCard } from "../../services/Actions/giftCardActions";
 import {
   CREATE_GIFTCARD_RESET,
@@ -130,12 +131,102 @@ const GiftCards = () => {
     giftCardImg: "",
   });
 
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [aiSuggestions, setAiSuggestions] = useState({
+    descriptions_medium: [],
+    descriptions_short: [],
+    tags: [],
+    giftcard_name_suggestions: [],
+  });
+  const [aiSelection, setAiSelection] = useState({
+    name: "",
+    description: "",
+    tag: "",
+  });
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+  };
+
+  const handleAiPromptChange = (e) => {
+    setAiPrompt(e.target.value);
+  };
+
+  const handleGenerateWithAi = async () => {
+    if (!formData.giftCardName || !aiPrompt) {
+      console.warn("[AI Describe] Missing fields", {
+        giftCardNamePresent: !!formData.giftCardName,
+        aiPromptPresent: !!aiPrompt,
+      });
+      setAiError("Please enter both a gift card name and what this gift card is for.");
+      return;
+    }
+
+    try {
+      setIsAiLoading(true);
+      setAiError("");
+
+      const payload = {
+        giftcard_name: formData.giftCardName,
+        prompt: aiPrompt,
+      };
+
+      console.log("[AI Describe] Sending request", {
+        url: "/api/ai/describe",
+        payload,
+      });
+
+      const { data } = await axios.post("/api/ai/describe", payload);
+
+      console.log("[AI Describe] Response received", data);
+
+      setAiSuggestions({
+        descriptions_medium: data.descriptions_medium || [],
+        descriptions_short: data.descriptions_short || [],
+        tags: data.tags || [],
+        giftcard_name_suggestions: data.giftcard_name_suggestions || [],
+      });
+    } catch (error) {
+      console.error("[AI Describe] Error fetching AI suggestions", {
+        message: error.message,
+        code: error.code,
+        responseStatus: error.response?.status,
+        responseData: error.response?.data,
+      });
+      setAiError("Could not fetch suggestions right now. Please try again.");
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  const handleSelectAiName = (name) => {
+    setFormData((prev) => ({
+      ...prev,
+      giftCardName: name,
+    }));
+    setAiSelection((prev) => ({ ...prev, name }));
+  };
+
+  const handleSelectAiDescription = (description) => {
+    setFormData((prev) => ({
+      ...prev,
+      description,
+    }));
+    setAiSelection((prev) => ({ ...prev, description }));
+  };
+
+  const handleSelectAiTag = (tag) => {
+    setFormData((prev) => ({
+      ...prev,
+      giftCardTag: tag,
+    }));
+    setAiSelection((prev) => ({ ...prev, tag }));
   };
 
   const handleSubmit = (e) => {
@@ -176,6 +267,18 @@ const GiftCards = () => {
       amount: "",
       discount: "",
       expirationDate: "",
+    });
+    setAiPrompt("");
+    setAiSuggestions({
+      descriptions_medium: [],
+      descriptions_short: [],
+      tags: [],
+      giftcard_name_suggestions: [],
+    });
+    setAiSelection({
+      name: "",
+      description: "",
+      tag: "",
     });
     setIsEditing(false);
     setEditingCardId(null);
@@ -404,6 +507,97 @@ const GiftCards = () => {
                   onChange={handleChange}
                   required
                 />
+              </div>
+              <div className="ai-helper-card">
+                <div className="ai-helper-header">
+                  <span className="ai-helper-pill">AI Assist</span>
+                  <p className="ai-helper-title">Describe what this gift card is for</p>
+                  <p className="ai-helper-subtitle">
+                    We will suggest a refined gift card name, description, and tags tailored to your prompt.
+                  </p>
+                </div>
+                <div className="giftcards-page-form-group ai-helper-input-group">
+                  <label htmlFor="aiPrompt">What is this gift card for?</label>
+                  <textarea
+                    id="aiPrompt"
+                    name="aiPrompt"
+                    rows="2"
+                    placeholder="e.g. create real estate birthday giftcard"
+                    value={aiPrompt}
+                    onChange={handleAiPromptChange}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="ai-helper-generate-btn"
+                  onClick={handleGenerateWithAi}
+                  disabled={isAiLoading}
+                >
+                  {isAiLoading ? "Generating suggestions..." : "Generate with AI"}
+                </button>
+                {aiError && <p className="ai-helper-error">{aiError}</p>}
+
+                {(aiSuggestions.giftcard_name_suggestions.length > 0 ||
+                  aiSuggestions.descriptions_medium.length > 0 ||
+                  aiSuggestions.tags.length > 0) && (
+                  <div className="ai-helper-suggestions">
+                    {aiSuggestions.giftcard_name_suggestions.length > 0 && (
+                      <div className="ai-helper-section">
+                        <h4 className="ai-helper-section-title">Name suggestions</h4>
+                        <div className="ai-helper-chip-row">
+                          {aiSuggestions.giftcard_name_suggestions.map((name) => (
+                            <button
+                              key={name}
+                              type="button"
+                              className={`ai-chip ${aiSelection.name === name ? "ai-chip-selected" : ""}`}
+                              onClick={() => handleSelectAiName(name)}
+                            >
+                              {name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {aiSuggestions.descriptions_medium.length > 0 && (
+                      <div className="ai-helper-section">
+                        <h4 className="ai-helper-section-title">Description ideas</h4>
+                        <div className="ai-helper-card-grid">
+                          {aiSuggestions.descriptions_medium.map((desc) => (
+                            <button
+                              key={desc}
+                              type="button"
+                              className={`ai-description-card ${
+                                aiSelection.description === desc ? "ai-description-card-selected" : ""
+                              }`}
+                              onClick={() => handleSelectAiDescription(desc)}
+                            >
+                              <span>{desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {aiSuggestions.tags.length > 0 && (
+                      <div className="ai-helper-section">
+                        <h4 className="ai-helper-section-title">Tag suggestions</h4>
+                        <div className="ai-helper-chip-row">
+                          {aiSuggestions.tags.map((tag) => (
+                            <button
+                              key={tag}
+                              type="button"
+                              className={`ai-chip ${aiSelection.tag === tag ? "ai-chip-selected" : ""}`}
+                              onClick={() => handleSelectAiTag(tag)}
+                            >
+                              {tag}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="giftcards-page-form-group">
                 <label htmlFor="giftCardTag">Gift Card Tag</label>

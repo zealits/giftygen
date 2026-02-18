@@ -1,16 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getGiftCardDetails } from "../../services/Actions/giftCardActions";
+import { getGiftCardDetails, listGiftCards } from "../../services/Actions/giftCardActions";
+import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import GiftCardForm from "./GiftCardForm";
 import { formatCurrency } from "../../utils/currency";
 import SEO from "../../components/SEO";
 import { getGiftCardProductSchema, getBreadcrumbSchema } from "../../utils/structuredData";
+import { Share2, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "./GiftCardDetails.css";
 
 const GiftCardDetails = () => {
   const { id, businessSlug } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showGiftCardForm, setShowGiftCardForm] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -19,7 +23,12 @@ const GiftCardDetails = () => {
   const containerRef = useRef(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     dispatch(getGiftCardDetails(id));
+    if (businessSlug) {
+      dispatch(fetchBusinessBySlug(businessSlug));
+      dispatch(listGiftCards("", businessSlug));
+    }
     
     // Set animation trigger after a short delay
     const timer = setTimeout(() => {
@@ -45,9 +54,14 @@ const GiftCardDetails = () => {
       clearTimeout(timer);
       elements.forEach(el => observer.unobserve(el));
     };
-  }, [dispatch, id]);
+  }, [dispatch, id, businessSlug]);
 
   const { giftCard, loading, error } = useSelector((state) => state.giftCardDetails);
+  const { business } = useSelector((state) => state.business);
+  const { giftCards: businessGiftCards } = useSelector((state) => state.giftCardList) || {};
+  const otherCards = (Array.isArray(businessGiftCards) ? businessGiftCards : []).filter(
+    (card) => card._id !== id && card.status !== "expired" && (!card.expirationDate || new Date(card.expirationDate) >= new Date())
+  );
 
   const handleBuyNow = () => {
     console.log("Selected card data:", {
@@ -163,14 +177,83 @@ if (loading) return (
     <div className={`gift-card-details-container ${isVisible ? 'visible' : ''}`} ref={containerRef}>
       {giftCard && (
         <SEO
-          title={`${giftCard.giftCardName} - ${giftCard.businessName || 'GiftyGen'}`}
+          title={`${giftCard.giftCardName} - ${business?.name || giftCard.businessName || 'GiftyGen'}`}
           description={giftCard.description || `${giftCard.giftCardName} digital gift card. Perfect gift for any occasion.`}
-          keywords={`${giftCard.giftCardName}, ${giftCard.businessName}, gift card, digital gift card, ${giftCard.amount} gift card`}
+          keywords={`${giftCard.giftCardName}, ${business?.name || giftCard.businessName}, gift card, digital gift card, ${giftCard.amount} gift card`}
           image={giftCard.giftCardImg}
           url={pageUrl}
           type="product"
           structuredData={structuredData}
         />
+      )}
+      <div className="gift-details-inner">
+      {businessSlug && business && (
+        <header className="venue-header gift-details-venue-header">
+          <div className="venue-header-inner">
+            <div className="venue-header-left">
+              <div className="venue-header-title-row">
+                {business.logoUrl && (
+                  <img
+                    src={business.logoUrl}
+                    alt={business.name}
+                    className="venue-restaurant-logo"
+                  />
+                )}
+                <div>
+                  <h1 className="venue-restaurant-name">{business.name}</h1>
+                  <Link to={`/${businessSlug}/giftcards`} className="venue-back-link">
+                    ← Back to gift cards
+                  </Link>
+                </div>
+              </div>
+              {(() => {
+                const addressParts = [
+                  business.address?.street,
+                  business.address?.city,
+                  business.address?.state,
+                ].filter(Boolean);
+                const addressText = addressParts.join(", ");
+                return addressText ? <p className="venue-address">{addressText}</p> : null;
+              })()}
+              <div className="venue-meta-row">
+                {business.pageCustomization?.statusBadge && (
+                  <span className="venue-status-badge">{business.pageCustomization.statusBadge}</span>
+                )}
+                {business.pageCustomization?.timings && (
+                  <span className="venue-meta">
+                    {business.pageCustomization.timings} <span className="venue-meta-i">ⓘ</span>
+                  </span>
+                )}
+                {business.pageCustomization?.priceRange && (
+                  <span className="venue-meta">| {business.pageCustomization.priceRange}</span>
+                )}
+                {business.phone && (
+                  <a href={`tel:${business.phone.replace(/\s/g, "")}`} className="venue-phone">
+                    {business.phone}
+                  </a>
+                )}
+              </div>
+              <div className="venue-actions">
+                <button
+                  type="button"
+                  className="venue-action-btn"
+                  onClick={() => window.navigator.share?.({ url: window.location.href, title: business.name })}
+                >
+                  <Share2 size={18} />
+                  Share
+                </button>
+                <button
+                  type="button"
+                  className="venue-action-btn"
+                  onClick={() => navigate(`/${businessSlug}/giftcards`, { state: { scrollToReviews: true } })}
+                >
+                  <MessageCircle size={18} />
+                  Reviews
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
       )}
       <div className="gift-card-details">
         <div className={`image-container slide-in-left ${isVisible ? 'active' : ''}`}>
@@ -236,9 +319,37 @@ if (loading) return (
         </div>
       </div>
 
-      <div className="related-cards animate-on-scroll">
-        
-       
+      {businessSlug && business && otherCards.length > 0 && (
+        <section className="gift-details-other-cards animate-on-scroll">
+          <h2>Gift Cards from {business.name}</h2>
+          <p className="other-cards-subtitle">Delivered instantly as digital cards.</p>
+          <div className="gift-details-other-cards-scroll">
+            {otherCards.map((card) => (
+              <Link
+                key={card._id}
+                to={`/${businessSlug}/gift-card/${card._id}`}
+                className="gift-details-other-card"
+              >
+                <div className="gift-details-other-card-wrap">
+                  <img
+                    src={card.giftCardImg}
+                    alt={card.giftCardName}
+                    className="gift-details-other-card-image"
+                  />
+                  <span className="gift-details-other-card-tag">{card.giftCardTag}</span>
+                </div>
+                <div className="gift-details-other-card-body">
+                  <h3 className="gift-details-other-card-title">{card.giftCardName}</h3>
+                  <span className="gift-details-other-card-price">
+                    {formatCurrency(card.amount, "INR")}
+                    {card.discount > 0 && ` · ${card.discount}% Off`}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
       </div>
 
       {showGiftCardForm && <GiftCardForm {...selectedCard} onClose={closePopup} />}

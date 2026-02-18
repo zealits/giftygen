@@ -13,6 +13,7 @@ const giftCardRoutes = require("./routes/giftCardRoutes");
 const superAdminRoutes = require("./routes/superAdminRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 // Make sure to add your dashboard routes here
 
@@ -35,6 +36,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/v1/payment", paymentRoutes); // Alias for new subscription module
 app.use("/api/v1/subscription", subscriptionRoutes);
 app.use("/api/wallet", walletRoutes);
+app.use("/api/ai", aiRoutes);
 
 const { GoogleAuth } = require("google-auth-library");
 const jwt = require("jsonwebtoken");

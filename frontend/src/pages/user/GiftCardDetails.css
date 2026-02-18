@@ -1,37 +1,38 @@
  .gift-card-details-container {
     max-width: 100vw;
-      
-    
-   
     font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: #ffffff;
+    padding: 24px;
+    position: relative;
+  }
+  
+  .gift-card-details-container > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Same left/right spacing as business page: max-width 1200px centered */
+  .gift-details-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
   }
   
   .gift-card-details {
     display: flex;
     gap: 50px;
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
-    height: 100vh;
+    background: #ffffff;
+    min-height: auto;
     padding: 40px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 
-                0 1px 8px rgba(0, 0, 0, 0.04),
-                0 20px 40px rgba(236, 201, 252, 0.15);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+    border-radius: 12px;
     position: relative;
-    overflow: hidden;
-    margin-bottom:-60px;
-    padding-right:100px;
-  }
-  
-  .gift-card-details::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
-    opacity: 0.6;
-    pointer-events: none;
-    z-index: 0;
+    overflow: visible;
+    margin-bottom: 0;
+    padding-right: 40px;
   }
   
  
@@ -106,7 +107,9 @@
     flex-direction: column;
     position: relative;
     z-index: 2;
-    margin-top:60px;
+    margin-top: 60px;
+    overflow: visible;
+    min-height: 0;
   }
   
   .details-container h1 {
@@ -203,7 +206,7 @@
   }
   
   .buy-now-btn {
-    width: 50px;
+    min-width: 160px;
     flex: 1;
     display: flex;
     align-items: center;
@@ -516,6 +519,233 @@
     .related-cards-grid {
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
+  }
+  
+  /* Venue-style header: same as BusinessPage for visual linkage */
+  .venue-header.gift-details-venue-header {
+    background: #fff;
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid #e8e8e8;
+    margin-bottom: 0;
+    border-radius: 0;
+  }
+  
+  .gift-details-inner .venue-header-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .gift-details-inner .venue-header-left {
+    flex: 1;
+    min-width: 280px;
+  }
+  
+  .gift-details-inner .venue-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+  
+  .gift-details-inner .venue-restaurant-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  
+  .gift-details-inner .venue-restaurant-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+  
+  .gift-details-inner .venue-back-link {
+    display: inline-block;
+    font-size: 0.9rem;
+    color: #696969;
+    text-decoration: none;
+    margin-top: 2px;
+  }
+  
+  .gift-details-inner .venue-back-link:hover {
+    color: #e23744;
+    text-decoration: underline;
+  }
+  
+  .gift-details-inner .venue-address {
+    font-size: 0.9rem;
+    color: #696969;
+    margin: 0 0 12px;
+  }
+  
+  .gift-details-inner .venue-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    font-size: 0.9rem;
+    color: #696969;
+    margin-bottom: 6px;
+  }
+  
+  .gift-details-inner .venue-status-badge {
+    background: #e23744;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  
+  .gift-details-inner .venue-meta-i {
+    font-style: italic;
+    opacity: 0.8;
+  }
+  
+  .gift-details-inner .venue-phone {
+    color: #e23744;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .gift-details-inner .venue-phone:hover {
+    text-decoration: underline;
+  }
+  
+  .gift-details-inner .venue-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .gift-details-inner .venue-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border: 1px solid #e23744;
+    background: #fff;
+    color: #e23744;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .gift-details-inner .venue-action-btn:hover {
+    background: #e23744;
+    color: #fff;
+  }
+  
+  /* Other gift cards from this business */
+  .gift-details-other-cards {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    width: 100%;
+  }
+  
+  .gift-details-other-cards h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px;
+  }
+  
+  .gift-details-other-cards .other-cards-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 24px;
+  }
+  
+  .gift-details-other-cards-scroll {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 12px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .gift-details-other-cards-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .gift-details-other-cards-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+  
+  .gift-details-other-cards-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  
+  .gift-details-other-card {
+    flex: 0 0 280px;
+    scroll-snap-align: start;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  
+  .gift-details-other-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  }
+  
+  .gift-details-other-card-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+  
+  .gift-details-other-card-tag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #ff6347;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .gift-details-other-card-body {
+    padding: 16px;
+  }
+  
+  .gift-details-other-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 6px;
+    line-height: 1.3;
+  }
+  
+  .gift-details-other-card-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #dc2626;
+  }
+  
+  .gift-details-other-card-wrap {
+    position: relative;
   }
   
   .footer {
