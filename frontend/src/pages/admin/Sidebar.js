@@ -3,7 +3,7 @@ import "./Sidebar.css";
 import { useDispatch } from "react-redux";
 import { logout } from "../../services/Actions/authActions";
 import { Link, useLocation } from "react-router-dom";
-import { FaCog, FaSignOutAlt, FaAngleLeft, FaTachometerAlt, FaGift, FaShoppingCart, FaChartLine, FaCreditCard, FaBars, FaChevronDown, FaChevronUp, FaLock, FaBuilding, FaCreditCard as FaCard } from "react-icons/fa";
+import { FaCog, FaSignOutAlt, FaAngleLeft, FaTachometerAlt, FaGift, FaShoppingCart, FaChartLine, FaCreditCard, FaBars, FaChevronDown, FaChevronUp, FaLock, FaBuilding, FaCreditCard as FaCard, FaPlus, FaList } from "react-icons/fa";
 import AiiLogo from "../../assets/Aii_logo.png";
 
 const Sidebar = () => {
@@ -15,6 +15,9 @@ const Sidebar = () => {
     if (path === "/settings") {
       return location.pathname.startsWith("/settings");
     }
+    if (path === "/giftcards") {
+      return location.pathname.startsWith("/giftcards");
+    }
     return location.pathname === path;
   };
 
@@ -23,8 +26,14 @@ const Sidebar = () => {
     return location.pathname.startsWith("/settings");
   };
 
+  // Check if any giftcards sub-route is active
+  const isGiftCardsActive = () => {
+    return location.pathname.startsWith("/giftcards");
+  };
+
   const [isOpen, setIsOpen] = useState(true);
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
+  const [giftcardsDropdownOpen, setGiftcardsDropdownOpen] = useState(false);
 
   // Auto-open dropdown when on a settings route
   useEffect(() => {
@@ -33,10 +42,18 @@ const Sidebar = () => {
     }
   }, [location.pathname, isOpen]);
 
+  // Auto-open giftcards dropdown when on a giftcards route
+  useEffect(() => {
+    if (location.pathname.startsWith("/giftcards") && isOpen) {
+      setGiftcardsDropdownOpen(true);
+    }
+  }, [location.pathname, isOpen]);
+
   // Close dropdown when sidebar is collapsed
   useEffect(() => {
     if (!isOpen) {
       setSettingsDropdownOpen(false);
+      setGiftcardsDropdownOpen(false);
     }
   }, [isOpen]);
 
@@ -66,14 +83,50 @@ const Sidebar = () => {
           {isActive("/dashboard") && <span className="active-indicator"></span>}
         </Link>
       </li>
-      <li>
-        <Link to="/giftcards" className={`linke ${isActive("/giftcards") ? "active" : ""}`}>
+      <li className={`giftcards-menu-item ${isGiftCardsActive() ? "active-parent" : ""}`}>
+        <div
+          className={`linke giftcards-trigger ${isGiftCardsActive() ? "active" : ""}`}
+          onClick={() => setGiftcardsDropdownOpen(!giftcardsDropdownOpen)}
+        >
           <i className="bx bx-user">
             <FaGift className="icon" />
           </i>
           <span className="links_name">GiftCards</span>
-          {isActive("/giftcards") && <span className="active-indicator"></span>}
-        </Link>
+          {isOpen && (
+            <span className="dropdown-arrow">
+              {giftcardsDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
+            </span>
+          )}
+          {isGiftCardsActive() && <span className="active-indicator"></span>}
+        </div>
+        {isOpen && giftcardsDropdownOpen && (
+          <ul className="giftcards-dropdown">
+            <li>
+              <Link
+                to="/giftcards/create"
+                className={`dropdown-link ${location.pathname === "/giftcards/create" ? "active" : ""}`}
+                onClick={() => setGiftcardsDropdownOpen(false)}
+              >
+                <i className="dropdown-icon">
+                  <FaPlus />
+                </i>
+                <span>Create Giftcard</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/giftcards"
+                className={`dropdown-link ${location.pathname === "/giftcards" ? "active" : ""}`}
+                onClick={() => setGiftcardsDropdownOpen(false)}
+              >
+                <i className="dropdown-icon">
+                  <FaList />
+                </i>
+                <span>Manage Giftcard</span>
+              </Link>
+            </li>
+          </ul>
+        )}
       </li>
       <li>
         <Link to="/orders" className={`linke ${isActive("/orders") ? "active" : ""}`}>

@@ -54,3 +54,49 @@ exports.describeGiftcard = async (req, res) => {
   }
 };
 
+// Proxy to external AI image endpoint so frontend avoids CORS
+exports.generateGiftcardImage = async (req, res) => {
+  try {
+    const { giftcard_name, description } = req.body || {};
+
+    if (!giftcard_name || !description) {
+      return res.status(400).json({ message: "giftcard_name and description are required" });
+    }
+
+    const { data } = await axios.post(
+      "https://giftifyai.giftygen.com/tier2/image",
+      { giftcard_name: giftcard_name.trim(), description: description.trim() },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          accept: "application/json",
+        },
+        timeout: 60000,
+      }
+    );
+
+    if (!data || !data.image_base64) {
+      return res.status(502).json({ message: "No image returned from AI service" });
+    }
+
+    return res.json({
+      image_base64: data.image_base64,
+      media_type: data.media_type || "image/png",
+    });
+  } catch (err) {
+    console.error("[AI Image][Backend] Error calling external API", {
+      message: err.message,
+      code: err.code,
+      status: err.response?.status,
+    });
+
+    if (err.response) {
+      return res
+        .status(err.response.status)
+        .json({ message: err.response.data?.message || "Image generation failed", details: err.response.data });
+    }
+
+    return res.status(502).json({ message: "Image service unavailable" });
+  }
+};
+

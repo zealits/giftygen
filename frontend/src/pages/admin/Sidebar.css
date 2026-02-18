@@ -446,6 +446,206 @@
     color: var(--accent-primary) !important;
 }
 
+/* GiftCards dropdown - reuse same styles as settings dropdown */
+.giftcards-menu-item {
+    position: relative;
+}
+
+/* Keep icon and text inline like other nav items */
+.giftcards-trigger.linke {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all var(--transition-speed) ease;
+    padding: 12px 8px;
+    gap: 12px;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.sidebar.open .giftcards-trigger.linke {
+    padding: 12px;
+}
+
+.giftcards-trigger {
+    cursor: pointer;
+    position: relative;
+    color: var(--text-secondary) !important;
+}
+
+.giftcards-trigger .icon {
+    color: var(--text-secondary) !important;
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all var(--transition-speed) ease;
+    margin: 0 auto;
+}
+
+.sidebar.open .giftcards-trigger .icon {
+    margin: 0;
+}
+
+.giftcards-trigger:hover .icon,
+.giftcards-trigger.active .icon {
+    color: var(--accent-primary) !important;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+}
+
+.giftcards-trigger .links_name {
+    color: var(--text-secondary) !important;
+    font-size: 15px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.sidebar.open .giftcards-trigger .links_name {
+    opacity: 1;
+}
+
+.giftcards-trigger:hover .links_name,
+.giftcards-trigger.active .links_name {
+    color: var(--accent-primary) !important;
+}
+
+.giftcards-trigger .dropdown-arrow {
+    margin-left: auto;
+    color: var(--text-secondary);
+    font-size: 12px;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidebar.open .giftcards-trigger .dropdown-arrow {
+    opacity: 1;
+    visibility: visible;
+}
+
+.giftcards-trigger:hover .dropdown-arrow,
+.giftcards-trigger.active .dropdown-arrow {
+    color: var(--accent-primary);
+}
+
+.giftcards-trigger.active-parent {
+    background: var(--hover-bg);
+    border-left: 2px solid var(--accent-primary);
+}
+
+.giftcards-trigger.active-parent .icon {
+    color: var(--accent-primary) !important;
+}
+
+.giftcards-trigger.active-parent .links_name {
+    color: var(--accent-primary) !important;
+}
+
+.giftcards-trigger:hover {
+    background: var(--hover-bg);
+}
+
+.giftcards-dropdown {
+    list-style: none;
+    padding: 0;
+    margin: 5px 0 0 0;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    animation: slideDown 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.giftcards-dropdown li {
+    margin: 0;
+    padding: 0;
+}
+
+.giftcards-dropdown .dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px 10px 40px;
+    color: var(--text-secondary) !important;
+    text-decoration: none;
+    transition: all var(--transition-speed) ease;
+    border-left: 2px solid transparent;
+    position: relative;
+}
+
+.giftcards-dropdown .dropdown-link span {
+    color: var(--text-secondary) !important;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.giftcards-dropdown .dropdown-link:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-primary) !important;
+    border-left-color: var(--accent-primary);
+    padding-left: 45px;
+}
+
+.giftcards-dropdown .dropdown-link:hover span {
+    color: var(--accent-primary) !important;
+}
+
+.giftcards-dropdown .dropdown-link:hover .dropdown-icon {
+    color: var(--accent-primary) !important;
+}
+
+.giftcards-dropdown .dropdown-link.active {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-primary) !important;
+    border-left-color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.giftcards-dropdown .dropdown-link.active span {
+    color: var(--accent-primary) !important;
+}
+
+.giftcards-dropdown .dropdown-link.active .dropdown-icon {
+    color: var(--accent-primary) !important;
+}
+
+.giftcards-dropdown .dropdown-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 0 2px 2px 0;
+}
+
+.giftcards-dropdown .dropdown-icon {
+    min-width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text-secondary);
+    transition: all var(--transition-speed) ease;
+}
+
+.giftcards-dropdown .dropdown-link:hover .dropdown-icon,
+.giftcards-dropdown .dropdown-link.active .dropdown-icon {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.4));
+    color: var(--accent-primary) !important;
+}
+
 .profile {
     margin-top: auto;
     padding: 0;

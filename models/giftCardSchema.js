@@ -9,6 +9,18 @@ const giftCardSchema = new mongoose.Schema(
     giftCardTag: {
       type: String,
     },
+    tags: {
+      type: [String],
+      default: undefined,
+    },
+    quantity: {
+      type: Number,
+      default: null,
+    },
+    soldQuantity: {
+      type: Number,
+      default: 0,
+    },
     description: {
       type: String,
     },

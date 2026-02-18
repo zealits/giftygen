@@ -1348,10 +1348,32 @@ html {
   opacity: 1;
 }
 
-.modern-tag {
+.purchase-card-tags-wrap {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
+  padding: 16px;
+  gap: 8px;
+}
+
+.purchase-card-tags-wrap .modern-tag:not(.modern-tag-right) {
+  align-self: flex-start;
+}
+
+.purchase-card-tags-wrap .modern-tag-right {
+  margin-left: auto;
+  align-self: flex-end;
+}
+
+.modern-tag {
+  position: static;
+  display: inline-block;
   background: linear-gradient(135deg, #ff6347 0%, #ff4500 100%);
   color: white;
   padding: 10px 16px;
@@ -1504,6 +1526,19 @@ html {
 
 .modern-card-button:active {
   transform: scale(0.96);
+}
+
+.modern-card-button.out-of-stock,
+.modern-card-button:disabled {
+  background: #64748b;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.modern-card-button.out-of-stock:hover,
+.modern-card-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 /* Better mobile button interaction */

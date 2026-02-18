@@ -427,8 +427,12 @@ const UserLanding = () => {
                 <div className="purchase-card-image modern-card-image">
                   <img src={card.giftCardImg} alt="Gift Card" loading="lazy" />
                   <div className="card-image-overlay"></div>
-                  <div className="purchase-card-tag modern-tag">
-                    <i className={card.icon}></i> {card.giftCardTag}
+                  <div className="purchase-card-tags-wrap">
+                    {(card.tags && card.tags.length > 0 ? card.tags : card.giftCardTag ? [card.giftCardTag] : []).slice(0, 3).map((tag, idx) => (
+                      <span key={idx} className={`purchase-card-tag modern-tag ${idx === 1 ? "modern-tag-right" : ""}`}>
+                        {idx === 0 && card.icon ? <i className={card.icon}></i> : null} {tag}
+                      </span>
+                    ))}
                   </div>
                   {businessSlug && business && (
                     <div className="business-card-badge modern-badge">
@@ -448,13 +452,20 @@ const UserLanding = () => {
                       <span className="purchase-card-discount modern-discount">{card.discount}% OFF</span>
                     </div>
                   </div>
-                  <button
-                    className="purchase-card-button modern-card-button"
-                    onClick={(e) => handleBuyNow(e, card.giftCardName, card.amount, card.discount, card._id)}
-                  >
-                    <Gift size={18} />
-                    <span>Buy Now</span>
-                  </button>
+                  {(() => {
+                    const sold = card.soldQuantity ?? card.buyers?.length ?? 0;
+                    const outOfStock = card.quantity != null && card.quantity > 0 && sold >= card.quantity;
+                    return (
+                      <button
+                        className={`purchase-card-button modern-card-button ${outOfStock ? "out-of-stock" : ""}`}
+                        onClick={(e) => !outOfStock && handleBuyNow(e, card.giftCardName, card.amount, card.discount, card._id)}
+                        disabled={outOfStock}
+                      >
+                        <Gift size={18} />
+                        <span>{outOfStock ? "Out of stock" : "Buy Now"}</span>
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             );

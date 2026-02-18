@@ -1,5 +1,231 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* Create Gift Card page - two column layout */
+.create-giftcard-page .create-giftcard-form-wrapper {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.create-giftcard-page .create-giftcard-form {
+  padding: 20px 0;
+}
+
+.create-giftcard-form-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.create-giftcard-left,
+.create-giftcard-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.create-giftcard-left {
+  padding-right: 8px;
+}
+
+.create-giftcard-right {
+  padding-left: 8px;
+  position: sticky;
+  top: 24px;
+}
+
+.create-giftcard-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 8px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.02em;
+}
+
+.create-giftcard-submit {
+  margin-top: 8px;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .create-giftcard-form-two-col {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .create-giftcard-left,
+  .create-giftcard-right {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .create-giftcard-right {
+    position: static;
+  }
+}
+
+/* Gift card image: upload or AI generate */
+.image-source-group .image-source-hint {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin: 4px 0 14px 0;
+}
+
+.image-options-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.image-option-card {
+  flex: 1;
+  min-width: 180px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.image-option-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.image-option-icon {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.image-option-card .ai-icon {
+  font-size: 28px;
+}
+
+.image-option-label {
+  font-weight: 600;
+  color: #fff;
+}
+
+.image-option-sublabel {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.image-file-input-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.image-option-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.image-option-upload .image-option-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.image-option-upload .image-option-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.image-option-ai .ai-btn {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+}
+
+.image-option-ai .ai-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.image-option-ai .ai-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.image-option-divider {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+}
+
+.image-current-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.image-current-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(99, 102, 241, 0.4);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.image-current-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-current-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 4px;
+  text-align: center;
+}
+
+.image-clear-btn {
+  padding: 8px 14px;
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.image-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.image-source-error {
+  color: #f87171;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 .main-content {
   width: 90%;
   margin: 30px auto;
@@ -22,7 +248,7 @@
 /* Actions Container */
 .actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 30px;
   padding: 20px;

@@ -29,6 +29,7 @@ const ExampleSeasonal = lazy(() => import("./pages/marketing/ExampleSeasonal"));
 const BusinessPage = lazy(() => import("./pages/marketing/BusinessPage"));
 const Sidebar = lazy(() => import("./pages/admin/Sidebar.js"));
 const GiftCards = lazy(() => import("./pages/admin/GiftCards.js"));
+const CreateGiftCard = lazy(() => import("./pages/admin/CreateGiftCard.js"));
 const Orders = lazy(() => import("./pages/admin/Orders.js"));
 const Customers = lazy(() => import("./pages/admin/Customers.js"));
 const Reports = lazy(() => import("./pages/admin/Reports.js"));
@@ -85,6 +86,14 @@ function AppRoutes() {
               element={
                 <div className="content">
                   <GiftCards />
+                </div>
+              }
+            />
+            <Route
+              path="/giftcards/create"
+              element={
+                <div className="content">
+                  <CreateGiftCard />
                 </div>
               }
             />

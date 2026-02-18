@@ -123,12 +123,13 @@ const GiftCards = () => {
 
   const [formData, setFormData] = useState({
     giftCardName: "",
-    giftCardTag: "birthday", // Default value matches the first option
+    giftCardTag: "birthday",
     description: "",
     amount: "",
     discount: "",
     expirationDate: "",
     giftCardImg: "",
+    quantity: "",
   });
 
   const [aiPrompt, setAiPrompt] = useState("");
@@ -259,32 +260,6 @@ const GiftCards = () => {
     }
   };
 
-  const handleOpenModal = () => {
-    setFormData({
-      giftCardName: "",
-      giftCardTag: "birthday",
-      description: "",
-      amount: "",
-      discount: "",
-      expirationDate: "",
-    });
-    setAiPrompt("");
-    setAiSuggestions({
-      descriptions_medium: [],
-      descriptions_short: [],
-      tags: [],
-      giftcard_name_suggestions: [],
-    });
-    setAiSelection({
-      name: "",
-      description: "",
-      tag: "",
-    });
-    setIsEditing(false);
-    setEditingCardId(null);
-    setModalOpen(true);
-  };
-
   const handleEdit = (card) => {
     setFormData({
       giftCardName: card.giftCardName,
@@ -292,8 +267,9 @@ const GiftCards = () => {
       description: card.description,
       amount: card.amount,
       discount: card.discount,
-      expirationDate: card.expirationDate.split("T")[0],
+      expirationDate: card.expirationDate?.split?.("T")[0] ?? "",
       giftCardImg: card.giftCardImg,
+      quantity: card.quantity != null ? String(card.quantity) : "",
     });
 
     setSelectedFile({
@@ -400,13 +376,10 @@ const GiftCards = () => {
 
   return (
     <div>
-      <h1 className="heading">GiftCards</h1>
+      <h1 className="heading">Manage Gift Cards</h1>
       <div>
         <div className="main-content">
           <div className="actions">
-            <button className="create-giftcard cbtn white" onClick={handleOpenModal}>
-              Create Giftcard
-            </button>
             <input
               type="text"
               id="search-giftcards"
@@ -424,18 +397,18 @@ const GiftCards = () => {
                 <th>Discount</th>
                 <th>Sale Price</th>
                 <th>Deadline</th>
-
+                <th>Stock</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7">Loading...</td>
+                  <td colSpan="8">Loading...</td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan="7">Error: {error}</td>
+                  <td colSpan="8">Error: {error}</td>
                 </tr>
               ) : giftCards && giftCards.length > 0 ? (
                 giftCards.map((card) => {
@@ -467,7 +440,11 @@ const GiftCards = () => {
                           )}
                         </div>
                       </td>
-
+                      <td>
+                        {card.quantity != null
+                          ? `${card.soldQuantity ?? card.buyers?.length ?? 0} / ${card.quantity}`
+                          : "—"}
+                      </td>
                       <td>
                         <button className="cbtn edit" onClick={() => handleEdit(card)}>
                           Edit
@@ -481,7 +458,7 @@ const GiftCards = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="7">No gift cards found</td>
+                  <td colSpan="8">No gift cards found</td>
                 </tr>
               )}
             </tbody>
@@ -769,6 +746,18 @@ const GiftCards = () => {
                   onChange={handleChange}
                   required
                   min={new Date().toISOString().split("T")[0]}
+                />
+              </div>
+              <div className="giftcards-page-form-group">
+                <label htmlFor="quantity">Quantity (max to sell)</label>
+                <input
+                  type="number"
+                  id="quantity"
+                  name="quantity"
+                  min="0"
+                  placeholder="Unlimited if empty"
+                  value={formData.quantity}
+                  onChange={handleChange}
                 />
               </div>
 

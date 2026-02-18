@@ -241,6 +241,46 @@ const BusinessPage = () => {
           <div className="venue-content">
             {activeTab === "overview" && (
               <>
+                {(addressText || business?.address?.latitude) && (
+                  <section className="venue-card venue-card-map">
+                    <h3 className="venue-card-title">Location</h3>
+                    {addressText && (
+                      <p className="venue-card-text venue-address-inline" style={{ marginBottom: 12 }}>
+                        {addressText}
+                      </p>
+                    )}
+                    {(addressText || (business?.address?.latitude != null && business?.address?.longitude != null)) && (
+                      <div className="venue-map-wrap">
+                        <iframe
+                          title={`Map: ${business?.name || "Business"} location`}
+                          className="venue-map-iframe"
+                          src={
+                            business?.address?.latitude != null && business?.address?.longitude != null
+                              ? `https://www.google.com/maps?q=${business.address.latitude},${business.address.longitude}&z=15&output=embed`
+                              : `https://www.google.com/maps?q=${encodeURIComponent(addressText)}&output=embed`
+                          }
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        />
+                      </div>
+                    )}
+                    {(addressText || (business?.address?.latitude != null && business?.address?.longitude != null)) && (
+                      <a
+                        className="venue-map-link"
+                        href={
+                          business?.address?.latitude != null && business?.address?.longitude != null
+                            ? `https://www.google.com/maps?q=${business.address.latitude},${business.address.longitude}`
+                            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressText)}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open in Google Maps
+                      </a>
+                    )}
+                  </section>
+                )}
                 {pc.knownFor && (
                   <section className="venue-card">
                     <h3 className="venue-card-title">Known For</h3>

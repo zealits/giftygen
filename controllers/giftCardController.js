@@ -53,7 +53,16 @@ const formatAmountDisplay = (value) => {
 
 const createGiftCard = async (req, res) => {
   try {
-    const { giftCardName, giftCardTag, description, amount, discount, expirationDate } = req.body;
+    const { giftCardName, giftCardTag, description, amount, discount, expirationDate, quantity } = req.body;
+    let tags = req.body.tags;
+    if (typeof tags === "string") {
+      try {
+        tags = JSON.parse(tags);
+      } catch {
+        tags = tags ? [tags] : [];
+      }
+    }
+    if (!Array.isArray(tags)) tags = [];
     let giftCardImgUrl = null;
 
     if (req.file) {
@@ -81,9 +90,13 @@ const createGiftCard = async (req, res) => {
       });
     }
 
+    const quantityNum = quantity != null && quantity !== "" ? Number(quantity) : null;
     const giftCard = new GiftCard({
       giftCardName,
-      giftCardTag,
+      giftCardTag: giftCardTag || (tags.length ? tags[0] : undefined),
+      tags: tags.length ? tags : undefined,
+      quantity: quantityNum,
+      soldQuantity: 0,
       description,
       amount,
       discount,
@@ -478,9 +491,17 @@ const updateGiftCard = async (req, res) => {
       });
     }
 
-    // Update the gift card fields
+    let tags = req.body.tags;
+    if (typeof tags === "string") {
+      try {
+        tags = JSON.parse(tags);
+      } catch {
+        tags = tags ? [tags] : [];
+      }
+    }
     const updates = { ...req.body, giftCardImg: giftCardImgUrl };
-    // Preserve businessSlug; do not allow changing businessSlug via update
+    if (Array.isArray(tags)) updates.tags = tags;
+    if (req.body.quantity !== undefined) updates.quantity = req.body.quantity === "" || req.body.quantity == null ? null : Number(req.body.quantity);
     delete updates.businessSlug;
     const updatedGiftCard = await GiftCard.findByIdAndUpdate(id, updates, { new: true });
     console.log("Updated Gift Card:", updatedGiftCard);
@@ -549,6 +570,12 @@ const addBuyer = async (req, res) => {
       return res.status(404).json({ error: "Gift card not found" });
     }
 
+    const quantity = giftCardDetails.quantity;
+    const soldCount = giftCardDetails.soldQuantity ?? giftCardDetails.buyers?.length ?? 0;
+    if (quantity != null && quantity > 0 && soldCount >= quantity) {
+      return res.status(400).json({ error: "This gift card is out of stock" });
+    }
+
     // Generate unique code for QR
     let uniqueCode;
     if (barcodeUnicode) {
@@ -593,6 +620,9 @@ const addBuyer = async (req, res) => {
     // Add buyer to gift card
     console.log(buyerDetails);
     giftCardDetails.buyers.push(buyerDetails);
+    if (giftCardDetails.quantity != null) {
+      giftCardDetails.soldQuantity = (giftCardDetails.soldQuantity || 0) + 1;
+    }
     await giftCardDetails.save();
 
     const senderEmail = selfInfo?.email || giftInfo?.senderEmail;
