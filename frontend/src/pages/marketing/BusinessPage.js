@@ -43,6 +43,33 @@ const BusinessPage = () => {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const handleShare = async () => {
+    const url = `${window.location.origin}/${businessSlug}/giftcards`;
+    const title = `${business?.name || "Business"} - Gift Cards | GiftyGen`;
+    const text = `Check out gift cards from ${business?.name || "this business"}.`;
+
+    if (window.navigator.share) {
+      try {
+        await window.navigator.share({
+          title,
+          text,
+          url,
+        });
+      } catch (err) {
+        if (err.name !== "AbortError") copyLinkToClipboard(url);
+      }
+    } else {
+      copyLinkToClipboard(url);
+    }
+  };
+
+  const copyLinkToClipboard = (url) => {
+    navigator.clipboard.writeText(url).then(
+      () => alert("Link copied to clipboard!"),
+      () => alert("Could not copy. Share this link: " + url)
+    );
+  };
+
   const handleTabClick = (id) => {
     setActiveTab(id);
     scrollToMain();
@@ -144,7 +171,7 @@ const BusinessPage = () => {
             </div>
             {pc.disclaimer && <p className="venue-disclaimer">{pc.disclaimer}</p>}
             <div className="venue-actions">
-              <button type="button" className="venue-action-btn">
+              <button type="button" className="venue-action-btn" onClick={handleShare}>
                 <Share2 size={18} />
                 Share
               </button>
