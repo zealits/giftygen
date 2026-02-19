@@ -179,6 +179,7 @@ const UserLanding = () => {
 
       // Filter out expired gift cards (by status or expirationDate)
       const activeCards = giftCards.filter((card) => {
+        if (card.status === "draft") return false;
         const isExplicitlyExpired = card.status === "expired";
         const isDateExpired = card.expirationDate && new Date(card.expirationDate) < now;
 
@@ -445,11 +446,33 @@ const UserLanding = () => {
                   <p className="purchase-card-description modern-card-description">{card.description}</p>
                   <div className="purchase-card-info modern-card-info">
                     <div className="price-section">
-                      <span className="purchase-card-price modern-price">{formatCurrency(card.amount, "INR")}</span>
+                      {(() => {
+                        const base = Number(card.amount) || 0;
+                        const disc = Number(card.discount) || 0;
+                        const hasDiscount = disc > 0 && disc < 100;
+                        const final = hasDiscount ? base * (1 - disc / 100) : base;
+                        const baseText = formatCurrency(base, "INR");
+                        const finalText = formatCurrency(final, "INR");
+
+                        return hasDiscount ? (
+                          <>
+                            <span className="purchase-card-price modern-price modern-price-original">
+                              {baseText}
+                            </span>
+                            <span className="purchase-card-price modern-price modern-price-final">
+                              {finalText}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="purchase-card-price modern-price">{baseText}</span>
+                        );
+                      })()}
                       <span className="price-label">Gift Value</span>
                     </div>
                     <div className="discount-section">
-                      <span className="purchase-card-discount modern-discount">{card.discount}% OFF</span>
+                      {card.discount > 0 && (
+                        <span className="purchase-card-discount modern-discount">{card.discount}% OFF</span>
+                      )}
                     </div>
                   </div>
                   {(() => {

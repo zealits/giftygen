@@ -158,10 +158,24 @@
     margin-bottom: 8px;
   }
   
-  .amount {
+.amount {
   font-size: 32px;
   font-weight: 700;
   color: #dc2626;
+}
+
+.amount-original {
+  font-size: 14px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-decoration: line-through;
+  margin-right: 12px;
+}
+
+.amount-final {
+  font-size: 32px;
+  font-weight: 700;
+  color: #16a34a;
 }
   
   .discount {

@@ -434,6 +434,52 @@
   margin: 0;
 }
 
+/* Gift card tags below description (array) */
+.venue-giftcard .venue-giftcard-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.venue-giftcard .venue-giftcard-tag {
+  display: inline-block;
+  background: linear-gradient(135deg, #ff6347 0%, #ff4500 100%);
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Actual + final price in one row on business details gift cards */
+.venue-giftcard .venue-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.venue-giftcard .modern-price-original {
+  font-size: 0.7em !important;
+  font-weight: 600;
+  color: #94a3b8;
+  -webkit-text-fill-color: currentColor;
+  background: none;
+  text-decoration: line-through;
+}
+.venue-giftcard .modern-price-final {
+  font-size: 1.8em !important;
+  font-weight: 800;
+  margin-top: 0;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .venue-buy-btn {
   background: #e23744 !important;
   border: none !important;

@@ -2,7 +2,7 @@ const GiftCard = require("../models/giftCardSchema");
 const ApiFeatures = require("../utils/apifeatures");
 const multer = require("multer");
 const path = require("path");
-const sendEmail = require("../utils/sendEmailRedeem.js"); // Assuming sendEmail is in the same directory
+const { sendEmail } = require("../utils/sendEmail.js");
 const QRCode = require("qrcode"); // For generating QR codes
 const cloudinary = require("cloudinary");
 const fs = require("fs");
@@ -52,8 +52,17 @@ const formatAmountDisplay = (value) => {
 // const cloudinary = require("cloudinary").v2;
 
 const createGiftCard = async (req, res) => {
+  const sendBadRequest = (message) => res.status(400).json({ message, error: message });
+
   try {
-    const { giftCardName, giftCardTag, description, amount, discount, expirationDate, quantity } = req.body;
+    const { giftCardName, giftCardTag, description, amount, discount, expirationDate, quantity, status: bodyStatus } = req.body;
+    const isDraft = bodyStatus === "draft";
+
+    const nameTrimmed = typeof giftCardName === "string" ? giftCardName.trim() : "";
+    if (!nameTrimmed) {
+      return sendBadRequest("Gift card name is required.");
+    }
+
     let tags = req.body.tags;
     if (typeof tags === "string") {
       try {
@@ -66,51 +75,69 @@ const createGiftCard = async (req, res) => {
     let giftCardImgUrl = null;
 
     if (req.file) {
-      // Generate a unique filename
-      const uniqueFilename = `${Date.now()}-${req.file.originalname}`;
-
-      // Upload the image to Cloudinary with explicit public_id including folder
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        public_id: `gift_cards/${uniqueFilename}`, // Explicitly specify folder in public_id
-        resource_type: "auto",
-      });
-
-      // Log the result to verify upload location
-      console.log("Upload result:", result);
-
-      giftCardImgUrl = result.secure_url;
-
-      // Remove the file from the uploads folder
-      fs.unlink(req.file.path, (err) => {
-        if (err) {
-          console.error("Error deleting file from uploads folder:", err);
-        } else {
-          console.log("Temporary file deleted successfully.");
+      try {
+        const uniqueFilename = `${Date.now()}-${req.file.originalname}`;
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          public_id: `gift_cards/${uniqueFilename}`,
+          resource_type: "auto",
+        });
+        giftCardImgUrl = result.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr);
+        return sendBadRequest(
+          uploadErr.message || "Image upload failed. Check Cloudinary config or try a different image."
+        );
+      } finally {
+        if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+          fs.unlink(req.file.path, (err) => {
+            if (err) console.error("Error deleting temp file:", err);
+          });
         }
-      });
+      }
     }
 
-    const quantityNum = quantity != null && quantity !== "" ? Number(quantity) : null;
+    const amountNum =
+      amount !== undefined && amount !== "" && amount !== null
+        ? (() => {
+            const n = Number(amount);
+            return Number.isFinite(n) ? n : undefined;
+          })()
+        : undefined;
+    const discountVal = discount !== undefined && discount !== "" && discount !== null ? String(discount) : undefined;
+    let quantityNum = null;
+    if (quantity != null && quantity !== "") {
+      const n = Number(quantity);
+      quantityNum = Number.isFinite(n) && n >= 0 ? n : null;
+    }
+    const expiryDate =
+      expirationDate && String(expirationDate).trim() && !Number.isNaN(new Date(expirationDate).getTime())
+        ? new Date(expirationDate)
+        : undefined;
+
     const giftCard = new GiftCard({
-      giftCardName,
+      giftCardName: nameTrimmed,
       giftCardTag: giftCardTag || (tags.length ? tags[0] : undefined),
       tags: tags.length ? tags : undefined,
       quantity: quantityNum,
       soldQuantity: 0,
-      description,
-      amount,
-      discount,
-      expirationDate,
+      description: description || undefined,
+      amount: amountNum,
+      discount: discountVal,
+      expirationDate: expiryDate,
       giftCardImg: giftCardImgUrl,
       businessSlug: req.user?.businessSlug || req.body.businessSlug || undefined,
+      status: isDraft ? "draft" : "active",
     });
 
-    console.log(giftCard);
     const savedGiftCard = await giftCard.save();
     res.status(201).json(savedGiftCard);
   } catch (error) {
-    console.error("Error:", error);
-    res.status(400).json({ error: error.message });
+    console.error("Create gift card error:", error);
+    const message =
+      error.name === "ValidationError" && error.message
+        ? error.message
+        : error.message || "Failed to create gift card.";
+    res.status(400).json({ message, error: message });
   }
 };
 
@@ -499,17 +526,60 @@ const updateGiftCard = async (req, res) => {
         tags = tags ? [tags] : [];
       }
     }
-    const updates = { ...req.body, giftCardImg: giftCardImgUrl };
-    if (Array.isArray(tags)) updates.tags = tags;
-    if (req.body.quantity !== undefined) updates.quantity = req.body.quantity === "" || req.body.quantity == null ? null : Number(req.body.quantity);
-    delete updates.businessSlug;
-    const updatedGiftCard = await GiftCard.findByIdAndUpdate(id, updates, { new: true });
+    if (!Array.isArray(tags)) tags = [];
+
+    const amountRaw = req.body.amount;
+    const amountNum =
+      amountRaw !== undefined && amountRaw !== "" && amountRaw !== null
+        ? (() => {
+            const n = Number(amountRaw);
+            return Number.isFinite(n) ? n : undefined;
+          })()
+        : undefined;
+    const quantityRaw = req.body.quantity;
+    const quantityNum =
+      quantityRaw !== undefined && quantityRaw !== "" && quantityRaw !== null
+        ? (() => {
+            const n = Number(quantityRaw);
+            return Number.isFinite(n) && n >= 0 ? n : null;
+          })()
+        : null;
+    const expirationDateRaw = req.body.expirationDate;
+    const expirationDate =
+      expirationDateRaw &&
+      String(expirationDateRaw).trim() &&
+      !Number.isNaN(new Date(expirationDateRaw).getTime())
+        ? new Date(expirationDateRaw)
+        : undefined;
+
+    const nameTrimmed = typeof req.body.giftCardName === "string" ? req.body.giftCardName.trim() : "";
+    const updates = {
+      giftCardImg: giftCardImgUrl,
+      giftCardName: nameTrimmed || existingGiftCard.giftCardName,
+      giftCardTag: req.body.giftCardTag != null && req.body.giftCardTag !== "" ? req.body.giftCardTag : undefined,
+      description: req.body.description != null && req.body.description !== "" ? req.body.description : undefined,
+      amount: amountNum,
+      discount: req.body.discount != null && req.body.discount !== "" ? String(req.body.discount) : undefined,
+      quantity: quantityNum,
+      expirationDate,
+      status:
+        req.body.status && ["active", "draft", "redeemed", "expired", "sold"].includes(req.body.status)
+          ? req.body.status
+          : undefined,
+    };
+    Object.keys(updates).forEach((k) => {
+      if (updates[k] === undefined) delete updates[k];
+    });
+    if (Array.isArray(tags) && tags.length > 0) updates.tags = tags;
+    const updatedGiftCard = await GiftCard.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
     console.log("Updated Gift Card:", updatedGiftCard);
 
     res.status(200).json(updatedGiftCard);
   } catch (error) {
     console.error("Error updating gift card:", error);
-    res.status(400).json({ error: error.message });
+    const message =
+      error.name === "ValidationError" && error.message ? error.message : error.message || "Failed to update gift card.";
+    res.status(400).json({ message, error: message });
   }
 };
 
@@ -563,12 +633,11 @@ const addBuyer = async (req, res) => {
     }
 
     const giftCardDetails = await GiftCard.findById(id);
-    console.log("giftcard amount checking : ", giftCardDetails.amount);
-    let remainingBalance = giftCardDetails.amount;
-
     if (!giftCardDetails) {
       return res.status(404).json({ error: "Gift card not found" });
     }
+    console.log("giftcard amount checking : ", giftCardDetails.amount);
+    let remainingBalance = giftCardDetails.amount;
 
     const quantity = giftCardDetails.quantity;
     const soldCount = giftCardDetails.soldQuantity ?? giftCardDetails.buyers?.length ?? 0;
@@ -584,10 +653,9 @@ const addBuyer = async (req, res) => {
       uniqueCode = `${id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
     }
 
-    /* // Construct Apple Wallet URL from uniqueCode if not provided
+    // Apple Wallet URL for email template
     const appleWalletUrl = req.body.appleWalletUrl || (uniqueCode ? `/api/wallet/download-apple-pass/${uniqueCode}` : null);
-    console.log("apple wallet url : ", appleWalletUrl);
- */
+
     // Generate QR code as Buffer
     const qrCodeBuffer = await QRCode.toBuffer(uniqueCode, {
       errorCorrectionLevel: "H",
@@ -967,38 +1035,82 @@ const addBuyer = async (req, res) => {
 </html>
 `;
 
-    try {
-      // Send email to sender
-      await sendEmail({
-        email: senderEmail,
-        subject: `Your gift card purchase: ${giftCardName}`,
-        html: createEmailTemplate(false),
-        attachments: [
-          {
-            filename: "qr-code.png",
-            content: qrCodeBuffer,
-            cid: qrCodeCid,
-          },
-        ],
-      });
+    const emailAttachments = [
+      {
+        filename: "qr-code.png",
+        content: qrCodeBuffer,
+        cid: qrCodeCid,
+      },
+    ];
 
-      // Send email to recipient if gift purchase
-      if (recipientEmail) {
+    // Send email to sender (purchaser / gift giver)
+    if (senderEmail) {
+      const senderSubject = `Your gift card purchase: ${giftCardName}`;
+      const senderHtml = createEmailTemplate(false);
+      console.log("[Gift card purchase] === SENDER EMAIL START ===");
+      console.log("[Gift card purchase] Sender email address:", senderEmail);
+      console.log("[Gift card purchase] Subject:", senderSubject);
+      console.log("[Gift card purchase] HTML length (chars):", senderHtml?.length ?? 0);
+      console.log("[Gift card purchase] Calling sendEmail for sender now...");
+      try {
         await sendEmail({
-          email: recipientEmail,
-          subject: `You've received a gift card: ${giftCardName}`,
-          html: createEmailTemplate(true),
-          attachments: [
-            {
-              filename: "qr-code.png",
-              content: qrCodeBuffer,
-              cid: qrCodeCid,
-            },
-          ],
+          email: senderEmail,
+          subject: senderSubject,
+          html: senderHtml,
+          attachments: emailAttachments,
+        });
+        console.log("[Gift card purchase] Confirmation email sent to sender successfully.");
+      } catch (senderEmailError) {
+        console.error("[Gift card purchase] === SENDER EMAIL FAILED ===");
+        console.error("[Gift card purchase] Sender:", senderEmail);
+        console.error("[Gift card purchase] Error message:", senderEmailError?.message);
+        console.error("[Gift card purchase] Error code:", senderEmailError?.code);
+        if (senderEmailError?.response) console.error("[Gift card purchase] SMTP response:", senderEmailError.response);
+        console.error("[Gift card purchase] Full error:", senderEmailError);
+      }
+      console.log("[Gift card purchase] === SENDER EMAIL END ===");
+    } else {
+      console.warn("[Gift card purchase] No sender email to send confirmation to.");
+    }
+
+    // Send email to recipient if gift purchase
+    if (recipientEmail) {
+      const recipientSubject = `You've received a gift card: ${giftCardName}`;
+      const recipientHtml = createEmailTemplate(true);
+      const recipientPayload = {
+        email: recipientEmail,
+        subject: recipientSubject,
+        html: recipientHtml,
+        attachments: emailAttachments,
+      };
+      console.log("[Gift card purchase] === RECIPIENT EMAIL START ===");
+      console.log("[Gift card purchase] Recipient email address:", recipientEmail);
+      console.log("[Gift card purchase] Subject:", recipientSubject);
+      console.log("[Gift card purchase] HTML length (chars):", recipientHtml?.length ?? 0);
+      console.log("[Gift card purchase] Attachments count:", recipientPayload.attachments?.length ?? 0);
+      if (recipientPayload.attachments?.length) {
+        recipientPayload.attachments.forEach((a, i) => {
+          console.log("[Gift card purchase] Attachment", i + 1, ":", a.filename, "content type:", typeof a.content, "cid:", a.cid);
         });
       }
-    } catch (emailError) {
-      console.error("Error sending emails:", emailError);
+      console.log("[Gift card purchase] Calling sendEmail for recipient now...");
+      try {
+        await sendEmail(recipientPayload);
+        console.log("[Gift card purchase] Gift card email sent to recipient successfully.");
+      } catch (recipientEmailError) {
+        console.error("[Gift card purchase] === RECIPIENT EMAIL FAILED ===");
+        console.error("[Gift card purchase] Recipient:", recipientEmail);
+        console.error("[Gift card purchase] Error message:", recipientEmailError?.message);
+        console.error("[Gift card purchase] Error code:", recipientEmailError?.code);
+        if (recipientEmailError?.response) {
+          console.error("[Gift card purchase] SMTP response:", recipientEmailError.response);
+        }
+        console.error("[Gift card purchase] Full error:", recipientEmailError);
+        if (recipientEmailError?.stack) {
+          console.error("[Gift card purchase] Stack:", recipientEmailError.stack);
+        }
+      }
+      console.log("[Gift card purchase] === RECIPIENT EMAIL END ===");
     }
 
     const whatsappNumber = formatPhoneNumberForWhatsApp(selfInfo?.phone);

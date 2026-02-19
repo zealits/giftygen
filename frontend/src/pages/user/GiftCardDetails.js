@@ -283,12 +283,31 @@ if (loading) return (
 
           <div className="price-container fade-in-up delay-4">
             <div className="price">
-              <span className="amount">{formatCurrency(giftCard.amount, 'INR')}</span>
-              <span className="discount pulse-animation">{giftCard.discount}% Off</span>
+              {(() => {
+                const base = Number(giftCard.amount) || 0;
+                const disc = Number(giftCard.discount) || 0;
+                const hasDiscount = disc > 0 && disc < 100;
+                const final = hasDiscount ? base * (1 - disc / 100) : base;
+                const baseText = formatCurrency(base, "INR");
+                const finalText = formatCurrency(final, "INR");
+                return hasDiscount ? (
+                  <>
+                    <span className="amount amount-original">{baseText}</span>
+                    <span className="amount amount-final">{finalText}</span>
+                  </>
+                ) : (
+                  <span className="amount">{baseText}</span>
+                );
+              })()}
+              {giftCard.discount > 0 && (
+                <span className="discount pulse-animation">{giftCard.discount}% Off</span>
+              )}
             </div>
-            <div className="saved-amount highlight-text">
-              Save {formatCurrency((giftCard.amount * giftCard.discount / 100), 'INR')}
-            </div>
+            {giftCard.discount > 0 && (
+              <div className="saved-amount highlight-text">
+                Save {formatCurrency((giftCard.amount * giftCard.discount / 100), "INR")}
+              </div>
+            )}
           </div>
 
           <div className="features fade-in-up delay-5">

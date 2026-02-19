@@ -35,7 +35,7 @@ const giftCardSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "redeemed", "expired", "sold"], // Added 'sold' status
+      enum: ["active", "draft", "redeemed", "expired", "sold"],
       default: "active",
     },
     expirationDate: {

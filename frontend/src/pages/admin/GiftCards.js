@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./GiftCards.css";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
@@ -12,6 +13,7 @@ import { Link2 } from "lucide-react";
 import { formatCurrency } from "../../utils/currency";
 
 const GiftCards = () => {
+  const navigate = useNavigate();
   const [isMessageModalOpen, setMessageModalOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isImageModalOpen, setImageModalOpen] = useState(false);
@@ -261,25 +263,13 @@ const GiftCards = () => {
   };
 
   const handleEdit = (card) => {
-    setFormData({
-      giftCardName: card.giftCardName,
-      giftCardTag: card.giftCardTag,
-      description: card.description,
-      amount: card.amount,
-      discount: card.discount,
-      expirationDate: card.expirationDate?.split?.("T")[0] ?? "",
-      giftCardImg: card.giftCardImg,
-      quantity: card.quantity != null ? String(card.quantity) : "",
-    });
+    navigate(`/giftcards/create/${card._id}`);
+  };
 
-    setSelectedFile({
-      file: null,
-      name: card.giftCardImg,
-    });
-
-    setIsEditing(true);
-    setEditingCardId(card._id);
-    setModalOpen(true);
+  const handlePublish = (card) => {
+    const formData = new FormData();
+    formData.append("status", "active");
+    dispatch(updateGiftCard(card._id, formData));
   };
 
   /*
@@ -412,17 +402,22 @@ const GiftCards = () => {
                 </tr>
               ) : giftCards && giftCards.length > 0 ? (
                 giftCards.map((card) => {
-                  const expirationDate = new Date(card.expirationDate);
+                  const expirationDate = card.expirationDate ? new Date(card.expirationDate) : null;
                   const now = new Date();
-                  const isExpired = expirationDate < now || card.status === "expired";
-                  
+                  const isExpired = (expirationDate && expirationDate < now) || card.status === "expired";
+                  const isDraft = card.status === "draft";
+                  const rowClass = isExpired ? "expired-row" : isDraft ? "draft-row" : "";
+
                   return (
-                    <tr key={card._id} className={isExpired ? "expired-row" : ""}>
+                    <tr key={card._id} className={rowClass}>
                       <td>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           {card.giftCardName}
                           {isExpired && (
                             <span className="expired-badge">Expired</span>
+                          )}
+                          {isDraft && (
+                            <span className="draft-badge">Draft</span>
                           )}
                         </div>
                       </td>
@@ -432,11 +427,12 @@ const GiftCards = () => {
 
                       <td>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-                          <span>{new Date(card.expirationDate).toLocaleDateString("en-GB")}</span>
+                          <span>{card.expirationDate ? new Date(card.expirationDate).toLocaleDateString("en-GB") : "—"}</span>
                           {isExpired && (
-                            <span style={{ fontSize: "0.75rem", color: "#ef4444", fontWeight: "600" }}>
-                              (Expired)
-                            </span>
+                            <span className="expired-date-hint">(Expired)</span>
+                          )}
+                          {isDraft && (
+                            <span className="draft-date-hint">(Draft)</span>
                           )}
                         </div>
                       </td>
@@ -446,6 +442,16 @@ const GiftCards = () => {
                           : "—"}
                       </td>
                       <td>
+                        {isDraft && (
+                          <button
+                            type="button"
+                            className="cbtn publish"
+                            onClick={() => handlePublish(card)}
+                            disabled={giftCardUpdate.loading}
+                          >
+                            Publish
+                          </button>
+                        )}
                         <button className="cbtn edit" onClick={() => handleEdit(card)}>
                           Edit
                         </button>

@@ -2,19 +2,23 @@ import React, { useState, useEffect } from "react";
 import "./GiftCards.css";
 import "./CreateGiftCard.css";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { createGiftCard } from "../../services/Actions/giftCardActions";
-import { CREATE_GIFTCARD_RESET } from "../../services/Constants/giftCardConstants";
+import { createGiftCard, getGiftCardDetails, updateGiftCard } from "../../services/Actions/giftCardActions";
+import { CREATE_GIFTCARD_RESET, UPDATE_GIFTCARD_RESET } from "../../services/Constants/giftCardConstants";
 import { Link2, Gift, X, Pencil, Sparkles } from "lucide-react";
 import { formatCurrency } from "../../utils/currency";
 
 const CreateGiftCard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { id: editId } = useParams();
   const { user } = useSelector((state) => state.auth);
   const businessSlug = user?.user?.businessSlug || "";
   const giftCardCreate = useSelector((state) => state.giftCardCreate);
+  const giftCardUpdate = useSelector((state) => state.giftCardUpdate);
+  const { giftCard: editCard, loading: editCardLoading } = useSelector((state) => state.giftCardDetails);
+  const [editPreFilled, setEditPreFilled] = useState(false);
 
   const [formData, setFormData] = useState({
     giftCardName: "",
@@ -35,7 +39,9 @@ const CreateGiftCard = () => {
   const [showImagePreview, setShowImagePreview] = useState(false);
   const imageInputRef = React.useRef(null);
 
-  const [aiPrompt, setAiPrompt] = useState("");
+  // AI content assistant (Call 1)
+  const [aiNameIdea, setAiNameIdea] = useState(""); // Gift Card Name Idea (rough concept)
+  const [aiContext, setAiContext] = useState(""); // Description / Context (what the card offers)
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState({
@@ -58,10 +64,42 @@ const CreateGiftCard = () => {
   const [dragOver, setDragOver] = useState(false);
 
   useEffect(() => {
+    if (editId) {
+      dispatch(getGiftCardDetails(editId));
+      setEditPreFilled(false);
+    }
     return () => {
       dispatch({ type: CREATE_GIFTCARD_RESET });
+      if (editId) dispatch({ type: UPDATE_GIFTCARD_RESET });
     };
-  }, [dispatch]);
+  }, [dispatch, editId]);
+
+  useEffect(() => {
+    if (!editId || !editCard || editCard._id !== editId || editCardLoading || editPreFilled) return;
+    const card = editCard;
+    const expDate = card.expirationDate
+      ? (typeof card.expirationDate === "string"
+          ? card.expirationDate.split("T")[0]
+          : new Date(card.expirationDate).toISOString().split("T")[0])
+      : "";
+    setFormData({
+      giftCardName: card.giftCardName || "",
+      giftCardTag: card.giftCardTag || "🎂 Birthday Special",
+      description: card.description || "",
+      amount: card.amount != null && card.amount !== "" ? String(card.amount) : "",
+      discount: card.discount != null && card.discount !== "" ? String(card.discount) : "",
+      expirationDate: expDate,
+      giftCardImg: card.giftCardImg || "",
+      quantity: card.quantity != null ? String(card.quantity) : "",
+      status: card.status || "active",
+    });
+    setTags(
+      Array.isArray(card.tags) && card.tags.length > 0 ? card.tags : card.giftCardTag ? [card.giftCardTag] : []
+    );
+    setSelectedFile({ file: null, name: card.giftCardImg ? "Current image" : "" });
+    setAiGeneratedFile(null);
+    setEditPreFilled(true);
+  }, [editId, editCard, editCardLoading, editPreFilled]);
 
   useEffect(() => {
     if (giftCardCreate.success) {
@@ -74,24 +112,54 @@ const CreateGiftCard = () => {
     }
   }, [giftCardCreate.success, dispatch, navigate]);
 
+  useEffect(() => {
+    if (editId && giftCardUpdate.success) {
+      setCreateSuccessModalOpen(true);
+      setTimeout(() => {
+        setCreateSuccessModalOpen(false);
+        dispatch({ type: UPDATE_GIFTCARD_RESET });
+        navigate("/giftcards");
+      }, 2000);
+    }
+  }, [editId, giftCardUpdate.success, dispatch, navigate]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAiPromptChange = (e) => setAiPrompt(e.target.value);
+  /** Clamp numeric fields to non-negative (and optional max). Prevents spinner/arrow key changes. */
+  const handlePricingNumberChange = (e, field, min = 0, max = null) => {
+    const raw = e.target.value;
+    if (raw === "" || raw === undefined) {
+      setFormData((prev) => ({ ...prev, [field]: "" }));
+      return;
+    }
+    const num = field === "amount" ? parseFloat(raw) : parseInt(raw, 10);
+    if (Number.isNaN(num)) return;
+    let clamped = Math.max(min, num);
+    if (max != null) clamped = Math.min(max, clamped);
+    setFormData((prev) => ({ ...prev, [field]: String(clamped) }));
+  };
+
+  const preventArrowKeys = (e) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") e.preventDefault();
+  };
 
   const handleGenerateWithAi = async () => {
-    if (!formData.giftCardName || !aiPrompt) {
-      setAiError("Please enter both a gift card name and what this gift card is for.");
+    const effectiveName = (aiNameIdea || formData.giftCardName || "").trim();
+    const context = aiContext.trim();
+
+    if (!effectiveName || !context) {
+      setAiError("Please enter both a gift card name idea and what this gift card is for.");
       return;
     }
     try {
       setIsAiLoading(true);
       setAiError("");
       const { data } = await axios.post("/api/ai/describe", {
-        giftcard_name: formData.giftCardName,
-        prompt: aiPrompt,
+        giftcard_name: effectiveName,
+        prompt: context,
       });
       setAiSuggestions({
         descriptions_medium: data.descriptions_medium || [],
@@ -134,26 +202,40 @@ const CreateGiftCard = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const imageFile = selectedFile.file || aiGeneratedFile;
-    if (!imageFile) {
+    if (!editId && !imageFile) {
       setAiImageError("Please upload an image or generate one with AI.");
       return;
     }
     setAiImageError("");
     const formDataToSubmit = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (key !== "image" && key !== "giftCardImg") {
-        formDataToSubmit.append(key, formData[key]);
+      if (key !== "image" && key !== "giftCardImg" && key !== "quantity") {
+        const val = formData[key];
+        if (val !== undefined && val !== null) formDataToSubmit.append(key, val);
       }
     });
     formDataToSubmit.append("tags", JSON.stringify(tags.length ? tags : [formData.giftCardTag]));
-    if (formData.quantity !== undefined && formData.quantity !== "") {
-      formDataToSubmit.append("quantity", formData.quantity);
+    const qVal = formData.quantity;
+    const quantityNum =
+      qVal !== undefined && qVal !== "" && qVal != null
+        ? (() => {
+            const n = Number(qVal);
+            return Number.isFinite(n) && n >= 0 ? n : null;
+          })()
+        : null;
+    formDataToSubmit.append("quantity", quantityNum != null ? String(quantityNum) : "");
+    if (imageFile) {
+      formDataToSubmit.append("image", imageFile);
     }
-    formDataToSubmit.append("image", imageFile);
     if (businessSlug) {
       formDataToSubmit.append("businessSlug", businessSlug);
     }
-    dispatch(createGiftCard(formDataToSubmit));
+    if (editId) {
+      if (formData.status !== undefined) formDataToSubmit.append("status", formData.status);
+      dispatch(updateGiftCard(editId, formDataToSubmit));
+    } else {
+      dispatch(createGiftCard(formDataToSubmit));
+    }
   };
 
   /** Convert base64 string from API to a File for upload */
@@ -198,7 +280,6 @@ const CreateGiftCard = () => {
       setAiGeneratedFile(file);
       setSelectedFile({ file: null, name: "" });
       setFormData((prev) => ({ ...prev, giftCardImg: dataUrl }));
-      setShowImagePreview(true);
       setAiImagePanelOpen(false);
       if (imageInputRef.current) imageInputRef.current.value = "";
     } catch (err) {
@@ -235,7 +316,6 @@ const CreateGiftCard = () => {
       const previewUrl = URL.createObjectURL(file);
       setSelectedFile({ file, name: file.name });
       setFormData((prev) => ({ ...prev, giftCardImg: previewUrl }));
-      setShowImagePreview(true);
     }
   };
 
@@ -261,7 +341,42 @@ const CreateGiftCard = () => {
   };
 
   const handleSaveDraft = () => {
-    navigate("/giftcards");
+    const nameTrimmed = (formData.giftCardName || "").trim();
+    if (!nameTrimmed) {
+      setAiImageError("Gift card name is required to save as draft.");
+      return;
+    }
+    setAiImageError("");
+    const formDataToSubmit = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (key !== "image" && key !== "giftCardImg") {
+        const val = formData[key];
+        if (val !== undefined && val !== null) formDataToSubmit.append(key, val);
+      }
+    });
+    formDataToSubmit.append("tags", JSON.stringify(tags.length ? tags : [formData.giftCardTag]));
+    const draftQVal = formData.quantity;
+    const draftQuantityNum =
+      draftQVal !== undefined && draftQVal !== "" && draftQVal != null
+        ? (() => {
+            const n = Number(draftQVal);
+            return Number.isFinite(n) && n >= 0 ? n : null;
+          })()
+        : null;
+    formDataToSubmit.append("quantity", draftQuantityNum != null ? String(draftQuantityNum) : "");
+    formDataToSubmit.append("status", "draft");
+    const imageFile = selectedFile.file || aiGeneratedFile;
+    if (imageFile) {
+      formDataToSubmit.append("image", imageFile);
+    }
+    if (businessSlug) {
+      formDataToSubmit.append("businessSlug", businessSlug);
+    }
+    if (editId) {
+      dispatch(updateGiftCard(editId, formDataToSubmit));
+    } else {
+      dispatch(createGiftCard(formDataToSubmit));
+    }
   };
 
   const handleDragOver = (e) => {
@@ -279,7 +394,6 @@ const CreateGiftCard = () => {
       const previewUrl = URL.createObjectURL(file);
       setSelectedFile({ file, name: file.name });
       setFormData((prev) => ({ ...prev, giftCardImg: previewUrl }));
-      setShowImagePreview(true);
     }
   };
 
@@ -327,8 +441,15 @@ const CreateGiftCard = () => {
   return (
     <div className="create-giftcard-page">
       <div className="main-content create-giftcard-form-wrapper">
-        <h1 className="heading">Create a Gift Card Template</h1>
-        <p className="page-subtitle">Fill details manually or switch to AI mode to auto-generate content & images</p>
+        <h1 className="heading">{editId ? "Edit Gift Card Template" : "Create a Gift Card Template"}</h1>
+        <p className="page-subtitle">
+          {editId
+            ? "Update details below. Same layout as creating."
+            : "Fill details manually or switch to AI mode to auto-generate content & images"}
+        </p>
+        {editId && editCardLoading && !editPreFilled && (
+          <p className="page-subtitle" style={{ color: "var(--dashboard-accent-light)" }}>Loading gift card...</p>
+        )}
 
         <div className="create-giftcard-tabs">
           <button
@@ -352,106 +473,117 @@ const CreateGiftCard = () => {
         <div className="create-giftcard-layout">
           <form id="createGiftCardForm" className="create-giftcard-form-area" onSubmit={handleSubmit}>
             <div className="create-giftcard-left">
-              {/* Collapsible AI Content Assistant - only when AI mode */}
-              <div
-                className={`create-giftcard-ai-trigger ${creationMode !== "ai" ? "disabled" : ""} ${aiPanelOpen ? "open" : ""}`}
-                onClick={() => creationMode === "ai" && setAiPanelOpen((o) => !o)}
-                role="button"
-                tabIndex={creationMode === "ai" ? 0 : -1}
-                onKeyDown={(e) => creationMode === "ai" && (e.key === "Enter" || e.key === " ") && setAiPanelOpen((o) => !o)}
-              >
-                <div className="create-giftcard-ai-trigger-icon">✦</div>
-                <div className="create-giftcard-ai-trigger-text">
-                  <h4>AI Content Assistant</h4>
-                  <p>Describe your card idea → get name suggestions, description & tags</p>
-                </div>
-                <span className="create-giftcard-ai-trigger-arrow">▾</span>
-              </div>
+              {/* Combined AI Content Assistant + Call 1 card (shown only in AI mode) */}
+              {creationMode === "ai" && (
+                <div className="ai-helper-card create-giftcard-ai-block">
+                  <div className="ai-helper-header">
+                    <span className="ai-helper-pill ai-helper-pill-main">AI Content Assistant</span>
+                    <p className="ai-helper-title">
+                      Describe your card idea → get name suggestions, description & tags
+                    </p>
+                  </div>
+                  <div className="ai-helper-header-sub">
+                    <span className="ai-helper-pill">✦ AI Call 1 — Content Generation</span>
+                  </div>
 
-              {creationMode === "ai" && aiPanelOpen && (
-            <div className="ai-helper-card create-giftcard-ai-block">
-            <div className="ai-helper-header">
-              <span className="ai-helper-pill">✦ AI Call 1 — Content Generation</span>
-            </div>
-            <div className="giftcards-page-form-group ai-helper-input-group">
-              <label htmlFor="aiPrompt">What is this gift card for?</label>
-              <textarea
-                id="aiPrompt"
-                name="aiPrompt"
-                rows="2"
-                placeholder="e.g. create real estate birthday giftcard"
-                value={aiPrompt}
-                onChange={handleAiPromptChange}
-              />
-            </div>
-            <button
-              type="button"
-              className="ai-helper-generate-btn"
-              onClick={handleGenerateWithAi}
-              disabled={isAiLoading}
-            >
-              {isAiLoading ? "Generating suggestions..." : "Generate Name Suggestions, Description & Tags"}
-            </button>
-            {aiError && <p className="ai-helper-error">{aiError}</p>}
-            {(aiSuggestions.giftcard_name_suggestions?.length > 0 ||
-              aiSuggestions.descriptions_medium?.length > 0 ||
-              aiSuggestions.tags?.length > 0) && (
-              <div className="ai-helper-suggestions">
-                {aiSuggestions.giftcard_name_suggestions?.length > 0 && (
-                  <div className="ai-helper-section">
-                    <h4 className="ai-helper-section-title">Name suggestions</h4>
-                    <div className="ai-helper-chip-row">
-                      {aiSuggestions.giftcard_name_suggestions.map((name) => (
-                        <button
-                          key={name}
-                          type="button"
-                          className={`ai-chip ${aiSelection.name === name ? "ai-chip-selected" : ""}`}
-                          onClick={() => handleSelectAiName(name)}
-                        >
-                          {name}
-                        </button>
-                      ))}
+                  <div className="ai-helper-inputs-row">
+                    <div className="giftcards-page-form-group ai-helper-input-group">
+                      <label htmlFor="aiNameIdea">
+                        Gift Card Name Idea <span className="create-giftcard-field-hint">(your rough concept)</span>
+                      </label>
+                      <textarea
+                        id="aiNameIdea"
+                        name="aiNameIdea"
+                        rows="2"
+                        placeholder="e.g. Premium Wellness Escape, Diwali Celebration Feast, Team Rewards Pass"
+                        value={aiNameIdea}
+                        onChange={(e) => setAiNameIdea(e.target.value)}
+                      />
+                    </div>
+                    <div className="giftcards-page-form-group ai-helper-input-group">
+                      <label htmlFor="aiContext">
+                        Description / Context{" "}
+                        <span className="create-giftcard-field-hint">(what does this card offer?)</span>
+                      </label>
+                      <textarea
+                        id="aiContext"
+                        name="aiContext"
+                        rows="2"
+                        placeholder="e.g. Redeemable for unlimited buffet dinner, festive desserts, and drinks for two at our partner restaurant"
+                        value={aiContext}
+                        onChange={(e) => setAiContext(e.target.value)}
+                      />
                     </div>
                   </div>
-                )}
-                {aiSuggestions.descriptions_medium?.length > 0 && (
-                  <div className="ai-helper-section">
-                    <h4 className="ai-helper-section-title">Description ideas</h4>
-                    <div className="ai-helper-card-grid">
-                      {aiSuggestions.descriptions_medium.map((desc) => (
-                        <button
-                          key={desc}
-                          type="button"
-                          className={`ai-description-card ${aiSelection.description === desc ? "ai-description-card-selected" : ""}`}
-                          onClick={() => handleSelectAiDescription(desc)}
-                        >
-                          <span>{desc}</span>
-                        </button>
-                      ))}
+
+                  <button
+                    type="button"
+                    className="ai-helper-generate-btn"
+                    onClick={handleGenerateWithAi}
+                    disabled={isAiLoading}
+                  >
+                    {isAiLoading ? "Generating suggestions..." : "Generate Name Suggestions, Description & Tags"}
+                  </button>
+                  {aiError && <p className="ai-helper-error">{aiError}</p>}
+                  {(aiSuggestions.giftcard_name_suggestions?.length > 0 ||
+                    aiSuggestions.descriptions_medium?.length > 0 ||
+                    aiSuggestions.tags?.length > 0) && (
+                    <div className="ai-helper-suggestions">
+                      {aiSuggestions.giftcard_name_suggestions?.length > 0 && (
+                        <div className="ai-helper-section">
+                          <h4 className="ai-helper-section-title">Name suggestions</h4>
+                          <div className="ai-helper-chip-row">
+                            {aiSuggestions.giftcard_name_suggestions.map((name) => (
+                              <button
+                                key={name}
+                                type="button"
+                                className={`ai-chip ${aiSelection.name === name ? "ai-chip-selected" : ""}`}
+                                onClick={() => handleSelectAiName(name)}
+                              >
+                                {name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {aiSuggestions.descriptions_medium?.length > 0 && (
+                        <div className="ai-helper-section">
+                          <h4 className="ai-helper-section-title">Description ideas</h4>
+                          <div className="ai-helper-card-grid">
+                            {aiSuggestions.descriptions_medium.map((desc) => (
+                              <button
+                                key={desc}
+                                type="button"
+                                className={`ai-description-card ${aiSelection.description === desc ? "ai-description-card-selected" : ""}`}
+                                onClick={() => handleSelectAiDescription(desc)}
+                              >
+                                <span>{desc}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {aiSuggestions.tags?.length > 0 && (
+                        <div className="ai-helper-section">
+                          <h4 className="ai-helper-section-title">Tag suggestions</h4>
+                          <div className="ai-helper-chip-row">
+                            {aiSuggestions.tags.map((tag) => (
+                              <button
+                                key={tag}
+                                type="button"
+                                className={`ai-chip ${aiSelection.tag === tag ? "ai-chip-selected" : ""}`}
+                                onClick={() => handleSelectAiTag(tag)}
+                              >
+                                {tag}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
-                {aiSuggestions.tags?.length > 0 && (
-                  <div className="ai-helper-section">
-                    <h4 className="ai-helper-section-title">Tag suggestions</h4>
-                    <div className="ai-helper-chip-row">
-                      {aiSuggestions.tags.map((tag) => (
-                        <button
-                          key={tag}
-                          type="button"
-                          className={`ai-chip ${aiSelection.tag === tag ? "ai-chip-selected" : ""}`}
-                          onClick={() => handleSelectAiTag(tag)}
-                        >
-                          {tag}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-            )}
+                  )}
+                </div>
+              )}
 
             <div className="create-giftcard-studio-card">
             <h2 className="create-giftcard-section-title">Basic Information</h2>
@@ -500,23 +632,35 @@ const CreateGiftCard = () => {
                   onKeyDown={(e) => e.key === "Enter" && addTag(e)}
                 />
               </div>
-              <select
-                id="giftCardTag"
-                name="giftCardTag"
-                value={formData.giftCardTag}
-                onChange={handleChange}
-                className="create-giftcard-quick-tag-select"
-                aria-label="Quick add preset tag"
-              >
-                {tagOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <button type="button" className="create-giftcard-add-preset-tag" onClick={() => { const t = formData.giftCardTag; if (t && !tags.includes(t)) setTags((p) => [...p, t]); }}>
-                Add preset tag
-              </button>
+              {/* Preset tag dropdown temporarily disabled as requested */}
+              {false && (
+                <>
+                  <select
+                    id="giftCardTag"
+                    name="giftCardTag"
+                    value={formData.giftCardTag}
+                    onChange={handleChange}
+                    className="create-giftcard-quick-tag-select"
+                    aria-label="Quick add preset tag"
+                  >
+                    {tagOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="create-giftcard-add-preset-tag"
+                    onClick={() => {
+                      const t = formData.giftCardTag;
+                      if (t && !tags.includes(t)) setTags((p) => [...p, t]);
+                    }}
+                  >
+                    Add preset tag
+                  </button>
+                </>
+              )}
             </div>
             </div>
 
@@ -530,11 +674,13 @@ const CreateGiftCard = () => {
                 id="amount"
                 name="amount"
                 value={formData.amount}
-                onChange={handleChange}
+                onChange={(e) => handlePricingNumberChange(e, "amount", 0)}
+                onKeyDown={preventArrowKeys}
                 placeholder="50.00"
                 min="0"
                 step="0.01"
                 required
+                className="create-giftcard-number-input"
               />
             </div>
             <div className="giftcards-page-form-group">
@@ -546,8 +692,10 @@ const CreateGiftCard = () => {
                 min="0"
                 max="100"
                 value={formData.discount}
-                onChange={handleChange}
+                onChange={(e) => handlePricingNumberChange(e, "discount", 0, 100)}
+                onKeyDown={preventArrowKeys}
                 placeholder="0"
+                className="create-giftcard-number-input"
               />
             </div>
             <div className="giftcards-page-form-group">
@@ -559,7 +707,9 @@ const CreateGiftCard = () => {
                 min="1"
                 placeholder="100"
                 value={formData.quantity}
-                onChange={handleChange}
+                onChange={(e) => handlePricingNumberChange(e, "quantity", 1)}
+                onKeyDown={preventArrowKeys}
+                className="create-giftcard-number-input"
               />
             </div>
             </div>
@@ -581,7 +731,7 @@ const CreateGiftCard = () => {
             <h2 className="create-giftcard-section-title">Card Image</h2>
             {(selectedFile.file || aiGeneratedFile) ? (
               <div className="image-current-wrapper">
-                <div className="image-current-preview" onClick={() => setShowImagePreview(true)}>
+                <div className="image-current-preview">
                   <img src={formData.giftCardImg} alt="Gift card" />
                   <span className="image-current-badge">{aiGeneratedFile ? "AI generated" : "Uploaded"}</span>
                 </div>
@@ -699,22 +849,42 @@ const CreateGiftCard = () => {
                     ) : (
                       <div className="preview-dash-image-placeholder">Card image</div>
                     )}
-                    <div className="preview-dash-tags">
-                      {(tags.length ? tags : (formData.giftCardTag ? [formData.giftCardTag] : [])).slice(0, 3).map((t, idx) => (
-                        <span key={idx} className={`preview-dash-tag ${idx === 1 ? "preview-dash-tag-right" : ""}`}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
                   </div>
                   <div className="preview-dash-content">
                     <h2 className="preview-dash-title">{formData.giftCardName || "Your Card Name"}</h2>
                     <p className="preview-dash-desc">
                       {(formData.description || "").trim() ? (formData.description || "").slice(0, 80) + ((formData.description || "").length > 80 ? "..." : "") : "Description will appear here."}
                     </p>
+                    {(tags.length ? tags : (formData.giftCardTag ? [formData.giftCardTag] : [])).length > 0 && (
+                      <div className="preview-dash-tags">
+                        {(tags.length ? tags : [formData.giftCardTag]).map((t, idx) => (
+                          <span key={idx} className="preview-dash-tag">{t}</span>
+                        ))}
+                      </div>
+                    )}
                     <div className="preview-dash-info">
                       <div className="preview-dash-price-wrap">
-                        <span className="preview-dash-price">{formatCurrency(formData.amount || 0, "INR")}</span>
+                        {(() => {
+                          const base = Number(formData.amount) || 0;
+                          const disc = Number(formData.discount) || 0;
+                          const hasDiscount = disc > 0 && disc < 100;
+                          const final = hasDiscount ? base * (1 - disc / 100) : base;
+                          const baseText = formatCurrency(base, "INR");
+                          const finalText = formatCurrency(final, "INR");
+
+                          return hasDiscount ? (
+                            <>
+                              <span className="preview-dash-price preview-dash-price-original">
+                                {baseText}
+                              </span>
+                              <span className="preview-dash-price preview-dash-price-final">
+                                {finalText}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="preview-dash-price">{baseText}</span>
+                          );
+                        })()}
                         <span className="preview-dash-price-label">Gift Value</span>
                       </div>
                       <div className="preview-dash-discount-wrap">
@@ -742,24 +912,42 @@ const CreateGiftCard = () => {
                 <div className="create-giftcard-info-row">
                   <span className="create-giftcard-info-label">Final Price</span>
                   <span className="create-giftcard-info-value price-val">
-                    {formData.amount && formData.discount != null && formData.discount !== ""
-                      ? formatCurrency(formData.amount * (1 - Number(formData.discount) / 100), "INR")
-                      : formData.amount ? formatCurrency(formData.amount, "INR") : "—"}
+                    {formData.amount
+                      ? (() => {
+                          const base = Number(formData.amount) || 0;
+                          const disc = Number(formData.discount) || 0;
+                          const hasDiscount = disc > 0 && disc < 100;
+                          const final = hasDiscount ? base * (1 - disc / 100) : base;
+                          const save = hasDiscount ? base - final : 0;
+                          const finalText = formatCurrency(final, "INR");
+                          const saveText = save > 0 ? formatCurrency(save, "INR") : null;
+                          return hasDiscount && saveText
+                            ? `${finalText} (Save ${saveText})`
+                            : finalText;
+                        })()
+                      : "—"}
                   </span>
                 </div>
               </div>
             </div>
             <div className="create-giftcard-submit-card">
+              {(giftCardCreate.error || giftCardUpdate.error) && (
+                <p className="create-giftcard-submit-error" role="alert">
+                  {giftCardCreate.error || giftCardUpdate.error}
+                </p>
+              )}
               <ul className="create-giftcard-checklist">
                 <li className={formData.giftCardName?.trim() ? "done" : ""}><span className="dot" />Gift card name</li>
                 <li className={formData.amount ? "done" : ""}><span className="dot" />Price set</li>
                 <li className={formData.expirationDate ? "done" : ""}><span className="dot" />Expiry date</li>
                 <li className={formData.quantity !== "" && formData.quantity != null ? "done" : ""}><span className="dot" />Quantity defined</li>
               </ul>
-              <button type="submit" form="createGiftCardForm" className="create-giftcard-submit-btn" disabled={giftCardCreate.loading}>
-                🎁 {giftCardCreate.loading ? "Creating..." : "Publish Gift Card"}
+              <button type="submit" form="createGiftCardForm" className="create-giftcard-submit-btn" disabled={giftCardCreate.loading || giftCardUpdate.loading}>
+                🎁 {giftCardCreate.loading || giftCardUpdate.loading
+                  ? (editId ? "Updating..." : "Creating...")
+                  : (editId ? "Update Gift Card" : "Publish Gift Card")}
               </button>
-              <button type="button" className="create-giftcard-save-draft-btn" onClick={handleSaveDraft}>
+              <button type="button" className="create-giftcard-save-draft-btn" onClick={handleSaveDraft} disabled={giftCardCreate.loading || giftCardUpdate.loading}>
                 Save as Draft
               </button>
             </div>
@@ -767,19 +955,20 @@ const CreateGiftCard = () => {
         </div>
 
         {showImagePreview && formData.giftCardImg && (
-            <div className="image-preview-modal">
+            <div className="image-preview-modal create-giftcard-image-preview-modal" role="dialog" aria-modal="true" aria-label="Gift card image preview">
               <div className="image-preview-content">
-                <button className="close-preview-btn" onClick={() => setShowImagePreview(false)}>
-                  &times;
+                <button type="button" className="close-preview-btn" onClick={() => setShowImagePreview(false)} aria-label="Close preview">
+                  <X size={24} />
                 </button>
-                <img
-                  src={formData.giftCardImg}
-                  alt="Gift Card Preview"
-                  className="preview-image"
-                  style={{ maxWidth: "100%", borderRadius: "10px" }}
-                />
+                <div className="image-preview-inner">
+                  <img
+                    src={formData.giftCardImg}
+                    alt="Gift Card Preview"
+                    className="preview-image"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
         )}
       </div>
 

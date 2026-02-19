@@ -90,6 +90,14 @@ function AppRoutes() {
               }
             />
             <Route
+              path="/giftcards/create/:id"
+              element={
+                <div className="content">
+                  <CreateGiftCard />
+                </div>
+              }
+            />
+            <Route
               path="/giftcards/create"
               element={
                 <div className="content">

@@ -1456,6 +1456,25 @@ html {
   letter-spacing: -0.5px;
 }
 
+.modern-price-original {
+  font-size: 0.7em;
+  font-weight: 600;
+  color: #94a3b8;
+  -webkit-text-fill-color: currentColor;
+  background: none;
+  text-decoration: line-through;
+}
+
+.modern-price-final {
+  font-size: 1.8em;
+  font-weight: 800;
+  margin-top: 2px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .price-label {
   font-size: 0.75em;
   color: #94a3b8;
@@ -2099,8 +2118,14 @@ html {
     font-size: 0.9em;
   }
 
-  .modern-price {
+  .modern-price:not(.modern-price-original):not(.modern-price-final) {
     font-size: 1.6em;
+  }
+  .modern-price-original {
+    font-size: 0.7em;
+  }
+  .modern-price-final {
+    font-size: 1.8em;
   }
 
   .modern-discount {
@@ -2167,8 +2192,14 @@ html {
     margin: 10px 0;
   }
 
-  .modern-price {
+  .modern-price:not(.modern-price-original):not(.modern-price-final) {
     font-size: 1.6em;
+  }
+  .modern-price-original {
+    font-size: 0.7em;
+  }
+  .modern-price-final {
+    font-size: 1.8em;
   }
 
   .price-label {

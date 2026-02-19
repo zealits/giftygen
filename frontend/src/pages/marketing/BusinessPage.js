@@ -112,7 +112,10 @@ const BusinessPage = () => {
 
   const activeCards =
     giftCards && Array.isArray(giftCards)
-      ? giftCards.filter((c) => c.status !== "expired" && (!c.expirationDate || new Date(c.expirationDate) >= new Date()))
+      ? giftCards.filter(
+          (c) =>
+            c.status === "active" && (!c.expirationDate || new Date(c.expirationDate) >= new Date())
+        )
       : [];
 
   if (businessLoading && !business) {
@@ -336,9 +339,6 @@ const BusinessPage = () => {
                         <div className="purchase-card-image modern-card-image">
                           <img src={card.giftCardImg} alt={card.giftCardName} loading="lazy" />
                           <div className="card-image-overlay" />
-                          {card.giftCardTag && (
-                            <div className="purchase-card-tag modern-tag">{card.giftCardTag}</div>
-                          )}
                           <div className="business-card-badge modern-badge">
                             <span className="business-badge-text">{business.name}</span>
                           </div>
@@ -346,15 +346,41 @@ const BusinessPage = () => {
                         <div className="purchase-card-content modern-card-content">
                           <h3 className="purchase-card-title modern-card-title">{card.giftCardName}</h3>
                           <p className="purchase-card-description modern-card-description">{card.description}</p>
+                          {(Array.isArray(card.tags) && card.tags.length > 0 ? card.tags : card.giftCardTag ? [card.giftCardTag] : []).length > 0 && (
+                            <div className="venue-giftcard-tags">
+                              {(Array.isArray(card.tags) && card.tags.length > 0 ? card.tags : [card.giftCardTag]).map((tag) => (
+                                <span key={tag} className="venue-giftcard-tag">{tag}</span>
+                              ))}
+                            </div>
+                          )}
                           <div className="purchase-card-info modern-card-info">
                             <div className="price-section">
-                              <span className="purchase-card-price modern-price">
-                                {formatCurrency(card.amount, "INR")}
-                              </span>
+                              {(() => {
+                                const base = Number(card.amount) || 0;
+                                const disc = Number(card.discount) || 0;
+                                const hasDiscount = disc > 0 && disc < 100;
+                                const final = hasDiscount ? base * (1 - disc / 100) : base;
+                                const baseText = formatCurrency(base, "INR");
+                                const finalText = formatCurrency(final, "INR");
+                                return hasDiscount ? (
+                                  <div className="venue-price-row">
+                                    <span className="purchase-card-price modern-price modern-price-original">
+                                      {baseText}
+                                    </span>
+                                    <span className="purchase-card-price modern-price modern-price-final">
+                                      {finalText}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="purchase-card-price modern-price">{baseText}</span>
+                                );
+                              })()}
                               <span className="price-label">Gift value</span>
                             </div>
                             <div className="discount-section">
-                              <span className="purchase-card-discount modern-discount">{card.discount}% OFF</span>
+                              {card.discount > 0 && (
+                                <span className="purchase-card-discount modern-discount">{card.discount}% OFF</span>
+                              )}
                             </div>
                           </div>
                           <button

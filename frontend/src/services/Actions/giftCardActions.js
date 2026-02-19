@@ -38,10 +38,9 @@ export const createGiftCard = (giftCardData) => async (dispatch) => {
       payload: data,
     });
   } catch (error) {
-    dispatch({
-      type: CREATE_GIFTCARD_FAIL,
-      payload: error.response && error.response.data.message ? error.response.data.message : error.message,
-    });
+    const message =
+      error.response?.data?.message || error.response?.data?.error || error.message || "Failed to create gift card.";
+    dispatch({ type: CREATE_GIFTCARD_FAIL, payload: message });
   }
 };
 
@@ -92,9 +91,11 @@ export const updateGiftCard = (id, updatedData) => async (dispatch) => {
       payload: data,
     });
   } catch (error) {
+    const message =
+      error.response?.data?.message || error.response?.data?.error || error.message || "Failed to update gift card.";
     dispatch({
       type: UPDATE_GIFTCARD_FAIL,
-      payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+      payload: message,
     });
   }
 };

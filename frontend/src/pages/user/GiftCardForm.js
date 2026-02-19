@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useParams } from "react-router-dom";
 import "./GiftCardForm.css";
 import { purchaseGiftCard } from "../../services/Actions/giftCardActions";
@@ -608,8 +609,8 @@ const validatePhone = (phone) => {
     }
   }, [showModal]);
 
-  return (
-    <div className="purchase-modal-open-overlay">
+  const modalContent = (
+    <div className="purchase-modal-open-overlay" role="dialog" aria-modal="true">
       <div className="purchase-modal-container">
         {showForm ? (
           <div className="giftCardContainer">
@@ -945,6 +946,8 @@ const validatePhone = (phone) => {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default GiftCardForm;

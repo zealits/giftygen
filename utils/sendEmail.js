@@ -17,6 +17,7 @@ const sendEmail = async (options) => {
     from: `"GiftyGen" <contact@giftygen.com>`, // Use your domain email as sender
     to: options.email,
     subject: options.subject,
+    text: options.message,
     html: options.html,
     attachments: options.attachments, // For QR code attachment
   };
