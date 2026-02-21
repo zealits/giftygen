@@ -47,9 +47,16 @@
 
 .venue-header-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   margin-bottom: 6px;
+}
+
+.venue-header-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 
 .venue-restaurant-logo {
@@ -66,6 +73,69 @@
   color: #1c1c1c;
   margin: 0;
   letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+/* Inline rating: stars + review count below business name (no green box, no number) */
+.venue-rating-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.venue-rating-inline .venue-rating-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.venue-rating-inline .venue-rating-star {
+  flex-shrink: 0;
+  color: #ddd;
+}
+
+.venue-rating-inline .venue-rating-star--filled {
+  color: #e9b731;
+}
+
+.venue-rating-inline .venue-rating-star--empty {
+  color: #ddd;
+}
+
+.venue-rating-inline .venue-rating-star--half {
+  position: relative;
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+
+.venue-rating-inline .venue-rating-star--half .venue-rating-star-outline {
+  position: absolute;
+  inset: 0;
+  color: #ddd;
+}
+
+.venue-rating-inline .venue-rating-star--half .venue-rating-star-half-fill {
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  overflow: hidden;
+  color: #e9b731;
+}
+
+.venue-rating-inline .venue-rating-star--half .venue-rating-star-half-fill svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.venue-rating-inline-count {
+  font-size: 0.85rem;
+  color: #696969;
+  font-weight: 500;
 }
 
 .venue-cuisine {
@@ -197,6 +267,89 @@
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.95);
   margin-top: 2px;
+}
+
+/* Refined rating badge for end-user reviews summary – 5 stars + value + count */
+.venue-rating-box--reviews {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 100px;
+  padding: 14px 20px;
+  background: linear-gradient(145deg, #2d8f5a 0%, #38a96a 50%, #3db872 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(45, 143, 90, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.venue-rating-box--reviews .venue-rating-stars-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.venue-rating-box--reviews .venue-rating-star {
+  flex-shrink: 0;
+  display: inline-flex;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.venue-rating-box--reviews .venue-rating-star--filled {
+  color: #ffd54f;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.2));
+}
+
+.venue-rating-box--reviews .venue-rating-star--empty {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Half star: outline behind, filled clipped to left 50% */
+.venue-rating-box--reviews .venue-rating-star--half {
+  position: relative;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+}
+
+.venue-rating-box--reviews .venue-rating-star--half .venue-rating-star-outline {
+  position: absolute;
+  inset: 0;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.venue-rating-box--reviews .venue-rating-star--half .venue-rating-star-half-fill {
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  overflow: hidden;
+  color: #ffd54f;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.2));
+}
+
+.venue-rating-box--reviews .venue-rating-star--half .venue-rating-star-half-fill svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.venue-rating-box--reviews .venue-rating-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1;
+}
+
+.venue-rating-box--reviews .venue-rating-count {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.02em;
 }
 
 /* Image gallery: main left, 2 stacked right */
@@ -376,6 +529,140 @@
   font-size: 0.85rem;
   color: #696969;
   margin: 0 0 8px;
+}
+
+/* Reviews section – form and list */
+.venue-reviews-section .venue-review-form {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.venue-review-form-row {
+  margin-bottom: 14px;
+}
+
+.venue-review-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1c1c1c;
+  margin-bottom: 6px;
+}
+
+.venue-star-input {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.venue-star-btn {
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #ddd;
+  transition: color 0.15s, transform 0.1s;
+}
+
+.venue-star-btn:hover {
+  color: #f5c542;
+}
+
+.venue-star-btn--filled,
+.venue-star-btn.venue-star-btn--filled {
+  color: #f5c542;
+}
+
+.venue-review-input,
+.venue-review-textarea {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
+.venue-review-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.venue-review-message {
+  font-size: 0.9rem;
+  margin: 10px 0 12px;
+  color: #696969;
+}
+
+.venue-review-message--success {
+  color: #48c479;
+}
+
+.venue-review-submit {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: #e23744;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.venue-review-submit:hover:not(:disabled) {
+  background: #c42f3a;
+}
+
+.venue-review-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.venue-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.venue-review-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.venue-review-item:last-child {
+  border-bottom: none;
+}
+
+.venue-review-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.venue-review-item-stars {
+  display: inline-flex;
+  gap: 2px;
+  color: #f5c542;
+}
+
+.venue-review-item-stars .venue-review-star-empty {
+  color: #e0e0e0;
+}
+
+.venue-review-item-meta {
+  font-size: 0.85rem;
+  color: #696969;
+}
+
+.venue-review-item-comment {
+  font-size: 0.9rem;
+  color: #1c1c1c;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .venue-cost {

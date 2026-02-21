@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Share2, MessageCircle, Gift, Check } from "lucide-react";
+import { Share2, MessageCircle, Gift, Check, Star } from "lucide-react";
+import axios from "../../utils/axiosConfig";
 import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import { listGiftCards } from "../../services/Actions/giftCardActions";
 import { formatCurrency } from "../../utils/currency";
@@ -31,13 +32,35 @@ const BusinessPage = () => {
   const [photoFilter, setPhotoFilter] = useState("all");
   const [showGiftCardForm, setShowGiftCardForm] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [reviewSummary, setReviewSummary] = useState({ averageRating: null, totalCount: 0 });
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 0, comment: "", reviewerName: "" });
+  const [submitReviewLoading, setSubmitReviewLoading] = useState(false);
+  const [reviewSubmitMessage, setReviewSubmitMessage] = useState("");
+
+  const fetchReviews = useCallback(async () => {
+    if (!businessSlug) return;
+    setReviewsLoading(true);
+    try {
+      const { data } = await axios.get(`/api/v1/admin/business/${businessSlug}/reviews`);
+      setReviews(data.reviews || []);
+      setReviewSummary(data.summary || { averageRating: null, totalCount: 0 });
+    } catch (err) {
+      setReviews([]);
+      setReviewSummary({ averageRating: null, totalCount: 0 });
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, [businessSlug]);
 
   useEffect(() => {
     if (businessSlug) {
       dispatch(fetchBusinessBySlug(businessSlug));
       dispatch(listGiftCards("", businessSlug));
+      fetchReviews();
     }
-  }, [dispatch, businessSlug]);
+  }, [dispatch, businessSlug, fetchReviews]);
 
   const scrollToMain = () => {
     const el = document.querySelector(".venue-main");
@@ -85,6 +108,31 @@ const BusinessPage = () => {
   const handleCardClick = (cardId, event) => {
     if (event.target.closest(".purchase-card-button")) return;
     navigate(`/${businessSlug}/gift-card/${cardId}`);
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    const { rating, comment, reviewerName } = reviewForm;
+    if (!rating || rating < 1 || rating > 5) {
+      setReviewSubmitMessage("Please select a star rating (1–5).");
+      return;
+    }
+    setSubmitReviewLoading(true);
+    setReviewSubmitMessage("");
+    try {
+      await axios.post(`/api/v1/admin/business/${businessSlug}/reviews`, {
+        rating,
+        comment: (comment || "").trim(),
+        reviewerName: (reviewerName || "").trim(),
+      });
+      setReviewForm({ rating: 0, comment: "", reviewerName: "" });
+      setReviewSubmitMessage("Thank you! Your review has been submitted.");
+      fetchReviews();
+    } catch (err) {
+      setReviewSubmitMessage(err?.response?.data?.message || "Failed to submit review. Please try again.");
+    } finally {
+      setSubmitReviewLoading(false);
+    }
   };
 
   const pc = business?.pageCustomization || {};
@@ -173,7 +221,43 @@ const BusinessPage = () => {
                   className="venue-restaurant-logo"
                 />
               )}
-              <h1 className="venue-restaurant-name">{business.name}</h1>
+              <div className="venue-header-title-block">
+                <h1 className="venue-restaurant-name">{business.name}</h1>
+                {reviewSummary.totalCount > 0 && reviewSummary.averageRating != null && (() => {
+                  const r = Number(reviewSummary.averageRating);
+                  return (
+                    <div className="venue-rating-inline" aria-label={`${r} out of 5 stars, ${reviewSummary.totalCount} ${reviewSummary.totalCount === 1 ? "review" : "reviews"}`}>
+                      <div className="venue-rating-stars-row">
+                        {[1, 2, 3, 4, 5].map((i) => {
+                          const full = r >= i;
+                          const half = !full && r >= i - 0.5;
+                          if (full) {
+                            return (
+                              <Star key={i} className="venue-rating-star venue-rating-star--filled" size={18} fill="currentColor" strokeWidth={0} aria-hidden="true" />
+                            );
+                          }
+                          if (half) {
+                            return (
+                              <span key={i} className="venue-rating-star venue-rating-star--half" aria-hidden="true">
+                                <Star className="venue-rating-star-outline" size={18} fill="none" strokeWidth={1.5} />
+                                <span className="venue-rating-star-half-fill">
+                                  <Star size={18} fill="currentColor" strokeWidth={0} />
+                                </span>
+                              </span>
+                            );
+                          }
+                          return (
+                            <Star key={i} className="venue-rating-star venue-rating-star--empty" size={18} fill="none" strokeWidth={1.5} aria-hidden="true" />
+                          );
+                        })}
+                      </div>
+                      <span className="venue-rating-inline-count">
+                        {reviewSummary.totalCount} {reviewSummary.totalCount === 1 ? "review" : "reviews"}
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
             {displaySubtitle && <p className="venue-cuisine">{displaySubtitle}</p>}
             {addressText && <p className="venue-address">{addressText}</p>}
@@ -210,20 +294,6 @@ const BusinessPage = () => {
                 Reviews
               </button>
             </div>
-          </div>
-          <div className="venue-header-right">
-            {pc.ratingPrimary && (
-              <div className="venue-rating-box">
-                <span className="venue-rating-star">{pc.ratingPrimary}</span>
-                <span className="venue-rating-count">{pc.ratingPrimaryCount || ""}</span>
-              </div>
-            )}
-            {pc.ratingSecondary && (
-              <div className="venue-rating-box">
-                <span className="venue-rating-star">{pc.ratingSecondary}</span>
-                <span className="venue-rating-count">{pc.ratingSecondaryCount || ""}</span>
-              </div>
-            )}
           </div>
         </div>
       </header>
@@ -421,9 +491,88 @@ const BusinessPage = () => {
             )}
 
             {activeTab === "reviews" && (
-              <section className="venue-card">
+              <section className="venue-card venue-reviews-section">
                 <h3 className="venue-card-title">Reviews</h3>
-                <p className="venue-card-muted">Reviews coming soon.</p>
+                <form className="venue-review-form" onSubmit={handleSubmitReview}>
+                  <div className="venue-review-form-row">
+                    <label className="venue-review-label">Your rating</label>
+                    <div className="venue-star-input" role="group" aria-label="Rate 1 to 5 stars">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          className={`venue-star-btn ${reviewForm.rating >= star ? "venue-star-btn--filled" : ""}`}
+                          onClick={() => setReviewForm((prev) => ({ ...prev, rating: star }))}
+                          aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                        >
+                          <Star size={28} strokeWidth={1.5} fill={reviewForm.rating >= star ? "currentColor" : "none"} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="venue-review-form-row">
+                    <label className="venue-review-label" htmlFor="reviewerName">Your name</label>
+                    <input
+                      id="reviewerName"
+                      type="text"
+                      className="venue-review-input"
+                      placeholder="e.g. John"
+                      value={reviewForm.reviewerName}
+                      onChange={(e) => setReviewForm((prev) => ({ ...prev, reviewerName: e.target.value }))}
+                      maxLength={120}
+                    />
+                  </div>
+                  <div className="venue-review-form-row">
+                    <label className="venue-review-label" htmlFor="reviewComment">Your review</label>
+                    <textarea
+                      id="reviewComment"
+                      className="venue-review-textarea"
+                      placeholder="Share your experience..."
+                      rows={3}
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm((prev) => ({ ...prev, comment: e.target.value }))}
+                      maxLength={2000}
+                    />
+                  </div>
+                  {reviewSubmitMessage && (
+                    <p className={`venue-review-message ${reviewSubmitMessage.includes("Thank you") ? "venue-review-message--success" : ""}`}>
+                      {reviewSubmitMessage}
+                    </p>
+                  )}
+                  <button type="submit" className="venue-review-submit" disabled={submitReviewLoading}>
+                    {submitReviewLoading ? "Submitting..." : "Submit review"}
+                  </button>
+                </form>
+                <div className="venue-reviews-list">
+                  {reviewsLoading ? (
+                    <p className="venue-card-muted">Loading reviews...</p>
+                  ) : reviews.length === 0 ? (
+                    <p className="venue-card-muted">No reviews yet. Be the first to leave a review!</p>
+                  ) : (
+                    reviews.map((r) => (
+                      <div key={r._id} className="venue-review-item">
+                        <div className="venue-review-item-header">
+                          <span className="venue-review-item-stars" aria-label={`${r.rating} out of 5 stars`}>
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                size={16}
+                                className={r.rating >= s ? "venue-review-star-filled" : "venue-review-star-empty"}
+                                strokeWidth={1.5}
+                                fill={r.rating >= s ? "currentColor" : "none"}
+                              />
+                            ))}
+                          </span>
+                          <span className="venue-review-item-meta">
+                            {r.reviewerName ? `${r.reviewerName} · ` : ""}
+                            {r.createdAt ? new Date(r.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : ""}
+                          </span>
+                        </div>
+                        {r.comment && <p className="venue-review-item-comment">{r.comment}</p>}
+                      </div>
+                    ))
+                  )}
+                </div>
               </section>
             )}
 

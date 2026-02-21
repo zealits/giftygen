@@ -981,50 +981,6 @@ const Settings = ({ section: sectionProp }) => {
                     style={{ resize: "vertical", minHeight: "80px" }}
                   />
                 </div>
-                <div className="form_group">
-                  <label className="form_label">Primary Rating</label>
-                  <input
-                    value={form.pageCustomization?.ratingPrimary || ""}
-                    onChange={(e) =>
-                      handlePageCustomizationChange("ratingPrimary", e.target.value)
-                    }
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.ratingPrimaryPlaceholder || "e.g. 4.8★"}
-                    className="form-input"
-                  />
-                </div>
-                <div className="form_group">
-                  <label className="form_label">Primary Rating Count</label>
-                  <input
-                    value={form.pageCustomization?.ratingPrimaryCount || ""}
-                    onChange={(e) =>
-                      handlePageCustomizationChange("ratingPrimaryCount", e.target.value)
-                    }
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.ratingPrimaryCountPlaceholder || "e.g. 428 Ratings"}
-                    className="form-input"
-                  />
-                </div>
-                <div className="form_group">
-                  <label className="form_label">Secondary Rating</label>
-                  <input
-                    value={form.pageCustomization?.ratingSecondary || ""}
-                    onChange={(e) =>
-                      handlePageCustomizationChange("ratingSecondary", e.target.value)
-                    }
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.ratingSecondaryPlaceholder || "e.g. 4.6★"}
-                    className="form-input"
-                  />
-                </div>
-                <div className="form_group">
-                  <label className="form_label">Secondary Rating Count</label>
-                  <input
-                    value={form.pageCustomization?.ratingSecondaryCount || ""}
-                    onChange={(e) =>
-                      handlePageCustomizationChange("ratingSecondaryCount", e.target.value)
-                    }
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.ratingSecondaryCountPlaceholder || "e.g. 156 Reviews"}
-                    className="form-input"
-                  />
-                </div>
                 <div className="form_group page-customization-full">
                   <label className="form_label">Disclaimer</label>
                   <input

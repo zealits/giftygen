@@ -20,6 +20,10 @@ const {
   getBusinessesByIndustry,
   getAllBusinesses,
 } = require("../controllers/restaurantAdminController");
+const {
+  getReviewsByBusinessSlug,
+  createReview,
+} = require("../controllers/reviewController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const upload = require("../middleware/multer");
 
@@ -75,6 +79,10 @@ router.get("/settings/qr-poster", isAuthenticatedUser, authorizeRoles("Admin"), 
 
 // Public endpoint to get business information by slug
 router.get("/business/:businessSlug", getBusinessBySlug);
+
+// Public endpoints for end-user reviews (by business slug)
+router.get("/business/:businessSlug/reviews", getReviewsByBusinessSlug);
+router.post("/business/:businessSlug/reviews", createReview);
 
 // Public endpoint to get all industries
 router.get("/industries", getIndustries);
