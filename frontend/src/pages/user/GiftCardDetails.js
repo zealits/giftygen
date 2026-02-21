@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getGiftCardDetails, listGiftCards } from "../../services/Actions/giftCardActions";
@@ -9,6 +9,7 @@ import SEO from "../../components/SEO";
 import { getGiftCardProductSchema, getBreadcrumbSchema } from "../../utils/structuredData";
 import { Share2, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getStatusFromBusinessHours, formatBusinessHoursGrouped } from "../../data/industryPageConfig";
 import "./GiftCardDetails.css";
 
 const GiftCardDetails = () => {
@@ -216,17 +217,34 @@ if (loading) return (
                 return addressText ? <p className="venue-address">{addressText}</p> : null;
               })()}
               <div className="venue-meta-row">
-                {business.pageCustomization?.statusBadge && (
-                  <span className="venue-status-badge">{business.pageCustomization.statusBadge}</span>
-                )}
-                {business.pageCustomization?.timings && (
-                  <span className="venue-meta">
-                    {business.pageCustomization.timings} <span className="venue-meta-i">ⓘ</span>
-                  </span>
-                )}
-                {business.pageCustomization?.priceRange && (
-                  <span className="venue-meta">| {business.pageCustomization.priceRange}</span>
-                )}
+                {(() => {
+                  const pc = business?.pageCustomization || {};
+                  const hasHours = pc.businessHours && Object.keys(pc.businessHours).length > 0;
+                  const status = hasHours
+                    ? getStatusFromBusinessHours(pc.businessHours).statusBadge
+                    : pc.statusBadge;
+                  const timingsGrouped = hasHours ? formatBusinessHoursGrouped(pc.businessHours) : [];
+                  const timingsFallback = hasHours ? null : pc.timings;
+                  return (
+                    <>
+                      {status && <span className="venue-status-badge">{status}</span>}
+                      {(timingsGrouped.length > 0 || timingsFallback) && (
+                        <div className="venue-timings-wrap">
+                          {timingsGrouped.length > 0 ? (
+                            <ul className="venue-timings-list">
+                              {timingsGrouped.map((line, idx) => (
+                                <li key={idx} className="venue-timings-item">{line}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span className="venue-meta">{timingsFallback}</span>
+                          )}
+                          <span className="venue-meta-i">ⓘ</span>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
                 {business.phone && (
                   <a href={`tel:${business.phone.replace(/\s/g, "")}`} className="venue-phone">
                     {business.phone}

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Share2, MessageCircle, Gift, Check } from "lucide-react";
 import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import { listGiftCards } from "../../services/Actions/giftCardActions";
 import { formatCurrency } from "../../utils/currency";
+import { getStatusFromBusinessHours, formatBusinessHoursGrouped } from "../../data/industryPageConfig";
 import SEO from "../../components/SEO";
 import GiftCardForm from "../user/GiftCardForm";
 import "../user/UserLanding.css";
@@ -87,6 +88,24 @@ const BusinessPage = () => {
   };
 
   const pc = business?.pageCustomization || {};
+  const displayStatus = useMemo(() => {
+    if (pc.businessHours && Object.keys(pc.businessHours).length > 0) {
+      return getStatusFromBusinessHours(pc.businessHours).statusBadge;
+    }
+    return pc.statusBadge;
+  }, [pc.businessHours, pc.statusBadge]);
+  const displayTimingsGrouped = useMemo(() => {
+    if (pc.businessHours && Object.keys(pc.businessHours).length > 0) {
+      return formatBusinessHoursGrouped(pc.businessHours);
+    }
+    return [];
+  }, [pc.businessHours]);
+  const displayTimingsFallback = useMemo(() => {
+    if (pc.businessHours && Object.keys(pc.businessHours).length > 0) return null;
+    return pc.timings;
+  }, [pc.businessHours, pc.timings]);
+  const displaySubtitle = Array.isArray(pc.subtitle) ? pc.subtitle.join(", ") : pc.subtitle;
+  const displayKnownFor = Array.isArray(pc.knownFor) ? pc.knownFor.join(", ") : pc.knownFor;
   const customTab = business?.industry ? INDUSTRY_TAB_MAP[business.industry] : null;
   const baseTabs = [
     { id: "overview", label: "Overview" },
@@ -156,16 +175,24 @@ const BusinessPage = () => {
               )}
               <h1 className="venue-restaurant-name">{business.name}</h1>
             </div>
-            {pc.subtitle && <p className="venue-cuisine">{pc.subtitle}</p>}
+            {displaySubtitle && <p className="venue-cuisine">{displaySubtitle}</p>}
             {addressText && <p className="venue-address">{addressText}</p>}
             <div className="venue-meta-row">
-              {pc.statusBadge && <span className="venue-status-badge">{pc.statusBadge}</span>}
-              {pc.timings && (
-                <span className="venue-meta">
-                  {pc.timings} <span className="venue-meta-i">ⓘ</span>
-                </span>
+              {displayStatus && <span className="venue-status-badge">{displayStatus}</span>}
+              {(displayTimingsGrouped.length > 0 || displayTimingsFallback) && (
+                <div className="venue-timings-wrap">
+                  {displayTimingsGrouped.length > 0 ? (
+                    <ul className="venue-timings-list">
+                      {displayTimingsGrouped.map((line, idx) => (
+                        <li key={idx} className="venue-timings-item">{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="venue-meta">{displayTimingsFallback}</span>
+                  )}
+                  <span className="venue-meta-i">ⓘ</span>
+                </div>
               )}
-              {pc.priceRange && <span className="venue-meta">| {pc.priceRange}</span>}
               {business.phone && (
                 <a href={`tel:${business.phone.replace(/\s/g, "")}`} className="venue-phone">
                   {business.phone}
@@ -284,16 +311,10 @@ const BusinessPage = () => {
                     )}
                   </section>
                 )}
-                {pc.knownFor && (
+                {displayKnownFor && (
                   <section className="venue-card">
                     <h3 className="venue-card-title">Known For</h3>
-                    <p className="venue-card-text">{pc.knownFor}</p>
-                  </section>
-                )}
-                {pc.priceRange && (
-                  <section className="venue-card">
-                    <h3 className="venue-card-title">Starting From</h3>
-                    <p className="venue-cost">{pc.priceRange}</p>
+                    <p className="venue-card-text">{displayKnownFor}</p>
                   </section>
                 )}
                 {Array.isArray(pc.amenities) && pc.amenities.length > 0 && (
@@ -309,7 +330,7 @@ const BusinessPage = () => {
                     </div>
                   </section>
                 )}
-                {business.description && !pc.knownFor && (
+                {business.description && !displayKnownFor && (
                   <section className="venue-card">
                     <h3 className="venue-card-title">About</h3>
                     <p className="venue-card-text">{business.description}</p>

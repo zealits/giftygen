@@ -218,6 +218,165 @@ textarea.form-input {
 	border-color: rgba(99, 102, 241, 0.5);
 }
 
+.page-customization-full {
+	grid-column: 1 / -1;
+}
+
+.tag-options-wrap {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.tag-option-chip {
+	padding: 6px 12px;
+	border-radius: 20px;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.06);
+	color: #e2e8f0;
+	font-size: 0.85rem;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.tag-option-chip:hover {
+	background: rgba(99, 102, 241, 0.15);
+	border-color: rgba(99, 102, 241, 0.4);
+}
+
+.tag-option-chip--selected {
+	background: rgba(99, 102, 241, 0.35);
+	border-color: #6366f1;
+	color: #f8fafc;
+}
+
+.tag-selected-wrap {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	min-height: 24px;
+}
+
+.tag-selected-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px 4px 12px;
+	border-radius: 16px;
+	background: rgba(99, 102, 241, 0.2);
+	border: 1px solid rgba(99, 102, 241, 0.4);
+	color: #e2e8f0;
+	font-size: 0.85rem;
+}
+
+.tag-selected-remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.15);
+	color: #f8fafc;
+	font-size: 1.1rem;
+	line-height: 1;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.tag-selected-remove:hover {
+	background: rgba(239, 68, 68, 0.5);
+}
+
+.business-hours-compact {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin-bottom: 12px;
+}
+
+.business-hours-block {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 12px 14px;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 12px;
+}
+
+.business-hours-block-label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #e2e8f0;
+	margin-bottom: 2px;
+}
+
+.business-hours-closed-label,
+.business-hours-same-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.8rem;
+	color: #94a3b8;
+	cursor: pointer;
+}
+
+.business-hours-closed-label input,
+.business-hours-same-label input {
+	width: 16px;
+	height: 16px;
+	accent-color: #6366f1;
+}
+
+.business-hours-inline {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.business-hours-input-sm {
+	min-width: 0;
+	width: 100%;
+	max-width: 110px;
+	padding: 8px 10px;
+	font-size: 0.85rem;
+}
+
+.business-hours-sep {
+	color: #64748b;
+	font-size: 0.85rem;
+}
+
+.dynamic-status-preview {
+	margin-top: 12px;
+	padding: 10px 14px;
+	background: rgba(99, 102, 241, 0.1);
+	border: 1px solid rgba(99, 102, 241, 0.2);
+	border-radius: 10px;
+	font-size: 0.9rem;
+	color: #e2e8f0;
+}
+
+.dynamic-status-lines {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 12px;
+	margin-top: 6px;
+}
+
+.dynamic-status-line {
+	display: inline-block;
+	padding: 2px 8px;
+	background: rgba(255, 255, 255, 0.08);
+	border-radius: 6px;
+	font-size: 0.8rem;
+	opacity: 0.95;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
 	.settings-page {

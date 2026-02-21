@@ -3,6 +3,13 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import MapLocationPicker from "../../components/MapLocationPicker";
+import {
+  INDUSTRY_PAGE_CONFIG,
+  getStatusFromBusinessHours,
+  formatBusinessHoursGrouped,
+  businessHoursToGrouped,
+  groupedToBusinessHours,
+} from "../../data/industryPageConfig";
 import "./Settings.css";
 
 const Settings = ({ section: sectionProp }) => {
@@ -135,45 +142,89 @@ const Settings = ({ section: sectionProp }) => {
     handlePageCustomizationChange(field, arr);
   };
 
-  // Industry config: custom tab label and field hints
-  const INDUSTRY_CONFIG = {
-    "Restaurant And Fine Dining": {
-      customTabLabel: "Menu",
-      customTabPlaceholder: "e.g. STARTERS — Paneer Tikka, Mushroom...\nMAIN COURSE — Biryani, Curry...",
-      tagsLabel: "Cuisine tags (comma-separated)",
-      tagsPlaceholder: "North Indian, European, BBQ, Desserts",
-    },
-    "Hotels & Resorts": {
-      customTabLabel: "Rooms",
-      customTabPlaceholder: "e.g. SEA VIEW DELUXE — King bed, balcony...\nSUITE — Living area, pool access...",
-      tagsLabel: "Room types (comma-separated)",
-      tagsPlaceholder: "Sea View, Pool View, Suite, Family Room",
-    },
-    "Fitness and Wellness memberships": {
-      customTabLabel: "Classes",
-      customTabPlaceholder: "e.g. STRENGTH — Full-body workouts...\nYOGA — Flexibility, recovery...",
-      tagsLabel: "Class types (comma-separated)",
-      tagsPlaceholder: "Strength, Yoga, HIIT, Personal Training",
-    },
-    "Retail & E-commerce": {
-      customTabLabel: "Collections",
-      customTabPlaceholder: "e.g. CASUAL — Tees, jackets...\nFESTIVE — Diwali, Christmas edits...",
-      tagsLabel: "Categories (comma-separated)",
-      tagsPlaceholder: "Tees, Jackets, Footwear, Accessories",
-    },
-    "Beauty and Personal care": {
-      customTabLabel: "Services",
-      customTabPlaceholder: "e.g. HAIR — Haircut, colour...\nSPA — Massage, steam...",
-      tagsLabel: "Service types (comma-separated)",
-      tagsPlaceholder: "Hair, Skin, Spa, Makeup",
-    },
-    "Seasonal Gifting": {
-      customTabLabel: "Campaigns",
-      customTabPlaceholder: "e.g. DIWALI — Dining, shopping redeemable...\nNEW YEAR — Celebration experiences...",
-      tagsLabel: "Campaign tags (comma-separated)",
-      tagsPlaceholder: "Diwali, Christmas, New Year, Corporate",
-    },
+  const handleSubtitleToggle = (item) => {
+    const arr = toArray(form.pageCustomization?.subtitle);
+    const next = arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
+    handlePageCustomizationChange("subtitle", next);
   };
+
+  const handleSubtitleAddCustom = (e) => {
+    if (e.key !== "Enter") return;
+    const value = e.target.value?.trim();
+    if (!value) return;
+    const arr = toArray(form.pageCustomization?.subtitle);
+    if (arr.includes(value)) return;
+    handlePageCustomizationChange("subtitle", [...arr, value]);
+    e.target.value = "";
+  };
+
+  const handleKnownForToggle = (item) => {
+    const arr = toArray(form.pageCustomization?.knownFor);
+    const next = arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
+    handlePageCustomizationChange("knownFor", next);
+  };
+
+  const handleKnownForAddCustom = (e) => {
+    if (e.key !== "Enter") return;
+    const value = e.target.value?.trim();
+    if (!value) return;
+    const arr = toArray(form.pageCustomization?.knownFor);
+    if (arr.includes(value)) return;
+    handlePageCustomizationChange("knownFor", [...arr, value]);
+    e.target.value = "";
+  };
+
+  const handleBusinessHoursChange = (day, field, value) => {
+    const next = { ...(form.pageCustomization?.businessHours || {}) };
+    if (!next[day]) next[day] = {};
+    if (value === null || value === "") {
+      delete next[day][field];
+      if (Object.keys(next[day]).length === 0) delete next[day];
+    } else {
+      next[day][field] = value;
+    }
+    handlePageCustomizationChange("businessHours", next);
+  };
+
+  const groupedHours = useMemo(
+    () => businessHoursToGrouped(form.pageCustomization?.businessHours),
+    [form.pageCustomization?.businessHours]
+  );
+
+  const setGroupedHours = (group, value) => {
+    const next = {
+      weekdays: groupedHours.weekdays,
+      sat: groupedHours.sat,
+      sun: groupedHours.sun,
+      [group]: value,
+    };
+    handlePageCustomizationChange("businessHours", groupedToBusinessHours(next));
+  };
+
+  const statusPreviewLines = useMemo(
+    () => formatBusinessHoursGrouped(form.pageCustomization?.businessHours || {}),
+    [form.pageCustomization?.businessHours]
+  );
+
+  const INDUSTRY_CONFIG = INDUSTRY_PAGE_CONFIG;
+
+  const toArray = (v) =>
+    Array.isArray(v) ? v : typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : [];
+
+  const subtitleList = useMemo(
+    () => toArray(form.pageCustomization?.subtitle),
+    [form.pageCustomization?.subtitle]
+  );
+  const knownForList = useMemo(
+    () => toArray(form.pageCustomization?.knownFor),
+    [form.pageCustomization?.knownFor]
+  );
+
+  const businessHours = form.pageCustomization?.businessHours || {};
+  const dynamicStatus = useMemo(
+    () => getStatusFromBusinessHours(businessHours),
+    [businessHours]
+  );
 
   const handleMapLocationSelect = (lat, lng, address = null) => {
     // Ensure lat and lng are numbers, not strings
@@ -251,9 +302,24 @@ const Settings = ({ section: sectionProp }) => {
     setSaving(true);
     setSettingsMessage("");
     try {
-      // Ensure latitude and longitude are numbers or null, not empty strings
+      const pc = form.pageCustomization || {};
+      const bh = pc.businessHours;
+      const { statusBadge: computedStatus, timings: computedTimings } =
+        getStatusFromBusinessHours(bh);
+
+      const { priceRange: _removed, ...pcRest } = pc;
+      const pageCustomization = {
+        ...pcRest,
+        subtitle: Array.isArray(pc.subtitle) ? pc.subtitle : toArray(pc.subtitle),
+        knownFor: Array.isArray(pc.knownFor) ? pc.knownFor : toArray(pc.knownFor),
+        ...(bh && Object.keys(bh).length > 0
+          ? { statusBadge: computedStatus || pc.statusBadge, timings: computedTimings || pc.timings }
+          : {}),
+      };
+
       const formData = {
         ...form,
+        pageCustomization,
         restaurantAddress: {
           ...form.restaurantAddress,
           latitude: form.restaurantAddress.latitude
@@ -589,7 +655,7 @@ const Settings = ({ section: sectionProp }) => {
                 name="businessDescription"
                 value={form.businessDescription}
                 onChange={handleChange}
-                placeholder="Describe your business..."
+                placeholder={form.industry && INDUSTRY_CONFIG[form.industry]?.businessDescriptionPlaceholder ? INDUSTRY_CONFIG[form.industry].businessDescriptionPlaceholder : "Describe your business..."}
                 className="form-input"
                 rows="4"
                 style={{ resize: "vertical", minHeight: "100px" }}
@@ -604,49 +670,265 @@ const Settings = ({ section: sectionProp }) => {
                 Customize how your public business page displays. These fields appear on your gift cards page.
               </p>
               <div className="form-grid">
-                <div className="form_group">
+                <div className="form_group page-customization-full">
                   <label className="form_label">Subtitle / Category</label>
+                  <p className="form-hint" style={{ marginBottom: 8 }}>
+                    Select from options below or type your own and press Enter to add.
+                  </p>
+                  <div className="tag-options-wrap">
+                    {(INDUSTRY_CONFIG[form.industry]?.subtitleOptions || []).map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        className={`tag-option-chip ${subtitleList.includes(opt) ? "tag-option-chip--selected" : ""}`}
+                        onClick={() => handleSubtitleToggle(opt)}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="tag-selected-wrap">
+                    {subtitleList.map((item) => (
+                      <span key={item} className="tag-selected-chip">
+                        {item}
+                        <button
+                          type="button"
+                          className="tag-selected-remove"
+                          onClick={() => handleSubtitleToggle(item)}
+                          aria-label={`Remove ${item}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                   <input
-                    value={form.pageCustomization?.subtitle || ""}
-                    onChange={(e) => handlePageCustomizationChange("subtitle", e.target.value)}
-                    placeholder="e.g. Fine Dining, European, BBQ"
+                    type="text"
                     className="form-input"
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.subtitlePlaceholder || "Add your own and press Enter"}
+                    onKeyDown={handleSubtitleAddCustom}
+                    style={{ marginTop: 8 }}
                   />
                 </div>
-                <div className="form_group">
-                  <label className="form_label">Status Badge</label>
-                  <input
-                    value={form.pageCustomization?.statusBadge || ""}
-                    onChange={(e) => handlePageCustomizationChange("statusBadge", e.target.value)}
-                    placeholder="e.g. Open now, Closes in 45 mins"
-                    className="form-input"
-                  />
+
+                <div className="form_group page-customization-full">
+                  <label className="form_label">Business Hours (dynamic Open/Closed status)</label>
+                  <p className="form-hint" style={{ marginBottom: 10 }}>
+                    Set hours for weekdays, then override Saturday/Sunday if different. Status updates automatically.
+                  </p>
+                  <div className="business-hours-compact">
+                    <div className="business-hours-block">
+                      <span className="business-hours-block-label">Weekdays (Mon–Fri)</span>
+                      <label className="business-hours-closed-label">
+                        <input
+                          type="checkbox"
+                          checked={groupedHours.weekdays.closed === true}
+                          onChange={(e) =>
+                            setGroupedHours("weekdays", e.target.checked ? { closed: true } : { open: "09:00", close: "18:00" })
+                          }
+                        />
+                        Closed
+                      </label>
+                      {!groupedHours.weekdays.closed && (
+                        <div className="business-hours-inline">
+                          <input
+                            type="time"
+                            className="form-input business-hours-input-sm"
+                            value={groupedHours.weekdays.open ?? ""}
+                            onChange={(e) =>
+                              setGroupedHours("weekdays", {
+                                ...groupedHours.weekdays,
+                                open: e.target.value || "",
+                                close: groupedHours.weekdays.close || "",
+                              })
+                            }
+                          />
+                          <span className="business-hours-sep">–</span>
+                          <input
+                            type="time"
+                            className="form-input business-hours-input-sm"
+                            value={groupedHours.weekdays.close ?? ""}
+                            onChange={(e) =>
+                              setGroupedHours("weekdays", {
+                                ...groupedHours.weekdays,
+                                open: groupedHours.weekdays.open || "",
+                                close: e.target.value || "",
+                              })
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="business-hours-block">
+                      <span className="business-hours-block-label">Saturday</span>
+                      <label className="business-hours-same-label">
+                        <input
+                          type="checkbox"
+                          checked={groupedHours.sat.sameAsWeekdays === true}
+                          onChange={(e) =>
+                            setGroupedHours(
+                              "sat",
+                              e.target.checked ? { sameAsWeekdays: true } : { closed: true }
+                            )
+                          }
+                        />
+                        Same as weekdays
+                      </label>
+                      {!groupedHours.sat.sameAsWeekdays && (
+                        <>
+                          <label className="business-hours-closed-label">
+                            <input
+                              type="checkbox"
+                              checked={groupedHours.sat.closed === true}
+                              onChange={(e) =>
+                                setGroupedHours("sat", e.target.checked ? { closed: true } : { open: "09:00", close: "18:00" })
+                              }
+                            />
+                            Closed
+                          </label>
+                          {!groupedHours.sat.closed && (
+                            <div className="business-hours-inline">
+                              <input
+                                type="time"
+                                className="form-input business-hours-input-sm"
+                                value={groupedHours.sat.open ?? ""}
+                                onChange={(e) =>
+                                  setGroupedHours("sat", {
+                                    ...groupedHours.sat,
+                                    open: e.target.value || "",
+                                    close: groupedHours.sat.close || "",
+                                  })
+                                }
+                              />
+                              <span className="business-hours-sep">–</span>
+                              <input
+                                type="time"
+                                className="form-input business-hours-input-sm"
+                                value={groupedHours.sat.close ?? ""}
+                                onChange={(e) =>
+                                  setGroupedHours("sat", {
+                                    ...groupedHours.sat,
+                                    open: groupedHours.sat.open || "",
+                                    close: e.target.value || "",
+                                  })
+                                }
+                              />
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <div className="business-hours-block">
+                      <span className="business-hours-block-label">Sunday</span>
+                      <label className="business-hours-same-label">
+                        <input
+                          type="checkbox"
+                          checked={groupedHours.sun.sameAsWeekdays === true}
+                          onChange={(e) =>
+                            setGroupedHours(
+                              "sun",
+                              e.target.checked ? { sameAsWeekdays: true } : { closed: true }
+                            )
+                          }
+                        />
+                        Same as weekdays
+                      </label>
+                      {!groupedHours.sun.sameAsWeekdays && (
+                        <>
+                          <label className="business-hours-closed-label">
+                            <input
+                              type="checkbox"
+                              checked={groupedHours.sun.closed === true}
+                              onChange={(e) =>
+                                setGroupedHours("sun", e.target.checked ? { closed: true } : { open: "09:00", close: "18:00" })
+                              }
+                            />
+                            Closed
+                          </label>
+                          {!groupedHours.sun.closed && (
+                            <div className="business-hours-inline">
+                              <input
+                                type="time"
+                                className="form-input business-hours-input-sm"
+                                value={groupedHours.sun.open ?? ""}
+                                onChange={(e) =>
+                                  setGroupedHours("sun", {
+                                    ...groupedHours.sun,
+                                    open: e.target.value || "",
+                                    close: groupedHours.sun.close || "",
+                                  })
+                                }
+                              />
+                              <span className="business-hours-sep">–</span>
+                              <input
+                                type="time"
+                                className="form-input business-hours-input-sm"
+                                value={groupedHours.sun.close ?? ""}
+                                onChange={(e) =>
+                                  setGroupedHours("sun", {
+                                    ...groupedHours.sun,
+                                    open: groupedHours.sun.open || "",
+                                    close: e.target.value || "",
+                                  })
+                                }
+                              />
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="dynamic-status-preview">
+                    <strong>Status:</strong>{" "}
+                    {dynamicStatus.statusBadge || "Set hours above to see status"}
+                    {statusPreviewLines.length > 0 && (
+                      <div className="dynamic-status-lines">
+                        {statusPreviewLines.map((line, idx) => (
+                          <span key={idx} className="dynamic-status-line">{line}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="form_group">
-                  <label className="form_label">Timings</label>
-                  <input
-                    value={form.pageCustomization?.timings || ""}
-                    onChange={(e) => handlePageCustomizationChange("timings", e.target.value)}
-                    placeholder="e.g. 6pm – 11pm (Today)"
-                    className="form-input"
-                  />
-                </div>
-                <div className="form_group">
-                  <label className="form_label">Price Range</label>
-                  <input
-                    value={form.pageCustomization?.priceRange || ""}
-                    onChange={(e) => handlePageCustomizationChange("priceRange", e.target.value)}
-                    placeholder="e.g. ₹5,000 for two"
-                    className="form-input"
-                  />
-                </div>
-                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+
+                <div className="form_group page-customization-full">
                   <label className="form_label">Known For / Highlights</label>
+                  <p className="form-hint" style={{ marginBottom: 8 }}>
+                    Select from options below or type your own and press Enter to add.
+                  </p>
+                  <div className="tag-options-wrap">
+                    {(INDUSTRY_CONFIG[form.industry]?.knownForOptions || []).map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        className={`tag-option-chip ${knownForList.includes(opt) ? "tag-option-chip--selected" : ""}`}
+                        onClick={() => handleKnownForToggle(opt)}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="tag-selected-wrap">
+                    {knownForList.map((item) => (
+                      <span key={item} className="tag-selected-chip">
+                        {item}
+                        <button
+                          type="button"
+                          className="tag-selected-remove"
+                          onClick={() => handleKnownForToggle(item)}
+                          aria-label={`Remove ${item}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                   <input
-                    value={form.pageCustomization?.knownFor || ""}
-                    onChange={(e) => handlePageCustomizationChange("knownFor", e.target.value)}
-                    placeholder="Comma-separated: Host, Great Buffet, Friendly Service..."
+                    type="text"
                     className="form-input"
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.knownForPlaceholder || "Add your own and press Enter"}
+                    onKeyDown={handleKnownForAddCustom}
+                    style={{ marginTop: 8 }}
                   />
                 </div>
                 <div className="form_group" style={{ gridColumn: "1 / -1" }}>
@@ -666,7 +948,7 @@ const Settings = ({ section: sectionProp }) => {
                     className="form-input"
                   />
                 </div>
-                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                <div className="form_group page-customization-full">
                   <label className="form_label">Amenities / Features</label>
                   <input
                     value={
@@ -677,7 +959,7 @@ const Settings = ({ section: sectionProp }) => {
                     onChange={(e) =>
                       handlePageCustomizationArrayChange("amenities", e.target.value)
                     }
-                    placeholder="Comma-separated: Dinner, Lunch, Pool, WiFi..."
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.amenitiesPlaceholder || "Comma-separated: Dinner, Lunch, Pool, WiFi..."}
                     className="form-input"
                   />
                 </div>
@@ -706,7 +988,7 @@ const Settings = ({ section: sectionProp }) => {
                     onChange={(e) =>
                       handlePageCustomizationChange("ratingPrimary", e.target.value)
                     }
-                    placeholder="e.g. 4.8★"
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.ratingPrimaryPlaceholder || "e.g. 4.8★"}
                     className="form-input"
                   />
                 </div>
@@ -717,7 +999,7 @@ const Settings = ({ section: sectionProp }) => {
                     onChange={(e) =>
                       handlePageCustomizationChange("ratingPrimaryCount", e.target.value)
                     }
-                    placeholder="e.g. 428 Dining Ratings"
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.ratingPrimaryCountPlaceholder || "e.g. 428 Ratings"}
                     className="form-input"
                   />
                 </div>
@@ -728,7 +1010,7 @@ const Settings = ({ section: sectionProp }) => {
                     onChange={(e) =>
                       handlePageCustomizationChange("ratingSecondary", e.target.value)
                     }
-                    placeholder="e.g. 4.6★"
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.ratingSecondaryPlaceholder || "e.g. 4.6★"}
                     className="form-input"
                   />
                 </div>
@@ -739,22 +1021,22 @@ const Settings = ({ section: sectionProp }) => {
                     onChange={(e) =>
                       handlePageCustomizationChange("ratingSecondaryCount", e.target.value)
                     }
-                    placeholder="e.g. 156 Gift Card Reviews"
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.ratingSecondaryCountPlaceholder || "e.g. 156 Reviews"}
                     className="form-input"
                   />
                 </div>
-                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                <div className="form_group page-customization-full">
                   <label className="form_label">Disclaimer</label>
                   <input
                     value={form.pageCustomization?.disclaimer || ""}
                     onChange={(e) =>
                       handlePageCustomizationChange("disclaimer", e.target.value)
                     }
-                    placeholder="e.g. * Buffet prices may vary on festive dates"
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.disclaimerPlaceholder || "e.g. * Terms may apply"}
                     className="form-input"
                   />
                 </div>
-                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                <div className="form_group page-customization-full">
                   <label className="form_label">Photo Filter Labels (comma-separated)</label>
                   <input
                     value={
@@ -765,7 +1047,7 @@ const Settings = ({ section: sectionProp }) => {
                     onChange={(e) =>
                       handlePageCustomizationArrayChange("photoFilterLabels", e.target.value)
                     }
-                    placeholder="e.g. All (24), Food (18), Ambience (6)"
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.photoFilterLabelsPlaceholder || "e.g. All (24), Food (18), Ambience (6)"}
                     className="form-input"
                   />
                 </div>
