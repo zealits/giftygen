@@ -639,6 +639,31 @@ exports.uploadBusinessPhotos = catchAsyncErrors(async (req, res, next) => {
   return res.status(200).json({ success: true, galleryImages: admin.galleryImages });
 });
 
+// Upload a single image for room types (returns URL only; stored in pageCustomization.roomTypes[].images)
+exports.uploadRoomPhoto = catchAsyncErrors(async (req, res, next) => {
+  const admin = await RestaurantAdmin.findById(req.user.id);
+  if (!admin) {
+    return next(new ErrorHander("Admin not found", 404));
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "No file uploaded" });
+  }
+
+  const uniqueFilename = `${Date.now()}-${req.file.originalname}`;
+  const result = await cloudinary.uploader.upload(req.file.path, {
+    public_id: `room_photos/${uniqueFilename}`,
+    resource_type: "image",
+    folder: "room_photos",
+  });
+
+  try {
+    fs.unlinkSync(req.file.path);
+  } catch (e) {}
+
+  return res.status(200).json({ success: true, url: result.secure_url });
+});
+
 // Generate a QR poster PNG (base64) for the business giftcards link with branding
 exports.generateQrPoster = catchAsyncErrors(async (req, res, next) => {
   const admin = await RestaurantAdmin.findById(req.user.id);

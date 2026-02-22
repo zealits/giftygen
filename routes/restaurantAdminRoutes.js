@@ -11,6 +11,7 @@ const {
   updateBusinessSettings,
   uploadBusinessLogo,
   uploadBusinessPhotos,
+  uploadRoomPhoto,
   generateQrPoster,
   captureRegistrationInterest,
   changePassword,
@@ -72,6 +73,15 @@ router.post(
   authorizeRoles("Admin"),
   upload.array("photos", 10),
   uploadBusinessPhotos,
+);
+
+// Upload single image for room type (returns { url })
+router.post(
+  "/settings/room-photo",
+  isAuthenticatedUser,
+  authorizeRoles("Admin"),
+  upload.single("photo"),
+  uploadRoomPhoto,
 );
 
 // Generate QR poster

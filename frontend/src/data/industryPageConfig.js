@@ -52,7 +52,8 @@ export const INDUSTRY_PAGE_CONFIG = {
   "Hotels & Resorts": {
     customTabLabel: "Rooms",
     customTabPlaceholder: "e.g. SEA VIEW DELUXE — King bed, balcony...\nSUITE — Living area, pool access...",
-    tagsLabel: "Room types (comma-separated)",
+    hasStructuredRooms: true,
+    tagsLabel: "Room type tags (optional, comma-separated)",
     tagsPlaceholder: "Sea View, Pool View, Suite, Family Room",
     subtitleOptions: [
       "Premium Rooms & Suites",

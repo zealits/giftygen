@@ -63,6 +63,7 @@ const Settings = ({ section: sectionProp }) => {
   const [downloading, setDownloading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [uploadingRoomPhotoFor, setUploadingRoomPhotoFor] = useState(null); // room index
   const [showMapPicker, setShowMapPicker] = useState(false);
   // SQUARE API COMMENTED OUT
   // const [showSquareInstructions, setShowSquareInstructions] = useState(false);
@@ -165,6 +166,51 @@ const Settings = ({ section: sectionProp }) => {
     if (arr.includes(value)) return;
     handlePageCustomizationChange("knownFor", [...arr, value]);
     e.target.value = "";
+  };
+
+  const roomTypes = Array.isArray(form.pageCustomization?.roomTypes) ? form.pageCustomization.roomTypes : [];
+  const setRoomTypes = (next) => handlePageCustomizationChange("roomTypes", next);
+
+  const addRoomType = () => {
+    setRoomTypes([
+      ...roomTypes,
+      { name: "", description: "", size: "", bestFor: "", images: [] },
+    ]);
+  };
+  const removeRoomType = (index) => {
+    setRoomTypes(roomTypes.filter((_, i) => i !== index));
+  };
+  const updateRoomType = (index, field, value) => {
+    const next = roomTypes.map((r, i) =>
+      i === index ? { ...r, [field]: value } : r
+    );
+    setRoomTypes(next);
+  };
+  const addRoomImage = async (roomIndex, file) => {
+    if (!file) return;
+    setUploadingRoomPhotoFor(roomIndex);
+    setSettingsMessage("");
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+      const res = await axios.post("/api/v1/admin/settings/room-photo", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const url = res.data?.url;
+      if (url) {
+        const current = roomTypes[roomIndex]?.images || [];
+        updateRoomType(roomIndex, "images", [...current, url]);
+      }
+    } catch (e) {
+      setSettingsMessage(e?.response?.data?.message || "Photo upload failed");
+      setTimeout(() => setSettingsMessage(""), 3000);
+    } finally {
+      setUploadingRoomPhotoFor(null);
+    }
+  };
+  const removeRoomImage = (roomIndex, url) => {
+    const current = roomTypes[roomIndex]?.images || [];
+    updateRoomType(roomIndex, "images", current.filter((u) => u !== url));
   };
 
   const handleBusinessHoursChange = (day, field, value) => {
@@ -894,6 +940,21 @@ const Settings = ({ section: sectionProp }) => {
                     style={{ marginTop: 8 }}
                   />
                 </div>
+                <div className="form_group page-customization-full">
+                  <label className="form_label">Amenities / Features</label>
+                  <input
+                    value={
+                      Array.isArray(form.pageCustomization?.amenities)
+                        ? form.pageCustomization.amenities.join(", ")
+                        : (form.pageCustomization?.amenities || "")
+                    }
+                    onChange={(e) =>
+                      handlePageCustomizationArrayChange("amenities", e.target.value)
+                    }
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.amenitiesPlaceholder || "Comma-separated: Dinner, Lunch, Pool, WiFi..."}
+                    className="form-input"
+                  />
+                </div>
                 <div className="form_group" style={{ gridColumn: "1 / -1" }}>
                   <label className="form_label">
                     {INDUSTRY_CONFIG[form.industry]?.tagsLabel || "Tags"}
@@ -911,39 +972,138 @@ const Settings = ({ section: sectionProp }) => {
                     className="form-input"
                   />
                 </div>
-                <div className="form_group page-customization-full">
-                  <label className="form_label">Amenities / Features</label>
-                  <input
-                    value={
-                      Array.isArray(form.pageCustomization?.amenities)
-                        ? form.pageCustomization.amenities.join(", ")
-                        : (form.pageCustomization?.amenities || "")
-                    }
-                    onChange={(e) =>
-                      handlePageCustomizationArrayChange("amenities", e.target.value)
-                    }
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.amenitiesPlaceholder || "Comma-separated: Dinner, Lunch, Pool, WiFi..."}
-                    className="form-input"
-                  />
-                </div>
-                <div className="form_group">
-                  <label className="form_label">
-                    {INDUSTRY_CONFIG[form.industry]?.customTabLabel || "Custom Tab"} Content
-                  </label>
-                  <textarea
-                    value={form.pageCustomization?.customTabContent || ""}
-                    onChange={(e) =>
-                      handlePageCustomizationChange("customTabContent", e.target.value)
-                    }
-                    placeholder={
-                      INDUSTRY_CONFIG[form.industry]?.customTabPlaceholder ||
-                      "Add content for your custom tab..."
-                    }
-                    className="form-input"
-                    rows="4"
-                    style={{ resize: "vertical", minHeight: "80px" }}
-                  />
-                </div>
+                {INDUSTRY_CONFIG[form.industry]?.hasStructuredRooms ? (
+                  <div className="form_group page-customization-full settings-room-types-section">
+                    <label className="form_label">Room types</label>
+                    <p className="form-hint" style={{ marginBottom: 12 }}>
+                      Add each room type with description, size, best for, and photos. Shown on your public Rooms tab.
+                    </p>
+                    <div className="settings-room-types-list">
+                      {roomTypes.map((room, index) => (
+                        <div key={index} className="settings-room-type-card">
+                          <div className="settings-room-type-card-header">
+                            <span className="settings-room-type-card-title">
+                              {room.name || `Room ${index + 1}`}
+                            </span>
+                            <button
+                              type="button"
+                              className="settings-room-type-remove"
+                              onClick={() => removeRoomType(index)}
+                              aria-label={`Remove room ${index + 1}`}
+                            >
+                              ×
+                            </button>
+                          </div>
+                          <div className="settings-room-type-fields">
+                            <div className="form_group">
+                              <label className="form_label form_label_sm">Name</label>
+                              <input
+                                type="text"
+                                className="form-input"
+                                value={room.name || ""}
+                                onChange={(e) => updateRoomType(index, "name", e.target.value)}
+                                placeholder="e.g. Standard Room, Deluxe Room"
+                              />
+                            </div>
+                            <div className="form_group">
+                              <label className="form_label form_label_sm">Description</label>
+                              <textarea
+                                className="form-input"
+                                value={room.description || ""}
+                                onChange={(e) => updateRoomType(index, "description", e.target.value)}
+                                placeholder="e.g. Basic and most common room type. 1 Queen / 2 Twin beds. Attached bathroom."
+                                rows={3}
+                                style={{ resize: "vertical", minHeight: "72px" }}
+                              />
+                            </div>
+                            <div className="form_group">
+                              <label className="form_label form_label_sm">Size</label>
+                              <input
+                                type="text"
+                                className="form-input"
+                                value={room.size || ""}
+                                onChange={(e) => updateRoomType(index, "size", e.target.value)}
+                                placeholder="e.g. 200–300 sq ft"
+                              />
+                            </div>
+                            <div className="form_group">
+                              <label className="form_label form_label_sm">Best for</label>
+                              <input
+                                type="text"
+                                className="form-input"
+                                value={typeof room.bestFor === "string" ? room.bestFor : (Array.isArray(room.bestFor) ? room.bestFor.join(", ") : "")}
+                                onChange={(e) => updateRoomType(index, "bestFor", e.target.value)}
+                                placeholder="e.g. Solo travelers, Budget couples"
+                              />
+                            </div>
+                            <div className="form_group settings-room-type-images-wrap">
+                              <label className="form_label form_label_sm">Photos</label>
+                              <div className="settings-room-type-images">
+                                {(room.images || []).map((url) => (
+                                  <div key={url} className="settings-room-type-image-item">
+                                    <img src={url} alt="" />
+                                    <button
+                                      type="button"
+                                      className="settings-room-type-image-remove"
+                                      onClick={() => removeRoomImage(index, url)}
+                                      aria-label="Remove photo"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                                <label className="settings-room-type-image-add">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="settings-room-type-image-input"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) addRoomImage(index, file);
+                                      e.target.value = "";
+                                    }}
+                                    disabled={uploadingRoomPhotoFor !== null}
+                                  />
+                                  {uploadingRoomPhotoFor === index ? (
+                                    <span className="settings-room-type-image-add-text">Uploading…</span>
+                                  ) : (
+                                    <span className="settings-room-type-image-add-text">+ Add photo</span>
+                                  )}
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-outline settings-room-type-add-btn"
+                      onClick={addRoomType}
+                    >
+                      + Add room type
+                    </button>
+                  </div>
+                ) : (
+                  <div className="form_group">
+                    <label className="form_label">
+                      {INDUSTRY_CONFIG[form.industry]?.customTabLabel || "Custom Tab"} Content
+                    </label>
+                    <textarea
+                      value={form.pageCustomization?.customTabContent || ""}
+                      onChange={(e) =>
+                        handlePageCustomizationChange("customTabContent", e.target.value)
+                      }
+                      placeholder={
+                        INDUSTRY_CONFIG[form.industry]?.customTabPlaceholder ||
+                        "Add content for your custom tab..."
+                      }
+                      className="form-input"
+                      rows="4"
+                      style={{ resize: "vertical", minHeight: "80px" }}
+                    />
+                  </div>
+                )}
                 <div className="form_group page-customization-full">
                   <label className="form_label">Photo Filter Labels (comma-separated)</label>
                   <input

@@ -605,27 +605,91 @@ const BusinessPage = () => {
             )}
 
             {customTab && activeTab === customTab.id && (
-              <section className="venue-card">
+              <section className="venue-card venue-rooms-section">
                 <h3 className="venue-card-title">{customTab.label}</h3>
-                {Array.isArray(pc.tags) && pc.tags.length > 0 && (
-                  <div className="venue-cuisine-tags">
-                    {pc.tags.map((tag) => (
-                      <span key={tag} className="venue-cuisine-tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {pc.customTabContent ? (
-                  <div className="venue-menu-preview">
-                    <div className="venue-menu-list">
-                      {pc.customTabContent.split("\n").map((line, i) => (
-                        <p key={i}>{line}</p>
-                      ))}
+                {Array.isArray(pc.roomTypes) && pc.roomTypes.length > 0 ? (
+                  <>
+                    {Array.isArray(pc.tags) && pc.tags.length > 0 && (
+                      <div className="venue-cuisine-tags venue-rooms-tags">
+                        {pc.tags.map((tag) => (
+                          <span key={tag} className="venue-cuisine-tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="venue-room-cards">
+                      {pc.roomTypes.map((room, index) => {
+                        const bestForList = typeof room.bestFor === "string"
+                          ? room.bestFor.split(",").map((s) => s.trim()).filter(Boolean)
+                          : Array.isArray(room.bestFor) ? room.bestFor : [];
+                        const images = Array.isArray(room.images) ? room.images : [];
+                        return (
+                          <article key={index} className="venue-room-card">
+                            <div className={`venue-room-card-inner${images.length === 0 ? " venue-room-card-inner--no-images" : ""}`}>
+                              {images.length > 0 && (
+                                <div className="venue-room-card-images">
+                                  {images.slice(0, 3).map((src, i) => (
+                                    <div key={i} className="venue-room-card-image">
+                                      <img src={src} alt={room.name || `Room ${index + 1}`} loading="lazy" />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="venue-room-card-body">
+                                <h4 className="venue-room-card-name">{room.name || `Room ${index + 1}`}</h4>
+                                {room.description && (
+                                  <div className="venue-room-card-block">
+                                    <span className="venue-room-card-label">Description</span>
+                                    <p className="venue-room-card-text">{room.description}</p>
+                                  </div>
+                                )}
+                                {room.size && (
+                                  <div className="venue-room-card-block">
+                                    <span className="venue-room-card-label">Size</span>
+                                    <p className="venue-room-card-text">{room.size}</p>
+                                  </div>
+                                )}
+                                {bestForList.length > 0 && (
+                                  <div className="venue-room-card-block">
+                                    <span className="venue-room-card-label">Best for</span>
+                                    <ul className="venue-room-card-best-for">
+                                      {bestForList.map((item, i) => (
+                                        <li key={i}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
                     </div>
-                  </div>
+                  </>
                 ) : (
-                  <p className="venue-card-muted">Content coming soon.</p>
+                  <>
+                    {Array.isArray(pc.tags) && pc.tags.length > 0 && (
+                      <div className="venue-cuisine-tags">
+                        {pc.tags.map((tag) => (
+                          <span key={tag} className="venue-cuisine-tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {pc.customTabContent ? (
+                      <div className="venue-menu-preview">
+                        <div className="venue-menu-list">
+                          {pc.customTabContent.split("\n").map((line, i) => (
+                            <p key={i}>{line}</p>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="venue-card-muted">Content coming soon.</p>
+                    )}
+                  </>
                 )}
               </section>
             )}
