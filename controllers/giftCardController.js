@@ -10,18 +10,17 @@ const { google } = require("googleapis");
 const auth = require("../config/googleConfig");
 const { sendGiftCardTemplateMessage } = require("../services/whatsappService");
 
-// Wallet icon data URLs for email (read at runtime; Node cannot require() PNG files)
-function getWalletIconDataUrls() {
+// Wallet icon buffers for email (inline attachments via cid; many clients block data: URLs)
+function getWalletIconBuffers() {
   const assetsDir = path.join(__dirname, "../assets");
   try {
-    const google = fs.readFileSync(path.join(assetsDir, "google-wallet.png")).toString("base64");
-    const apple = fs.readFileSync(path.join(assetsDir, "apple-wallet.png")).toString("base64");
     return {
-      googleWallet: `data:image/png;base64,${google}`,
-      appleWallet: `data:image/png;base64,${apple}`,
+      google: fs.readFileSync(path.join(assetsDir, "google-wallet.png")),
+      apple: fs.readFileSync(path.join(assetsDir, "apple-wallet.png")),
     };
   } catch (e) {
-    return { googleWallet: "", appleWallet: "" };
+    console.warn("[Gift card email] Wallet icons not found:", e.message);
+    return { google: null, apple: null };
   }
 }
 
@@ -724,7 +723,9 @@ const addBuyer = async (req, res) => {
     const currencySymbol = currency === "INR" ? "₹" : currency === "USD" ? "$" : currency;
     const formattedAmount = `${currencySymbol} ${amount}`;
 
-    const { googleWallet: googleWalletIconSrc, appleWallet: appleWalletIconSrc } = getWalletIconDataUrls();
+    const walletIcons = getWalletIconBuffers();
+    const googleWalletCid = "google-wallet-" + Date.now() + "@giftcard.com";
+    const appleWalletCid = "apple-wallet-" + Date.now() + "@giftcard.com";
 
     // Email template function
     const createEmailTemplate = (isRecipient = false) => `
@@ -1022,7 +1023,7 @@ const addBuyer = async (req, res) => {
                   walletUrl
                     ? `
                 <a href="${walletUrl}" target="_blank" rel="noopener noreferrer" class="wallet-button">
-                    <img src="${googleWalletIconSrc}"
+                    <img src="cid:${googleWalletCid}"
                          alt="Google Wallet" 
                          class="wallet-icon" />
                     <span class="wallet-text">Add to Google Wallet</span>
@@ -1035,7 +1036,7 @@ const addBuyer = async (req, res) => {
                   appleWalletUrl
                     ? `
                 <a href="https://giftygen.com${appleWalletUrl}" target="_blank" rel="noopener noreferrer" class="wallet-button apple-wallet">
-                    <img src="${appleWalletIconSrc}"
+                    <img src="cid:${appleWalletCid}"
                          alt="Apple Wallet" 
                          class="wallet-icon" />
                     <span class="wallet-text">Add to Apple Wallet</span>
@@ -1072,19 +1073,16 @@ const addBuyer = async (req, res) => {
 `;
 
     // Use a dedicated buffer copy per email so the second send does not get a consumed/corrupted buffer
-    const senderAttachments = [
-      {
-        filename: "qr-code.png",
-        content: qrCodeBuffer,
-        cid: qrCodeCid,
-      },
+    const baseSenderAttachments = [
+      { filename: "qr-code.png", content: qrCodeBuffer, cid: qrCodeCid },
+      ...(walletIcons.google ? [{ filename: "google-wallet.png", content: walletIcons.google, cid: googleWalletCid }] : []),
+      ...(walletIcons.apple ? [{ filename: "apple-wallet.png", content: walletIcons.apple, cid: appleWalletCid }] : []),
     ];
+    const senderAttachments = baseSenderAttachments;
     const recipientAttachments = [
-      {
-        filename: "qr-code.png",
-        content: Buffer.from(qrCodeBuffer),
-        cid: qrCodeCid,
-      },
+      { filename: "qr-code.png", content: Buffer.from(qrCodeBuffer), cid: qrCodeCid },
+      ...(walletIcons.google ? [{ filename: "google-wallet.png", content: Buffer.from(walletIcons.google), cid: googleWalletCid }] : []),
+      ...(walletIcons.apple ? [{ filename: "apple-wallet.png", content: Buffer.from(walletIcons.apple), cid: appleWalletCid }] : []),
     ];
 
     // Send email to sender (purchaser / gift giver)
