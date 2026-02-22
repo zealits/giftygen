@@ -10,6 +10,21 @@ const { google } = require("googleapis");
 const auth = require("../config/googleConfig");
 const { sendGiftCardTemplateMessage } = require("../services/whatsappService");
 
+// Wallet icon data URLs for email (read at runtime; Node cannot require() PNG files)
+function getWalletIconDataUrls() {
+  const assetsDir = path.join(__dirname, "../assets");
+  try {
+    const google = fs.readFileSync(path.join(assetsDir, "google-wallet.png")).toString("base64");
+    const apple = fs.readFileSync(path.join(assetsDir, "apple-wallet.png")).toString("base64");
+    return {
+      googleWallet: `data:image/png;base64,${google}`,
+      appleWallet: `data:image/png;base64,${apple}`,
+    };
+  } catch (e) {
+    return { googleWallet: "", appleWallet: "" };
+  }
+}
+
 const formatPhoneNumberForWhatsApp = (input = "") => {
   if (!input) return null;
   const digitsOnly = String(input).replace(/\D/g, "");
@@ -55,7 +70,16 @@ const createGiftCard = async (req, res) => {
   const sendBadRequest = (message) => res.status(400).json({ message, error: message });
 
   try {
-    const { giftCardName, giftCardTag, description, amount, discount, expirationDate, quantity, status: bodyStatus } = req.body;
+    const {
+      giftCardName,
+      giftCardTag,
+      description,
+      amount,
+      discount,
+      expirationDate,
+      quantity,
+      status: bodyStatus,
+    } = req.body;
     const isDraft = bodyStatus === "draft";
 
     const nameTrimmed = typeof giftCardName === "string" ? giftCardName.trim() : "";
@@ -85,7 +109,7 @@ const createGiftCard = async (req, res) => {
       } catch (uploadErr) {
         console.error("Cloudinary upload error:", uploadErr);
         return sendBadRequest(
-          uploadErr.message || "Image upload failed. Check Cloudinary config or try a different image."
+          uploadErr.message || "Image upload failed. Check Cloudinary config or try a different image.",
         );
       } finally {
         if (req.file && req.file.path && fs.existsSync(req.file.path)) {
@@ -195,14 +219,10 @@ const getAllGiftCards = async (req, res) => {
       const expDate = new Date(card.expirationDate);
       if (expDate < now && card.status !== "expired") {
         // Mark as expired when date has passed
-        updatePromises.push(
-          GiftCard.findByIdAndUpdate(card._id, { status: "expired" }, { new: true })
-        );
+        updatePromises.push(GiftCard.findByIdAndUpdate(card._id, { status: "expired" }, { new: true }));
       } else if (expDate >= now && card.status === "expired") {
         // Clear expired status when date is extended to the future
-        updatePromises.push(
-          GiftCard.findByIdAndUpdate(card._id, { status: "active" }, { new: true })
-        );
+        updatePromises.push(GiftCard.findByIdAndUpdate(card._id, { status: "active" }, { new: true }));
       }
     }
 
@@ -352,11 +372,11 @@ const getSalesTrends = async (req, res) => {
 const getSalesData = async (req, res) => {
   try {
     const { businessSlug, startDate: startDateParam, endDate: endDateParam } = req.query || {};
-    
+
     // Get the current date and calculate start date based on parameters or default to 30 days
     let endDate = new Date();
     let startDate = new Date();
-    
+
     if (startDateParam && endDateParam) {
       startDate = new Date(startDateParam);
       endDate = new Date(endDateParam);
@@ -379,7 +399,7 @@ const getSalesData = async (req, res) => {
       { $unwind: "$buyers" },
       { $match: { "buyers.purchaseDate": { $gte: startDate, $lte: endDate } } },
       { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$buyers.purchaseDate" } }, sales: { $sum: 1 } } },
-      { $sort: { _id: 1 } }
+      { $sort: { _id: 1 } },
     );
 
     const salesData = await GiftCard.aggregate(pipeline);
@@ -537,9 +557,7 @@ const updateGiftCard = async (req, res) => {
         : null;
     const expirationDateRaw = req.body.expirationDate;
     const expirationDate =
-      expirationDateRaw &&
-      String(expirationDateRaw).trim() &&
-      !Number.isNaN(new Date(expirationDateRaw).getTime())
+      expirationDateRaw && String(expirationDateRaw).trim() && !Number.isNaN(new Date(expirationDateRaw).getTime())
         ? new Date(expirationDateRaw)
         : undefined;
 
@@ -549,7 +567,12 @@ const updateGiftCard = async (req, res) => {
         ? req.body.status
         : undefined;
     // If admin extends expiration to a future date and card was expired, clear expired status
-    if (statusUpdate === undefined && existingGiftCard.status === "expired" && expirationDate && new Date(expirationDate) > new Date()) {
+    if (
+      statusUpdate === undefined &&
+      existingGiftCard.status === "expired" &&
+      expirationDate &&
+      new Date(expirationDate) > new Date()
+    ) {
       statusUpdate = "active";
     }
     const updates = {
@@ -574,7 +597,9 @@ const updateGiftCard = async (req, res) => {
   } catch (error) {
     console.error("Error updating gift card:", error);
     const message =
-      error.name === "ValidationError" && error.message ? error.message : error.message || "Failed to update gift card.";
+      error.name === "ValidationError" && error.message
+        ? error.message
+        : error.message || "Failed to update gift card.";
     res.status(400).json({ message, error: message });
   }
 };
@@ -650,7 +675,8 @@ const addBuyer = async (req, res) => {
     }
 
     // Apple Wallet URL for email template
-    const appleWalletUrl = req.body.appleWalletUrl || (uniqueCode ? `/api/wallet/download-apple-pass/${uniqueCode}` : null);
+    const appleWalletUrl =
+      req.body.appleWalletUrl || (uniqueCode ? `/api/wallet/download-apple-pass/${uniqueCode}` : null);
 
     // Generate QR code as Buffer
     const qrCodeBuffer = await QRCode.toBuffer(uniqueCode, {
@@ -697,6 +723,8 @@ const addBuyer = async (req, res) => {
     const currency = paymentDetails?.currency || "INR";
     const currencySymbol = currency === "INR" ? "₹" : currency === "USD" ? "$" : currency;
     const formattedAmount = `${currencySymbol} ${amount}`;
+
+    const { googleWallet: googleWalletIconSrc, appleWallet: appleWalletIconSrc } = getWalletIconDataUrls();
 
     // Email template function
     const createEmailTemplate = (isRecipient = false) => `
@@ -986,27 +1014,39 @@ const addBuyer = async (req, res) => {
           
             
             <!-- Wallet Section -->
-            ${walletUrl || appleWalletUrl ? `
+            ${
+              walletUrl || appleWalletUrl
+                ? `
             <div class="qr-section">
-                ${walletUrl ? `
+                ${
+                  walletUrl
+                    ? `
                 <a href="${walletUrl}" target="_blank" rel="noopener noreferrer" class="wallet-button">
-                    <img src="https://res.cloudinary.com/dzmn9lnk5/image/upload/v1740297009/gift_cards/google-wallet_wfh992.png" 
+                    <img src="${googleWalletIconSrc}"
                          alt="Google Wallet" 
                          class="wallet-icon" />
                     <span class="wallet-text">Add to Google Wallet</span>
                 </a>
-                ` : ''}
+                `
+                    : ""
+                }
                 
-                ${appleWalletUrl ? `
+                ${
+                  appleWalletUrl
+                    ? `
                 <a href="https://giftygen.com${appleWalletUrl}" target="_blank" rel="noopener noreferrer" class="wallet-button apple-wallet">
-                    <img src="https://res.cloudinary.com/dzmn9lnk5/image/upload/v1755349111/gift_cards/64px-Apple_Wallet_Icon.svg_tk8gzq.png" 
+                    <img src="${appleWalletIconSrc}"
                          alt="Apple Wallet" 
                          class="wallet-icon" />
                     <span class="wallet-text">Add to Apple Wallet</span>
                 </a>
-                ` : ''}
+                `
+                    : ""
+                }
             </div>
-            ` : ''}
+            `
+                : ""
+            }
         </div>
 
         <!-- Instructions -->
@@ -1031,10 +1071,18 @@ const addBuyer = async (req, res) => {
 </html>
 `;
 
-    const emailAttachments = [
+    // Use a dedicated buffer copy per email so the second send does not get a consumed/corrupted buffer
+    const senderAttachments = [
       {
         filename: "qr-code.png",
         content: qrCodeBuffer,
+        cid: qrCodeCid,
+      },
+    ];
+    const recipientAttachments = [
+      {
+        filename: "qr-code.png",
+        content: Buffer.from(qrCodeBuffer),
         cid: qrCodeCid,
       },
     ];
@@ -1053,7 +1101,7 @@ const addBuyer = async (req, res) => {
           email: senderEmail,
           subject: senderSubject,
           html: senderHtml,
-          attachments: emailAttachments,
+          attachments: senderAttachments,
         });
         console.log("[Gift card purchase] Confirmation email sent to sender successfully.");
       } catch (senderEmailError) {
@@ -1069,7 +1117,12 @@ const addBuyer = async (req, res) => {
       console.warn("[Gift card purchase] No sender email to send confirmation to.");
     }
 
-    // Send email to recipient if gift purchase
+    // Send email to recipient if gift purchase (recipientEmail is set when purchaseType === "gift" and giftInfo.recipientEmail is provided)
+    if (purchaseType === "gift" && !recipientEmail) {
+      console.warn(
+        "[Gift card purchase] Gift purchase but no recipient email – ensure frontend sends giftInfo.recipientEmail.",
+      );
+    }
     if (recipientEmail) {
       const recipientSubject = `You've received a gift card: ${giftCardName}`;
       const recipientHtml = createEmailTemplate(true);
@@ -1077,7 +1130,7 @@ const addBuyer = async (req, res) => {
         email: recipientEmail,
         subject: recipientSubject,
         html: recipientHtml,
-        attachments: emailAttachments,
+        attachments: recipientAttachments,
       };
       console.log("[Gift card purchase] === RECIPIENT EMAIL START ===");
       console.log("[Gift card purchase] Recipient email address:", recipientEmail);
@@ -1086,7 +1139,16 @@ const addBuyer = async (req, res) => {
       console.log("[Gift card purchase] Attachments count:", recipientPayload.attachments?.length ?? 0);
       if (recipientPayload.attachments?.length) {
         recipientPayload.attachments.forEach((a, i) => {
-          console.log("[Gift card purchase] Attachment", i + 1, ":", a.filename, "content type:", typeof a.content, "cid:", a.cid);
+          console.log(
+            "[Gift card purchase] Attachment",
+            i + 1,
+            ":",
+            a.filename,
+            "content type:",
+            typeof a.content,
+            "cid:",
+            a.cid,
+          );
         });
       }
       console.log("[Gift card purchase] Calling sendEmail for recipient now...");
@@ -1392,7 +1454,7 @@ const getAllBuyers = async (req, res) => {
           remainingAmount: entry.remainingAmount,
           originalAmount: entry.originalAmount,
         })),
-      }))
+      })),
     );
 
     // Sort buyers by purchaseDate in descending order (newest first)
@@ -1422,7 +1484,7 @@ const totalRedemptionValue = async (req, res) => {
     pipeline.push(
       { $unwind: "$buyers" },
       { $unwind: "$buyers.redemptionHistory" },
-      { $group: { _id: null, totalRedemption: { $sum: "$buyers.redemptionHistory.redeemedAmount" } } }
+      { $group: { _id: null, totalRedemption: { $sum: "$buyers.redemptionHistory.redeemedAmount" } } },
     );
 
     const totalRedemption = await GiftCard.aggregate(pipeline);
@@ -1441,11 +1503,11 @@ const totalRedemptionValue = async (req, res) => {
 const getRevenueForLast30Days = async (req, res) => {
   try {
     const { businessSlug, startDate: startDateParam, endDate: endDateParam } = req.query || {};
-    
+
     // Calculate the start and end date based on parameters or default to last 30 days
     let endDate = new Date();
     let startDate = new Date();
-    
+
     if (startDateParam && endDateParam) {
       startDate = new Date(startDateParam);
       endDate = new Date(endDateParam);
