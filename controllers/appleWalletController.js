@@ -198,18 +198,46 @@ async function downloadApplePass(req, res) {
     console.log("Pass ID received:", passId);
     console.log("Request headers:", req.headers);
 
-    // Get the pass data from the store
+    // Get the pass data from the store, or from the database if not in store (e.g. after server restart or after 24h expiry)
     const applePassStore = require("./walletController").applePassStore;
     console.log("Total passes in store:", applePassStore.size);
     console.log("Available pass IDs:", Array.from(applePassStore.keys()));
 
-    const passData = applePassStore.get(passId);
-    console.log("Pass data found:", !!passData);
+    let passData = applePassStore.get(passId);
 
     if (!passData) {
-      console.error("❌ Pass not found in store");
+      console.log("Pass not in store, looking up in database by uniqueCode...");
+      const giftCard = await GiftCard.findOne({ "buyers.qrCode.uniqueCode": passId });
+      if (giftCard) {
+        const buyer = giftCard.buyers.find((b) => b.qrCode && b.qrCode.uniqueCode === passId);
+        if (buyer) {
+          const userName =
+            buyer.selfInfo?.name || buyer.giftInfo?.recipientName || "Gift Card Holder";
+          const currency = buyer.paymentDetails?.currency || "INR";
+          passData = {
+            uniqueCode: passId,
+            walletGiftCardName: giftCard.giftCardName || "Gift Card",
+            userName,
+            amount: giftCard.amount,
+            currency,
+            expiryDate: giftCard.expirationDate,
+            giftCardDetails: giftCard,
+            giftCardImg: giftCard.giftCardImg,
+          };
+          console.log("✅ Pass data restored from database:", {
+            uniqueCode: passData.uniqueCode,
+            userName: passData.userName,
+            amount: passData.amount,
+            currency: passData.currency,
+          });
+        }
+      }
+    }
+
+    if (!passData) {
+      console.error("❌ Pass not found in store or database");
       console.error("Looking for passId:", passId);
-      console.error("Available keys:", Array.from(applePassStore.keys()));
+      console.error("Available keys in store:", Array.from(applePassStore.keys()));
       return res.status(404).json({
         error: "Pass not found or expired",
         requestedPassId: passId,
