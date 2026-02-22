@@ -74,7 +74,16 @@ const Settings = ({ section: sectionProp }) => {
     return `${window.location.origin}/${slug}/giftcards`;
   }, [form.businessSlug]);
 
+  const toArray = (v) =>
+    Array.isArray(v) ? v : typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : [];
+
   useEffect(() => {
+    const pc = initial.pageCustomization || {};
+    const sub = toArray(pc.subtitle);
+    const known = toArray(pc.knownFor);
+    const mergedKnownFor = [...new Set([...sub, ...known])];
+    const pageCustomization = { ...pc, knownFor: mergedKnownFor, subtitle: [] };
+
     setForm({
       restaurantName: initial.restaurantName || "",
       businessSlug: initial.businessSlug || "",
@@ -88,7 +97,7 @@ const Settings = ({ section: sectionProp }) => {
         latitude: initial.restaurantAddress?.latitude || null,
         longitude: initial.restaurantAddress?.longitude || null,
       },
-      pageCustomization: initial.pageCustomization || {},
+      pageCustomization,
       razorpayKeyId: initial.razorpayKeyId || "",
       razorpayKeySecret: initial.razorpayKeySecret || "",
     });
@@ -142,22 +151,6 @@ const Settings = ({ section: sectionProp }) => {
     handlePageCustomizationChange(field, arr);
   };
 
-  const handleSubtitleToggle = (item) => {
-    const arr = toArray(form.pageCustomization?.subtitle);
-    const next = arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
-    handlePageCustomizationChange("subtitle", next);
-  };
-
-  const handleSubtitleAddCustom = (e) => {
-    if (e.key !== "Enter") return;
-    const value = e.target.value?.trim();
-    if (!value) return;
-    const arr = toArray(form.pageCustomization?.subtitle);
-    if (arr.includes(value)) return;
-    handlePageCustomizationChange("subtitle", [...arr, value]);
-    e.target.value = "";
-  };
-
   const handleKnownForToggle = (item) => {
     const arr = toArray(form.pageCustomization?.knownFor);
     const next = arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
@@ -208,17 +201,16 @@ const Settings = ({ section: sectionProp }) => {
 
   const INDUSTRY_CONFIG = INDUSTRY_PAGE_CONFIG;
 
-  const toArray = (v) =>
-    Array.isArray(v) ? v : typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : [];
-
-  const subtitleList = useMemo(
-    () => toArray(form.pageCustomization?.subtitle),
-    [form.pageCustomization?.subtitle]
-  );
   const knownForList = useMemo(
     () => toArray(form.pageCustomization?.knownFor),
     [form.pageCustomization?.knownFor]
   );
+
+  const knownForAllOptions = useMemo(() => {
+    const sub = INDUSTRY_CONFIG[form.industry]?.subtitleOptions || [];
+    const known = INDUSTRY_CONFIG[form.industry]?.knownForOptions || [];
+    return [...new Set([...sub, ...known])];
+  }, [form.industry]);
 
   const businessHours = form.pageCustomization?.businessHours || {};
   const dynamicStatus = useMemo(
@@ -310,7 +302,7 @@ const Settings = ({ section: sectionProp }) => {
       const { priceRange: _removed, ...pcRest } = pc;
       const pageCustomization = {
         ...pcRest,
-        subtitle: Array.isArray(pc.subtitle) ? pc.subtitle : toArray(pc.subtitle),
+        subtitle: [], // merged into knownFor; single "Known For / Highlights" section
         knownFor: Array.isArray(pc.knownFor) ? pc.knownFor : toArray(pc.knownFor),
         ...(bh && Object.keys(bh).length > 0
           ? { statusBadge: computedStatus || pc.statusBadge, timings: computedTimings || pc.timings }
@@ -671,47 +663,6 @@ const Settings = ({ section: sectionProp }) => {
               </p>
               <div className="form-grid">
                 <div className="form_group page-customization-full">
-                  <label className="form_label">Subtitle / Category</label>
-                  <p className="form-hint" style={{ marginBottom: 8 }}>
-                    Select from options below or type your own and press Enter to add.
-                  </p>
-                  <div className="tag-options-wrap">
-                    {(INDUSTRY_CONFIG[form.industry]?.subtitleOptions || []).map((opt) => (
-                      <button
-                        key={opt}
-                        type="button"
-                        className={`tag-option-chip ${subtitleList.includes(opt) ? "tag-option-chip--selected" : ""}`}
-                        onClick={() => handleSubtitleToggle(opt)}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="tag-selected-wrap">
-                    {subtitleList.map((item) => (
-                      <span key={item} className="tag-selected-chip">
-                        {item}
-                        <button
-                          type="button"
-                          className="tag-selected-remove"
-                          onClick={() => handleSubtitleToggle(item)}
-                          aria-label={`Remove ${item}`}
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.subtitlePlaceholder || "Add your own and press Enter"}
-                    onKeyDown={handleSubtitleAddCustom}
-                    style={{ marginTop: 8 }}
-                  />
-                </div>
-
-                <div className="form_group page-customization-full">
                   <label className="form_label">Business Hours (dynamic Open/Closed status)</label>
                   <p className="form-hint" style={{ marginBottom: 10 }}>
                     Set hours for weekdays, then override Saturday/Sunday if different. Status updates automatically.
@@ -892,12 +843,24 @@ const Settings = ({ section: sectionProp }) => {
                 </div>
 
                 <div className="form_group page-customization-full">
+                  <label className="form_label">Disclaimer</label>
+                  <input
+                    value={form.pageCustomization?.disclaimer || ""}
+                    onChange={(e) =>
+                      handlePageCustomizationChange("disclaimer", e.target.value)
+                    }
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.disclaimerPlaceholder || "e.g. * Terms may apply"}
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form_group page-customization-full">
                   <label className="form_label">Known For / Highlights</label>
                   <p className="form-hint" style={{ marginBottom: 8 }}>
-                    Select from options below or type your own and press Enter to add.
+                    Select from options below or type your own and press Enter to add. Categories and highlights in one place.
                   </p>
                   <div className="tag-options-wrap">
-                    {(INDUSTRY_CONFIG[form.industry]?.knownForOptions || []).map((opt) => (
+                    {knownForAllOptions.map((opt) => (
                       <button
                         key={opt}
                         type="button"
@@ -926,7 +889,7 @@ const Settings = ({ section: sectionProp }) => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.knownForPlaceholder || "Add your own and press Enter"}
+                    placeholder={INDUSTRY_CONFIG[form.industry]?.knownForPlaceholder || "e.g. Sea View, Concierge — or add your own above"}
                     onKeyDown={handleKnownForAddCustom}
                     style={{ marginTop: 8 }}
                   />
@@ -979,17 +942,6 @@ const Settings = ({ section: sectionProp }) => {
                     className="form-input"
                     rows="4"
                     style={{ resize: "vertical", minHeight: "80px" }}
-                  />
-                </div>
-                <div className="form_group page-customization-full">
-                  <label className="form_label">Disclaimer</label>
-                  <input
-                    value={form.pageCustomization?.disclaimer || ""}
-                    onChange={(e) =>
-                      handlePageCustomizationChange("disclaimer", e.target.value)
-                    }
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.disclaimerPlaceholder || "e.g. * Terms may apply"}
-                    className="form-input"
                   />
                 </div>
                 <div className="form_group page-customization-full">

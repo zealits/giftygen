@@ -152,8 +152,9 @@ const BusinessPage = () => {
     if (pc.businessHours && Object.keys(pc.businessHours).length > 0) return null;
     return pc.timings;
   }, [pc.businessHours, pc.timings]);
-  const displaySubtitle = Array.isArray(pc.subtitle) ? pc.subtitle.join(", ") : pc.subtitle;
-  const displayKnownFor = Array.isArray(pc.knownFor) ? pc.knownFor.join(", ") : pc.knownFor;
+  const knownForDisplay = Array.isArray(pc.knownFor) ? pc.knownFor.join(", ") : (pc.knownFor || "");
+  const displaySubtitle = knownForDisplay || (Array.isArray(pc.subtitle) ? pc.subtitle.join(", ") : pc.subtitle || "");
+  const displayKnownFor = knownForDisplay;
   const customTab = business?.industry ? INDUSTRY_TAB_MAP[business.industry] : null;
   const baseTabs = [
     { id: "overview", label: "Overview" },
