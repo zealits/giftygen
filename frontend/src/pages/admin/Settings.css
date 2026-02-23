@@ -772,8 +772,91 @@ textarea.form-input {
 }
 
 .branding-row-name,
-.branding-row-industry {
+.branding-row-industry,
+.branding-row-phone {
 	margin: 0;
+}
+
+.branding-row-phone {
+	grid-column: 1 / -1;
+	max-width: 480px;
+}
+
+.contact-numbers-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.contact-number-row {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.contact-number-wrap {
+	display: flex;
+	gap: 8px;
+	align-items: stretch;
+}
+
+.contact-number-wrap .contact-number-remove {
+	flex-shrink: 0;
+	width: 36px;
+	height: auto;
+	min-height: 42px;
+	padding: 0;
+	background: rgba(255, 255, 255, 0.06);
+	border: 2px solid rgba(255, 255, 255, 0.1);
+	border-radius: 8px;
+	color: rgba(248, 113, 113, 0.9);
+	font-size: 1.25rem;
+	line-height: 1;
+	cursor: pointer;
+	transition: background 0.2s, border-color 0.2s;
+}
+
+.contact-number-wrap .contact-number-remove:hover {
+	background: rgba(248, 113, 113, 0.15);
+	border-color: rgba(248, 113, 113, 0.4);
+}
+
+.contact-number-add {
+	margin-top: 8px;
+}
+
+.contact-number-add.btn-outline {
+	font-size: 0.9rem;
+}
+
+.contact-number-code,
+select.contact-number-code {
+	width: 72px;
+	min-width: 72px;
+	max-width: 72px;
+	flex-shrink: 0;
+	text-align: center;
+	padding: 10px 12px;
+	box-sizing: border-box;
+}
+
+.contact-number-custom-code {
+	width: 68px;
+	min-width: 68px;
+	flex-shrink: 0;
+	box-sizing: border-box;
+}
+
+.contact-number-national {
+	flex: 1;
+	min-width: 160px;
+}
+
+.form-error {
+	display: block;
+	margin-top: 6px;
+	font-size: 0.8rem;
+	color: #f87171;
 }
 
 .logo-section {

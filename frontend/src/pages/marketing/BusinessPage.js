@@ -314,14 +314,22 @@ const BusinessPage = () => {
                   ) : (
                     <span className="venue-meta">{displayTimingsFallback}</span>
                   )}
-                  <span className="venue-meta-i">ⓘ</span>
                 </div>
               )}
-              {business.phone && (
-                <a href={`tel:${business.phone.replace(/\s/g, "")}`} className="venue-phone">
-                  {business.phone}
-                </a>
-              )}
+              {business.phone &&
+                business.phone
+                  .split(";")
+                  .map((p) => p.trim())
+                  .filter(Boolean)
+                  .map((num, i) => (
+                    <a
+                      key={i}
+                      href={`tel:${num.replace(/\s/g, "")}`}
+                      className="venue-phone"
+                    >
+                      {num}
+                    </a>
+                  ))}
             </div>
             {pc.disclaimer && <p className="venue-disclaimer">{pc.disclaimer}</p>}
             <div className="venue-actions">

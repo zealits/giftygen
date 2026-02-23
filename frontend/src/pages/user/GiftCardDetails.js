@@ -245,11 +245,20 @@ if (loading) return (
                     </>
                   );
                 })()}
-                {business.phone && (
-                  <a href={`tel:${business.phone.replace(/\s/g, "")}`} className="venue-phone">
-                    {business.phone}
-                  </a>
-                )}
+                {business.phone &&
+                  business.phone
+                    .split(";")
+                    .map((p) => p.trim())
+                    .filter(Boolean)
+                    .map((num, i) => (
+                      <a
+                        key={i}
+                        href={`tel:${num.replace(/\s/g, "")}`}
+                        className="venue-phone"
+                      >
+                        {num}
+                      </a>
+                    ))}
               </div>
               <div className="venue-actions">
                 <button

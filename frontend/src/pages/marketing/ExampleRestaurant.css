@@ -235,6 +235,10 @@
   font-weight: 500;
 }
 
+.venue-phone + .venue-phone {
+  margin-left: 10px;
+}
+
 .venue-phone:hover {
   text-decoration: underline;
 }

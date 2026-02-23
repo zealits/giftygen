@@ -12,6 +12,73 @@ import {
 } from "../../data/industryPageConfig";
 import "./Settings.css";
 
+const PHONE_COUNTRY_OPTIONS = [
+  { value: "+91", label: "+91" },
+  { value: "+1", label: "+1" },
+  { value: "other", label: "Other" },
+];
+
+const parseStoredPhone = (stored) => {
+  if (!stored || typeof stored !== "string") return { code: "+91", national: "", customCode: "" };
+  const trimmed = stored.trim();
+  const digits = trimmed.replace(/\D/g, "");
+  const plusMatch = trimmed.match(/^\s*(\+\d{1,4})/);
+  if (digits.startsWith("91") && digits.length >= 12) {
+    return { code: "+91", national: digits.slice(2, 12), customCode: "" };
+  }
+  if (digits.startsWith("1") && digits.length >= 11) {
+    return { code: "+1", national: digits.slice(1, 11), customCode: "" };
+  }
+  if (digits.length <= 10) return { code: "+91", national: digits, customCode: "" };
+  if (plusMatch) {
+    const code = plusMatch[1];
+    const codeDigits = code.replace(/\D/g, "");
+    const national = digits.startsWith(codeDigits) ? digits.slice(codeDigits.length) : digits;
+    return { code: "other", national: national.slice(0, 15), customCode: code };
+  }
+  return { code: "+91", national: digits.slice(-10), customCode: "" };
+};
+
+const validatePhoneNational = (code, national, customCode = "") => {
+  const digits = (national || "").replace(/\D/g, "");
+  if (!digits) return { valid: true };
+  if (code === "+91") {
+    if (digits.length !== 10) return { valid: false, message: "Indian number must be 10 digits" };
+    if (!/^[6-9]/.test(digits)) return { valid: false, message: "Indian mobile must start with 6, 7, 8 or 9" };
+    return { valid: true };
+  }
+  if (code === "+1") {
+    if (digits.length !== 10) return { valid: false, message: "US/Canada number must be 10 digits" };
+    return { valid: true };
+  }
+  if (code === "other") {
+    if (!(customCode || "").trim().match(/^\+\d{1,4}$/)) return { valid: false, message: "Enter country code (e.g. +44)" };
+    if (digits.length < 5 || digits.length > 15) return { valid: false, message: "Number must be 5–15 digits" };
+    return { valid: true };
+  }
+  return { valid: true };
+};
+
+const formatPhoneForStorage = (code, national, customCode = "") => {
+  const digits = (national || "").replace(/\D/g, "");
+  if (!digits) return "";
+  const effectiveCode = code === "other" ? (customCode || "").trim() : code;
+  if (!effectiveCode) return digits;
+  return `${effectiveCode} ${digits}`.trim();
+};
+
+const PHONE_LIST_DELIMITER = ";";
+
+const parseStoredPhoneList = (stored) => {
+  if (!stored || typeof stored !== "string") return [{ countryCode: "+91", national: "", customCode: "" }];
+  const parts = stored.split(PHONE_LIST_DELIMITER).map((s) => s.trim()).filter(Boolean);
+  if (parts.length === 0) return [{ countryCode: "+91", national: "", customCode: "" }];
+  return parts.map((part) => {
+    const { code, national, customCode } = parseStoredPhone(part);
+    return { countryCode: code, national, customCode: customCode || "" };
+  });
+};
+
 const Settings = ({ section: sectionProp }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,11 +98,13 @@ const Settings = ({ section: sectionProp }) => {
   const currentSection = getSection();
   const { user } = useSelector((state) => state.auth);
   const initial = user?.user || {};
+  const parsedPhoneList = parseStoredPhoneList(initial.phone);
   const [form, setForm] = useState({
     restaurantName: initial.restaurantName || "",
     businessSlug: initial.businessSlug || "",
     industry: initial.industry || "",
     businessDescription: initial.businessDescription || "",
+    phoneNumbers: parsedPhoneList.length > 0 ? parsedPhoneList : [{ countryCode: "+91", national: "", customCode: "" }],
     restaurantAddress: {
       street: initial.restaurantAddress?.street || "",
       city: initial.restaurantAddress?.city || "",
@@ -94,11 +163,13 @@ const Settings = ({ section: sectionProp }) => {
     const mergedKnownFor = [...new Set([...sub, ...known])];
     const pageCustomization = { ...pc, knownFor: mergedKnownFor, subtitle: [] };
 
+    const phoneNumbers = parseStoredPhoneList(initial.phone);
     setForm({
       restaurantName: initial.restaurantName || "",
       businessSlug: initial.businessSlug || "",
       industry: initial.industry || "",
       businessDescription: initial.businessDescription || "",
+      phoneNumbers: phoneNumbers.length > 0 ? phoneNumbers : [{ countryCode: "+91", national: "", customCode: "" }],
       restaurantAddress: {
         street: initial.restaurantAddress?.street || "",
         city: initial.restaurantAddress?.city || "",
@@ -118,6 +189,7 @@ const Settings = ({ section: sectionProp }) => {
     initial.businessSlug,
     initial.industry,
     initial.businessDescription,
+    initial.phone,
     initial.restaurantAddress,
     // SQUARE API COMMENTED OUT
     // initial.squareApplicationId,
@@ -133,6 +205,30 @@ const Settings = ({ section: sectionProp }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const addPhoneNumber = () => {
+    setForm((prev) => ({
+      ...prev,
+      phoneNumbers: [...(prev.phoneNumbers || []), { countryCode: "+91", national: "", customCode: "" }],
+    }));
+  };
+
+  const removePhoneNumber = (index) => {
+    setForm((prev) => {
+      const list = prev.phoneNumbers || [];
+      if (list.length <= 1) return prev;
+      return { ...prev, phoneNumbers: list.filter((_, i) => i !== index) };
+    });
+  };
+
+  const updatePhoneNumber = (index, field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      phoneNumbers: (prev.phoneNumbers || []).map((entry, i) =>
+        i === index ? { ...entry, [field]: value } : entry
+      ),
+    }));
   };
 
   const handleAddressChange = (e) => {
@@ -371,8 +467,22 @@ const Settings = ({ section: sectionProp }) => {
       .slice(0, 60);
 
   const handleSaveSettings = async () => {
-    setSaving(true);
     setSettingsMessage("");
+    const phoneNumbers = form.phoneNumbers || [];
+    for (let i = 0; i < phoneNumbers.length; i++) {
+      const entry = phoneNumbers[i];
+      const phoneValidation = validatePhoneNational(
+        entry.countryCode,
+        entry.national,
+        entry.customCode
+      );
+      if (!phoneValidation.valid) {
+        setSettingsMessage(`Number ${i + 1}: ${phoneValidation.message || "Invalid contact number"}`);
+        return;
+      }
+    }
+
+    setSaving(true);
     try {
       const pc = form.pageCustomization || {};
       const bh = pc.businessHours;
@@ -388,8 +498,13 @@ const Settings = ({ section: sectionProp }) => {
           : {}),
       };
 
+      const phoneStrings = (form.phoneNumbers || [])
+        .map((entry) => formatPhoneForStorage(entry.countryCode, entry.national, entry.customCode))
+        .filter(Boolean);
+      const { phoneNumbers: _pn, ...formRest } = form;
       const formData = {
-        ...form,
+        ...formRest,
+        phone: phoneStrings.join(PHONE_LIST_DELIMITER),
         pageCustomization,
         restaurantAddress: {
           ...form.restaurantAddress,
@@ -729,6 +844,85 @@ const Settings = ({ section: sectionProp }) => {
                   <option value="Beauty and Personal care">Beauty and Personal care</option>
                   <option value="Seasonal Gifting">Seasonal Gifting</option>
                 </select>
+              </div>
+              <div className="form_group branding-row-phone">
+                <label className="form_label">Contact Number</label>
+                <div className="contact-numbers-list">
+                  {(form.phoneNumbers || []).map((entry, index) => (
+                    <div key={index} className="contact-number-row">
+                      <div className="contact-number-wrap">
+                        <select
+                          value={entry.countryCode}
+                          onChange={(e) => updatePhoneNumber(index, "countryCode", e.target.value)}
+                          className="form-input contact-number-code"
+                          aria-label="Country code"
+                        >
+                          {PHONE_COUNTRY_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                        {entry.countryCode === "other" && (
+                          <input
+                            type="text"
+                            inputMode="tel"
+                            autoComplete="tel-country-code"
+                            value={entry.customCode || "+"}
+                            onChange={(e) => {
+                              let v = e.target.value.replace(/[^\d+]/g, "");
+                              if (!v.startsWith("+")) v = "+" + v;
+                              updatePhoneNumber(index, "customCode", v.slice(0, 5));
+                            }}
+                            placeholder="+44"
+                            className="form-input contact-number-custom-code"
+                          />
+                        )}
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          autoComplete="tel-national"
+                          value={entry.national}
+                          onChange={(e) => {
+                            const maxLen = entry.countryCode === "other" ? 15 : 10;
+                            const v = e.target.value.replace(/\D/g, "").slice(0, maxLen);
+                            updatePhoneNumber(index, "national", v);
+                          }}
+                          placeholder={
+                            entry.countryCode === "+91"
+                              ? "e.g. 98765 43210"
+                              : entry.countryCode === "+1"
+                                ? "e.g. 555 123 4567"
+                                : "e.g. 7911 123456"
+                          }
+                          className="form-input contact-number-national"
+                          maxLength={entry.countryCode === "other" ? 15 : 10}
+                        />
+                        {(form.phoneNumbers || []).length > 1 && (
+                          <button
+                            type="button"
+                            className="contact-number-remove"
+                            onClick={() => removePhoneNumber(index)}
+                            aria-label="Remove number"
+                            title="Remove number"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                      {entry.national &&
+                        !validatePhoneNational(entry.countryCode, entry.national, entry.customCode).valid && (
+                          <span className="form-error">
+                            {validatePhoneNational(entry.countryCode, entry.national, entry.customCode).message}
+                          </span>
+                        )}
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="btn btn-outline contact-number-add" onClick={addPhoneNumber}>
+                  + Add another number
+                </button>
               </div>
             </div>
 

@@ -497,6 +497,7 @@ exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
     businessSlug,
     industry,
     businessDescription,
+    phone,
     restaurantAddress,
     galleryImages,
     pageCustomization,
@@ -513,6 +514,7 @@ exports.updateBusinessSettings = catchAsyncErrors(async (req, res, next) => {
   if (businessSlug) admin.businessSlug = businessSlug;
   if (industry !== undefined) admin.industry = industry;
   if (businessDescription !== undefined) admin.businessDescription = businessDescription;
+  if (phone !== undefined) admin.phone = phone;
 
   // Update gallery images if provided (for removal operations)
   if (Array.isArray(galleryImages)) {

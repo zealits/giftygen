@@ -651,7 +651,11 @@
     text-decoration: none;
     font-weight: 500;
   }
-  
+
+  .gift-details-inner .venue-phone + .venue-phone {
+    margin-left: 10px;
+  }
+
   .gift-details-inner .venue-phone:hover {
     text-decoration: underline;
   }
