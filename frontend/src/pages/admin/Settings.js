@@ -346,27 +346,60 @@ const Settings = ({ section: sectionProp }) => {
 
   const menuSections = Array.isArray(form.pageCustomization?.menuSections) ? form.pageCustomization.menuSections : [];
   const setMenuSections = (next) => handlePageCustomizationChange("menuSections", next);
-  const addMenuSection = () => setMenuSections([...menuSections, { title: "", items: [""], imageUrl: "" }]);
-  const removeMenuSection = (index) => setMenuSections(menuSections.filter((_, i) => i !== index));
+  const emptySection = { title: "", items: [""], imageUrl: "" };
+  const displayMenuSections =
+    menuSections.length > 0 ? menuSections : [emptySection];
+  const addMenuSection = () =>
+    setMenuSections(
+      menuSections.length > 0
+        ? [...menuSections, { ...emptySection }]
+        : [displayMenuSections[0], { ...emptySection }],
+    );
+  const removeMenuSection = (index) => {
+    if (menuSections.length === 0) {
+      setMenuSections([]);
+      return;
+    }
+    setMenuSections(menuSections.filter((_, i) => i !== index));
+  };
   const updateMenuSection = (index, field, value) => {
+    if (menuSections.length === 0) {
+      setMenuSections([{ ...displayMenuSections[0], [field]: value }]);
+      return;
+    }
     const next = menuSections.map((s, i) => (i === index ? { ...s, [field]: value } : s));
     setMenuSections(next);
   };
   const updateMenuItem = (sectionIndex, itemIndex, value) => {
-    const section = menuSections[sectionIndex];
+    const sections = menuSections.length > 0 ? menuSections : displayMenuSections;
+    const section = sections[sectionIndex];
     const items = [...(section?.items || [])];
     items[itemIndex] = value;
+    if (menuSections.length === 0) {
+      setMenuSections([{ ...displayMenuSections[0], items }]);
+      return;
+    }
     updateMenuSection(sectionIndex, "items", items);
   };
   const removeMenuItem = (sectionIndex, itemIndex) => {
-    const section = menuSections[sectionIndex];
+    const sections = menuSections.length > 0 ? menuSections : displayMenuSections;
+    const section = sections[sectionIndex];
     const items = (section?.items || []).filter((_, i) => i !== itemIndex);
     if (items.length === 0) items.push("");
+    if (menuSections.length === 0) {
+      setMenuSections([{ ...displayMenuSections[0], items }]);
+      return;
+    }
     updateMenuSection(sectionIndex, "items", items);
   };
   const addMenuItem = (sectionIndex) => {
-    const section = menuSections[sectionIndex];
+    const sections = menuSections.length > 0 ? menuSections : displayMenuSections;
+    const section = sections[sectionIndex];
     const items = [...(section?.items || []), ""];
+    if (menuSections.length === 0) {
+      setMenuSections([{ ...displayMenuSections[0], items }]);
+      return;
+    }
     updateMenuSection(sectionIndex, "items", items);
   };
   const addMenuSectionImage = async (sectionIndex, file) => {
@@ -1381,9 +1414,6 @@ const Settings = ({ section: sectionProp }) => {
                   <div className="form_group page-customization-full settings-menu-section-wrap">
                     <div className="settings-menu-section-header">
                       <label className="form_label">Menu Content</label>
-                      <button type="button" className="btn btn-outline settings-menu-section-add-btn settings-menu-section-add-first" onClick={addMenuSection}>
-                        + Add menu section
-                      </button>
                       <p className="form-hint">
                         Add sections (e.g. Starters, Main Course) and items. You can load the sample below as reference or build your own. Add an optional image per section.
                       </p>
@@ -1392,7 +1422,7 @@ const Settings = ({ section: sectionProp }) => {
                       </button>
                     </div>
                     <div className="settings-menu-sections-list">
-                      {menuSections.map((section, sectionIndex) => (
+                      {displayMenuSections.map((section, sectionIndex) => (
                         <div key={sectionIndex} className="settings-menu-section-card">
                           <div className="settings-menu-section-card-header">
                             <input

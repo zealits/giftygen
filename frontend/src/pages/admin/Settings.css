@@ -463,11 +463,6 @@ textarea.form-input {
 	margin-bottom: 16px;
 }
 
-.settings-menu-section-add-first {
-	align-self: flex-start;
-	margin-bottom: 4px;
-}
-
 .settings-menu-load-sample {
 	align-self: flex-start;
 	margin-top: 4px;
