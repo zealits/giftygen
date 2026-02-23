@@ -169,6 +169,19 @@ const BusinessPage = () => {
     : business?.logoUrl
       ? [business.logoUrl]
       : [];
+  const photoLabels = Array.isArray(pc.photoLabels)
+    ? pc.photoLabels.slice(0, galleryImages.length)
+    : [];
+  const photoFilterOptions = useMemo(() => {
+    const labels = [...new Set(photoLabels.map((l) => (l || "").trim()).filter(Boolean))];
+    return ["All", ...labels];
+  }, [photoLabels.join(",")]);
+  const filteredGalleryImages = useMemo(() => {
+    if (photoFilter === "all") return galleryImages.map((src, i) => ({ src, i }));
+    return galleryImages
+      .map((src, i) => ({ src, i }))
+      .filter(({ i: idx }) => (photoLabels[idx] || "").toLowerCase() === photoFilter);
+  }, [galleryImages, photoFilter, photoLabels]);
 
   const addressParts = [
     business?.address?.street,
@@ -567,14 +580,14 @@ const BusinessPage = () => {
             {activeTab === "photos" && (
               <section className="venue-photos">
                 <h3 className="venue-photos-title">{business.name} Photos</h3>
-                {Array.isArray(pc.photoFilterLabels) && pc.photoFilterLabels.length > 0 && (
+                {photoFilterOptions.length > 0 && (
                   <div className="venue-photo-filters">
-                    {pc.photoFilterLabels.map((f) => (
+                    {photoFilterOptions.map((f) => (
                       <button
                         key={f}
                         type="button"
-                        className={`venue-photo-filter ${photoFilter === f.split(" ")[0].toLowerCase() ? "venue-photo-filter--active" : ""}`}
-                        onClick={() => setPhotoFilter(f.split(" ")[0].toLowerCase())}
+                        className={`venue-photo-filter ${photoFilter === (f === "All" ? "all" : f.toLowerCase()) ? "venue-photo-filter--active" : ""}`}
+                        onClick={() => setPhotoFilter(f === "All" ? "all" : f.toLowerCase())}
                       >
                         {f}
                       </button>
@@ -582,7 +595,7 @@ const BusinessPage = () => {
                   </div>
                 )}
                 <div className="venue-photos-grid">
-                  {galleryImages.map((src, i) => (
+                  {filteredGalleryImages.map(({ src, i }) => (
                     <div key={i} className="venue-photo-item">
                       <img src={src} alt={`Gallery ${i + 1}`} />
                     </div>

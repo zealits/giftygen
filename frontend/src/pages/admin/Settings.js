@@ -65,6 +65,8 @@ const Settings = ({ section: sectionProp }) => {
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [uploadingRoomPhotoFor, setUploadingRoomPhotoFor] = useState(null); // room index
   const [showMapPicker, setShowMapPicker] = useState(false);
+  const [showCustomLabelFor, setShowCustomLabelFor] = useState(null); // index of photo showing custom label input
+  const [customLabelInput, setCustomLabelInput] = useState("");
   // SQUARE API COMMENTED OUT
   // const [showSquareInstructions, setShowSquareInstructions] = useState(false);
   const [showRazorpayInstructions, setShowRazorpayInstructions] = useState(false);
@@ -168,6 +170,13 @@ const Settings = ({ section: sectionProp }) => {
     e.target.value = "";
   };
 
+  const handlePhotoLabelChange = (index, value) => {
+    const labels = photoLabels.slice(0, galleryImages.length);
+    const next = [...labels];
+    next[index] = value || "";
+    handlePageCustomizationChange("photoLabels", next);
+  };
+
   const roomTypes = Array.isArray(form.pageCustomization?.roomTypes) ? form.pageCustomization.roomTypes : [];
   const setRoomTypes = (next) => handlePageCustomizationChange("roomTypes", next);
 
@@ -257,6 +266,27 @@ const Settings = ({ section: sectionProp }) => {
     const known = INDUSTRY_CONFIG[form.industry]?.knownForOptions || [];
     return [...new Set([...sub, ...known])];
   }, [form.industry]);
+
+  const photoFilterLabelOptions = useMemo(
+    () => INDUSTRY_CONFIG[form.industry]?.photoFilterLabelOptions || [],
+    [form.industry]
+  );
+
+  const photoLabels = useMemo(() => {
+    const labels = Array.isArray(form.pageCustomization?.photoLabels)
+      ? form.pageCustomization.photoLabels
+      : [];
+    const len = galleryImages.length;
+    if (labels.length >= len) return labels.slice(0, len);
+    return [...labels, ...Array(len - labels.length).fill("")];
+  }, [form.pageCustomization?.photoLabels, galleryImages.length]);
+
+  const galleryLabelOptions = useMemo(() => {
+    const customUsed = [...new Set(photoLabels.map((l) => (l || "").trim()).filter(Boolean))].filter(
+      (l) => !photoFilterLabelOptions.includes(l)
+    );
+    return [...photoFilterLabelOptions, ...customUsed];
+  }, [photoFilterLabelOptions, photoLabels]);
 
   const businessHours = form.pageCustomization?.businessHours || {};
   const dynamicStatus = useMemo(
@@ -469,7 +499,20 @@ const Settings = ({ section: sectionProp }) => {
       const res = await axios.post("/api/v1/admin/settings/photos", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setGalleryImages(res.data.galleryImages || []);
+      const newGallery = res.data.galleryImages || [];
+      setGalleryImages(newGallery);
+      setForm((prev) => {
+        const cur = prev.pageCustomization?.photoLabels || [];
+        const len = newGallery.length;
+        const nextLabels =
+          cur.length >= len
+            ? cur.slice(0, len)
+            : [...cur, ...Array(len - cur.length).fill("")];
+        return {
+          ...prev,
+          pageCustomization: { ...prev.pageCustomization, photoLabels: nextLabels },
+        };
+      });
       setSettingsMessage(`${files.length} photo(s) uploaded successfully!`);
       setTimeout(() => setSettingsMessage(""), 3000);
     } catch (e) {
@@ -480,20 +523,31 @@ const Settings = ({ section: sectionProp }) => {
   };
 
   const handleRemovePhoto = async (photoUrl) => {
-    const updatedGallery = galleryImages.filter((url) => url !== photoUrl);
+    const index = galleryImages.indexOf(photoUrl);
+    const updatedGallery = galleryImages.filter((_, i) => i !== index);
+    const curLabels = form.pageCustomization?.photoLabels || [];
+    const updatedLabels = curLabels.filter((_, i) => i !== index);
     setGalleryImages(updatedGallery);
+    setForm((prev) => ({
+      ...prev,
+      pageCustomization: { ...prev.pageCustomization, photoLabels: updatedLabels },
+    }));
 
     try {
       await axios.put("/api/v1/admin/settings", {
         ...form,
+        pageCustomization: { ...form.pageCustomization, photoLabels: updatedLabels },
         galleryImages: updatedGallery,
       });
       setSettingsMessage("Photo removed successfully!");
       setTimeout(() => setSettingsMessage(""), 3000);
     } catch (e) {
       setSettingsMessage(e?.response?.data?.message || "Failed to remove photo");
-      // Revert on error
       setGalleryImages(galleryImages);
+      setForm((prev) => ({
+        ...prev,
+        pageCustomization: { ...prev.pageCustomization, photoLabels: curLabels },
+      }));
     }
   };
 
@@ -1089,21 +1143,6 @@ const Settings = ({ section: sectionProp }) => {
                     />
                   </div>
                 )}
-                <div className="form_group page-customization-full">
-                  <label className="form_label">Photo Filter Labels (comma-separated)</label>
-                  <input
-                    value={
-                      Array.isArray(form.pageCustomization?.photoFilterLabels)
-                        ? form.pageCustomization.photoFilterLabels.join(", ")
-                        : (form.pageCustomization?.photoFilterLabels || "")
-                    }
-                    onChange={(e) =>
-                      handlePageCustomizationArrayChange("photoFilterLabels", e.target.value)
-                    }
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.photoFilterLabelsPlaceholder || "e.g. All (24), Food (18), Ambience (6)"}
-                    className="form-input"
-                  />
-                </div>
               </div>
             </div>
           )}
@@ -1116,7 +1155,7 @@ const Settings = ({ section: sectionProp }) => {
               className="gallery-grid"
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
                 gap: "16px",
                 marginTop: "16px",
                 marginBottom: "16px",
@@ -1128,46 +1167,150 @@ const Settings = ({ section: sectionProp }) => {
                   className="gallery-item"
                   style={{
                     position: "relative",
-                    aspectRatio: "1",
+                    display: "flex",
+                    flexDirection: "column",
                     borderRadius: "12px",
                     overflow: "hidden",
                     border: "2px solid #e5e7eb",
                     backgroundColor: "#f9fafb",
+                    minWidth: 0,
                   }}
                 >
-                  <img
-                    src={photoUrl}
-                    alt={`Business photo ${index + 1}`}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemovePhoto(photoUrl)}
-                    style={{
-                      position: "absolute",
-                      top: "8px",
-                      right: "8px",
-                      background: "rgba(239, 68, 68, 0.9)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "50%",
-                      width: "28px",
-                      height: "28px",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: "bold",
-                    }}
-                    title="Remove photo"
-                  >
-                    ×
-                  </button>
+                  <div style={{ position: "relative", aspectRatio: "1", flex: 1, minHeight: 0 }}>
+                    <img
+                      src={photoUrl}
+                      alt={`Business photo ${index + 1}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePhoto(photoUrl)}
+                      style={{
+                        position: "absolute",
+                        top: "8px",
+                        right: "8px",
+                        background: "rgba(239, 68, 68, 0.9)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: "28px",
+                        height: "28px",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: "bold",
+                      }}
+                      title="Remove photo"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div style={{ padding: "0 10px 10px", minWidth: 0 }}>
+                    <label
+                      className="form_label form_label_sm"
+                      style={{
+                        margin: "6px 0 2px",
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: "#0f172a",
+                      }}
+                    >
+                      Label
+                    </label>
+                    <select
+                      value={showCustomLabelFor === index ? "__custom__" : (photoLabels[index] || "")}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "__custom__") {
+                          setShowCustomLabelFor(index);
+                          setCustomLabelInput("");
+                        } else {
+                          setShowCustomLabelFor((prev) => (prev === index ? null : prev));
+                          handlePhotoLabelChange(index, v);
+                        }
+                      }}
+                      className="form-input"
+                      style={{
+                        margin: "0 0 4px",
+                        padding: "6px 8px",
+                        fontSize: 12,
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #4f46e5",
+                        color: "#0f172a",
+                        borderRadius: 6,
+                        width: "100%",
+                        maxWidth: "100%",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                    <option value="">Select label</option>
+                    {galleryLabelOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                    <option value="__custom__">Add custom label...</option>
+                  </select>
+                  {showCustomLabelFor === index && (
+                    <div style={{ margin: "0 0 8px", display: "flex", gap: 6, alignItems: "center", minWidth: 0 }}>
+                      <input
+                        type="text"
+                        value={customLabelInput}
+                        onChange={(e) => setCustomLabelInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            const val = customLabelInput.trim();
+                            if (val) {
+                              handlePhotoLabelChange(index, val);
+                              setShowCustomLabelFor(null);
+                              setCustomLabelInput("");
+                            }
+                          }
+                          if (e.key === "Escape") {
+                            setShowCustomLabelFor(null);
+                            setCustomLabelInput("");
+                          }
+                        }}
+                        placeholder="Type label and press Enter"
+                        className="form-input photo-custom-label-input"
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          maxWidth: "100%",
+                          padding: "6px 8px",
+                          fontSize: 12,
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #4f46e5",
+                          color: "#0f172a",
+                          borderRadius: 6,
+                          boxSizing: "border-box",
+                        }}
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = customLabelInput.trim();
+                          if (val) {
+                            handlePhotoLabelChange(index, val);
+                            setShowCustomLabelFor(null);
+                            setCustomLabelInput("");
+                          }
+                        }}
+                        className="btn btn-outline"
+                        style={{ padding: "6px 10px", fontSize: 12 }}
+                      >
+                        Add
+                      </button>
+                    </div>
+                  )}
+                  </div>
                 </div>
               ))}
 

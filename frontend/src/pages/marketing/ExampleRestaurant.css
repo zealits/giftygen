@@ -826,6 +826,7 @@
 }
 
 .venue-photo-filter:hover {
+  background: #fff;
   border-color: #e23744;
   color: #e23744;
 }

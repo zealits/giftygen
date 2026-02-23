@@ -47,6 +47,7 @@ export const INDUSTRY_PAGE_CONFIG = {
     amenitiesPlaceholder: "Dinner, Lunch, Brunch, Outdoor Seating, WiFi, Parking, Card Accepted",
     disclaimerPlaceholder: "e.g. * Buffet prices may vary on festive dates",
     photoFilterLabelsPlaceholder: "e.g. All (24), Food (18), Ambience (6)",
+    photoFilterLabelOptions: ["All", "Food", "Ambience"],
     businessDescriptionPlaceholder: "Describe your restaurant — cuisine, vibe, and what makes it special",
   },
   "Hotels & Resorts": {
@@ -89,6 +90,7 @@ export const INDUSTRY_PAGE_CONFIG = {
     amenitiesPlaceholder: "Pool, Spa, Gym, WiFi, Parking, Room Service, Minibar, AC",
     disclaimerPlaceholder: "e.g. * Room rates may vary by season",
     photoFilterLabelsPlaceholder: "e.g. All (32), Rooms (12), Pool (8), Dining (6)",
+    photoFilterLabelOptions: ["All", "Rooms", "Pool", "Dining"],
     businessDescriptionPlaceholder: "Describe your hotel — location, amenities, and guest experience",
   },
   "Fitness and Wellness memberships": {
@@ -130,6 +132,7 @@ export const INDUSTRY_PAGE_CONFIG = {
     amenitiesPlaceholder: "Lockers, Shower, Towel Service, WiFi, Parking, AC, Steam",
     disclaimerPlaceholder: "e.g. * First-time visitors may need to complete a fitness assessment",
     photoFilterLabelsPlaceholder: "e.g. All (18), Gym (8), Classes (6), Spa (4)",
+    photoFilterLabelOptions: ["All", "Gym", "Classes", "Spa"],
     businessDescriptionPlaceholder: "Describe your fitness center — classes, equipment, and membership benefits",
   },
   "Retail & E-commerce": {
@@ -171,6 +174,7 @@ export const INDUSTRY_PAGE_CONFIG = {
     amenitiesPlaceholder: "Free Shipping, COD, Exchange, Gift Cards, Wishlist",
     disclaimerPlaceholder: "e.g. * Delivery timelines may vary by pin code",
     photoFilterLabelsPlaceholder: "e.g. All (40), New (12), Bestsellers (10)",
+    photoFilterLabelOptions: ["All", "New", "Bestsellers"],
     businessDescriptionPlaceholder: "Describe your store — what you sell, brands, and what makes you unique",
   },
   "Beauty and Personal care": {
@@ -212,6 +216,7 @@ export const INDUSTRY_PAGE_CONFIG = {
     amenitiesPlaceholder: "AC, WiFi, Parking, Card Accepted, Home Service, Product Sales",
     disclaimerPlaceholder: "e.g. * Advance booking recommended for weekends",
     photoFilterLabelsPlaceholder: "e.g. All (20), Hair (8), Spa (6), Makeup (4)",
+    photoFilterLabelOptions: ["All", "Hair", "Spa", "Makeup"],
     businessDescriptionPlaceholder: "Describe your salon or spa — services, expertise, and ambiance",
   },
   "Seasonal Gifting": {
@@ -252,6 +257,7 @@ export const INDUSTRY_PAGE_CONFIG = {
     amenitiesPlaceholder: "Pan-India, Custom Messaging, Bulk Orders, E-vouchers, Express Delivery",
     disclaimerPlaceholder: "e.g. * Delivery during peak festive season may take 2–3 days",
     photoFilterLabelsPlaceholder: "e.g. All (16), Diwali (6), Corporate (4)",
+    photoFilterLabelOptions: ["All", "Diwali", "Corporate"],
     businessDescriptionPlaceholder: "Describe your gifting business — occasions, products, and delivery",
   },
 };

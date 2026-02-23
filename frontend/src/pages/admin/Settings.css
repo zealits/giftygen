@@ -960,3 +960,8 @@ textarea.form-input {
 	}
 }
 
+.photo-custom-label-input::placeholder {
+	color: #0f172a;
+	opacity: 1;
+}
+
