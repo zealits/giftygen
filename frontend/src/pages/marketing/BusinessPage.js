@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Share2, MessageCircle, Gift, Check, Star } from "lucide-react";
+import { Share2, MessageCircle, Gift, Star } from "lucide-react";
 import axios from "../../utils/axiosConfig";
 import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import { listGiftCards } from "../../services/Actions/giftCardActions";
@@ -386,19 +386,6 @@ const BusinessPage = () => {
                   <section className="venue-card">
                     <h3 className="venue-card-title">Known For</h3>
                     <p className="venue-card-text">{displayKnownFor}</p>
-                  </section>
-                )}
-                {Array.isArray(pc.amenities) && pc.amenities.length > 0 && (
-                  <section className="venue-card">
-                    <h3 className="venue-card-title">Amenities</h3>
-                    <div className="venue-more-info">
-                      {pc.amenities.map((item) => (
-                        <span key={item} className="venue-more-info-item">
-                          <Check size={16} />
-                          {item}
-                        </span>
-                      ))}
-                    </div>
                   </section>
                 )}
                 {business.description && !displayKnownFor && (
