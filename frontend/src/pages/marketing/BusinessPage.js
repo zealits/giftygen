@@ -738,7 +738,29 @@ const BusinessPage = () => {
                         ))}
                       </div>
                     )}
-                    {pc.customTabContent ? (
+                    {Array.isArray(pc.menuSections) && pc.menuSections.length > 0 ? (
+                      <div className="venue-menu-structured">
+                        {pc.menuSections.map((section, idx) => (
+                          <div key={idx} className="venue-menu-section">
+                            <div className="venue-menu-section-header">
+                              {section.imageUrl && (
+                                <div className="venue-menu-section-image">
+                                  <img src={section.imageUrl} alt="" />
+                                </div>
+                              )}
+                              <h4 className="venue-menu-section-title">{section.title || "Menu"}</h4>
+                            </div>
+                            <ul className="venue-menu-section-items">
+                              {(section.items || [])
+                                .filter((item) => String(item).trim())
+                                .map((item, i) => (
+                                  <li key={i}>{item}</li>
+                                ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    ) : pc.customTabContent ? (
                       <div className="venue-menu-preview">
                         <div className="venue-menu-list">
                           {pc.customTabContent.split("\n").map((line, i) => (

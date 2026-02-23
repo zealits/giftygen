@@ -69,6 +69,19 @@ const formatPhoneForStorage = (code, national, customCode = "") => {
 
 const PHONE_LIST_DELIMITER = ";";
 
+/** Sample menu structure for Restaurant — reference template users can load */
+const SAMPLE_MENU_SECTIONS = [
+  { title: "Indian Cuisine", items: ["North Indian — Butter Chicken, Paneer Tikka, Dal Makhani, Naan/Roti, Biryani", "South Indian — Dosa, Idli, Vada, Sambar, Uttapam", "Street Style — Pav Bhaji, Chole Bhature, Vada Pav, Pani Puri"], imageUrl: "" },
+  { title: "Continental Cuisine", items: ["Pasta (White Sauce / Red Sauce)", "Grilled Chicken / Fish", "Steak", "Soups", "Garlic Bread", "Salads"], imageUrl: "" },
+  { title: "Chinese / Pan-Asian", items: ["Hakka Noodles", "Fried Rice", "Manchurian", "Dim Sum", "Spring Rolls"], imageUrl: "" },
+  { title: "Italian", items: ["Pizza", "Pasta", "Lasagna", "Risotto", "Bruschetta"], imageUrl: "" },
+  { title: "Fast Food", items: ["Burger", "Fries", "Sandwich", "Wraps", "Fried Chicken", "Milkshakes"], imageUrl: "" },
+  { title: "Healthy / Diet Food", items: ["Salad Bowls", "Grilled Items", "Smoothies", "Quinoa Bowls", "Low-Calorie Meals"], imageUrl: "" },
+  { title: "Bakery & Desserts", items: ["Cakes", "Pastries", "Ice Cream", "Brownies", "Gulab Jamun", "Rasmalai"], imageUrl: "" },
+  { title: "Beverages", items: ["Non-Alcoholic — Tea/Coffee, Fresh Juice, Mocktails, Soft Drinks", "Alcoholic (If Bar) — Beer, Wine, Whisky, Cocktails"], imageUrl: "" },
+  { title: "Standard Format", items: ["Starters", "Soups", "Main Course (Veg / Non-Veg)", "Breads & Rice", "Desserts", "Beverages"], imageUrl: "" },
+];
+
 const parseStoredPhoneList = (stored) => {
   if (!stored || typeof stored !== "string") return [{ countryCode: "+91", national: "", customCode: "" }];
   const parts = stored.split(PHONE_LIST_DELIMITER).map((s) => s.trim()).filter(Boolean);
@@ -133,6 +146,7 @@ const Settings = ({ section: sectionProp }) => {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [uploadingRoomPhotoFor, setUploadingRoomPhotoFor] = useState(null); // room index
+  const [uploadingMenuPhotoFor, setUploadingMenuPhotoFor] = useState(null); // menu section index
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [showCustomLabelFor, setShowCustomLabelFor] = useState(null); // index of photo showing custom label input
   const [customLabelInput, setCustomLabelInput] = useState("");
@@ -329,6 +343,53 @@ const Settings = ({ section: sectionProp }) => {
       current.filter((u) => u !== url),
     );
   };
+
+  const menuSections = Array.isArray(form.pageCustomization?.menuSections) ? form.pageCustomization.menuSections : [];
+  const setMenuSections = (next) => handlePageCustomizationChange("menuSections", next);
+  const addMenuSection = () => setMenuSections([...menuSections, { title: "", items: [""], imageUrl: "" }]);
+  const removeMenuSection = (index) => setMenuSections(menuSections.filter((_, i) => i !== index));
+  const updateMenuSection = (index, field, value) => {
+    const next = menuSections.map((s, i) => (i === index ? { ...s, [field]: value } : s));
+    setMenuSections(next);
+  };
+  const updateMenuItem = (sectionIndex, itemIndex, value) => {
+    const section = menuSections[sectionIndex];
+    const items = [...(section?.items || [])];
+    items[itemIndex] = value;
+    updateMenuSection(sectionIndex, "items", items);
+  };
+  const removeMenuItem = (sectionIndex, itemIndex) => {
+    const section = menuSections[sectionIndex];
+    const items = (section?.items || []).filter((_, i) => i !== itemIndex);
+    if (items.length === 0) items.push("");
+    updateMenuSection(sectionIndex, "items", items);
+  };
+  const addMenuItem = (sectionIndex) => {
+    const section = menuSections[sectionIndex];
+    const items = [...(section?.items || []), ""];
+    updateMenuSection(sectionIndex, "items", items);
+  };
+  const addMenuSectionImage = async (sectionIndex, file) => {
+    if (!file) return;
+    setUploadingMenuPhotoFor(sectionIndex);
+    setSettingsMessage("");
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+      const res = await axios.post("/api/v1/admin/settings/room-photo", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const url = res.data?.url;
+      if (url) updateMenuSection(sectionIndex, "imageUrl", url);
+    } catch (e) {
+      setSettingsMessage(e?.response?.data?.message || "Photo upload failed");
+      setTimeout(() => setSettingsMessage(""), 3000);
+    } finally {
+      setUploadingMenuPhotoFor(null);
+    }
+  };
+  const removeMenuSectionImage = (sectionIndex) => updateMenuSection(sectionIndex, "imageUrl", "");
+  const loadSampleMenu = () => setMenuSections(SAMPLE_MENU_SECTIONS.map((s) => ({ ...s, imageUrl: s.imageUrl || "" })));
 
   const handleBusinessHoursChange = (day, field, value) => {
     const next = { ...(form.pageCustomization?.businessHours || {}) };
@@ -1189,19 +1250,21 @@ const Settings = ({ section: sectionProp }) => {
                     style={{ marginTop: 8 }}
                   />
                 </div>
-                <div className="form_group" style={{ gridColumn: "1 / -1" }}>
-                  <label className="form_label">{INDUSTRY_CONFIG[form.industry]?.tagsLabel || "Tags"}</label>
-                  <input
-                    value={
-                      Array.isArray(form.pageCustomization?.tags)
-                        ? form.pageCustomization.tags.join(", ")
-                        : form.pageCustomization?.tags || ""
-                    }
-                    onChange={(e) => handlePageCustomizationArrayChange("tags", e.target.value)}
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.tagsPlaceholder || "Comma-separated tags"}
-                    className="form-input"
-                  />
-                </div>
+                {form.industry !== "Restaurant And Fine Dining" && (
+                  <div className="form_group" style={{ gridColumn: "1 / -1" }}>
+                    <label className="form_label">{INDUSTRY_CONFIG[form.industry]?.tagsLabel || "Tags"}</label>
+                    <input
+                      value={
+                        Array.isArray(form.pageCustomization?.tags)
+                          ? form.pageCustomization.tags.join(", ")
+                          : form.pageCustomization?.tags || ""
+                      }
+                      onChange={(e) => handlePageCustomizationArrayChange("tags", e.target.value)}
+                      placeholder={INDUSTRY_CONFIG[form.industry]?.tagsPlaceholder || "Comma-separated tags"}
+                      className="form-input"
+                    />
+                  </div>
+                )}
                 {INDUSTRY_CONFIG[form.industry]?.hasStructuredRooms ? (
                   <div className="form_group page-customization-full settings-room-types-section">
                     <label className="form_label">Room types</label>
@@ -1312,6 +1375,110 @@ const Settings = ({ section: sectionProp }) => {
                     </div>
                     <button type="button" className="btn btn-outline settings-room-type-add-btn" onClick={addRoomType}>
                       + Add room type
+                    </button>
+                  </div>
+                ) : form.industry === "Restaurant And Fine Dining" ? (
+                  <div className="form_group page-customization-full settings-menu-section-wrap">
+                    <div className="settings-menu-section-header">
+                      <label className="form_label">Menu Content</label>
+                      <button type="button" className="btn btn-outline settings-menu-section-add-btn settings-menu-section-add-first" onClick={addMenuSection}>
+                        + Add menu section
+                      </button>
+                      <p className="form-hint">
+                        Add sections (e.g. Starters, Main Course) and items. You can load the sample below as reference or build your own. Add an optional image per section.
+                      </p>
+                      <button type="button" className="btn btn-outline settings-menu-load-sample" onClick={loadSampleMenu}>
+                        Load sample menu (reference)
+                      </button>
+                    </div>
+                    <div className="settings-menu-sections-list">
+                      {menuSections.map((section, sectionIndex) => (
+                        <div key={sectionIndex} className="settings-menu-section-card">
+                          <div className="settings-menu-section-card-header">
+                            <input
+                              type="text"
+                              className="form-input settings-menu-section-title"
+                              value={section.title || ""}
+                              onChange={(e) => updateMenuSection(sectionIndex, "title", e.target.value)}
+                              placeholder="Section title (e.g. Indian Cuisine, Starters)"
+                            />
+                            <button
+                              type="button"
+                              className="settings-menu-section-remove"
+                              onClick={() => removeMenuSection(sectionIndex)}
+                              aria-label="Remove section"
+                              title="Remove section"
+                            >
+                              ×
+                            </button>
+                          </div>
+                          <div className="settings-menu-section-body">
+                            <div className="settings-menu-section-image-wrap">
+                              <label className="form_label form_label_sm">Section image (optional)</label>
+                              {section.imageUrl ? (
+                                <div className="settings-menu-section-image-preview">
+                                  <img src={section.imageUrl} alt="" />
+                                  <button
+                                    type="button"
+                                    className="settings-menu-section-image-remove"
+                                    onClick={() => removeMenuSectionImage(sectionIndex)}
+                                    aria-label="Remove image"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ) : (
+                                <label className="settings-menu-section-image-add">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="settings-menu-section-image-input"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) addMenuSectionImage(sectionIndex, file);
+                                      e.target.value = "";
+                                    }}
+                                    disabled={uploadingMenuPhotoFor !== null}
+                                  />
+                                  {uploadingMenuPhotoFor === sectionIndex ? (
+                                    <span className="settings-menu-section-image-add-text">Uploading…</span>
+                                  ) : (
+                                    <span className="settings-menu-section-image-add-text">+ Add image</span>
+                                  )}
+                                </label>
+                              )}
+                            </div>
+                            <div className="settings-menu-section-items-wrap">
+                              <label className="form_label form_label_sm">Items (one per line)</label>
+                              {(section.items || [""]).map((item, itemIndex) => (
+                                <div key={itemIndex} className="settings-menu-item-row">
+                                  <input
+                                    type="text"
+                                    className="form-input settings-menu-item-input"
+                                    value={item}
+                                    onChange={(e) => updateMenuItem(sectionIndex, itemIndex, e.target.value)}
+                                    placeholder="e.g. Butter Chicken, Paneer Tikka"
+                                  />
+                                  <button
+                                    type="button"
+                                    className="settings-menu-item-remove"
+                                    onClick={() => removeMenuItem(sectionIndex, itemIndex)}
+                                    aria-label="Remove item"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                              <button type="button" className="btn btn-outline settings-menu-item-add" onClick={() => addMenuItem(sectionIndex)}>
+                                + Add item
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button type="button" className="btn btn-outline settings-menu-section-add-btn" onClick={addMenuSection}>
+                      + Add menu section
                     </button>
                   </div>
                 ) : (
