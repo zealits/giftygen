@@ -38,6 +38,7 @@ const BusinessPage = () => {
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: "", reviewerName: "" });
   const [submitReviewLoading, setSubmitReviewLoading] = useState(false);
   const [reviewSubmitMessage, setReviewSubmitMessage] = useState("");
+  const [roomGalleryIndex, setRoomGalleryIndex] = useState({});
 
   const fetchReviews = useCallback(async () => {
     if (!businessSlug) return;
@@ -420,10 +421,14 @@ const BusinessPage = () => {
                     )}
                   </section>
                 )}
-                {displayKnownFor && (
+                {knownForList.length > 0 && (
                   <section id="venue-known-for" className="venue-card">
                     <h3 className="venue-card-title">Known For</h3>
-                    <p className="venue-card-text">{displayKnownFor}</p>
+                    <div className="venue-knownfor-tags">
+                      {knownForList.map((item, idx) => (
+                        <span key={`${item}-${idx}`} className="venue-knownfor-tag">{item}</span>
+                      ))}
+                    </div>
                   </section>
                 )}
                 {business.description && !displayKnownFor && (
@@ -649,16 +654,38 @@ const BusinessPage = () => {
                           ? room.bestFor.split(",").map((s) => s.trim()).filter(Boolean)
                           : Array.isArray(room.bestFor) ? room.bestFor : [];
                         const images = Array.isArray(room.images) ? room.images : [];
+                        const selectedImageIndex = roomGalleryIndex[index] ?? 0;
+                        const displayImages = images.slice(0, 5);
                         return (
                           <article key={index} className="venue-room-card">
                             <div className={`venue-room-card-inner${images.length === 0 ? " venue-room-card-inner--no-images" : ""}`}>
                               {images.length > 0 && (
-                                <div className="venue-room-card-images">
-                                  {images.slice(0, 3).map((src, i) => (
-                                    <div key={i} className="venue-room-card-image">
-                                      <img src={src} alt={room.name || `Room ${index + 1}`} loading="lazy" />
+                                <div className="venue-room-gallery">
+                                  <div className="venue-room-gallery-hero">
+                                    <img
+                                      src={images[selectedImageIndex]}
+                                      alt={room.name ? `${room.name} — view ${selectedImageIndex + 1}` : `Room ${index + 1}`}
+                                      loading="lazy"
+                                    />
+                                    {displayImages.length > 1 && (
+                                      <span className="venue-room-gallery-count">{selectedImageIndex + 1} / {displayImages.length}</span>
+                                    )}
+                                  </div>
+                                  {displayImages.length > 1 && (
+                                    <div className="venue-room-gallery-thumbs">
+                                      {displayImages.map((src, i) => (
+                                        <button
+                                          key={i}
+                                          type="button"
+                                          className={`venue-room-gallery-thumb${i === selectedImageIndex ? " is-active" : ""}`}
+                                          onClick={() => setRoomGalleryIndex((prev) => ({ ...prev, [index]: i }))}
+                                          aria-label={`View image ${i + 1}`}
+                                        >
+                                          <img src={src} alt="" loading="lazy" />
+                                        </button>
+                                      ))}
                                     </div>
-                                  ))}
+                                  )}
                                 </div>
                               )}
                               <div className="venue-room-card-body">
@@ -678,11 +705,11 @@ const BusinessPage = () => {
                                 {bestForList.length > 0 && (
                                   <div className="venue-room-card-block">
                                     <span className="venue-room-card-label">Best for</span>
-                                    <ul className="venue-room-card-best-for">
+                                    <div className="venue-room-card-best-for">
                                       {bestForList.map((item, i) => (
-                                        <li key={i}>{item}</li>
+                                        <span key={i} className="venue-room-best-for-tag">{item}</span>
                                       ))}
-                                    </ul>
+                                    </div>
                                   </div>
                                 )}
                               </div>
