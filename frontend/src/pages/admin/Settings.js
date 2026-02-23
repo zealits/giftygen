@@ -78,7 +78,14 @@ const Settings = ({ section: sectionProp }) => {
   }, [form.businessSlug]);
 
   const toArray = (v) =>
-    Array.isArray(v) ? v : typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : [];
+    Array.isArray(v)
+      ? v
+      : typeof v === "string"
+        ? v
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
 
   useEffect(() => {
     const pc = initial.pageCustomization || {};
@@ -150,7 +157,13 @@ const Settings = ({ section: sectionProp }) => {
   };
 
   const handlePageCustomizationArrayChange = (field, value) => {
-    const arr = typeof value === "string" ? value.split(",").map((s) => s.trim()).filter(Boolean) : value;
+    const arr =
+      typeof value === "string"
+        ? value
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : value;
     handlePageCustomizationChange(field, arr);
   };
 
@@ -181,18 +194,13 @@ const Settings = ({ section: sectionProp }) => {
   const setRoomTypes = (next) => handlePageCustomizationChange("roomTypes", next);
 
   const addRoomType = () => {
-    setRoomTypes([
-      ...roomTypes,
-      { name: "", description: "", size: "", bestFor: "", images: [] },
-    ]);
+    setRoomTypes([...roomTypes, { name: "", description: "", size: "", bestFor: "", images: [] }]);
   };
   const removeRoomType = (index) => {
     setRoomTypes(roomTypes.filter((_, i) => i !== index));
   };
   const updateRoomType = (index, field, value) => {
-    const next = roomTypes.map((r, i) =>
-      i === index ? { ...r, [field]: value } : r
-    );
+    const next = roomTypes.map((r, i) => (i === index ? { ...r, [field]: value } : r));
     setRoomTypes(next);
   };
   const addRoomImage = async (roomIndex, file) => {
@@ -219,7 +227,11 @@ const Settings = ({ section: sectionProp }) => {
   };
   const removeRoomImage = (roomIndex, url) => {
     const current = roomTypes[roomIndex]?.images || [];
-    updateRoomType(roomIndex, "images", current.filter((u) => u !== url));
+    updateRoomType(
+      roomIndex,
+      "images",
+      current.filter((u) => u !== url),
+    );
   };
 
   const handleBusinessHoursChange = (day, field, value) => {
@@ -236,7 +248,7 @@ const Settings = ({ section: sectionProp }) => {
 
   const groupedHours = useMemo(
     () => businessHoursToGrouped(form.pageCustomization?.businessHours),
-    [form.pageCustomization?.businessHours]
+    [form.pageCustomization?.businessHours],
   );
 
   const setGroupedHours = (group, value) => {
@@ -251,15 +263,12 @@ const Settings = ({ section: sectionProp }) => {
 
   const statusPreviewLines = useMemo(
     () => formatBusinessHoursGrouped(form.pageCustomization?.businessHours || {}),
-    [form.pageCustomization?.businessHours]
+    [form.pageCustomization?.businessHours],
   );
 
   const INDUSTRY_CONFIG = INDUSTRY_PAGE_CONFIG;
 
-  const knownForList = useMemo(
-    () => toArray(form.pageCustomization?.knownFor),
-    [form.pageCustomization?.knownFor]
-  );
+  const knownForList = useMemo(() => toArray(form.pageCustomization?.knownFor), [form.pageCustomization?.knownFor]);
 
   const knownForAllOptions = useMemo(() => {
     const sub = INDUSTRY_CONFIG[form.industry]?.subtitleOptions || [];
@@ -269,13 +278,11 @@ const Settings = ({ section: sectionProp }) => {
 
   const photoFilterLabelOptions = useMemo(
     () => INDUSTRY_CONFIG[form.industry]?.photoFilterLabelOptions || [],
-    [form.industry]
+    [form.industry],
   );
 
   const photoLabels = useMemo(() => {
-    const labels = Array.isArray(form.pageCustomization?.photoLabels)
-      ? form.pageCustomization.photoLabels
-      : [];
+    const labels = Array.isArray(form.pageCustomization?.photoLabels) ? form.pageCustomization.photoLabels : [];
     const len = galleryImages.length;
     if (labels.length >= len) return labels.slice(0, len);
     return [...labels, ...Array(len - labels.length).fill("")];
@@ -283,16 +290,13 @@ const Settings = ({ section: sectionProp }) => {
 
   const galleryLabelOptions = useMemo(() => {
     const customUsed = [...new Set(photoLabels.map((l) => (l || "").trim()).filter(Boolean))].filter(
-      (l) => !photoFilterLabelOptions.includes(l)
+      (l) => !photoFilterLabelOptions.includes(l),
     );
     return [...photoFilterLabelOptions, ...customUsed];
   }, [photoFilterLabelOptions, photoLabels]);
 
   const businessHours = form.pageCustomization?.businessHours || {};
-  const dynamicStatus = useMemo(
-    () => getStatusFromBusinessHours(businessHours),
-    [businessHours]
-  );
+  const dynamicStatus = useMemo(() => getStatusFromBusinessHours(businessHours), [businessHours]);
 
   const handleMapLocationSelect = (lat, lng, address = null) => {
     // Ensure lat and lng are numbers, not strings
@@ -372,8 +376,7 @@ const Settings = ({ section: sectionProp }) => {
     try {
       const pc = form.pageCustomization || {};
       const bh = pc.businessHours;
-      const { statusBadge: computedStatus, timings: computedTimings } =
-        getStatusFromBusinessHours(bh);
+      const { statusBadge: computedStatus, timings: computedTimings } = getStatusFromBusinessHours(bh);
 
       const { priceRange: _removed, ...pcRest } = pc;
       const pageCustomization = {
@@ -504,10 +507,7 @@ const Settings = ({ section: sectionProp }) => {
       setForm((prev) => {
         const cur = prev.pageCustomization?.photoLabels || [];
         const len = newGallery.length;
-        const nextLabels =
-          cur.length >= len
-            ? cur.slice(0, len)
-            : [...cur, ...Array(len - cur.length).fill("")];
+        const nextLabels = cur.length >= len ? cur.slice(0, len) : [...cur, ...Array(len - cur.length).fill("")];
         return {
           ...prev,
           pageCustomization: { ...prev.pageCustomization, photoLabels: nextLabels },
@@ -680,65 +680,56 @@ const Settings = ({ section: sectionProp }) => {
           <div className="profile-section">
             <h3 className="card-title">Branding & Identity</h3>
 
-            <div className="logo-section">
-              <label className="form_label">Business Logo</label>
-              <div className="logo-upload">
-                <div className="logo-preview">
+            <div className="branding-row">
+              <div className="logo-section branding-row-logo">
+                <label className="form_label">Business Logo</label>
+                <input type="file" accept="image/*" onChange={handleLogoFile} className="file-input" id="logo-upload" />
+                <div className="logo-box-wrap">
                   {logoUrl ? (
-                    <img src={logoUrl} alt="Business Logo" className="logo-image" />
-                  ) : (
-                    <div className="logo-placeholder">
-                      <span>📷</span>
-                      <span>No Logo</span>
+                    <div className="logo-preview logo-preview--has-image">
+                      <img src={logoUrl} alt="Business Logo" className="logo-image" />
+                      <label
+                        htmlFor="logo-upload"
+                        className={`logo-hover-overlay ${uploadingLogo ? "logo-hover-overlay--busy" : ""}`}
+                        style={uploadingLogo ? { pointerEvents: "none" } : {}}
+                      >
+                        <span className="logo-hover-icon">📷</span>
+                        <span>{uploadingLogo ? "Uploading..." : "Change logo"}</span>
+                      </label>
                     </div>
+                  ) : (
+                    <label htmlFor="logo-upload" className="logo-upload-empty">
+                      <span className="logo-upload-empty-icon">📷</span>
+                      <span className="logo-upload-empty-text">Upload logo</span>
+                      <span className="logo-upload-empty-sub">
+                        {uploadingLogo ? "Uploading..." : "Click to choose file"}
+                      </span>
+                    </label>
                   )}
                 </div>
-                <div className="logo-actions">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoFile}
-                    className="file-input"
-                    id="logo-upload"
-                  />
-                  <label htmlFor="logo-upload" className="btn btn-secondary">
-                    Choose File
-                  </label>
-                  <button
-                    disabled={uploadingLogo}
-                    type="button"
-                    className="btn btn-outline"
-                    onClick={() => document.getElementById("logo-upload").click()}
-                  >
-                    {uploadingLogo ? "Uploading..." : "Upload Logo"}
-                  </button>
-                </div>
               </div>
-              <p className="form-hint">PNG/JPG preferred. Stored securely on Cloudinary.</p>
-            </div>
-
-            <div className="form_group">
-              <label className="form_label">Business Name</label>
-              <input
-                name="restaurantName"
-                value={form.restaurantName}
-                onChange={handleNameChange}
-                placeholder="Enter your business name"
-                className="form-input"
-              />
-            </div>
-
-            <div className="form_group">
-              <label className="form_label">Industry</label>
-              <select name="industry" value={form.industry} onChange={handleChange} className="form-input">
-                <option value="">Select an industry</option>
-                <option value="Restaurant And Fine Dining">Restaurant And Fine Dining</option>
-                <option value="Hotels & Resorts">Hotels & Resorts</option>
-                <option value="Fitness and Wellness memberships">Fitness and Wellness memberships</option>
-                <option value="Retail & E-commerce">Retail & E-commerce</option>
-                <option value="Beauty and Personal care">Beauty and Personal care</option>
-                <option value="Seasonal Gifting">Seasonal Gifting</option>
-              </select>
+              <div className="form_group branding-row-name">
+                <label className="form_label">Business Name</label>
+                <input
+                  name="restaurantName"
+                  value={form.restaurantName}
+                  onChange={handleNameChange}
+                  placeholder="Enter your business name"
+                  className="form-input"
+                />
+              </div>
+              <div className="form_group branding-row-industry">
+                <label className="form_label">Industry</label>
+                <select name="industry" value={form.industry} onChange={handleChange} className="form-input">
+                  <option value="">Select an industry</option>
+                  <option value="Restaurant And Fine Dining">Restaurant And Fine Dining</option>
+                  <option value="Hotels & Resorts">Hotels & Resorts</option>
+                  <option value="Fitness and Wellness memberships">Fitness and Wellness memberships</option>
+                  <option value="Retail & E-commerce">Retail & E-commerce</option>
+                  <option value="Beauty and Personal care">Beauty and Personal care</option>
+                  <option value="Seasonal Gifting">Seasonal Gifting</option>
+                </select>
+              </div>
             </div>
 
             <div className="form_group" style={{ gridColumn: "1 / -1" }}>
@@ -747,7 +738,11 @@ const Settings = ({ section: sectionProp }) => {
                 name="businessDescription"
                 value={form.businessDescription}
                 onChange={handleChange}
-                placeholder={form.industry && INDUSTRY_CONFIG[form.industry]?.businessDescriptionPlaceholder ? INDUSTRY_CONFIG[form.industry].businessDescriptionPlaceholder : "Describe your business..."}
+                placeholder={
+                  form.industry && INDUSTRY_CONFIG[form.industry]?.businessDescriptionPlaceholder
+                    ? INDUSTRY_CONFIG[form.industry].businessDescriptionPlaceholder
+                    : "Describe your business..."
+                }
                 className="form-input"
                 rows="4"
                 style={{ resize: "vertical", minHeight: "100px" }}
@@ -763,7 +758,7 @@ const Settings = ({ section: sectionProp }) => {
               </p>
               <div className="form-grid">
                 <div className="form_group page-customization-full">
-                  <label className="form_label">Business Hours (dynamic Open/Closed status)</label>
+                  <label className="form_label">Business Hours</label>
                   <p className="form-hint" style={{ marginBottom: 10 }}>
                     Set hours for weekdays, then override Saturday/Sunday if different. Status updates automatically.
                   </p>
@@ -775,7 +770,10 @@ const Settings = ({ section: sectionProp }) => {
                           type="checkbox"
                           checked={groupedHours.weekdays.closed === true}
                           onChange={(e) =>
-                            setGroupedHours("weekdays", e.target.checked ? { closed: true } : { open: "09:00", close: "18:00" })
+                            setGroupedHours(
+                              "weekdays",
+                              e.target.checked ? { closed: true } : { open: "09:00", close: "18:00" },
+                            )
                           }
                         />
                         Closed
@@ -817,10 +815,7 @@ const Settings = ({ section: sectionProp }) => {
                           type="checkbox"
                           checked={groupedHours.sat.sameAsWeekdays === true}
                           onChange={(e) =>
-                            setGroupedHours(
-                              "sat",
-                              e.target.checked ? { sameAsWeekdays: true } : { closed: true }
-                            )
+                            setGroupedHours("sat", e.target.checked ? { sameAsWeekdays: true } : { closed: true })
                           }
                         />
                         Same as weekdays
@@ -832,7 +827,10 @@ const Settings = ({ section: sectionProp }) => {
                               type="checkbox"
                               checked={groupedHours.sat.closed === true}
                               onChange={(e) =>
-                                setGroupedHours("sat", e.target.checked ? { closed: true } : { open: "09:00", close: "18:00" })
+                                setGroupedHours(
+                                  "sat",
+                                  e.target.checked ? { closed: true } : { open: "09:00", close: "18:00" },
+                                )
                               }
                             />
                             Closed
@@ -876,10 +874,7 @@ const Settings = ({ section: sectionProp }) => {
                           type="checkbox"
                           checked={groupedHours.sun.sameAsWeekdays === true}
                           onChange={(e) =>
-                            setGroupedHours(
-                              "sun",
-                              e.target.checked ? { sameAsWeekdays: true } : { closed: true }
-                            )
+                            setGroupedHours("sun", e.target.checked ? { sameAsWeekdays: true } : { closed: true })
                           }
                         />
                         Same as weekdays
@@ -891,7 +886,10 @@ const Settings = ({ section: sectionProp }) => {
                               type="checkbox"
                               checked={groupedHours.sun.closed === true}
                               onChange={(e) =>
-                                setGroupedHours("sun", e.target.checked ? { closed: true } : { open: "09:00", close: "18:00" })
+                                setGroupedHours(
+                                  "sun",
+                                  e.target.checked ? { closed: true } : { open: "09:00", close: "18:00" },
+                                )
                               }
                             />
                             Closed
@@ -930,12 +928,13 @@ const Settings = ({ section: sectionProp }) => {
                     </div>
                   </div>
                   <div className="dynamic-status-preview">
-                    <strong>Status:</strong>{" "}
-                    {dynamicStatus.statusBadge || "Set hours above to see status"}
+                    <strong>Status:</strong> {dynamicStatus.statusBadge || "Set hours above to see status"}
                     {statusPreviewLines.length > 0 && (
                       <div className="dynamic-status-lines">
                         {statusPreviewLines.map((line, idx) => (
-                          <span key={idx} className="dynamic-status-line">{line}</span>
+                          <span key={idx} className="dynamic-status-line">
+                            {line}
+                          </span>
                         ))}
                       </div>
                     )}
@@ -946,9 +945,7 @@ const Settings = ({ section: sectionProp }) => {
                   <label className="form_label">Disclaimer</label>
                   <input
                     value={form.pageCustomization?.disclaimer || ""}
-                    onChange={(e) =>
-                      handlePageCustomizationChange("disclaimer", e.target.value)
-                    }
+                    onChange={(e) => handlePageCustomizationChange("disclaimer", e.target.value)}
                     placeholder={INDUSTRY_CONFIG[form.industry]?.disclaimerPlaceholder || "e.g. * Terms may apply"}
                     className="form-input"
                   />
@@ -957,7 +954,8 @@ const Settings = ({ section: sectionProp }) => {
                 <div className="form_group page-customization-full">
                   <label className="form_label">Known For / Highlights</label>
                   <p className="form-hint" style={{ marginBottom: 8 }}>
-                    Select from options below or type your own and press Enter to add. Categories and highlights in one place.
+                    Select from options below or type your own and press Enter to add. Categories and highlights in one
+                    place.
                   </p>
                   <div className="tag-options-wrap">
                     {knownForAllOptions.map((opt) => (
@@ -989,24 +987,23 @@ const Settings = ({ section: sectionProp }) => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.knownForPlaceholder || "e.g. Sea View, Concierge — or add your own above"}
+                    placeholder={
+                      INDUSTRY_CONFIG[form.industry]?.knownForPlaceholder ||
+                      "e.g. Sea View, Concierge — or add your own above"
+                    }
                     onKeyDown={handleKnownForAddCustom}
                     style={{ marginTop: 8 }}
                   />
                 </div>
                 <div className="form_group" style={{ gridColumn: "1 / -1" }}>
-                  <label className="form_label">
-                    {INDUSTRY_CONFIG[form.industry]?.tagsLabel || "Tags"}
-                  </label>
+                  <label className="form_label">{INDUSTRY_CONFIG[form.industry]?.tagsLabel || "Tags"}</label>
                   <input
                     value={
                       Array.isArray(form.pageCustomization?.tags)
                         ? form.pageCustomization.tags.join(", ")
-                        : (form.pageCustomization?.tags || "")
+                        : form.pageCustomization?.tags || ""
                     }
-                    onChange={(e) =>
-                      handlePageCustomizationArrayChange("tags", e.target.value)
-                    }
+                    onChange={(e) => handlePageCustomizationArrayChange("tags", e.target.value)}
                     placeholder={INDUSTRY_CONFIG[form.industry]?.tagsPlaceholder || "Comma-separated tags"}
                     className="form-input"
                   />
@@ -1021,9 +1018,7 @@ const Settings = ({ section: sectionProp }) => {
                       {roomTypes.map((room, index) => (
                         <div key={index} className="settings-room-type-card">
                           <div className="settings-room-type-card-header">
-                            <span className="settings-room-type-card-title">
-                              {room.name || `Room ${index + 1}`}
-                            </span>
+                            <span className="settings-room-type-card-title">{room.name || `Room ${index + 1}`}</span>
                             <button
                               type="button"
                               className="settings-room-type-remove"
@@ -1070,7 +1065,13 @@ const Settings = ({ section: sectionProp }) => {
                               <input
                                 type="text"
                                 className="form-input"
-                                value={typeof room.bestFor === "string" ? room.bestFor : (Array.isArray(room.bestFor) ? room.bestFor.join(", ") : "")}
+                                value={
+                                  typeof room.bestFor === "string"
+                                    ? room.bestFor
+                                    : Array.isArray(room.bestFor)
+                                      ? room.bestFor.join(", ")
+                                      : ""
+                                }
                                 onChange={(e) => updateRoomType(index, "bestFor", e.target.value)}
                                 placeholder="e.g. Solo travelers, Budget couples"
                               />
@@ -1115,11 +1116,7 @@ const Settings = ({ section: sectionProp }) => {
                         </div>
                       ))}
                     </div>
-                    <button
-                      type="button"
-                      className="btn btn-outline settings-room-type-add-btn"
-                      onClick={addRoomType}
-                    >
+                    <button type="button" className="btn btn-outline settings-room-type-add-btn" onClick={addRoomType}>
                       + Add room type
                     </button>
                   </div>
@@ -1130,12 +1127,9 @@ const Settings = ({ section: sectionProp }) => {
                     </label>
                     <textarea
                       value={form.pageCustomization?.customTabContent || ""}
-                      onChange={(e) =>
-                        handlePageCustomizationChange("customTabContent", e.target.value)
-                      }
+                      onChange={(e) => handlePageCustomizationChange("customTabContent", e.target.value)}
                       placeholder={
-                        INDUSTRY_CONFIG[form.industry]?.customTabPlaceholder ||
-                        "Add content for your custom tab..."
+                        INDUSTRY_CONFIG[form.industry]?.customTabPlaceholder || "Add content for your custom tab..."
                       }
                       className="form-input"
                       rows="4"
@@ -1224,7 +1218,7 @@ const Settings = ({ section: sectionProp }) => {
                       Label
                     </label>
                     <select
-                      value={showCustomLabelFor === index ? "__custom__" : (photoLabels[index] || "")}
+                      value={showCustomLabelFor === index ? "__custom__" : photoLabels[index] || ""}
                       onChange={(e) => {
                         const v = e.target.value;
                         if (v === "__custom__") {
@@ -1249,67 +1243,67 @@ const Settings = ({ section: sectionProp }) => {
                         boxSizing: "border-box",
                       }}
                     >
-                    <option value="">Select label</option>
-                    {galleryLabelOptions.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                    <option value="__custom__">Add custom label...</option>
-                  </select>
-                  {showCustomLabelFor === index && (
-                    <div style={{ margin: "0 0 8px", display: "flex", gap: 6, alignItems: "center", minWidth: 0 }}>
-                      <input
-                        type="text"
-                        value={customLabelInput}
-                        onChange={(e) => setCustomLabelInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
+                      <option value="">Select label</option>
+                      {galleryLabelOptions.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                      <option value="__custom__">Add custom label...</option>
+                    </select>
+                    {showCustomLabelFor === index && (
+                      <div style={{ margin: "0 0 8px", display: "flex", gap: 6, alignItems: "center", minWidth: 0 }}>
+                        <input
+                          type="text"
+                          value={customLabelInput}
+                          onChange={(e) => setCustomLabelInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              const val = customLabelInput.trim();
+                              if (val) {
+                                handlePhotoLabelChange(index, val);
+                                setShowCustomLabelFor(null);
+                                setCustomLabelInput("");
+                              }
+                            }
+                            if (e.key === "Escape") {
+                              setShowCustomLabelFor(null);
+                              setCustomLabelInput("");
+                            }
+                          }}
+                          placeholder="Type label and press Enter"
+                          className="form-input photo-custom-label-input"
+                          style={{
+                            flex: 1,
+                            minWidth: 0,
+                            maxWidth: "100%",
+                            padding: "6px 8px",
+                            fontSize: 12,
+                            backgroundColor: "#ffffff",
+                            border: "1px solid #4f46e5",
+                            color: "#0f172a",
+                            borderRadius: 6,
+                            boxSizing: "border-box",
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
                             const val = customLabelInput.trim();
                             if (val) {
                               handlePhotoLabelChange(index, val);
                               setShowCustomLabelFor(null);
                               setCustomLabelInput("");
                             }
-                          }
-                          if (e.key === "Escape") {
-                            setShowCustomLabelFor(null);
-                            setCustomLabelInput("");
-                          }
-                        }}
-                        placeholder="Type label and press Enter"
-                        className="form-input photo-custom-label-input"
-                        style={{
-                          flex: 1,
-                          minWidth: 0,
-                          maxWidth: "100%",
-                          padding: "6px 8px",
-                          fontSize: 12,
-                          backgroundColor: "#ffffff",
-                          border: "1px solid #4f46e5",
-                          color: "#0f172a",
-                          borderRadius: 6,
-                          boxSizing: "border-box",
-                        }}
-                        autoFocus
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const val = customLabelInput.trim();
-                          if (val) {
-                            handlePhotoLabelChange(index, val);
-                            setShowCustomLabelFor(null);
-                            setCustomLabelInput("");
-                          }
-                        }}
-                        className="btn btn-outline"
-                        style={{ padding: "6px 10px", fontSize: 12 }}
-                      >
-                        Add
-                      </button>
-                    </div>
-                  )}
+                          }}
+                          className="btn btn-outline"
+                          style={{ padding: "6px 10px", fontSize: 12 }}
+                        >
+                          Add
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
