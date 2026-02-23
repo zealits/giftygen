@@ -152,9 +152,14 @@ const BusinessPage = () => {
     if (pc.businessHours && Object.keys(pc.businessHours).length > 0) return null;
     return pc.timings;
   }, [pc.businessHours, pc.timings]);
-  const knownForDisplay = Array.isArray(pc.knownFor) ? pc.knownFor.join(", ") : (pc.knownFor || "");
-  const displaySubtitle = knownForDisplay || (Array.isArray(pc.subtitle) ? pc.subtitle.join(", ") : pc.subtitle || "");
-  const displayKnownFor = knownForDisplay;
+  const knownForList = Array.isArray(pc.knownFor) ? pc.knownFor : (pc.knownFor ? [pc.knownFor] : []);
+  const knownForDisplayFull = knownForList.join(", ");
+  const KNOWN_FOR_VISIBLE = 5;
+  const knownForTruncated = knownForList.length <= KNOWN_FOR_VISIBLE
+    ? knownForDisplayFull
+    : knownForList.slice(0, KNOWN_FOR_VISIBLE).join(", ") + " " + (knownForList.length - KNOWN_FOR_VISIBLE) + "+";
+  const displaySubtitle = knownForTruncated || (Array.isArray(pc.subtitle) ? pc.subtitle.join(", ") : pc.subtitle || "");
+  const displayKnownFor = knownForDisplayFull;
   const customTab = business?.industry ? INDUSTRY_TAB_MAP[business.industry] : null;
   const baseTabs = [
     { id: "overview", label: "Overview" },
@@ -273,7 +278,27 @@ const BusinessPage = () => {
                 })()}
               </div>
             </div>
-            {displaySubtitle && <p className="venue-cuisine">{displaySubtitle}</p>}
+            {knownForList.length > 0 && (
+              <div className="venue-header-knownfor">
+                {knownForList.slice(0, KNOWN_FOR_VISIBLE).map((item) => (
+                  <span key={item} className="venue-header-knownfor-tag">{item}</span>
+                ))}
+                {knownForList.length > KNOWN_FOR_VISIBLE && (
+                  <button
+                    type="button"
+                    className="venue-header-knownfor-tag venue-header-knownfor-tag--more"
+                    onClick={() => {
+                      handleTabClick("overview");
+                      setTimeout(() => {
+                        document.getElementById("venue-known-for")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }, 100);
+                    }}
+                  >
+                    {knownForList.length - KNOWN_FOR_VISIBLE}+
+                  </button>
+                )}
+              </div>
+            )}
             {addressText && <p className="venue-address">{addressText}</p>}
             <div className="venue-meta-row">
               {displayStatus && <span className="venue-status-badge">{displayStatus}</span>}
@@ -396,7 +421,7 @@ const BusinessPage = () => {
                   </section>
                 )}
                 {displayKnownFor && (
-                  <section className="venue-card">
+                  <section id="venue-known-for" className="venue-card">
                     <h3 className="venue-card-title">Known For</h3>
                     <p className="venue-card-text">{displayKnownFor}</p>
                   </section>

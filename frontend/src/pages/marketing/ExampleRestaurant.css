@@ -144,6 +144,37 @@
   margin: 0 0 4px;
 }
 
+.venue-header-knownfor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 4px;
+}
+
+.venue-header-knownfor-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #696969;
+  background: transparent;
+  border: 1px solid rgba(226, 55, 68, 0.5);
+  border-radius: 20px;
+}
+
+.venue-header-knownfor-tag--more {
+  color: #e23744;
+  border-color: #e23744;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  margin: 0;
+}
+
+.venue-header-knownfor-tag--more:hover {
+  background: rgba(226, 55, 68, 0.08);
+}
+
 .venue-address {
   font-size: 0.9rem;
   color: #696969;
