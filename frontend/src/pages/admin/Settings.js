@@ -940,21 +940,6 @@ const Settings = ({ section: sectionProp }) => {
                     style={{ marginTop: 8 }}
                   />
                 </div>
-                <div className="form_group page-customization-full">
-                  <label className="form_label">Amenities / Features</label>
-                  <input
-                    value={
-                      Array.isArray(form.pageCustomization?.amenities)
-                        ? form.pageCustomization.amenities.join(", ")
-                        : (form.pageCustomization?.amenities || "")
-                    }
-                    onChange={(e) =>
-                      handlePageCustomizationArrayChange("amenities", e.target.value)
-                    }
-                    placeholder={INDUSTRY_CONFIG[form.industry]?.amenitiesPlaceholder || "Comma-separated: Dinner, Lunch, Pool, WiFi..."}
-                    className="form-input"
-                  />
-                </div>
                 <div className="form_group" style={{ gridColumn: "1 / -1" }}>
                   <label className="form_label">
                     {INDUSTRY_CONFIG[form.industry]?.tagsLabel || "Tags"}
