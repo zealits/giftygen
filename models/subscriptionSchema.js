@@ -29,6 +29,7 @@ const subscriptionSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: false },
     razorpayOrderId: { type: String },
     razorpayPaymentId: { type: String },
+    promoCode: { type: String }, // Store promo code used for this order
     paymentHistory: [paymentHistorySchema],
   },
   { timestamps: true }

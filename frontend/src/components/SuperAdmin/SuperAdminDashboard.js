@@ -22,6 +22,19 @@ const SuperAdminDashboard = () => {
     businessSlug: "",
     password: "",
   });
+
+  // ── Promo Code State ─────────────────────────────────────────────────────
+  const [promoCodes, setPromoCodes] = useState([]);
+  const [promoForm, setPromoForm] = useState({
+    code: "",
+    description: "",
+    discountPercent: 60,
+    maxUses: "",
+    planLevel: "all", // all, small, medium, large
+    period: "all",    // all, quarterly, biannual, yearly
+  });
+  const [promoLoading, setPromoLoading] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +46,7 @@ const SuperAdminDashboard = () => {
     }
 
     fetchData();
+    fetchPromoCodes();
   }, [navigate]);
 
   const fetchData = async () => {
@@ -60,9 +74,96 @@ const SuperAdminDashboard = () => {
     }
   };
 
+  // ── Promo Code Functions ────────────────────────────────────────────────
+  const fetchPromoCodes = async () => {
+    try {
+      const token = localStorage.getItem("superAdminToken");
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const res = await axios.get("/api/superadmin/promo-codes", config);
+      setPromoCodes(res.data.promoCodes);
+    } catch (error) {
+      console.error("Error fetching promo codes:", error);
+    }
+  };
+
+  const handleCreatePromo = async () => {
+    if (!promoForm.code.trim()) {
+      setNotifyMessage("Promo code is required");
+      setNotifyVisible(true);
+      return;
+    }
+    setPromoLoading(true);
+
+    // Map planLevel and period to backend plan keys
+    // small: quarterly, biannual, yearly
+    // medium: medium_quarterly, medium_biannual, medium_yearly
+    // large: large_quarterly, large_biannual, large_yearly
+    let applicablePlanTypes = [];
+    
+    if (promoForm.planLevel !== "all" || promoForm.period !== "all") {
+      const levels = promoForm.planLevel === "all" ? ["small", "medium", "large"] : [promoForm.planLevel];
+      const periods = promoForm.period === "all" ? ["quarterly", "biannual", "yearly"] : [promoForm.period];
+      
+      levels.forEach(level => {
+        periods.forEach(per => {
+          if (level === "small") applicablePlanTypes.push(per);
+          else applicablePlanTypes.push(`${level}_${per}`);
+        });
+      });
+    }
+
+    try {
+      const token = localStorage.getItem("superAdminToken");
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      await axios.post("/api/superadmin/promo-codes", {
+        code: promoForm.code,
+        description: promoForm.description,
+        discountPercent: Number(promoForm.discountPercent) || 60,
+        maxUses: promoForm.maxUses ? Number(promoForm.maxUses) : null,
+        applicablePlanTypes,
+      }, config);
+      setNotifyMessage("Promo code created successfully!");
+      setNotifyVisible(true);
+      setPromoForm({ code: "", description: "", discountPercent: 60, maxUses: "", planLevel: "all", period: "all" });
+      fetchPromoCodes();
+    } catch (error) {
+      setNotifyMessage(error?.response?.data?.message || "Failed to create promo code");
+      setNotifyVisible(true);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleTogglePromo = async (id) => {
+    try {
+      const token = localStorage.getItem("superAdminToken");
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      await axios.put(`/api/superadmin/promo-codes/${id}/toggle`, {}, config);
+      fetchPromoCodes();
+    } catch (error) {
+      setNotifyMessage("Failed to toggle promo code");
+      setNotifyVisible(true);
+    }
+  };
+
+  const handleDeletePromo = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this promo code?")) return;
+    try {
+      const token = localStorage.getItem("superAdminToken");
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      await axios.delete(`/api/superadmin/promo-codes/${id}`, config);
+      setNotifyMessage("Promo code deleted");
+      setNotifyVisible(true);
+      fetchPromoCodes();
+    } catch (error) {
+      setNotifyMessage("Failed to delete promo code");
+      setNotifyVisible(true);
+    }
+  };
+
   const handleApproveRequest = async () => {
     if (!selectedRequest) return;
-    
+
     setActionLoading(true);
     try {
       const token = localStorage.getItem("superAdminToken");
@@ -93,7 +194,7 @@ const SuperAdminDashboard = () => {
 
       setNotifyMessage("Request approved! Login credentials have been sent to the registered email.");
       setNotifyVisible(true);
-      
+
       // Refresh data and close modal
       fetchData();
       setShowModal(false);
@@ -109,7 +210,7 @@ const SuperAdminDashboard = () => {
 
   const handleRejectRequest = async () => {
     if (!selectedRequest) return;
-    
+
     setActionLoading(true);
     try {
       const token = localStorage.getItem("superAdminToken");
@@ -124,7 +225,7 @@ const SuperAdminDashboard = () => {
 
       setNotifyMessage("Request rejected successfully.");
       setNotifyVisible(true);
-      
+
       // Refresh data and close modal
       fetchData();
       setShowModal(false);
@@ -349,17 +450,17 @@ const SuperAdminDashboard = () => {
                     Cancel
                   </button>
                   <button
-                  onClick={handleRejectRequest}
-                  className="reject-button"
-                  disabled={actionLoading}
-               >
-                  Reject
-                   </button>
+                    onClick={handleRejectRequest}
+                    className="reject-button"
+                    disabled={actionLoading}
+                  >
+                    Reject
+                  </button>
 
                   <button
-                   onClick={handleApproveRequest}
-                   className="approve-button"
-                   disabled={actionLoading}
+                    onClick={handleApproveRequest}
+                    className="approve-button"
+                    disabled={actionLoading}
                   >
                     Approve Request
                   </button>
@@ -377,6 +478,153 @@ const SuperAdminDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* ── Promo Codes Section ────────────────────────────────────────────── */}
+      <div className="requests-section">
+        <h2>🎟️ Promo Codes</h2>
+
+        <div className="promo-create-form">
+          <input
+            placeholder="PROMO CODE"
+            value={promoForm.code}
+            onChange={(e) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })}
+            style={{ textTransform: "uppercase" }}
+          />
+          <input
+            placeholder="Description (optional)"
+            value={promoForm.description}
+            onChange={(e) => setPromoForm({ ...promoForm, description: e.target.value })}
+          />
+          <input
+            type="number"
+            placeholder="Discount %"
+            value={promoForm.discountPercent}
+            onChange={(e) => setPromoForm({ ...promoForm, discountPercent: e.target.value })}
+            min="1" max="100"
+            style={{ width: "100px" }}
+          />
+          <input
+            type="number"
+            placeholder="Max Uses (empty=unlimited)"
+            value={promoForm.maxUses}
+            onChange={(e) => setPromoForm({ ...promoForm, maxUses: e.target.value })}
+            min="1"
+            style={{ width: "160px" }}
+          />
+
+          {/* New Dropdowns for Plan Level and Period */}
+          <select
+            value={promoForm.planLevel}
+            onChange={(e) => setPromoForm({ ...promoForm, planLevel: e.target.value })}
+            style={{ 
+              padding: "10px", 
+              borderRadius: "6px", 
+              border: "1px solid rgba(255,255,255,0.15)", 
+              background: "rgba(255,255,255,0.06)", 
+              color: "#e5e7eb" 
+            }}
+          >
+            <option value="all" style={{ color: "black" }}>All Business Plans</option>
+            <option value="small" style={{ color: "black" }}>Starter Plan</option>
+            <option value="medium" style={{ color: "black" }}>Growth Plan</option>
+            <option value="large" style={{ color: "black" }}>Scale Plan</option>
+          </select>
+
+          <select
+            value={promoForm.period}
+            onChange={(e) => setPromoForm({ ...promoForm, period: e.target.value })}
+            style={{ 
+              padding: "10px", 
+              borderRadius: "6px", 
+              border: "1px solid rgba(255,255,255,0.15)", 
+              background: "rgba(255,255,255,0.06)", 
+              color: "#e5e7eb" 
+            }}
+          >
+            <option value="all" style={{ color: "black" }}>All Periods</option>
+            <option value="quarterly" style={{ color: "black" }}>3 Months</option>
+            <option value="biannual" style={{ color: "black" }}>6 Months</option>
+            <option value="yearly" style={{ color: "black" }}>1 Year</option>
+          </select>
+          <button onClick={handleCreatePromo} disabled={promoLoading} className="approve-button">
+            {promoLoading ? "Creating..." : "Create"}
+          </button>
+        </div>
+
+        {promoCodes.length > 0 && (
+          <div className="requests-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Discount</th>
+                  <th>Description</th>
+                  <th>Applied To</th>
+                  <th>Used</th>
+                  <th>Max Uses</th>
+                  <th>Status</th>
+                  <th>Expires</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {promoCodes.map((p) => (
+                  <tr key={p._id}>
+                    <td style={{ fontWeight: "bold", letterSpacing: "1px" }}>{p.code}</td>
+                    <td>{p.discountPercent}%</td>
+                    <td>{p.description || "—"}</td>
+                    <td style={{ fontSize: "12px", color: "#a0aec0" }}>
+                      {p.applicablePlanTypes && p.applicablePlanTypes.length > 0 
+                        ? p.applicablePlanTypes.join(", ") 
+                        : "All Plans"}
+                    </td>
+                    <td>{p.usedCount}</td>
+                    <td>{p.maxUses || "∞"}</td>
+                    <td>
+                      <span
+                        className="status-badge"
+                        style={{
+                          backgroundColor: p.isActive ? "#27ae60" : "#e74c3c",
+                        }}
+                      >
+                        {p.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td>
+                      {p.expiresAt
+                        ? new Date(p.expiresAt).toLocaleDateString()
+                        : "Never"}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleTogglePromo(p._id)}
+                        className="view-button"
+                        style={{ marginRight: "6px" }}
+                      >
+                        {p.isActive ? "Disable" : "Enable"}
+                      </button>
+                      <button
+                        onClick={() => handleDeletePromo(p._id)}
+                        className="reject-button"
+                        style={{ padding: "6px 12px", fontSize: "0.85rem" }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {promoCodes.length === 0 && (
+          <p style={{ color: "#95a5a6", textAlign: "center", padding: "20px" }}>
+            No promo codes yet. Create one above.
+          </p>
+        )}
+      </div>
+
 
       {notifyVisible && (
         <Modal message={notifyMessage} onClose={() => setNotifyVisible(false)} />

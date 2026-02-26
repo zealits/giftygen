@@ -7,14 +7,14 @@ const SuperAdmin = require("../models/superAdminSchema");
 exports.isAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
   let token;
 
-  // Check for token in cookies first (for existing restaurant admin routes)
-  if (req.cookies && req.cookies.token) {
-    token = req.cookies.token;
+  // Check for Bearer token first (for super admin routes — explicit header takes priority)
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    token = req.headers.authorization.split(" ")[1];
   }
 
-  // Check for Bearer token in Authorization header (for super admin routes)
-  if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-    token = req.headers.authorization.split(" ")[1];
+  // Fall back to cookie token (for restaurant admin routes)
+  if (!token && req.cookies && req.cookies.token) {
+    token = req.cookies.token;
   }
 
   if (!token) {

@@ -34,7 +34,9 @@ app.use("/api/v1/invoices", invoiceRoutes); // Invoice routes
 app.use("/api/superadmin", superAdminRoutes); // Super admin routes
 app.use("/api/payments", paymentRoutes);
 app.use("/api/v1/payment", paymentRoutes); // Alias for new subscription module
+const promoCodeRoutes = require("./routes/promoCodeRoutes");
 app.use("/api/v1/subscription", subscriptionRoutes);
+app.use("/api/v1/promo-code", promoCodeRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/ai", aiRoutes);
 
@@ -257,7 +259,7 @@ app.get('/sitemap.xml', async (req, res) => {
   try {
     // 1. Get real data from Database
     const giftCards = await GiftCard.find({ status: 'active' }).select('_id updatedAt businessSlug');
-    const businesses = await RestaurantAdmin.find({ 
+    const businesses = await RestaurantAdmin.find({
       isVerified: true,
       businessSlug: { $exists: true, $ne: null }
     }).select('businessSlug updatedAt');
@@ -301,10 +303,10 @@ app.get('/sitemap.xml', async (req, res) => {
     // 5. Add Dynamic Gift Cards
     giftCards.forEach(card => {
       const lastmod = card.updatedAt ? new Date(card.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-      const url = card.businessSlug 
+      const url = card.businessSlug
         ? `https://giftygen.com/${card.businessSlug}/gift-card/${card._id}`
         : `https://giftygen.com/gift-card/${card._id}`;
-      
+
       xml += `
     <url>
         <loc>${url}</loc>

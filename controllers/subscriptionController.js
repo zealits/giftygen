@@ -7,9 +7,19 @@ const { createInvoice, sendInvoiceEmail } = require("../controllers/invoiceContr
 const { getTaxBreakdown } = require("../utils/taxCalculator");
 
 const PLAN_DEFINITIONS = {
+  // Small Business
   monthly: { amount: 1499, currency: "INR", duration: 1, durationType: "months" },
   quarterly: { amount: 3999, currency: "INR", duration: 3, durationType: "months" },
-  yearly: { amount: 14999, currency: "INR", duration: 12, durationType: "months" },
+  biannual: { amount: 6999, currency: "INR", duration: 6, durationType: "months" },
+  yearly: { amount: 11999, currency: "INR", duration: 12, durationType: "months" },
+  // Medium Business
+  medium_quarterly: { amount: 5999, currency: "INR", duration: 3, durationType: "months" },
+  medium_biannual: { amount: 9999, currency: "INR", duration: 6, durationType: "months" },
+  medium_yearly: { amount: 16999, currency: "INR", duration: 12, durationType: "months" },
+  // Large Business
+  large_quarterly: { amount: 8999, currency: "INR", duration: 3, durationType: "months" },
+  large_biannual: { amount: 15999, currency: "INR", duration: 6, durationType: "months" },
+  large_yearly: { amount: 24999, currency: "INR", duration: 12, durationType: "months" },
 };
 
 const calculateEndDate = (startDate, plan) => {
@@ -96,7 +106,7 @@ exports.getCurrentSubscription = async (req, res) => {
 
 exports.createSubscriptionOrder = async (req, res) => {
   try {
-    const { planType, businessSlug } = req.body;
+    const { planType, businessSlug, promoCode } = req.body;
 
     if (!planType || !businessSlug) {
       return res.status(400).json({ message: "Plan type and business slug are required" });
@@ -107,41 +117,149 @@ exports.createSubscriptionOrder = async (req, res) => {
       return res.status(400).json({ message: "Invalid plan type" });
     }
 
-    // Calculate tax breakdown
-    const taxBreakdown = getTaxBreakdown(plan.amount);
+    // ── Apply promo code discount if provided ──────────────────────────────
+    let discountPercent = 0;
+    let appliedPromoCode = null;
 
+    if (promoCode) {
+      const PromoCode = require("../models/promoCodeSchema");
+      const promo = await PromoCode.findOne({ code: promoCode.toUpperCase().trim() });
+
+      if (!promo || !promo.isActive) {
+        return res.status(400).json({ message: "Invalid or inactive promo code" });
+      }
+      if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) {
+        return res.status(400).json({ message: "Promo code has expired" });
+      }
+      if (promo.maxUses && promo.usedCount >= promo.maxUses) {
+        return res.status(400).json({ message: "Promo code usage limit reached" });
+      }
+      // Check if already used by this business
+      const alreadyUsed = promo.usedBy.some((u) => u.businessSlug === businessSlug);
+      if (alreadyUsed) {
+        return res.status(400).json({ message: "Promo code already used by this business" });
+      }
+      if (promo.applicablePlanTypes.length > 0 && !promo.applicablePlanTypes.includes(planType)) {
+        return res.status(400).json({ message: "Promo code is not valid for this plan" });
+      }
+
+      discountPercent = promo.discountPercent;
+      appliedPromoCode = promo;
+    }
+
+    // ── Calculate discounted amount ────────────────────────────────────────
+    const discountedAmount = Math.round(plan.amount * (1 - discountPercent / 100));
+    const taxBreakdown = getTaxBreakdown(discountedAmount);
+
+    const totalAmountRounded = Math.round(taxBreakdown.totalAmount * 100); // 100% discount means this is 0
+
+    // ── Bypass Razorpay if 100% discount (FREE) ────────────────────────────
+    if (totalAmountRounded === 0) {
+      const subscription = await Subscription.create({
+        businessSlug,
+        planType,
+        amount: 0,
+        taxAmount: 0,
+        totalAmount: 0,
+        currency: plan.currency || "INR",
+        status: "active",
+        isActive: true,
+        startDate: new Date(),
+        endDate: calculateEndDate(new Date(), plan),
+        razorpayOrderId: `free_${businessSlug}_${Date.now()}`,
+        paymentHistory: [{
+          paymentId: "FREE_PROMO",
+          orderId: `free_${businessSlug}_${Date.now()}`,
+          amount: 0,
+          status: "success",
+          date: new Date(),
+        }],
+      });
+
+      if (appliedPromoCode) {
+        appliedPromoCode.usedCount += 1;
+        appliedPromoCode.usedBy.push({ businessSlug, usedAt: new Date() });
+        await appliedPromoCode.save();
+      }
+
+      // Generate Invoice
+      try {
+        const RestaurantAdmin = require("../models/restaurantAdminSchema");
+        const businessInfo = await RestaurantAdmin.findOne({ businessSlug });
+        
+        if (businessInfo) {
+          const { createInvoice } = require("./invoiceController");
+          const invoice = await createInvoice(subscription, businessInfo);
+          
+          if (invoice) {
+            const { sendInvoiceEmail } = require("../utils/sendEmail");
+            sendInvoiceEmail(invoice, businessInfo).catch((err) => 
+              console.error("Error sending free invoice email:", err)
+            );
+          }
+        }
+      } catch (invoiceError) {
+        console.error("Error creating free invoice:", invoiceError);
+      }
+
+      return res.status(200).json({
+        isFree: true,
+        subscription,
+        discount: { percent: 100, originalAmount: plan.amount, discountedAmount: 0, saved: plan.amount },
+      });
+    }
+
+    // ── Create Razorpay order if amount > 0 ────────────────────────────────
     const razorpayInstance = await getRazorpayInstance(businessSlug);
 
-    // Create Razorpay order with total amount (including tax)
+    const notes = {
+      planType,
+      businessSlug,
+      baseAmount: discountedAmount.toString(),
+      originalAmount: plan.amount.toString(),
+      discountPercent: discountPercent.toString(),
+      taxAmount: taxBreakdown.taxAmount.toString(),
+      totalAmount: taxBreakdown.totalAmount.toString(),
+    };
+    if (promoCode) notes.promoCode = promoCode.toUpperCase().trim();
+
     const order = await razorpayInstance.orders.create({
-      amount: Math.round(taxBreakdown.totalAmount * 100), // Convert to paise
+      amount: totalAmountRounded, 
       currency: plan.currency || "INR",
       receipt: `sub_${businessSlug}_${Date.now()}`,
-      notes: {
-        planType,
-        businessSlug,
-        baseAmount: plan.amount.toString(),
-        taxAmount: taxBreakdown.taxAmount.toString(),
-        totalAmount: taxBreakdown.totalAmount.toString(),
-      },
+      notes,
     });
 
     const subscription = await Subscription.create({
       businessSlug,
       planType,
-      amount: plan.amount, // Base amount
+      amount: discountedAmount,
       taxAmount: taxBreakdown.taxAmount,
-      totalAmount: taxBreakdown.totalAmount, // Total with tax
+      totalAmount: taxBreakdown.totalAmount,
       currency: plan.currency || "INR",
       status: "pending",
       isActive: false,
       razorpayOrderId: order.id,
+      // Store the promo code string temporarily so we know which one to mark as used upon successful payment
+      promoCode: appliedPromoCode ? appliedPromoCode.code : undefined,
     });
 
-    res.status(200).json({ order, subscription });
+    res.status(200).json({
+      order,
+      subscription,
+      discount: discountPercent > 0 ? {
+        percent: discountPercent,
+        originalAmount: plan.amount,
+        discountedAmount,
+        saved: plan.amount - discountedAmount,
+      } : null,
+    });
   } catch (error) {
     console.error("Error creating subscription order:", error);
-    res.status(500).json({ message: "Failed to create subscription order" });
+    res.status(500).json({ 
+      message: "Failed to create subscription order", 
+      error: error.error || error.message || error 
+    });
   }
 };
 
@@ -206,10 +324,10 @@ exports.verifySubscriptionPayment = async (req, res) => {
     subscription.startDate = startDate;
     subscription.endDate = endDate;
     subscription.razorpayPaymentId = paymentId;
-    
+
     // Use the stored totalAmount from subscription (which includes tax)
     const paymentAmount = subscription.totalAmount || subscription.amount;
-    
+
     subscription.paymentHistory.push({
       paymentId,
       orderId: effectiveOrderId,
@@ -217,6 +335,17 @@ exports.verifySubscriptionPayment = async (req, res) => {
       status: "success",
       date: new Date(),
     });
+
+    // Mark promo code as used if one was applied
+    if (subscription.promoCode) {
+      const PromoCode = require("../models/promoCodeSchema");
+      const promo = await PromoCode.findOne({ code: subscription.promoCode });
+      if (promo) {
+        promo.usedCount += 1;
+        promo.usedBy.push({ businessSlug, usedAt: new Date() });
+        await promo.save();
+      }
+    }
 
     await subscription.save();
 

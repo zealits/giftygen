@@ -46,14 +46,21 @@ const buildInvoiceHtml = (invoice, businessInfo) => {
   const dueDate = formatDate(invoice.dueDate);
   const planTypeMap = {
     monthly: "Monthly Plan",
-    quarterly: "Quarterly Plan",
-    yearly: "Yearly Plan",
+    quarterly: "Quarterly Plan (Small Business)",
+    biannual: "Biannual Plan (Small Business)",
+    yearly: "Yearly Plan (Small Business)",
+    medium_quarterly: "Quarterly Plan (Medium Business)",
+    medium_biannual: "Biannual Plan (Medium Business)",
+    medium_yearly: "Yearly Plan (Medium Business)",
+    large_quarterly: "Quarterly Plan (Large Business)",
+    large_biannual: "Biannual Plan (Large Business)",
+    large_yearly: "Yearly Plan (Large Business)",
   };
   const planName = planTypeMap[invoice.planType] || invoice.planType;
-  
+
   // Get subscription data (could be from subscriptionId populated or subscription property)
   let subscription = invoice.subscriptionId || invoice.subscription;
-  
+
   // If subscription is an ObjectId, try to get dates from invoice dates as fallback
   if (!subscription || (subscription && !subscription.startDate && !subscription.endDate)) {
     // Use invoice dates as fallback for subscription period
@@ -309,19 +316,19 @@ const buildInvoiceHtml = (invoice, businessInfo) => {
               <rect x="5" y="35" width="90" height="50" rx="6" fill="none" stroke="url(#rectGradient)" stroke-width="2.5" />
               <text x="50" y="68" font-size="18" font-weight="600" fill="#1a1a1a" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" letter-spacing="0.5">giftygen</text>
               ${Array.from({ length: 6 }, (_, col) =>
-                Array.from({ length: 8 }, (_, row) => {
-                  const x = 110 + col * 12;
-                  const y = 40 + row * 10;
-                  const totalPos = col + row;
-                  let color;
-                  if (totalPos < 3) color = "#FF6B6B";
-                  else if (totalPos < 6) color = "#FFD93D";
-                  else if (totalPos < 9) color = "#6BCF7F";
-                  else if (totalPos < 12) color = "#4D96FF";
-                  else color = "#9B59B6";
-                  return `<circle cx="${x}" cy="${y}" r="3.5" fill="${color}" />`;
-                }).join('')
-              ).join('')}
+    Array.from({ length: 8 }, (_, row) => {
+      const x = 110 + col * 12;
+      const y = 40 + row * 10;
+      const totalPos = col + row;
+      let color;
+      if (totalPos < 3) color = "#FF6B6B";
+      else if (totalPos < 6) color = "#FFD93D";
+      else if (totalPos < 9) color = "#6BCF7F";
+      else if (totalPos < 12) color = "#4D96FF";
+      else color = "#9B59B6";
+      return `<circle cx="${x}" cy="${y}" r="3.5" fill="${color}" />`;
+    }).join('')
+  ).join('')}
             </svg>
           </div>
         </div>
@@ -366,27 +373,29 @@ const buildInvoiceHtml = (invoice, businessInfo) => {
                 <td class="col-description">
                   <div class="item-name">${escapeHtml(planName)}</div>
                   ${(() => {
-                    const sub = subscription;
-                    if (sub && sub.startDate && sub.endDate) {
-                      return `<div class="item-period">${escapeHtml(formatDateForDisplay(sub.startDate))} – ${escapeHtml(formatDateForDisplay(sub.endDate))}</div>`;
-                    } else if (sub && (sub.startDate || sub.endDate)) {
-                      const start = sub.startDate ? formatDateForDisplay(sub.startDate) : formatDateForDisplay(invoice.invoiceDate);
-                      const end = sub.endDate ? formatDateForDisplay(sub.endDate) : formatDateForDisplay(invoice.dueDate || invoice.invoiceDate);
-                      return `<div class="item-period">${escapeHtml(start)} – ${escapeHtml(end)}</div>`;
-                    } else {
-                      // Fallback: calculate dates based on plan type
-                      const startDate = invoice.invoiceDate;
-                      const endDate = new Date(startDate);
-                      if (invoice.planType === 'monthly') {
-                        endDate.setMonth(endDate.getMonth() + 1);
-                      } else if (invoice.planType === 'quarterly') {
-                        endDate.setMonth(endDate.getMonth() + 3);
-                      } else if (invoice.planType === 'yearly') {
-                        endDate.setFullYear(endDate.getFullYear() + 1);
-                      }
-                      return `<div class="item-period">${escapeHtml(formatDateForDisplay(startDate))} – ${escapeHtml(formatDateForDisplay(endDate))}</div>`;
-                    }
-                  })()}
+      const sub = subscription;
+      if (sub && sub.startDate && sub.endDate) {
+        return `<div class="item-period">${escapeHtml(formatDateForDisplay(sub.startDate))} – ${escapeHtml(formatDateForDisplay(sub.endDate))}</div>`;
+      } else if (sub && (sub.startDate || sub.endDate)) {
+        const start = sub.startDate ? formatDateForDisplay(sub.startDate) : formatDateForDisplay(invoice.invoiceDate);
+        const end = sub.endDate ? formatDateForDisplay(sub.endDate) : formatDateForDisplay(invoice.dueDate || invoice.invoiceDate);
+        return `<div class="item-period">${escapeHtml(start)} – ${escapeHtml(end)}</div>`;
+      } else {
+        // Fallback: calculate dates based on plan type
+        const startDate = invoice.invoiceDate;
+        const endDate = new Date(startDate);
+        if (invoice.planType === 'monthly') {
+          endDate.setMonth(endDate.getMonth() + 1);
+        } else if (invoice.planType === 'quarterly' || invoice.planType === 'medium_quarterly' || invoice.planType === 'large_quarterly') {
+          endDate.setMonth(endDate.getMonth() + 3);
+        } else if (invoice.planType === 'biannual' || invoice.planType === 'medium_biannual' || invoice.planType === 'large_biannual') {
+          endDate.setMonth(endDate.getMonth() + 6);
+        } else if (invoice.planType === 'yearly' || invoice.planType === 'medium_yearly' || invoice.planType === 'large_yearly') {
+          endDate.setFullYear(endDate.getFullYear() + 1);
+        }
+        return `<div class="item-period">${escapeHtml(formatDateForDisplay(startDate))} – ${escapeHtml(formatDateForDisplay(endDate))}</div>`;
+      }
+    })()}
                 </td>
                 <td class="col-qty">1</td>
                 <td class="col-unit-price">${escapeHtml(invoice.currency === "INR" ? "₹" : invoice.currency)} ${escapeHtml(invoice.amount.toFixed(2))}</td>
@@ -462,7 +471,7 @@ exports.createInvoice = async (subscription, businessInfo) => {
   try {
     // Use tax amounts from subscription if available, otherwise calculate
     let taxAmount, totalAmount;
-    
+
     if (subscription.taxAmount && subscription.totalAmount) {
       // Use stored tax amounts from subscription
       taxAmount = subscription.taxAmount;
@@ -516,10 +525,10 @@ exports.createInvoice = async (subscription, businessInfo) => {
 exports.sendInvoiceEmail = async (invoice, businessInfo) => {
   try {
     const pdfBuffer = await generateInvoicePDF(invoice, businessInfo);
-    
+
     // Generate the invoice HTML template for email
     const invoiceHtml = buildInvoiceHtml(invoice, businessInfo);
-    
+
     // Create email wrapper with the invoice embedded
     const emailHtml = `
       <!DOCTYPE html>

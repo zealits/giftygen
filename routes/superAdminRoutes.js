@@ -9,6 +9,12 @@ const {
   getRegistrationStats,
   createBusinessAdmin,
 } = require("../controllers/superAdminController");
+const {
+  createPromoCode,
+  getAllPromoCodes,
+  togglePromoCode,
+  deletePromoCode,
+} = require("../controllers/promoCodeController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 
 const router = express.Router();
@@ -38,4 +44,11 @@ router.get("/stats", isAuthenticatedUser, authorizeRoles("SuperAdmin"), getRegis
 // Create Business Admin (Protected)
 router.post("/business-admin", isAuthenticatedUser, authorizeRoles("SuperAdmin"), createBusinessAdmin);
 
+// Promo Code Management (Protected)
+router.post("/promo-codes", isAuthenticatedUser, authorizeRoles("SuperAdmin"), createPromoCode);
+router.get("/promo-codes", isAuthenticatedUser, authorizeRoles("SuperAdmin"), getAllPromoCodes);
+router.put("/promo-codes/:id/toggle", isAuthenticatedUser, authorizeRoles("SuperAdmin"), togglePromoCode);
+router.delete("/promo-codes/:id", isAuthenticatedUser, authorizeRoles("SuperAdmin"), deletePromoCode);
+
 module.exports = router;
+

@@ -3,50 +3,156 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import "./subscriptionManagement.css";
 
+/* ──────────────────────────────────────────────
+   PLAN CONFIGURATION
+   ────────────────────────────────────────────── */
+const PLAN_CARDS = [
+  {
+    id: "small",
+    label: "Starter",
+    tagline: "Great for getting started",
+    isPopular: false,
+    isEnterprise: false,
+    giftCardLimit: "Up to 500",
+    marketplaceCommission: "10%",
+    commissionColor: "red",
+    onboarding: "₹1,999",
+    features: [
+      "Unlimited gift card promotions",
+      "QR Code & Shareable Link",
+      "Marketplace Listing",
+      "Full dashboard access",
+      "Real-time analytics",
+      "Email support",
+      "Order management",
+    ],
+    periods: [
+      { key: "quarterly", label: "3 Months", amount: 3999, duration: "3 months", savings: null },
+      { key: "biannual", label: "6 Months", amount: 6999, duration: "6 months", savings: "Save ₹999" },
+      { key: "yearly", label: "1 Year", amount: 11999, duration: "1 year", savings: "Save ₹3,997" },
+    ],
+  },
+  {
+    id: "medium",
+    label: "Growth",
+    tagline: "Our most popular choice",
+    isPopular: true,
+    isEnterprise: false,
+    giftCardLimit: "Up to 2,000",
+    marketplaceCommission: "6%",
+    commissionColor: "red",
+    onboarding: "₹3,999",
+    features: [
+      "Unlimited gift card promotions",
+      "QR Code & Shareable Link",
+      "Marketplace Listing",
+      "Full dashboard access",
+      "Real-time analytics",
+      "Priority email support",
+      "Order management",
+    ],
+    periods: [
+      { key: "medium_quarterly", label: "3 Months", amount: 5999, duration: "3 months", savings: null },
+      { key: "medium_biannual", label: "6 Months", amount: 9999, duration: "6 months", savings: "Save ₹1,999" },
+      { key: "medium_yearly", label: "1 Year", amount: 16999, duration: "1 year", savings: "Save ₹6,997" },
+    ],
+  },
+  {
+    id: "large",
+    label: "Scale",
+    tagline: "Unlimited scale, best rates",
+    isPopular: false,
+    isEnterprise: true,
+    giftCardLimit: "Unlimited",
+    marketplaceCommission: "3%",
+    commissionColor: "green",
+    onboarding: "₹9,999",
+    features: [
+      "Unlimited gift card promotions",
+      "QR Code & Shareable Link",
+      "Marketplace Listing",
+      "Full dashboard access",
+      "Real-time analytics",
+      "Priority support",
+      "Order management",
+      "Dedicated account manager",
+    ],
+    periods: [], // Contact Sales
+  },
+];
+
+const PLAN_DISPLAY_NAMES = {
+  quarterly: "Small Business — 3 Months",
+  biannual: "Small Business — 6 Months",
+  yearly: "Small Business — 1 Year",
+  medium_quarterly: "Medium Business — 3 Months",
+  medium_biannual: "Medium Business — 6 Months",
+  medium_yearly: "Medium Business — 1 Year",
+  monthly: "Monthly",
+};
+
+/* ──────────────────────────────────────────────
+   COMPONENT
+   ────────────────────────────────────────────── */
 const SubscriptionManagement = () => {
-  const [plans, setPlans] = useState(null);
   const [currentSubscription, setCurrentSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [razorpayKey, setRazorpayKey] = useState("");
   const [processingPaymentPlan, setProcessingPaymentPlan] = useState(null);
   const [invoices, setInvoices] = useState([]);
   const [downloadingInvoice, setDownloadingInvoice] = useState(null);
+
+  // Period selection per card (0‑based index)
+  const [selectedPeriods, setSelectedPeriods] = useState({ small: 0, medium: 0 });
+  const [openDropdown, setOpenDropdown] = useState(null); // "small" | "medium" | null
+  const [showPlans, setShowPlans] = useState(false);
+
+  // Promo‑code handling
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState(null); // { code, discountPercent }
+  const [promoError, setPromoError] = useState("");
+  const [promoSuccess, setPromoSuccess] = useState("");
+  const [promoValidating, setPromoValidating] = useState(false);
+
   const { user } = useSelector((state) => state.auth);
   const businessSlug = user?.user?.businessSlug || "";
   const hasFetched = useRef(false);
+  const dropdownRefs = useRef({});
 
+  /* ── Dropdown outside‑click handling ── */
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (
+        openDropdown &&
+        dropdownRefs.current[openDropdown] &&
+        !dropdownRefs.current[openDropdown].contains(e.target)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [openDropdown]);
+
+  /* ── FETCH CURRENT SUBSCRIPTION, RAZORPAY KEY & INVOICES ── */
   const fetchSubscriptionData = useCallback(async () => {
     try {
       setLoading(true);
-
-      // Fetch plans
-      const plansResponse = await axios.get("/api/v1/subscription/plans");
-      setPlans(plansResponse.data.plans);
-
-      // Fetch current subscription (200 even when empty)
-      const subResponse = await axios.get(
-        `/api/v1/subscription/${businessSlug}/current`
-      );
+      const subResponse = await axios.get(`/api/v1/subscription/${businessSlug}/current`);
       setCurrentSubscription(subResponse.data.subscription || null);
 
-      // Fetch Razorpay key
-      const keyResponse = await axios.get(
-        `/api/v1/payment/razorpay/key?businessSlug=${businessSlug}`
-      );
+      const keyResponse = await axios.get(`/api/v1/payment/razorpay/key?businessSlug=${businessSlug}`);
       setRazorpayKey(keyResponse.data.keyId);
 
-      // Fetch invoices
+      // Invoices
       try {
         const invoicesResponse = await axios.get(`/api/v1/invoices/business/${businessSlug}`);
-        if (invoicesResponse.data.success) {
-          setInvoices(invoicesResponse.data.invoices || []);
-        }
-      } catch (error) {
-        console.error("Error fetching invoices:", error);
+        if (invoicesResponse.data.success) setInvoices(invoicesResponse.data.invoices || []);
+      } catch (err) {
+        console.error("Error fetching invoices:", err);
       }
     } catch (error) {
       console.error("Error fetching subscription data:", error);
-      // Previously showed an alert to the user; now just logs the error
     } finally {
       setLoading(false);
     }
@@ -58,90 +164,114 @@ const SubscriptionManagement = () => {
     fetchSubscriptionData();
   }, [businessSlug, fetchSubscriptionData]);
 
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
+  /* ── LOAD RAZORPAY SDK ── */
+  const loadRazorpayScript = () =>
+    new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
-  };
 
-  const handleSubscribe = async (planType) => {
+  /* ── SUBSCRIBE / PAYMENT FLOW ── */
+  const handleSubscribe = async (planKey, cardLabel) => {
+    // -----------------------------------------------------------------
+    // 1️⃣  Guard – prevent double‑clicks
+    // -----------------------------------------------------------------
     if (processingPaymentPlan) return;
 
-    try {
-      setProcessingPaymentPlan(planType);
+    // -----------------------------------------------------------------
+    // 2️⃣  Basic sanity checks (helps during dev / catches empty slug)
+    // -----------------------------------------------------------------
+    if (!planKey) {
+      console.warn("[handleSubscribe] No planKey supplied");
+      return;
+    }
+    if (!businessSlug) {
+      alert("Business identifier missing – cannot create an order.");
+      console.warn("[handleSubscribe] businessSlug is empty");
+      return;
+    }
 
-      // Load Razorpay script
-      const loaded = await loadRazorpayScript();
-      if (!loaded) {
-        console.error("Failed to load payment gateway. Please try again.");
+    try {
+      setProcessingPaymentPlan(planKey);
+
+      // -----------------------------------------------------------------
+      // 3️⃣  Load Razorpay SDK (show a friendly message if it fails)
+      // -----------------------------------------------------------------
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        alert("Failed to load payment gateway. Please refresh the page.");
         setProcessingPaymentPlan(null);
         return;
       }
 
-      // Create order
-      const orderResponse = await axios.post(
-        "/api/v1/subscription/create-order",
+      // -----------------------------------------------------------------
+      // 4️⃣  Build the payload – we send BOTH `planKey` and `planType`
+      //     because some back‑ends still expect the older name.
+      // -----------------------------------------------------------------
+      const payload = {
+        planKey,               // backward‑compatibility
+        planType: planKey,     // current API surface
+        businessSlug,
+        promoCode: promoDiscount?.code || "",
+      };
+
+      // -----------------------------------------------------------------
+      // 5️⃣  Create the order on the server, handling 400/422 errors
+      // -----------------------------------------------------------------
+      const orderResponse = await axios.post("/api/v1/subscription/create-order", payload);
+      const responseData = orderResponse?.data || {};
+
+      // Normalise order object – the API may return `order` or `orderDetails`
+      const order =
+        responseData.order ||
+        responseData.orderDetails ||
         {
-          planType,
-          businessSlug,
-        }
-      );
+          amount: responseData.amount,
+          currency: responseData.currency,
+          id: responseData.id || responseData.orderId,
+        };
 
-      const { order, subscription } = orderResponse.data;
+      const subscription = responseData.subscription;
 
-      // Initialize Razorpay
+      // -----------------------------------------------------------------
+      // 6️⃣  Validate the order payload before passing it to Razorpay
+      // -----------------------------------------------------------------
+      if (!order || typeof order.amount === "undefined") {
+        console.error("Invalid order payload from server:", responseData);
+        throw new Error("Unable to create payment order. Please try again later.");
+      }
+
+      // -----------------------------------------------------------------
+      // 7️⃣  Initialise Razorpay UI
+      // -----------------------------------------------------------------
       const options = {
         key: razorpayKey,
         amount: order.amount,
         currency: order.currency,
         name: "Gift Card Platform",
-        description: `${planType.charAt(0).toUpperCase() + planType.slice(1)} Subscription`,
-        order_id: order.id,
+        description: `${cardLabel} Subscription`,
+        // Razorpay expects `order_id`; we map from the normalized order.
+        order_id: order.id || order.orderId,
         handler: async (response) => {
           try {
-            // Verify payment
-            const verifyResponse = await axios.post(
-              "/api/v1/subscription/verify-payment",
-              {
-                orderId: response.razorpay_order_id,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-                // Use Mongo _id explicitly; some serializers omit the virtual id field
-                subscriptionId: subscription._id,
-                businessSlug,
-              }
-            );
-
+            const verifyResponse = await axios.post("/api/v1/subscription/verify-payment", {
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+              subscriptionId: subscription?._id,
+              businessSlug,
+            });
             if (verifyResponse.data.success) {
-              console.log("Subscription activated successfully");
+              // Refetch subscription state after a successful payment
               hasFetched.current = false;
               fetchSubscriptionData();
-            } else {
-              console.error(
-                "Payment verification failed on server:",
-                verifyResponse.data.message || "Unknown error"
-              );
             }
-          } catch (error) {
-            console.error("Payment verification failed:", error);
-            const serverMessage =
-              error.response?.data?.message ||
-              error.response?.data?.error ||
-              error.message;
-            console.error(
-              "Payment verification failed.",
-              serverMessage,
-              "Payment ID:",
-              response.razorpay_payment_id
-            );
+          } catch (err) {
+            console.error("Payment verification failed:", err);
           } finally {
             setProcessingPaymentPlan(null);
           }
@@ -151,76 +281,65 @@ const SubscriptionManagement = () => {
           email: user?.user?.email || "",
           contact: user?.user?.phone || "",
         },
-        theme: {
-          color: "#6366f1",
-        },
-        modal: {
-          ondismiss: () => {
-            setProcessingPaymentPlan(null);
-          },
-        },
+        theme: { color: "#7c3aed" },
+        modal: { ondismiss: () => setProcessingPaymentPlan(null) },
       };
 
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
+      new window.Razorpay(options).open();
     } catch (error) {
+      // -----------------------------------------------------------------
+      // 8️⃣  Show a **human‑readable** message – include server‑side details
+      // -----------------------------------------------------------------
       console.error("Error initiating subscription:", error);
-      alert("Failed to initiate subscription. Please try again.");
+
+      const serverMessage = error?.response?.data?.message || error?.response?.data?.error;
+      const friendlyMsg = serverMessage
+        ? `Failed to start subscription: ${serverMessage}`
+        : "Failed to initiate subscription. Please try again.";
+      alert(friendlyMsg);
       setProcessingPaymentPlan(null);
     }
   };
 
+  /* ── CONTACT‑SALES ── */
+  const handleContactSales = () => {
+    window.location.href =
+      "mailto:sales@giftcardplatform.com?subject=Large Business Plan Enquiry";
+  };
+
+  /* ── CANCEL SUBSCRIPTION ── */
   const handleCancelSubscription = async () => {
     if (
       !window.confirm(
         "Are you sure you want to cancel your subscription? You will still have access until the end of your billing period."
       )
-    ) {
+    )
       return;
-    }
-
     try {
       await axios.put(`/api/v1/subscription/${currentSubscription._id}/cancel`);
-      console.log(
-        "Subscription cancelled successfully. Access until",
-        new Date(currentSubscription.endDate).toLocaleDateString()
-      );
       hasFetched.current = false;
       fetchSubscriptionData();
     } catch (error) {
       console.error("Error cancelling subscription:", error);
-      // Previously showed an alert; now just logs the error
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  /* ── UTILITIES ── */
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
-  };
 
   const getDaysRemaining = (endDate) => {
     if (!endDate) return 0;
-    
-    // Set both dates to midnight to avoid time-of-day issues
     const end = new Date(endDate);
     end.setHours(0, 0, 0, 0);
-    
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    
-    // Calculate difference in milliseconds
-    const diffTime = end - now;
-    
-    // Convert to days and round down (don't count partial days)
-    // This gives us the number of full days remaining until the end date
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    // If end date is today or in the past, return 0
-    // Otherwise return the number of days (this includes the end date as a remaining day)
-    return diffDays >= 0 ? diffDays : 0;
+    const diff = Math.floor((end - now) / (1000 * 60 * 60 * 24));
+    return diff >= 0 ? diff : 0;
   };
 
   const handleDownloadInvoice = async (invoiceId, invoiceNumber) => {
@@ -229,7 +348,6 @@ const SubscriptionManagement = () => {
       const response = await axios.get(`/api/v1/invoices/${invoiceId}/download`, {
         responseType: "blob",
       });
-
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -239,44 +357,59 @@ const SubscriptionManagement = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Error downloading invoice:", err);
+    } catch {
       alert("Failed to download invoice. Please try again.");
     } finally {
       setDownloadingInvoice(null);
     }
   };
 
-  // Get invoice for current subscription
   const getCurrentSubscriptionInvoice = () => {
     if (!currentSubscription || !invoices.length) return null;
-    // Find invoice that matches the current subscription
-    return invoices.find(inv => 
-      inv.subscriptionId && 
-      (inv.subscriptionId._id === currentSubscription._id || 
-       inv.subscriptionId.toString() === currentSubscription._id.toString())
-    ) || invoices[0]; // Fallback to most recent invoice
+    return (
+      invoices.find(
+        (inv) =>
+          inv.subscriptionId &&
+          (inv.subscriptionId._id === currentSubscription._id ||
+            inv.subscriptionId.toString() === currentSubscription._id.toString())
+      ) || invoices[0]
+    );
   };
 
+  const formatPlanType = (planType) => PLAN_DISPLAY_NAMES[planType] || planType;
+
+  /* ── LOADING STATE ── */
   if (loading) {
     return (
       <div className="subscription-container">
-        <h1 className="subscription-heading">Subscription Management</h1>
+        <div className="subscription-hero">
+          <h1 className="subscription-heading">Subscription</h1>
+        </div>
         <div className="loading-container">
-          <div className="skeleton-loader"></div>
-          <div className="skeleton-loader"></div>
-          <div className="skeleton-loader"></div>
+          <div className="skeleton-loader" />
+          <div className="skeleton-loader" />
+          <div className="skeleton-loader" />
         </div>
       </div>
     );
   }
 
+  const invoice = getCurrentSubscriptionInvoice();
+
+  /* ── MAIN RENDER ── */
   return (
     <div className="subscription-container">
-      <h1 className="subscription-heading">Subscription Management</h1>
+      {/* ── Hero Header ── */}
+      <div className="subscription-hero">
+        <h1 className="subscription-heading">SUBSCRIPTION</h1>
+        <p className="subscription-subheading">
+          Choose the right plan to grow your gift card business
+        </p>
+        <div className="subscription-hero-divider" />
+      </div>
 
-      {/* Current Subscription Status */}
-      {currentSubscription && currentSubscription.isActive && (
+      {/* ── Active Subscription Banner ── */}
+      {currentSubscription?.isActive && (
         <div className="current-subscription-card">
           <div className="subscription-header">
             <h2>Current Subscription</h2>
@@ -284,17 +417,17 @@ const SubscriptionManagement = () => {
               {currentSubscription.status.toUpperCase()}
             </span>
           </div>
-          
+
           <div className="subscription-details">
             <div className="detail-item">
-              <span className="detail-label">Plan Type</span>
-              <span className="detail-value">
-                {currentSubscription.planType.charAt(0).toUpperCase() + currentSubscription.planType.slice(1)}
-              </span>
+              <span className="detail-label">Plan</span>
+              <span className="detail-value">{formatPlanType(currentSubscription.planType)}</span>
             </div>
             <div className="detail-item">
-              <span className="detail-label">Amount</span>
-              <span className="detail-value">₹{currentSubscription.amount}</span>
+              <span className="detail-label">Amount Paid</span>
+              <span className="detail-value">
+                ₹{currentSubscription.amount?.toLocaleString("en-IN")}
+              </span>
             </div>
             <div className="detail-item">
               <span className="detail-label">Start Date</span>
@@ -313,25 +446,20 @@ const SubscriptionManagement = () => {
           </div>
 
           <div className="subscription-actions">
-            {getCurrentSubscriptionInvoice() && (
+            <button onClick={() => setShowPlans(true)} className="upgrade-btn">
+              🚀 Upgrade / Renew
+            </button>
+            {invoice && (
               <button
-                onClick={() => handleDownloadInvoice(
-                  getCurrentSubscriptionInvoice()._id,
-                  getCurrentSubscriptionInvoice().invoiceNumber
-                )}
-                disabled={downloadingInvoice === getCurrentSubscriptionInvoice()._id}
+                onClick={() => handleDownloadInvoice(invoice._id, invoice.invoiceNumber)}
+                disabled={downloadingInvoice === invoice._id}
                 className="download-invoice-btn"
               >
-                {downloadingInvoice === getCurrentSubscriptionInvoice()._id 
-                  ? "Downloading..." 
-                  : "📥 Download Invoice"}
+                {downloadingInvoice === invoice._id ? "Downloading…" : "📥 Download Invoice"}
               </button>
             )}
             {currentSubscription.status !== "cancelled" && (
-              <button
-                onClick={handleCancelSubscription}
-                className="cancel-subscription-btn"
-              >
+              <button onClick={handleCancelSubscription} className="cancel-subscription-btn">
                 Cancel Subscription
               </button>
             )}
@@ -339,69 +467,263 @@ const SubscriptionManagement = () => {
         </div>
       )}
 
-      {/* No Active Subscription Message */}
-      {(!currentSubscription || !currentSubscription.isActive) && (
-        <div className="no-subscription-message">
-          <h3>No Active Subscription</h3>
-          <p>Choose a plan below to get started with our gift card platform.</p>
-        </div>
-      )}
+      {/* ── Plan Cards (hidden if user has active sub unless they clicked Upgrade) ── */}
+      {(!currentSubscription?.isActive || showPlans) && (
+        <div className="plans-section">
+          <div className="plans-section-header">
+            <h2 className="plans-heading">Available Plans</h2>
+            <p className="plans-subheading">
+              All plans include a one‑time onboarding fee&nbsp;·&nbsp;0% commission on your own QR customers
+            </p>
+          </div>
 
-      {/* Subscription Plans */}
-      <div className="plans-section">
-        <h2 className="plans-heading">Available Plans</h2>
-        <div className="plans-grid">
-          {plans &&
-            Object.entries(plans).map(([key, plan]) => {
-              const isCurrentPlan = currentSubscription?.isActive && currentSubscription?.planType === key;
-              const isMostPopular = key === "quarterly";
-              
+          {/* ── Promo Code Input ── */}
+          <div className="promo-code-section">
+            <div className="promo-code-input-row">
+              <input
+                type="text"
+                className="promo-code-input"
+                placeholder="Enter promo code"
+                value={promoCode}
+                onChange={(e) => {
+                  setPromoCode(e.target.value.toUpperCase());
+                  setPromoError("");
+                  setPromoSuccess("");
+                }}
+              />
+              <button
+                className="promo-apply-btn"
+                disabled={!promoCode.trim() || promoValidating}
+                onClick={async () => {
+                  setPromoValidating(true);
+                  setPromoError("");
+                  setPromoSuccess("");
+                  setPromoDiscount(null);
+                  try {
+                    const res = await axios.post("/api/v1/promo-code/validate", { code: promoCode });
+                    if (res.data.success) {
+                      setPromoDiscount(res.data.promoCode);
+                      setPromoSuccess(`🎉 ${res.data.promoCode.discountPercent}% discount applied!`);
+                    } else {
+                      setPromoError(res.data.message);
+                    }
+                  } catch (err) {
+                    setPromoError(err?.response?.data?.message || "Failed to validate promo code");
+                  } finally {
+                    setPromoValidating(false);
+                  }
+                }}
+              >
+                {promoValidating ? "Validating…" : "Apply"}
+              </button>
+              {promoDiscount && (
+                <button
+                  className="promo-remove-btn"
+                  onClick={() => {
+                    setPromoCode("");
+                    setPromoDiscount(null);
+                    setPromoSuccess("");
+                    setPromoError("");
+                  }}
+                >
+                  ✕ Remove
+                </button>
+              )}
+            </div>
+            {promoError && <p className="promo-error">{promoError}</p>}
+            {promoSuccess && <p className="promo-success">{promoSuccess}</p>}
+          </div>
+
+          {/* ── Grid of Plan Cards ── */}
+          <div className="plans-grid">
+            {PLAN_CARDS.map((card) => {
+              const periodIdx = selectedPeriods[card.id] || 0;
+              const activePeriod = card.periods[periodIdx] || null;
+              const isCurrentPlanKey =
+                activePeriod && currentSubscription?.isActive && currentSubscription?.planType === activePeriod.key;
+              const isProcessing = activePeriod && processingPaymentPlan === activePeriod.key;
+
               return (
                 <div
-                  key={key}
-                  className={`plan-card ${isMostPopular ? "popular" : ""} ${isCurrentPlan ? "current-plan" : ""}`}
+                  key={card.id}
+                  className={[
+                    "plan-card",
+                    card.isEnterprise ? "enterprise" : "",
+                    isCurrentPlanKey ? "current-plan" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                 >
-                  {isMostPopular && <div className="popular-badge">Most Popular</div>}
-                  {isCurrentPlan && <div className="current-plan-badge">Current Plan</div>}
-                  
-                  <h3 className="plan-name">
-                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                  </h3>
-                  
-                  <div className="plan-price">
-                    <span className="currency">₹</span>
-                    <span className="amount">{plan.amount}</span>
-                    <span className="period">
-                      /{plan.duration} {plan.durationType === "months" ? (plan.duration === 1 ? "month" : "months") : "year"}
+                  {isCurrentPlanKey && <div className="current-plan-badge">✓ Current Plan</div>}
+
+                  {/* Header */}
+                  <div className="plan-header">
+                    <span className="plan-duration-tag">
+                      {card.isEnterprise ? "Custom" : activePeriod?.duration || ""}
                     </span>
+                    <h3 className="plan-name">{card.label}</h3>
+                    <p className="plan-tagline">{card.tagline}</p>
                   </div>
 
+                  {/* Period dropdown – only for non‑enterprise cards */}
+                  {!card.isEnterprise && card.periods.length > 0 && (
+                    <>
+                      <div className="sb-period-label">Period</div>
+                      <div
+                        className="sb-dropdown-wrapper"
+                        ref={(el) => {
+                          dropdownRefs.current[card.id] = el;
+                        }}
+                      >
+                        <button
+                          className="sb-dropdown-trigger"
+                          onClick={() =>
+                            setOpenDropdown(openDropdown === card.id ? null : card.id)
+                          }
+                          type="button"
+                        >
+                          <span>{activePeriod?.label}</span>
+                          <span className={`sb-chevron ${openDropdown === card.id ? "open" : ""}`}>▾</span>
+                        </button>
+
+                        {openDropdown === card.id && (
+                          <div className="sb-dropdown-menu">
+                            {card.periods.map((p, idx) => (
+                              <button
+                                key={p.key}
+                                className={`sb-dropdown-item ${idx === periodIdx ? "active" : ""}`}
+                                onClick={() => {
+                                  setSelectedPeriods((prev) => ({
+                                    ...prev,
+                                    [card.id]: idx,
+                                  }));
+                                  setOpenDropdown(null);
+                                }}
+                                type="button"
+                              >
+                                <span>{p.label}</span>
+                                <span className="sb-dropdown-item-right">
+                                  <span className="sb-dropdown-price">
+                                    ₹{p.amount.toLocaleString("en-IN")}
+                                  </span>
+                                  {p.savings && <span className="sb-save-badge">{p.savings}</span>}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Price display */}
+                  {!card.isEnterprise && activePeriod ? (
+                    <>
+                      <div className="sb-price-row">
+                        <div className="sb-price-main">
+                          {activePeriod.savings && (
+                            <span className="sb-save-badge sb-save-badge--inline">
+                              {activePeriod.savings}
+                            </span>
+                          )}
+                          <div className="plan-price">
+                            <span className="currency">₹</span>
+                            <span className="amount">{activePeriod.amount.toLocaleString("en-IN")}</span>
+                            <span className="period">/{activePeriod.duration}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="plan-price-contact">
+                      <span>Contact Sales</span>
+                    </div>
+                  )}
+
+                  {/* Onboarding fee */}
+                  <div className="plan-onboarding">
+                    <span className="plan-onboarding-label">One‑Time Onboarding</span>
+                    <span className="plan-onboarding-value">{card.onboarding}</span>
+                  </div>
+
+                  {/* Feature list */}
                   <ul className="plan-features">
-                    <li>✓ Unlimited gift cards</li>
-                    <li>✓ Full dashboard access</li>
-                    <li>✓ Real-time analytics</li>
-                    <li>✓ Email support</li>
-                    <li>✓ Order management</li>
-                    {key === "yearly" && <li>✓ Priority support</li>}
+                    <li>
+                      <span className="feature-icon check">✓</span>
+                      Gift cards
+                      <span
+                        className={`feature-value ${card.giftCardLimit === "Unlimited" ? "green" : "highlight"}`}
+                      >
+                        {card.giftCardLimit}
+                      </span>
+                    </li>
+                    {card.features.map((f, i) => (
+                      <li key={i}>
+                        <span className="feature-icon check">✓</span>
+                        {f}
+                      </li>
+                    ))}
+                    <li>
+                      <span className="feature-icon check">✓</span>
+                      Marketplace Commission
+                      <span
+                        className={`feature-value ${card.commissionColor === "green" ? "green" : "highlight"}`}
+                      >
+                        {card.marketplaceCommission}
+                      </span>
+                    </li>
+                    <li>
+                      <span className="feature-icon check">✓</span>
+                      Own QR Commission
+                      <span className="feature-value green">0%</span>
+                    </li>
                   </ul>
 
-                  <button
-                    onClick={() => handleSubscribe(key)}
-                    disabled={isCurrentPlan || processingPaymentPlan === key}
-                    className={`subscribe-btn ${isCurrentPlan || processingPaymentPlan === key ? "disabled" : ""}`}
-                  >
-                    {isCurrentPlan ? "Current Plan" : "Subscribe Now"}
-                  </button>
+                  {/* CTA button */}
+                  {card.isEnterprise ? (
+                    <button onClick={handleContactSales} className="subscribe-btn contact-btn">
+                      Contact Sales →
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (activePeriod?.key) {
+                          handleSubscribe(activePeriod.key, card.label);
+                        }
+                      }}
+                      disabled={!activePeriod || isCurrentPlanKey || isProcessing}
+                      className={[
+                        "subscribe-btn",
+                        card.isPopular ? "popular-btn" : "",
+                        !activePeriod || isCurrentPlanKey || isProcessing ? "disabled" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                    >
+                      {isCurrentPlanKey
+                        ? "✓ Current Plan"
+                        : isProcessing
+                          ? "Processing…"
+                          : "Subscribe Now"}
+                    </button>
+                  )}
                 </div>
               );
             })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Payment History */}
-      {currentSubscription && currentSubscription.paymentHistory && currentSubscription.paymentHistory.length > 0 && (
+      {/* ── Payment History ── */}
+      {currentSubscription?.paymentHistory?.length > 0 && (
         <div className="payment-history-section">
-          <h2>Payment History</h2>
+          <div className="payment-history-header">
+            <h2>Payment History</h2>
+            <span className="payment-history-count">
+              {currentSubscription.paymentHistory.length} record
+              {currentSubscription.paymentHistory.length !== 1 ? "s" : ""}
+            </span>
+          </div>
           <div className="payment-history-table">
             <table>
               <thead>
@@ -413,15 +735,13 @@ const SubscriptionManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentSubscription.paymentHistory.map((payment, index) => (
-                  <tr key={index}>
+                {currentSubscription.paymentHistory.map((payment, idx) => (
+                  <tr key={idx}>
                     <td>{formatDate(payment.date)}</td>
                     <td className="payment-id">{payment.paymentId}</td>
                     <td>₹{payment.amount}</td>
                     <td>
-                      <span className={`payment-status ${payment.status}`}>
-                        {payment.status}
-                      </span>
+                      <span className={`payment-status ${payment.status}`}>{payment.status}</span>
                     </td>
                   </tr>
                 ))}
