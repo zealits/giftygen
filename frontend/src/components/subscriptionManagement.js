@@ -17,6 +17,7 @@ const PLAN_CARDS = [
     marketplaceCommission: "10%",
     commissionColor: "red",
     onboarding: "₹1,999",
+    onboardingAmount: 1999,
     features: [
       "Unlimited gift card promotions",
       "QR Code & Shareable Link",
@@ -42,6 +43,7 @@ const PLAN_CARDS = [
     marketplaceCommission: "6%",
     commissionColor: "red",
     onboarding: "₹3,999",
+    onboardingAmount: 3999,
     features: [
       "Unlimited gift card promotions",
       "QR Code & Shareable Link",
@@ -67,6 +69,7 @@ const PLAN_CARDS = [
     marketplaceCommission: "3%",
     commissionColor: "green",
     onboarding: "₹9,999",
+    onboardingAmount: 9999,
     features: [
       "Unlimited gift card promotions",
       "QR Code & Shareable Link",
@@ -89,6 +92,7 @@ const PLAN_DISPLAY_NAMES = {
   medium_biannual: "Medium Business — 6 Months",
   medium_yearly: "Medium Business — 1 Year",
   monthly: "Monthly",
+  onboarding: "One-Time Onboarding",
 };
 
 /* ──────────────────────────────────────────────
@@ -109,7 +113,7 @@ const SubscriptionManagement = () => {
 
   // Promo‑code handling
   const [promoCode, setPromoCode] = useState("");
-  const [promoDiscount, setPromoDiscount] = useState(null); // { code, discountPercent }
+  const [promoDiscount, setPromoDiscount] = useState(null); // { code, discountPercent, applicablePlanTypes? }
   const [promoError, setPromoError] = useState("");
   const [promoSuccess, setPromoSuccess] = useState("");
   const [promoValidating, setPromoValidating] = useState(false);
@@ -469,7 +473,7 @@ const SubscriptionManagement = () => {
 
       {/* ── Plan Cards (hidden if user has active sub unless they clicked Upgrade) ── */}
       {(!currentSubscription?.isActive || showPlans) && (
-        <div className="plans-section">
+          <div className="plans-section">
           <div className="plans-section-header">
             <h2 className="plans-heading">Available Plans</h2>
             <p className="plans-subheading">
@@ -502,8 +506,20 @@ const SubscriptionManagement = () => {
                   try {
                     const res = await axios.post("/api/v1/promo-code/validate", { code: promoCode });
                     if (res.data.success) {
-                      setPromoDiscount(res.data.promoCode);
-                      setPromoSuccess(`🎉 ${res.data.promoCode.discountPercent}% discount applied!`);
+                      const promoInfo = res.data.promoCode || {};
+                      setPromoDiscount(promoInfo);
+
+                      const plansList = Array.isArray(promoInfo.applicablePlanTypes)
+                        ? promoInfo.applicablePlanTypes
+                        : [];
+                      const appliedToText =
+                        plansList.length > 0
+                          ? `Applied on: ${plansList.map((p) => formatPlanType(p)).join(", ")}`
+                          : "Applied on all plans";
+
+                      setPromoSuccess(
+                        `🎉 ${promoInfo.discountPercent}% discount applied! ${appliedToText}`,
+                      );
                     } else {
                       setPromoError(res.data.message);
                     }
@@ -543,6 +559,18 @@ const SubscriptionManagement = () => {
                 activePeriod && currentSubscription?.isActive && currentSubscription?.planType === activePeriod.key;
               const isProcessing = activePeriod && processingPaymentPlan === activePeriod.key;
 
+              const promoApplies =
+                !!promoDiscount &&
+                (!Array.isArray(promoDiscount.applicablePlanTypes) ||
+                  promoDiscount.applicablePlanTypes.length === 0 ||
+                  (activePeriod && promoDiscount.applicablePlanTypes.includes(activePeriod.key)));
+
+              const discountPercent = promoApplies ? Number(promoDiscount.discountPercent || 0) : 0;
+              const discountedAmount =
+                promoApplies && activePeriod
+                  ? Math.max(0, Math.round(activePeriod.amount * (1 - discountPercent / 100)))
+                  : null;
+
               return (
                 <div
                   key={card.id}
@@ -558,9 +586,6 @@ const SubscriptionManagement = () => {
 
                   {/* Header */}
                   <div className="plan-header">
-                    <span className="plan-duration-tag">
-                      {card.isEnterprise ? "Custom" : activePeriod?.duration || ""}
-                    </span>
                     <h3 className="plan-name">{card.label}</h3>
                     <p className="plan-tagline">{card.tagline}</p>
                   </div>
@@ -626,11 +651,33 @@ const SubscriptionManagement = () => {
                               {activePeriod.savings}
                             </span>
                           )}
-                          <div className="plan-price">
-                            <span className="currency">₹</span>
-                            <span className="amount">{activePeriod.amount.toLocaleString("en-IN")}</span>
-                            <span className="period">/{activePeriod.duration}</span>
-                          </div>
+                          {promoApplies && discountedAmount !== null ? (
+                            <>
+                              <div className="plan-price plan-price--promo">
+                                <span className="currency">₹</span>
+                                <span className="original-amount">
+                                  {activePeriod.amount.toLocaleString("en-IN")}
+                                </span>
+                                <span className="discount-arrow">→</span>
+                                <span className="currency">₹</span>
+                                <span className="discounted-amount">
+                                  {discountedAmount.toLocaleString("en-IN")}
+                                </span>
+                                <span className="period">/{activePeriod.duration}</span>
+                              </div>
+                              <div className="promo-chip-inline">
+                                {discountPercent}% discount applied
+                              </div>
+                            </>
+                          ) : (
+                            <div className="plan-price">
+                              <span className="currency">₹</span>
+                              <span className="amount">
+                                {activePeriod.amount.toLocaleString("en-IN")}
+                              </span>
+                              <span className="period">/{activePeriod.duration}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </>
@@ -641,10 +688,39 @@ const SubscriptionManagement = () => {
                   )}
 
                   {/* Onboarding fee */}
-                  <div className="plan-onboarding">
-                    <span className="plan-onboarding-label">One‑Time Onboarding</span>
-                    <span className="plan-onboarding-value">{card.onboarding}</span>
-                  </div>
+                  {(() => {
+                    const promoAppliesToOnboarding =
+                      !!promoDiscount &&
+                      (!Array.isArray(promoDiscount.applicablePlanTypes) ||
+                        promoDiscount.applicablePlanTypes.length === 0 ||
+                        promoDiscount.applicablePlanTypes.includes("onboarding"));
+                    const onboardingAmount = card.onboardingAmount ?? 0;
+                    const discountedOnboarding =
+                      promoAppliesToOnboarding && onboardingAmount > 0
+                        ? Math.max(
+                            0,
+                            Math.round(
+                              onboardingAmount * (1 - Number(promoDiscount?.discountPercent || 0) / 100),
+                            ),
+                          )
+                        : null;
+                    return (
+                      <div className="plan-onboarding">
+                        <span className="plan-onboarding-label">One‑Time Onboarding</span>
+                        {promoAppliesToOnboarding && discountedOnboarding !== null ? (
+                          <span className="plan-onboarding-value">
+                            <span className="plan-onboarding-original">{card.onboarding}</span>
+                            {" → "}
+                            <span className="plan-onboarding-discounted">
+                              ₹{discountedOnboarding.toLocaleString("en-IN")}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="plan-onboarding-value">{card.onboarding}</span>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Feature list */}
                   <ul className="plan-features">

@@ -32,6 +32,7 @@ const SuperAdminDashboard = () => {
     maxUses: "",
     planLevel: "all", // all, small, medium, large
     period: "all",    // all, quarterly, biannual, yearly
+    applyToOnboarding: false, // One-Time Onboarding Cost
   });
   const [promoLoading, setPromoLoading] = useState(false);
 
@@ -98,6 +99,7 @@ const SuperAdminDashboard = () => {
     // small: quarterly, biannual, yearly
     // medium: medium_quarterly, medium_biannual, medium_yearly
     // large: large_quarterly, large_biannual, large_yearly
+    // onboarding: One-Time Onboarding Cost (special type)
     let applicablePlanTypes = [];
     
     if (promoForm.planLevel !== "all" || promoForm.period !== "all") {
@@ -110,6 +112,9 @@ const SuperAdminDashboard = () => {
           else applicablePlanTypes.push(`${level}_${per}`);
         });
       });
+    }
+    if (promoForm.applyToOnboarding) {
+      applicablePlanTypes.push("onboarding");
     }
 
     try {
@@ -124,7 +129,7 @@ const SuperAdminDashboard = () => {
       }, config);
       setNotifyMessage("Promo code created successfully!");
       setNotifyVisible(true);
-      setPromoForm({ code: "", description: "", discountPercent: 60, maxUses: "", planLevel: "all", period: "all" });
+      setPromoForm({ code: "", description: "", discountPercent: 60, maxUses: "", planLevel: "all", period: "all", applyToOnboarding: false });
       fetchPromoCodes();
     } catch (error) {
       setNotifyMessage(error?.response?.data?.message || "Failed to create promo code");
@@ -546,6 +551,17 @@ const SuperAdminDashboard = () => {
             <option value="biannual" style={{ color: "black" }}>6 Months</option>
             <option value="yearly" style={{ color: "black" }}>1 Year</option>
           </select>
+
+          <label className="promo-onboarding-check" style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", whiteSpace: "nowrap" }}>
+            <input
+              type="checkbox"
+              checked={promoForm.applyToOnboarding}
+              onChange={(e) => setPromoForm({ ...promoForm, applyToOnboarding: e.target.checked })}
+              style={{ width: "18px", height: "18px", accentColor: "#27ae60" }}
+            />
+            <span>One-Time Onboarding Cost</span>
+          </label>
+
           <button onClick={handleCreatePromo} disabled={promoLoading} className="approve-button">
             {promoLoading ? "Creating..." : "Create"}
           </button>
@@ -574,8 +590,10 @@ const SuperAdminDashboard = () => {
                     <td>{p.discountPercent}%</td>
                     <td>{p.description || "—"}</td>
                     <td style={{ fontSize: "12px", color: "#a0aec0" }}>
-                      {p.applicablePlanTypes && p.applicablePlanTypes.length > 0 
-                        ? p.applicablePlanTypes.join(", ") 
+                      {p.applicablePlanTypes && p.applicablePlanTypes.length > 0
+                        ? p.applicablePlanTypes
+                            .map((t) => (t === "onboarding" ? "One-Time Onboarding" : t))
+                            .join(", ")
                         : "All Plans"}
                     </td>
                     <td>{p.usedCount}</td>

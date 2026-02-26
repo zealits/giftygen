@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-/* import "./Modal.css"; */
+import "./Modal.css";
 
 const Modal = ({ title = "Notification", message, onClose, variant = "success", showClose = true }) => {
   useEffect(() => {

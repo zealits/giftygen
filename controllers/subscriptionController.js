@@ -139,7 +139,9 @@ exports.createSubscriptionOrder = async (req, res) => {
       if (alreadyUsed) {
         return res.status(400).json({ message: "Promo code already used by this business" });
       }
-      if (promo.applicablePlanTypes.length > 0 && !promo.applicablePlanTypes.includes(planType)) {
+      const appliesToPlan = promo.applicablePlanTypes.includes(planType);
+      const appliesToOnboarding = promo.applicablePlanTypes.includes("onboarding");
+      if (promo.applicablePlanTypes.length > 0 && !appliesToPlan && !appliesToOnboarding) {
         return res.status(400).json({ message: "Promo code is not valid for this plan" });
       }
 

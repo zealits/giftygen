@@ -73,9 +73,13 @@ exports.validatePromoCode = catchAsyncErrors(async (req, res, next) => {
         return res.status(200).json({ success: false, message: "This promo code has reached its maximum usage limit" });
     }
 
-    // Check plan type restriction
-    if (promo.applicablePlanTypes.length > 0 && planType && !promo.applicablePlanTypes.includes(planType)) {
-        return res.status(200).json({ success: false, message: "This promo code is not valid for the selected plan" });
+    // Check plan type restriction (promo can apply to plan and/or One-Time Onboarding)
+    if (promo.applicablePlanTypes.length > 0 && planType) {
+        const appliesToPlan = promo.applicablePlanTypes.includes(planType);
+        const appliesToOnboarding = promo.applicablePlanTypes.includes("onboarding");
+        if (!appliesToPlan && !appliesToOnboarding) {
+            return res.status(200).json({ success: false, message: "This promo code is not valid for the selected plan" });
+        }
     }
 
     res.status(200).json({
@@ -85,6 +89,7 @@ exports.validatePromoCode = catchAsyncErrors(async (req, res, next) => {
             code: promo.code,
             discountPercent: promo.discountPercent,
             description: promo.description,
+            applicablePlanTypes: promo.applicablePlanTypes || [],
         },
     });
 });
