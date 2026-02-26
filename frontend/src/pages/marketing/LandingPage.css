@@ -802,8 +802,8 @@
 
 /* Mobile Actions Container */
 .lp-mobile-actions {
-  margin-top: auto;
-  padding: 20px 24px 24px;
+  margin: 8px 24px 20px;
+  padding: 16px 24px 20px;
   border-top: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.02);
   display: flex;

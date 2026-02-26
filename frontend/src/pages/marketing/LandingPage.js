@@ -969,6 +969,19 @@ function LandingPage() {
           </button>
         </div>
 
+        {/* Theme + language controls at the top of the mobile menu */}
+        <div className="lp-mobile-actions">
+          <div className="lp-mobile-theme">
+            <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === "dark" ? "☀️" : "🌙"}
+              <span>{theme === "dark" ? "Switch to Light" : "Switch to Dark"}</span>
+            </button>
+          </div>
+          <div className="lp-mobile-language">
+            <LanguageDropdown variant="mobile" />
+          </div>
+        </div>
+
         <nav className="lp-mobile-nav" aria-label="Main navigation">
           {mobileNavItems.map((item, index) => (
             <button
@@ -1006,18 +1019,6 @@ function LandingPage() {
           >
             {t("nav.explore")}
           </button>
-        </div>
-
-        <div className="lp-mobile-actions">
-          <div className="lp-mobile-theme">
-            <button className="lp-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-              {theme === "dark" ? "☀️" : "🌙"}
-              <span>{theme === "dark" ? "Switch to Light" : "Switch to Dark"}</span>
-            </button>
-          </div>
-          <div className="lp-mobile-language">
-            <LanguageDropdown variant="mobile" />
-          </div>
         </div>
       </div>
 
