@@ -41,7 +41,6 @@ import {
   Layers,
   Info,
   Sparkles,
-  HelpCircle,
   Mail,
   Home,
   ChevronDown,
@@ -69,7 +68,6 @@ function LandingPage() {
     return null;
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [openFaqIndex, setOpenFaqIndex] = useState(null);
   const mobileMenuRef = useRef(null);
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
@@ -261,62 +259,6 @@ function LandingPage() {
       </div>
     );
   };
-
-  // Region-based pricing: India (IN) vs USA / rest of world (translations via t())
-  // Use IP-based country when available; otherwise fall back to stored location or browser locale (India locale → INR)
-  const isIndiaPricing = useMemo(() => {
-    const country = userLocation?.country;
-    if (country === "IN") return true;
-    if (country && country !== "IN") return false; // Known non-India (e.g. US)
-    // No location or API failed: try localStorage from previous visit
-    try {
-      const stored = localStorage.getItem("giftygen_user_location");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed?.country === "IN") return true;
-        if (parsed?.country) return false;
-      }
-    } catch (_) {}
-    // Infer from browser locale (e.g. en-IN, hi-IN, or Indian language) when IP API failed or is wrong
-    const locale = typeof navigator !== "undefined" ? (navigator.language || navigator.userLanguage || "") : "";
-    const localeUpper = locale.toUpperCase();
-    if (localeUpper.includes("-IN") || localeUpper === "HI" || localeUpper === "MR" || localeUpper === "BN" || localeUpper === "TE" || localeUpper === "TA" || localeUpper === "KN" || localeUpper === "ML" || localeUpper === "GU" || localeUpper === "PA" || localeUpper === "OR" || localeUpper === "UR") return true;
-    return false;
-  }, [userLocation?.country]);
-  const pricingRows = useMemo(() => {
-    const check = "check";
-    const cross = "cross";
-    const upTo = (n) => `${t("pricing.upTo")} ${n}`;
-    if (isIndiaPricing) {
-      return [
-      { feature: t("pricing.features.idealFor"), small: t("pricing.india.idealFor.small"), medium: t("pricing.india.idealFor.medium"), large: t("pricing.india.idealFor.large") },
-      { feature: t("pricing.features.onboardingCost"), small: "₹1,999", medium: "₹3,999", large: "₹9,999" },
-      { feature: t("pricing.features.monthlyPlan"), small: "₹1,499 / month", medium: "₹3,999 / month", large: "₹9,999 / month" },
-      { feature: t("pricing.features.quarterlyPlan"), small: "₹3,999 / 3 months", medium: "₹10,999 / 3 months", large: "₹26,999 / 3 months", badgeSmall: "mostPopular" },
-      { feature: t("pricing.features.yearlyPlan"), small: "₹14,999 / year", medium: "₹44,999 / year", large: "₹99,999 / year", badgeSmall: "bestValue" },
-      { feature: t("pricing.features.giftCardsAllowed"), small: upTo("500"), medium: upTo("2,000"), large: t("pricing.unlimited") },
-      { feature: t("pricing.features.giftCardPromotion"), small: t("pricing.unlimited"), medium: t("pricing.unlimited"), large: t("pricing.unlimited") },
-      { feature: t("pricing.features.qrCode"), small: check, medium: check, large: check },
-      { feature: t("pricing.features.marketplaceListing"), small: check, medium: check, large: check },
-      { feature: t("pricing.features.marketplaceCommission"), small: "10%", medium: "6%", large: "3%" },
-      { feature: t("pricing.features.commissionOwnQr"), small: "0%", medium: "0%", large: "0%" },
-      ];
-    }
-    return [
-    { feature: t("pricing.features.idealFor"), small: t("pricing.usa.idealFor.small"), medium: t("pricing.usa.idealFor.medium"), large: t("pricing.usa.idealFor.large") },
-    { feature: t("pricing.features.onboardingCost"), small: "$79", medium: "$149", large: "$299" },
-    { feature: t("pricing.features.monthlyPlan"), small: "$29 / month", medium: "$69 / month", large: "$129 / month" },
-    { feature: t("pricing.features.quarterlyPlan"), small: "$79 / 3 months", medium: "$199 / 3 months", large: "$349 / 3 months", badgeSmall: "mostPopular" },
-    { feature: t("pricing.features.yearlyPlan"), small: "$249 / year", medium: "$699 / year", large: "$1,299 / year", badgeSmall: "bestValue" },
-    { feature: t("pricing.features.giftCardsAllowed"), small: upTo("500"), medium: upTo("2,000"), large: t("pricing.unlimited") },
-    { feature: t("pricing.features.giftCardPromotion"), small: t("pricing.unlimited"), medium: t("pricing.unlimited"), large: t("pricing.unlimited") },
-    { feature: t("pricing.features.qrCode"), small: check, medium: check, large: check },
-    { feature: t("pricing.features.marketplaceListing"), small: check, medium: check, large: check },
-    { feature: t("pricing.features.marketplaceCommission"), small: "10%", medium: "6%", large: "3%" },
-    { feature: t("pricing.features.commissionOwnQr"), small: "0%", medium: "0%", large: "0%" },
-    { feature: t("pricing.features.multiLocation"), small: cross, medium: cross, large: check },
-    ];
-  }, [isIndiaPricing, t]);
 
   // Detect and set language based on geolocation
   useEffect(() => {
@@ -824,9 +766,7 @@ function LandingPage() {
     { id: "about", label: t("nav.about"), icon: <Info size={20} /> },
     { id: "features", label: t("nav.features"), icon: <Sparkles size={20} /> },
     { id: "solutions", label: t("nav.solutions"), icon: <Star size={20} /> },
-    { id: "pricing", label: t("nav.pricing"), icon: <DollarSign size={20} /> },
     { id: "register", label: t("nav.register"), icon: <CreditCard size={20} /> },
-    { id: "faq", label: "FAQ", icon: <HelpCircle size={20} /> },
     { id: "contact", label: t("nav.contact"), icon: <Mail size={20} /> },
   ];
 
@@ -987,9 +927,7 @@ function LandingPage() {
               </div>
             )}
           </div>
-          <button onClick={() => handleScrollTo("pricing")}>{t("nav.pricing")}</button>
           <button onClick={() => handleScrollTo("register")}>{t("nav.register")}</button>
-          <button onClick={() => handleScrollTo("faq")}>FAQ</button>
           <button onClick={() => handleScrollTo("contact")}>{t("nav.contact")}</button>
         </nav>
 
@@ -1545,86 +1483,6 @@ function LandingPage() {
         </div>
       </section> */}
 
-      {/* Pricing */}
-      <section className="lp-section lp-pricing" id="pricing">
-        <div className="lp-section__header">
-          <h2 className="lp-section__title lp-h2">{t("pricing.title")}</h2>
-          <p className="lp-section__subtitle">
-            {isIndiaPricing ? t("pricing.subtitleIndia") : t("pricing.subtitleUSA")}
-          </p>
-          <div className="lp-pricing__region-badge" aria-live="polite">
-            {isIndiaPricing ? t("pricing.regionIndia") : t("pricing.regionUSA")}
-          </div>
-        </div>
-        <div className="lp-pricing__wrapper">
-          <div className="lp-pricing__table-wrap">
-            <table className="lp-pricing__table" role="grid">
-              <thead>
-                <tr>
-                  <th scope="col" className="lp-pricing__th lp-pricing__th--feature">{t("pricing.feature")}</th>
-                  <th scope="col" className="lp-pricing__th lp-pricing__th--small">
-                    <span className="lp-pricing__tier-dot lp-pricing__tier-dot--green" aria-hidden></span>
-                    {t("pricing.smallBusiness")}
-                  </th>
-                  <th scope="col" className="lp-pricing__th lp-pricing__th--medium">
-                    <span className="lp-pricing__tier-dot lp-pricing__tier-dot--blue" aria-hidden></span>
-                    {t("pricing.mediumBusiness")}
-                  </th>
-                  <th scope="col" className="lp-pricing__th lp-pricing__th--large">
-                    <span className="lp-pricing__tier-dot lp-pricing__tier-dot--purple" aria-hidden></span>
-                    {t("pricing.largeBusiness")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {pricingRows.map((row, index) => (
-                  <tr key={index} className="lp-pricing__row">
-                    <td className="lp-pricing__cell lp-pricing__cell--feature">{row.feature}</td>
-                    <td className="lp-pricing__cell lp-pricing__cell--small">
-                      {row.small === "check" ? (
-                        <span className="lp-pricing__icon lp-pricing__icon--check" aria-label={t("pricing.included")}><Check size={20} /></span>
-                      ) : row.small === "cross" ? (
-                        <span className="lp-pricing__icon lp-pricing__icon--cross" aria-label={t("pricing.notIncluded")}><X size={20} /></span>
-                      ) : (
-                        <>
-                          <span className="lp-pricing__value">{row.small}</span>
-                          {row.badgeSmall && (
-                            <span className="lp-pricing__badge lp-pricing__badge--popular">{row.badgeSmall === "mostPopular" ? "⭐ " : "💎 "}{t(`pricing.badges.${row.badgeSmall}`)}</span>
-                          )}
-                        </>
-                      )}
-                    </td>
-                    <td className="lp-pricing__cell lp-pricing__cell--medium">
-                      {row.medium === "check" ? (
-                        <span className="lp-pricing__icon lp-pricing__icon--check" aria-label={t("pricing.included")}><Check size={20} /></span>
-                      ) : row.medium === "cross" ? (
-                        <span className="lp-pricing__icon lp-pricing__icon--cross" aria-label={t("pricing.notIncluded")}><X size={20} /></span>
-                      ) : (
-                        <span className="lp-pricing__value">{row.medium}</span>
-                      )}
-                    </td>
-                    <td className="lp-pricing__cell lp-pricing__cell--large">
-                      {row.large === "check" ? (
-                        <span className="lp-pricing__icon lp-pricing__icon--check" aria-label={t("pricing.included")}><Check size={20} /></span>
-                      ) : row.large === "cross" ? (
-                        <span className="lp-pricing__icon lp-pricing__icon--cross" aria-label={t("pricing.notIncluded")}><X size={20} /></span>
-                      ) : (
-                        <span className="lp-pricing__value">{row.large}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="lp-pricing__cta">
-          <button className="lp-btn" onClick={() => handleScrollTo("register")}>
-            {t("pricing.getStarted")}
-          </button>
-        </div>
-      </section>
-
       {/* Registration */}
       <section className="lp-section lp-register" id="register">
         <div className="lp-register__intro">
@@ -1820,92 +1678,6 @@ function LandingPage() {
             {isSubmitting ? "Registering..." : t("register.form.submit")}
           </button>
         </form>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="lp-section lp-faq" id="faq">
-        <div className="lp-section__header">
-          <h2 className="lp-section__title lp-h2">FAQ SECTION</h2>
-        </div>
-        <div className="lp-faq__container">
-          {[
-            {
-              question: "How long does it take to set up Giftygen?",
-              answer:
-                "Setup is quick. After registration, you can start creating gift cards immediately. Basic setup (account creation, business profile, first gift card) typically takes 15–30 minutes. POS integration may require additional configuration depending on your system, but the platform is ready to use right away.",
-            },
-            {
-              question: "What's the cost? Do you have a free trial?",
-              answer:
-                "We offer three subscription plans: Monthly Plan (₹1,499/month), Quarterly Plan (₹3,999/3 months - most popular), and Yearly Plan (₹14,999/year - best value). All plans include unlimited gift cards, full dashboard access, real-time analytics, email support, and order management. The yearly plan includes priority support. Currently, there is no free trial, but you can start with the monthly plan to test the platform.",
-            },
-            {
-              question: "Which POS systems do you integrate with?",
-              answer:
-                "We integrate with 50+ POS systems including Quick Serve (Toast, Square, Clover), Fine Dining (Micros Oracle, MarginEdge), Pizza/QSR (Lightspeed, Revel, TouchBistro), Hotels (Oracle Hospitality, IHG, Marriott, Hilton, Fidelio), E-commerce (Shopify, WooCommerce, BigCommerce, Wix), Salon/Wellness (Mindbody, Acuity Scheduling, Vagaro, Booker, Square Appointments), and Custom Systems via API integration. Gift card balances sync in real-time, and redemption is automatic at checkout.",
-            },
-            {
-              question: "How secure is customer data? Is this PCI compliant?",
-              answer:
-                "Yes. We use Razorpay, a PCI DSS Level 1 compliant payment gateway. Customer payment data is not stored on our servers; all transactions are processed through Razorpay's secure infrastructure. Customer information (names, emails, purchase history) is encrypted and stored securely. We follow industry-standard security practices to protect your data.",
-            },
-            {
-              question: "How do customers redeem gift cards?",
-              answer:
-                "Customers can redeem gift cards in multiple ways: QR Code Scanning (staff scans the QR code at checkout using the admin dashboard), OTP Verification (for security, an OTP is sent to the customer's registered email/phone), Automatic POS Integration (if integrated with your POS, redemption happens automatically), Partial Redemption (customers can redeem any amount up to the available balance; remaining balance is tracked automatically), and Digital Wallets (gift cards can be added to Google Wallet and Apple Wallet for easy access).",
-            },
-            {
-              question: "What if customers don't redeem their gift cards? Do we keep the money?",
-              answer:
-                "Yes. When a customer purchases a gift card, you receive the payment immediately. If the gift card is never redeemed or only partially redeemed, you keep the full amount paid. This is standard practice in the gift card industry and helps improve your cash flow. You can track unredeemed balances in your analytics dashboard.",
-            },
-            {
-              question: "Can we customize the gift card design? Can I add our logo?",
-              answer:
-                "Yes. You can customize your logo (upload your business logo displayed on gift cards and QR code pages), gift card images (add custom images/backgrounds), colors (customize background colors and branding), text (customize card titles, descriptions, and messages), and various design elements to match your brand. Customization options are available in your admin dashboard settings.",
-            },
-            {
-              question: "Do you own my customer data? Can I export it? What if I want to cancel?",
-              answer:
-                "You own your customer data. You can export it anytime in multiple formats: CSV (for spreadsheet analysis), PDF (for reports and presentations), and Excel/XLSX (for detailed analysis). Available exports include customer purchase reports, sales reports, revenue reports, gift card performance reports, redemption reports, and financial summaries. If you cancel your subscription, you can export all your data before cancellation. Your data remains accessible until the end of your billing period.",
-            },
-            {
-              question: "Can we run seasonal promotions?",
-              answer:
-                "Yes. You can create seasonal pricing (set different prices for peak, shoulder, and low seasons), limited-time offers (create time-bound promotional campaigns), holiday campaigns (launch holiday-specific gift card campaigns for Christmas, Diwali, New Year, etc.), discount management (apply percentage discounts to gift cards), targeted promotions (create campaigns for specific customer segments), and pre-holiday sales (build anticipation with early-bird offers). The platform tracks seasonal trends and performance to help optimize your campaigns.",
-            },
-            {
-              question: "Can we sell multi-denomination cards?",
-              answer:
-                "Yes. You can create gift cards with fixed amounts or allow customers to choose custom amounts. The platform supports fixed amount cards (pre-set denominations like ₹500, ₹1,000, ₹2,000), variable amount cards (customers can enter any amount within your specified range), and multiple options (offer both fixed and variable options simultaneously). Each gift card tracks its specific amount and redemption history individually.",
-            },
-            {
-              question: "How does payment processing work?",
-              answer:
-                "Payment processing is handled through Razorpay, a secure payment gateway. The process works as follows: Customer selects a gift card and proceeds to payment, payment is processed through Razorpay's secure checkout (supports credit/debit cards, UPI, net banking, wallets), upon successful payment the gift card is immediately generated, gift card is delivered via email with QR code and redemption instructions, customers can add the gift card to Google Wallet or Apple Wallet, and all transactions are recorded in your dashboard with receipts and invoices. You receive payments directly to your connected account.",
-            },
-          ].map((faq, index) => (
-            <div key={index} className="lp-faq__item">
-              <button
-                className={`lp-faq__question ${openFaqIndex === index ? "lp-faq__question--open" : ""}`}
-                onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
-                aria-expanded={openFaqIndex === index}
-                aria-controls={`faq-answer-${index}`}
-              >
-                <span className="lp-faq__number">FAQ #{index + 1}:</span>
-                <span className="lp-faq__text">{faq.question}</span>
-                <span className="lp-faq__icon">{openFaqIndex === index ? "−" : "+"}</span>
-              </button>
-              <div
-                id={`faq-answer-${index}`}
-                className={`lp-faq__answer ${openFaqIndex === index ? "lp-faq__answer--open" : ""}`}
-                aria-hidden={openFaqIndex !== index}
-              >
-                <p className="lp-faq__answer-text">{faq.answer}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
 
       {/* Contact */}
