@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
-import logo from "../../assets/giftygen_logo.svg";
+import logo from "../../assets/giftygen_logo_1.png";
 import logoWhiteBg from "../../assets/giftgen_whitebg_logo.png";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
@@ -2048,7 +2048,10 @@ function LandingPage() {
       {/* Footer */}
       <footer className="lp-footer">
         <div className="lp-footer__brand">
-          <img src={logo} alt="giftygen logo" />
+          <img
+            src={theme === "light" ? logoWhiteBg : logo}
+            alt="giftygen logo"
+          />
           <span>giftygen</span>
         </div>
         <div className="lp-footer__links">
