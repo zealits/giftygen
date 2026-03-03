@@ -661,7 +661,7 @@ const CreateGiftCard = () => {
             <h2 className="create-giftcard-section-title">Pricing & Availability</h2>
             <div className="create-giftcard-price-row">
             <div className="giftcards-page-form-group">
-              <label htmlFor="amount">Price ($) *</label>
+              <label htmlFor="amount">Price (₹) *</label>
               <input
                 type="number"
                 id="amount"

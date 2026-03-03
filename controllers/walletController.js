@@ -122,7 +122,8 @@ async function generateWalletPass(req, res) {
       ? selfInfo?.name 
       : giftInfo?.recipientName || "Gift Card Holder";
     const amount = giftCardDetails.amount || 0;
-    const currency = paymentDetails?.currency || "USD";
+    // Default to INR for your deployment; will still honor an explicit currency sent in paymentDetails.
+    const currency = (paymentDetails?.currency || "INR").toUpperCase();
 
     console.log("Gift Card Details:", {
       name: walletGiftCardName,

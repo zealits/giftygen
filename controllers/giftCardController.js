@@ -1549,8 +1549,12 @@ const getRevenueForLast30Days = async (req, res) => {
 // Function to generate and save gift card to Google Wallet
 const addGiftCardToWallet = async (req, res) => {
   try {
-    const { userId, cardNumber } = req.body;
-    console.log("Triggered");
+    const { userId, cardNumber, amount, currency, classId } = req.body;
+    console.log("[Google Wallet] addGiftCardToWallet triggered with body:", req.body);
+
+    if (!userId || !cardNumber) {
+      return res.status(400).json({ error: "userId and cardNumber are required" });
+    }
 
     const walletService = google.walletobjects({
       version: "v1",
@@ -1558,16 +1562,23 @@ const addGiftCardToWallet = async (req, res) => {
     });
 
     const giftCardId = `gift_card_${userId}_${Date.now()}`;
-    const microsValue = 50000000; // $50 in micros
+
+    // Default to INR, compute micros from provided amount if available
+    const finalCurrency = (currency || "INR").toUpperCase();
+    const numericAmount = amount !== undefined ? Number(amount) : NaN;
+    const microsValue = Number.isFinite(numericAmount) ? Math.round(numericAmount * 1_000_000) : 0;
 
     const giftCardObject = {
       id: `${process.env.GOOGLE_WALLET_ISSUER_ID}.${giftCardId}`,
-      classId: `${process.env.GOOGLE_WALLET_ISSUER_ID}.aii_hotels.giftcardclass`,
+      // Allow overriding classId from request body so you can point to an INR-configured class.
+      classId:
+        classId ||
+        `${process.env.GOOGLE_WALLET_ISSUER_ID}.aii_hotels.giftcardclass`,
       state: "active",
-      cardNumber: cardNumber,
+      cardNumber,
       balance: {
-        currencyCode: "INR",
-        micros: microsValue, // Use only micros
+        currencyCode: finalCurrency,
+        micros: microsValue,
       },
       barcode: {
         type: "QR_CODE",
@@ -1577,17 +1588,17 @@ const addGiftCardToWallet = async (req, res) => {
       programName: "Gift Card Program",
     };
 
-    console.log("Gift Card Object:", giftCardObject);
+    console.log("[Google Wallet] Gift Card Object:", giftCardObject);
 
     // Insert gift card into Google Wallet
     const response = await walletService.giftcardobject.insert({ requestBody: giftCardObject });
-    console.log("Gift Card Created:", response.data);
+    console.log("[Google Wallet] Gift Card Created:", response.data);
 
     const saveUrl = `https://pay.google.com/gp/v/save/${encodeURIComponent(giftCardObject.id)}`;
 
     res.status(200).json({ message: "Gift card added to wallet", saveUrl });
   } catch (error) {
-    console.error("Error adding gift card:", error.response?.data || error);
+    console.error("[Google Wallet] Error adding gift card:", error.response?.data || error);
     res.status(500).json({ error: "Failed to add gift card to wallet" });
   }
 };
