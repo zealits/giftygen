@@ -933,13 +933,25 @@ const CreateGiftCard = () => {
                     <div style={{ fontSize: 13, opacity: 0.9 }}>
                       {formData.giftCardName || "Wallet Preview Gift Card"}
                     </div>
-                    <div style={{ fontSize: 18, fontWeight: 600, marginTop: 8 }}>
-                      INR {formData.amount || "0"}
+                    <div style={{ fontSize: 16, fontWeight: 600, marginTop: 8 }}>
+                      {(() => {
+                        const amount = formData.amount || "0";
+                        const expiryLabel = formData.expirationDate
+                          ? (() => {
+                              const d = new Date(formData.expirationDate);
+                              if (Number.isNaN(d.getTime())) return "";
+                              return d.toLocaleDateString("en-IN", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              });
+                            })()
+                          : "";
+                        return expiryLabel ? `INR ${amount} • Expires: ${expiryLabel}` : `INR ${amount}`;
+                      })()}
                     </div>
-                    <div style={{ fontSize: 15, marginTop: 4 }}>
-                      {formData.description?.trim()
-                        ? formData.description.slice(0, 32) + (formData.description.length > 32 ? "…" : "")
-                        : "Recipient name will appear here"}
+                    <div style={{ fontSize: 18, marginTop: 10 }}>
+                      Name will appear here
                     </div>
                     <div
                       style={{
