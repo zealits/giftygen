@@ -15,6 +15,7 @@ const CreateGiftCard = () => {
   const { id: editId } = useParams();
   const { user } = useSelector((state) => state.auth);
   const businessSlug = user?.user?.businessSlug || "";
+  const businessIndustry = user?.user?.industry || "";
   const giftCardCreate = useSelector((state) => state.giftCardCreate);
   const giftCardUpdate = useSelector((state) => state.giftCardUpdate);
   const { giftCard: editCard, loading: editCardLoading } = useSelector((state) => state.giftCardDetails);
@@ -147,19 +148,24 @@ const CreateGiftCard = () => {
   };
 
   const handleGenerateWithAi = async () => {
-    const effectiveName = (aiNameIdea || formData.giftCardName || "").trim();
     const context = aiContext.trim();
+    const industryType = (businessIndustry || "").trim();
 
-    if (!effectiveName || !context) {
-      setAiError("Please enter both a gift card name idea and what this gift card is for.");
+    if (!context) {
+      setAiError("Please describe what this gift card is for.");
+      return;
+    }
+
+    if (!industryType) {
+      setAiError("Please select your business industry in Business Profile before using AI suggestions.");
       return;
     }
     try {
       setIsAiLoading(true);
       setAiError("");
       const { data } = await axios.post("/api/ai/describe", {
-        giftcard_name: effectiveName,
         prompt: context,
+        industry_type: industryType,
       });
       setAiSuggestions({
         descriptions_medium: data.descriptions_medium || [],
@@ -482,29 +488,16 @@ const CreateGiftCard = () => {
                       Describe your card idea → get name suggestions, description & tags
                     </p>
                   </div>
-                  <div className="ai-helper-header-sub">
+                  {/* <div className="ai-helper-header-sub">
                     <span className="ai-helper-pill">✦ AI Call 1 — Content Generation</span>
-                  </div>
+                  </div> */}
 
                   <div className="ai-helper-inputs-row">
-                    <div className="giftcards-page-form-group ai-helper-input-group">
-                      <label htmlFor="aiNameIdea">
-                        Gift Card Name Idea <span className="create-giftcard-field-hint">(your rough concept)</span>
-                      </label>
-                      <textarea
-                        id="aiNameIdea"
-                        name="aiNameIdea"
-                        rows="2"
-                        placeholder="e.g. Premium Wellness Escape, Diwali Celebration Feast, Team Rewards Pass"
-                        value={aiNameIdea}
-                        onChange={(e) => setAiNameIdea(e.target.value)}
-                      />
-                    </div>
-                    <div className="giftcards-page-form-group ai-helper-input-group">
-                      <label htmlFor="aiContext">
+                    <div className="giftcards-page-form-group ai-helper-input-group" style={{ flex: 1 }}>
+                      {/* <label htmlFor="aiContext">
                         Description / Context{" "}
                         <span className="create-giftcard-field-hint">(what does this card offer?)</span>
-                      </label>
+                      </label> */}
                       <textarea
                         id="aiContext"
                         name="aiContext"

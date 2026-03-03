@@ -428,6 +428,31 @@
   margin-bottom: 14px;
 }
 
+/* Themed scrollbar for AI description textarea (and other textareas on this page) */
+.create-giftcard-page textarea {
+  scrollbar-width: thin;
+  scrollbar-color: var(--dashboard-accent) rgba(15, 23, 42, 0.8);
+}
+
+.create-giftcard-page textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.create-giftcard-page textarea::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 999px;
+}
+
+.create-giftcard-page textarea::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--dashboard-accent-light), var(--dashboard-accent));
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.9);
+}
+
+.create-giftcard-page textarea::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--dashboard-accent), #6366f1);
+}
+
 .create-giftcard-page .ai-chip,
 .create-giftcard-page .ai-description-card {
   background: var(--dark3) !important;

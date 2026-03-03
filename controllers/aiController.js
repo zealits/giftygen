@@ -3,20 +3,20 @@ const axios = require("axios");
 // Proxy to external AI describe endpoint so frontend avoids CORS
 exports.describeGiftcard = async (req, res) => {
   try {
-    const { giftcard_name, prompt } = req.body || {};
+    const { prompt, industry_type } = req.body || {};
 
-    if (!giftcard_name || !prompt) {
-      return res.status(400).json({ message: "giftcard_name and prompt are required" });
+    if (!prompt || !industry_type) {
+      return res.status(400).json({ message: "prompt and industry_type are required" });
     }
 
     console.log("[AI Describe][Backend] Incoming request", {
-      giftcard_name,
+      industry_type,
       promptSnippet: String(prompt).slice(0, 80),
     });
 
     const { data } = await axios.post(
-      "https://giftifyai.giftygen.com/tier2/describe",
-      { giftcard_name, prompt },
+      "https://giftifyai.giftygen.com/tier1/describe",
+      { prompt, industry_type },
       {
         headers: {
           "Content-Type": "application/json",
