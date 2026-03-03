@@ -250,6 +250,16 @@ const SubscriptionManagement = () => {
       }
 
       // -----------------------------------------------------------------
+      // 6b  Ensure Razorpay key is available (prevents cryptic failure when opening checkout)
+      // -----------------------------------------------------------------
+      if (!razorpayKey || razorpayKey.trim() === "") {
+        console.error("Razorpay key missing – check backend env RAZORPAY_KEY_ID or per-business keys.");
+        alert("Payment gateway is not configured. Please contact support.");
+        setProcessingPaymentPlan(null);
+        return;
+      }
+
+      // -----------------------------------------------------------------
       // 7️⃣  Initialise Razorpay UI
       // -----------------------------------------------------------------
       const options = {
@@ -296,10 +306,15 @@ const SubscriptionManagement = () => {
       // -----------------------------------------------------------------
       console.error("Error initiating subscription:", error);
 
-      const serverMessage = error?.response?.data?.message || error?.response?.data?.error;
+      const data = error?.response?.data;
+      const serverMessage =
+        (typeof data?.message === "string" && data.message) ||
+        (typeof data?.error === "string" && data.error) ||
+        (data?.error?.message) ||
+        (error?.message);
       const friendlyMsg = serverMessage
         ? `Failed to start subscription: ${serverMessage}`
-        : "Failed to initiate subscription. Please try again.";
+        : "Failed to initiate subscription. Please try again. Check the browser console for details.";
       alert(friendlyMsg);
       setProcessingPaymentPlan(null);
     }
