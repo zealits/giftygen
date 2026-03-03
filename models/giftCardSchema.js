@@ -52,6 +52,10 @@ const giftCardSchema = new mongoose.Schema(
     giftCardImg: {
       type: String,
     },
+    // Optional brand color for Google Wallet pass background
+    walletColor: {
+      type: String,
+    },
     businessSlug: {
       type: String, // which business owns this gift card
       index: true,

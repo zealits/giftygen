@@ -149,6 +149,7 @@ const createGiftCard = async (req, res) => {
       expirationDate: expiryDate,
       giftCardImg: giftCardImgUrl,
       businessSlug: req.user?.businessSlug || req.body.businessSlug || undefined,
+      walletColor: req.body.walletColor || undefined,
       status: isDraft ? "draft" : "active",
     });
 

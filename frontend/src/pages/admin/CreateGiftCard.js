@@ -30,6 +30,7 @@ const CreateGiftCard = () => {
     expirationDate: "",
     giftCardImg: "",
     quantity: "",
+    walletColor: "#3B5BDB",
   });
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
@@ -93,6 +94,7 @@ const CreateGiftCard = () => {
       giftCardImg: card.giftCardImg || "",
       quantity: card.quantity != null ? String(card.quantity) : "",
       status: card.status || "active",
+      walletColor: card.walletColor || "#3B5BDB",
     });
     setTags(
       Array.isArray(card.tags) && card.tags.length > 0 ? card.tags : card.giftCardTag ? [card.giftCardTag] : []
@@ -718,6 +720,22 @@ const CreateGiftCard = () => {
                 min={new Date().toISOString().split("T")[0]}
               />
             </div>
+            <div className="giftcards-page-form-group" style={{ marginTop: 16 }}>
+              <label htmlFor="walletColor">Google Wallet Card Color</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <input
+                  type="color"
+                  id="walletColor"
+                  name="walletColor"
+                  value={formData.walletColor}
+                  onChange={handleChange}
+                  style={{ width: 40, height: 40, borderRadius: 8, border: "none", padding: 0, cursor: "pointer" }}
+                />
+                <span className="create-giftcard-field-hint">
+                  This color is used as the background for the Google Wallet pass.
+                </span>
+              </div>
+            </div>
             </div>
 
             <div className="create-giftcard-studio-card">
@@ -891,6 +909,68 @@ const CreateGiftCard = () => {
                       <span>Buy Now</span>
                     </button>
                   </div>
+                </div>
+              </div>
+              {/* Google Wallet style preview */}
+              <div style={{ marginTop: 24 }}>
+                <div
+                  style={{
+                    borderRadius: 24,
+                    overflow: "hidden",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+                    maxWidth: 320,
+                    margin: "0 auto",
+                    background: "#F5F7FB",
+                  }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: formData.walletColor || "#3B5BDB",
+                      padding: "16px 18px 14px",
+                      color: "#fff",
+                    }}
+                  >
+                    <div style={{ fontSize: 13, opacity: 0.9 }}>
+                      {formData.giftCardName || "Wallet Preview Gift Card"}
+                    </div>
+                    <div style={{ fontSize: 18, fontWeight: 600, marginTop: 8 }}>
+                      INR {formData.amount || "0"}
+                    </div>
+                    <div style={{ fontSize: 15, marginTop: 4 }}>
+                      {formData.description?.trim()
+                        ? formData.description.slice(0, 32) + (formData.description.length > 32 ? "…" : "")
+                        : "Recipient name will appear here"}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 16,
+                        borderRadius: 12,
+                        background: "#fff",
+                        padding: 12,
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 104,
+                          height: 104,
+                          background:
+                            "repeating-linear-gradient(45deg,#e0e0e0 0,#e0e0e0 4px,#ffffff 4px,#ffffff 8px)",
+                          borderRadius: 8,
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {formData.giftCardImg && (
+                    <div style={{ height: 120, overflow: "hidden" }}>
+                      <img
+                        src={formData.giftCardImg}
+                        alt="Wallet card hero"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="create-giftcard-info-section">
