@@ -410,7 +410,7 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
 
     // Prepare dynamic values with proper formatting
     // Currency: If USD use $, otherwise default to ₹ (Indian Rupee)
-    const currencySymbol = passData.currency === "INR" ? "$" : "₹";
+    const currencySymbol = passData.currency === "INR" ? "₹" : "$";
     const amountValue = `${currencySymbol} ${passData.amount || "0"}`;
     const recipientValue = passData.userName || "Recipient";
     const giftCardTypeValue = passData.walletGiftCardName || "Gift Card";
