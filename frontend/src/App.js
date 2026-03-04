@@ -5,40 +5,54 @@ import { loadUser } from "./services/Actions/authActions.js";
 import { LoadingProvider } from "./context/LoadingContext";
 import "./App.css";
 
+// Ensure lazy-loaded modules have a default export (avoids React #130 in production)
+function safeLazy(importFn, name) {
+  return lazy(() =>
+    importFn().then((m) => {
+      if (m == null || m.default == null) {
+        const err = new Error(`Lazy module "${name}" has no default export. Fix the export in that file.`);
+        if (typeof console !== "undefined") console.error(err.message, m);
+        throw err;
+      }
+      return m;
+    })
+  );
+}
+
 // Lazy load components
-const Login = lazy(() => import("./components/Auth/Login"));
-const Register = lazy(() => import("./components/Register"));
-const ResetPassword = lazy(() => import("./components/Auth/ResetPassword"));
-const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.js"));
-const UserLanding = lazy(() => import("./pages/user/UserLanding.js"));
-const UnderConstruction = lazy(() => import("./pages/user/UnderConstruction.js"));
-const Explore = lazy(() => import("./pages/user/Explore.js"));
-const ExploreCategory = lazy(() => import("./pages/user/ExploreCategory.js"));
-const ExploreBrand = lazy(() => import("./pages/user/ExploreBrand.js"));
-const LandingPage = lazy(() => import("./pages/marketing/LandingPage"));
-const PrivacyPolicy = lazy(() => import("./pages/marketing/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("./pages/marketing/TermsOfService"));
-const BenefitDetail = lazy(() => import("./pages/marketing/BenefitDetail"));
-const BusinessCategoryDetail = lazy(() => import("./pages/marketing/BusinessCategoryDetail"));
-const ExampleRestaurant = lazy(() => import("./pages/marketing/ExampleRestaurant"));
-const ExampleHotel = lazy(() => import("./pages/marketing/ExampleHotel"));
-const ExampleFitness = lazy(() => import("./pages/marketing/ExampleFitness"));
-const ExampleRetail = lazy(() => import("./pages/marketing/ExampleRetail"));
-const ExampleBeauty = lazy(() => import("./pages/marketing/ExampleBeauty"));
-const ExampleSeasonal = lazy(() => import("./pages/marketing/ExampleSeasonal"));
-const BusinessPage = lazy(() => import("./pages/marketing/BusinessPage"));
-const Sidebar = lazy(() => import("./pages/admin/Sidebar.js"));
-const GiftCards = lazy(() => import("./pages/admin/GiftCards.js"));
-const CreateGiftCard = lazy(() => import("./pages/admin/CreateGiftCard.js"));
-const Orders = lazy(() => import("./pages/admin/Orders.js"));
-const Customers = lazy(() => import("./pages/admin/Customers.js"));
-const Reports = lazy(() => import("./pages/admin/Reports.js"));
-const Settings = lazy(() => import("./pages/admin/Settings.js"));
-const RedeemGiftCard = lazy(() => import("./pages/admin/RedeemGiftCard.js"));
-const GiftCardDetails = lazy(() => import("./pages/user/GiftCardDetails.js"));
-const SuperAdminLogin = lazy(() => import("./components/SuperAdmin/SuperAdminLogin"));
-const SuperAdminDashboard = lazy(() => import("./components/SuperAdmin/SuperAdminDashboard"));
-const SubscriptionManagement = lazy(() => import("./components/subscriptionManagement"));
+const Login = safeLazy(() => import("./components/Auth/Login"), "Auth/Login");
+const Register = safeLazy(() => import("./components/Register"), "Register");
+const ResetPassword = safeLazy(() => import("./components/Auth/ResetPassword"), "ResetPassword");
+const AdminDashboard = safeLazy(() => import("./pages/admin/AdminDashboard.js"), "AdminDashboard");
+const UserLanding = safeLazy(() => import("./pages/user/UserLanding.js"), "UserLanding");
+const UnderConstruction = safeLazy(() => import("./pages/user/UnderConstruction.js"), "UnderConstruction");
+const Explore = safeLazy(() => import("./pages/user/Explore.js"), "Explore");
+const ExploreCategory = safeLazy(() => import("./pages/user/ExploreCategory.js"), "ExploreCategory");
+const ExploreBrand = safeLazy(() => import("./pages/user/ExploreBrand.js"), "ExploreBrand");
+const LandingPage = safeLazy(() => import("./pages/marketing/LandingPage"), "LandingPage");
+const PrivacyPolicy = safeLazy(() => import("./pages/marketing/PrivacyPolicy"), "PrivacyPolicy");
+const TermsOfService = safeLazy(() => import("./pages/marketing/TermsOfService"), "TermsOfService");
+const BenefitDetail = safeLazy(() => import("./pages/marketing/BenefitDetail"), "BenefitDetail");
+const BusinessCategoryDetail = safeLazy(() => import("./pages/marketing/BusinessCategoryDetail"), "BusinessCategoryDetail");
+const ExampleRestaurant = safeLazy(() => import("./pages/marketing/ExampleRestaurant"), "ExampleRestaurant");
+const ExampleHotel = safeLazy(() => import("./pages/marketing/ExampleHotel"), "ExampleHotel");
+const ExampleFitness = safeLazy(() => import("./pages/marketing/ExampleFitness"), "ExampleFitness");
+const ExampleRetail = safeLazy(() => import("./pages/marketing/ExampleRetail"), "ExampleRetail");
+const ExampleBeauty = safeLazy(() => import("./pages/marketing/ExampleBeauty"), "ExampleBeauty");
+const ExampleSeasonal = safeLazy(() => import("./pages/marketing/ExampleSeasonal"), "ExampleSeasonal");
+const BusinessPage = safeLazy(() => import("./pages/marketing/BusinessPage"), "BusinessPage");
+const Sidebar = safeLazy(() => import("./pages/admin/Sidebar.js"), "Sidebar");
+const GiftCards = safeLazy(() => import("./pages/admin/GiftCards.js"), "GiftCards");
+const CreateGiftCard = safeLazy(() => import("./pages/admin/CreateGiftCard.js"), "CreateGiftCard");
+const Orders = safeLazy(() => import("./pages/admin/Orders.js"), "Orders");
+const Customers = safeLazy(() => import("./pages/admin/Customers.js"), "Customers");
+const Reports = safeLazy(() => import("./pages/admin/Reports.js"), "Reports");
+const Settings = safeLazy(() => import("./pages/admin/Settings.js"), "Settings");
+const RedeemGiftCard = safeLazy(() => import("./pages/admin/RedeemGiftCard.js"), "RedeemGiftCard");
+const GiftCardDetails = safeLazy(() => import("./pages/user/GiftCardDetails.js"), "GiftCardDetails");
+const SuperAdminLogin = safeLazy(() => import("./components/SuperAdmin/SuperAdminLogin"), "SuperAdminLogin");
+const SuperAdminDashboard = safeLazy(() => import("./components/SuperAdmin/SuperAdminDashboard"), "SuperAdminDashboard");
+const SubscriptionManagement = safeLazy(() => import("./components/subscriptionManagement"), "subscriptionManagement");
 // import 'font-awesome/css/font-awesome.min.css';
 
 function AppRoutes() {
