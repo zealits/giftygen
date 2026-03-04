@@ -985,6 +985,90 @@ const CreateGiftCard = () => {
                   )}
                 </div>
               </div>
+
+              {/* Apple Wallet style preview */}
+              <div style={{ marginTop: 24 }}>
+                <div
+                  style={{
+                    borderRadius: 28,
+                    overflow: "hidden",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+                    maxWidth: 320,
+                    margin: "0 auto",
+                    backgroundColor: formData.walletColor || "#4158D0",
+                    color: "#fff",
+                  }}
+                >
+                  {/* Hero image */}
+                  {formData.giftCardImg && (
+                    <div style={{ height: 120, overflow: "hidden" }}>
+                      <img
+                        src={formData.giftCardImg}
+                        alt="Apple wallet hero"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    </div>
+                  )}
+                  {/* Info row under image */}
+                  <div style={{ padding: "14px 16px 8px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.9 }}>
+                      <span>TO:</span>
+                      <span>GIFT CARD TYPE</span>
+                      <span>VALID UNTIL</span>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: 12,
+                        marginTop: 4,
+                      }}
+                    >
+                      <span>{formData.giftCardName ? "Name will appear" : "Name will appear"}</span>
+                      <span>
+                        {(formData.giftCardName || "").trim()
+                          ? (formData.giftCardName || "").slice(0, 18) +
+                            ((formData.giftCardName || "").length > 18 ? "…" : "")
+                          : "Gift Card"}
+                      </span>
+                      <span>
+                        {formData.expirationDate
+                          ? (() => {
+                              const d = new Date(formData.expirationDate);
+                              if (Number.isNaN(d.getTime())) return "—";
+                              return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+                            })()
+                          : "—"}
+                      </span>
+                    </div>
+                    {/* Amount shown as watermark-style text, not over the hero image */}
+                    <div style={{ fontSize: 20, fontWeight: 600, marginTop: 10 }}>
+                      ₹ {formData.amount || "0"}
+                    </div>
+                    {/* QR placeholder */}
+                    <div
+                      style={{
+                        marginTop: 14,
+                        borderRadius: 12,
+                        background: "#fff",
+                        padding: 10,
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 110,
+                          height: 110,
+                          background:
+                            "repeating-linear-gradient(45deg,#e0e0e0 0,#e0e0e0 4px,#ffffff 4px,#ffffff 8px)",
+                          borderRadius: 8,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="create-giftcard-info-section">
                 <div className="create-giftcard-info-row">
                   <span className="create-giftcard-info-label">Quantity</span>

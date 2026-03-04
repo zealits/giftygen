@@ -7,6 +7,18 @@ const https = require("https");
 const http = require("http");
 const { PKPass } = require("passkit-generator");
 
+// Convert hex color (#RRGGBB) to "rgb(r, g, b)" string for Apple Wallet
+function hexToRgbString(hex, fallback = "rgb(65, 88, 208)") {
+  if (!hex || typeof hex !== "string") return fallback;
+  const cleaned = hex.replace("#", "");
+  if (cleaned.length !== 6) return fallback;
+  const r = parseInt(cleaned.slice(0, 2), 16);
+  const g = parseInt(cleaned.slice(2, 4), 16);
+  const b = parseInt(cleaned.slice(4, 6), 16);
+  if ([r, g, b].some((v) => Number.isNaN(v))) return fallback;
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 // Helper function to detect certificate type
 function detectCertificateType(certPath) {
   try {
@@ -468,22 +480,8 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
     // Update storeCard in the internal structure
     if (internalPass && internalPass.storeCard) {
       console.log("📝 Updating internalPass.storeCard");
-      if (!internalPass.storeCard.primaryFields) {
-        internalPass.storeCard.primaryFields = [];
-      }
-      const primaryIndex = internalPass.storeCard.primaryFields.findIndex((f) => f && f.key === "amount");
-      if (primaryIndex >= 0) {
-        internalPass.storeCard.primaryFields[primaryIndex].value = amountValue;
-        console.log(`✅ Updated internal primaryField[${primaryIndex}]`);
-      } else {
-        internalPass.storeCard.primaryFields.push({
-          key: "amount",
-          label: "Gift Card",
-          value: amountValue,
-        });
-        console.log("✅ Added internal primaryField");
-      }
-
+      // Remove primary fields so amount is not drawn over the hero image
+      internalPass.storeCard.primaryFields = [];
       if (!internalPass.storeCard.secondaryFields) {
         internalPass.storeCard.secondaryFields = [];
       }
@@ -498,6 +496,21 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
           value: recipientValue,
         });
         console.log("✅ Added internal secondaryField");
+      }
+
+      // Ensure amount is shown as a secondary field instead of primary (so it appears below the info row)
+      if (!internalPass.storeCard.auxiliaryFields) {
+        internalPass.storeCard.auxiliaryFields = [];
+      }
+      const auxAmountIndex = internalPass.storeCard.auxiliaryFields.findIndex((f) => f && f.key === "amount");
+      if (auxAmountIndex >= 0) {
+        internalPass.storeCard.auxiliaryFields[auxAmountIndex].value = amountValue;
+      } else {
+        internalPass.storeCard.auxiliaryFields.push({
+          key: "amount",
+          label: "Amount",
+          value: amountValue,
+        });
       }
 
       // Add or update giftCardType field in internal structure
@@ -534,19 +547,8 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
     if (!pass.storeCard) {
       pass.storeCard = {};
     }
-    if (!pass.storeCard.primaryFields) {
-      pass.storeCard.primaryFields = [];
-    }
-    const primaryFieldIndex = pass.storeCard.primaryFields.findIndex((f) => f && f.key === "amount");
-    if (primaryFieldIndex >= 0) {
-      pass.storeCard.primaryFields[primaryFieldIndex].value = amountValue;
-    } else {
-      pass.storeCard.primaryFields.push({
-        key: "amount",
-        label: "Gift Card",
-        value: amountValue,
-      });
-    }
+    // Clear primary fields so amount is not rendered over the hero image
+    pass.storeCard.primaryFields = [];
 
     if (!pass.storeCard.secondaryFields) {
       pass.storeCard.secondaryFields = [];
@@ -559,6 +561,21 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
         key: "name",
         label: "Recipient",
         value: recipientValue,
+      });
+    }
+
+    // Add amount as an auxiliary field (displayed below the info row, not on the image)
+    if (!pass.storeCard.auxiliaryFields) {
+      pass.storeCard.auxiliaryFields = [];
+    }
+    const auxAmountFieldIndex = pass.storeCard.auxiliaryFields.findIndex((f) => f && f.key === "amount");
+    if (auxAmountFieldIndex >= 0) {
+      pass.storeCard.auxiliaryFields[auxAmountFieldIndex].value = amountValue;
+    } else {
+      pass.storeCard.auxiliaryFields.push({
+        key: "amount",
+        label: "Amount",
+        value: amountValue,
       });
     }
 
@@ -614,14 +631,8 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
           }
         }
         
-        // Update primary fields (amount)
-        if (modifiedPassJson.storeCard.primaryFields) {
-          const amountField = modifiedPassJson.storeCard.primaryFields.find((f) => f && f.key === "amount");
-          if (amountField) {
-            amountField.value = amountValue;
-            console.log("✅ Updated template primaryField amount:", amountField);
-          }
-        }
+        // Remove primary fields so the template doesn't draw amount over the image
+        modifiedPassJson.storeCard.primaryFields = [];
         
         // Update secondary fields (recipient, giftCardType, cardId, validUntil)
         if (modifiedPassJson.storeCard.secondaryFields) {
@@ -669,7 +680,28 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
             });
             console.log("✅ Added template secondaryField validUntil");
           }
+          
+          // Ensure auxiliaryFields exists and contains amount
+          if (!modifiedPassJson.storeCard.auxiliaryFields) {
+            modifiedPassJson.storeCard.auxiliaryFields = [];
+          }
+          const templateAuxAmountIndex = modifiedPassJson.storeCard.auxiliaryFields.findIndex(
+            (f) => f && f.key === "amount",
+          );
+          if (templateAuxAmountIndex >= 0) {
+            modifiedPassJson.storeCard.auxiliaryFields[templateAuxAmountIndex].value = amountValue;
+          } else {
+            modifiedPassJson.storeCard.auxiliaryFields.push({
+              key: "amount",
+              label: "Amount",
+              value: amountValue,
+            });
+          }
         }
+
+        // Sync background color with card setting
+        const walletColorHex = passData.giftCardDetails?.walletColor || "#4158D0";
+        modifiedPassJson.backgroundColor = hexToRgbString(walletColorHex);
 
         // Create temporary directory and copy all template files
         // passkit-generator expects the directory to have .pass extension
@@ -747,7 +779,7 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
             altText: "Scan to Redeem",
           },
         ];
-        pass.backgroundColor = "rgb(65, 88, 208)";
+        pass.backgroundColor = hexToRgbString(passData.giftCardDetails?.walletColor || "#4158D0");
         pass.foregroundColor = "rgb(255, 255, 255)";
         pass.labelColor = "rgb(255, 255, 255)";
         pass.logoText = "Gift Card Purchase";
@@ -797,7 +829,7 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
           messageEncoding: "iso-8859-1",
         },
       ];
-      pass.backgroundColor = "rgb(65, 88, 208)";
+      pass.backgroundColor = hexToRgbString(passData.giftCardDetails?.walletColor || "#4158D0");
       pass.foregroundColor = "rgb(255, 255, 255)";
       pass.labelColor = "rgb(255, 255, 255)";
       pass.logoText = passData.walletGiftCardName || "Gift Card";
