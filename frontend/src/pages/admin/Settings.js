@@ -153,10 +153,27 @@ const Settings = ({ section: sectionProp }) => {
   // const [showSquareInstructions, setShowSquareInstructions] = useState(false);
   const [showRazorpayInstructions, setShowRazorpayInstructions] = useState(false);
 
-  const publicUrl = useMemo(() => {
+  const publicPathUrl = useMemo(() => {
     const slug = (form.businessSlug || "").trim();
     if (!slug) return null;
     return `${window.location.origin}/${slug}/giftcards`;
+  }, [form.businessSlug]);
+
+  const publicSubdomainUrl = useMemo(() => {
+    const slug = (form.businessSlug || "").trim();
+    if (!slug) return null;
+
+    const { protocol, hostname } = window.location;
+
+    // In development (localhost/127.0.0.1), fall back to path‑based URL
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return `${window.location.origin}/${slug}/giftcards`;
+    }
+
+    const parts = hostname.split(".");
+    const baseDomain = parts.length > 2 ? parts.slice(-2).join(".") : hostname;
+
+    return `${protocol}//${slug}.${baseDomain}/`;
   }, [form.businessSlug]);
 
   const toArray = (v) =>
@@ -657,10 +674,10 @@ const Settings = ({ section: sectionProp }) => {
     }
   };
 
-  const copyPublicLink = async () => {
-    if (!publicUrl) return;
+  const copyPublicLink = async (urlToCopy) => {
+    if (!urlToCopy) return;
     try {
-      await navigator.clipboard.writeText(publicUrl);
+      await navigator.clipboard.writeText(urlToCopy);
       setSettingsMessage("Link copied to clipboard!");
       setTimeout(() => setSettingsMessage(""), 2000);
     } catch (_) {
@@ -1891,18 +1908,41 @@ const Settings = ({ section: sectionProp }) => {
             )}
           </div>
 
-          {publicUrl && (
+          {(publicSubdomainUrl || publicPathUrl) && (
             <div className="url-section">
               <h3 className="card-title">Public Access</h3>
               <div className="url-display">
-                <div className="url-info">
-                  <label className="form_label">Public Gift Cards Page</label>
-                  <div className="url-text">{publicUrl}</div>
-                </div>
-                <button type="button" className="btn btn-outline" onClick={copyPublicLink}>
-                  Copy URL
-                </button>
+                {publicSubdomainUrl && (
+                  <>
+                    <div className="url-info">
+                      <label className="form_label">Public Gift Cards Page (Subdomain)</label>
+                      <div className="url-text">{publicSubdomainUrl}</div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={() => copyPublicLink(publicSubdomainUrl)}
+                    >
+                      Copy URL
+                    </button>
+                  </>
+                )}
               </div>
+              {publicPathUrl && (
+                <div className="url-display" style={{ marginTop: 12 }}>
+                  <div className="url-info">
+                    <label className="form_label">Public Gift Cards Page (Path URL)</label>
+                    <div className="url-text">{publicPathUrl}</div>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={() => copyPublicLink(publicPathUrl)}
+                  >
+                    Copy URL
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -1913,7 +1953,7 @@ const Settings = ({ section: sectionProp }) => {
             <button
               type="button"
               className="btn btn-success"
-              disabled={downloading || !publicUrl}
+              disabled={downloading || !publicPathUrl}
               onClick={downloadQrPoster}
             >
               {downloading ? "Generating..." : "Print Your Digital Ad"}

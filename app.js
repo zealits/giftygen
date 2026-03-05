@@ -286,13 +286,27 @@ app.get('/sitemap.xml', async (req, res) => {
     </url>`;
     });
 
-    // 4. Add Dynamic Business Pages
+    // 4. Add Dynamic Business Pages (both path URL and subdomain URL)
     businesses.forEach(business => {
       if (business.businessSlug) {
-        const lastmod = business.updatedAt ? new Date(business.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        const slug = business.businessSlug;
+        const lastmod = business.updatedAt
+          ? new Date(business.updatedAt).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0];
+
+        // Existing path-based URL
         xml += `
     <url>
-        <loc>https://giftygen.com/${business.businessSlug}/giftcards</loc>
+        <loc>https://giftygen.com/${slug}/giftcards</loc>
+        <lastmod>${lastmod}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>`;
+
+        // New subdomain-based URL
+        xml += `
+    <url>
+        <loc>https://${slug}.giftygen.com/</loc>
         <lastmod>${lastmod}</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>

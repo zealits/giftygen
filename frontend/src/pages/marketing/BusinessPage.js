@@ -40,6 +40,30 @@ const BusinessPage = () => {
   const [reviewSubmitMessage, setReviewSubmitMessage] = useState("");
   const [roomGalleryIndex, setRoomGalleryIndex] = useState({});
 
+  const getBusinessUrls = useCallback(
+    (slug) => {
+      if (!slug) {
+        return { pathUrl: window.location.origin, subdomainUrl: window.location.origin };
+      }
+
+      const origin = window.location.origin;
+      const { protocol, hostname } = window.location;
+
+      const pathUrl = `${origin}/${slug}/giftcards`;
+
+      if (hostname === "localhost" || hostname === "127.0.0.1") {
+        return { pathUrl, subdomainUrl: pathUrl };
+      }
+
+      const parts = hostname.split(".");
+      const baseDomain = parts.length > 2 ? parts.slice(-2).join(".") : hostname;
+      const subdomainUrl = `${protocol}//${slug}.${baseDomain}/`;
+
+      return { pathUrl, subdomainUrl };
+    },
+    [],
+  );
+
   const fetchReviews = useCallback(async () => {
     if (!businessSlug) return;
     setReviewsLoading(true);
@@ -69,7 +93,8 @@ const BusinessPage = () => {
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/${businessSlug}/giftcards`;
+    const { subdomainUrl, pathUrl } = getBusinessUrls(businessSlug);
+    const url = subdomainUrl || pathUrl;
     const title = `${business?.name || "Business"} - Gift Cards | GiftyGen`;
     const text = `Check out gift cards from ${business?.name || "this business"}.`;
 
@@ -224,7 +249,8 @@ const BusinessPage = () => {
 
   const pageTitle = `${business.name} - Gift Cards | GiftyGen`;
   const pageDescription = `Browse and purchase digital gift cards from ${business.name}.`;
-  const pageUrl = `${window.location.origin}/${businessSlug}/giftcards`;
+  const { pathUrl: businessPathUrl, subdomainUrl: businessSubdomainUrl } = getBusinessUrls(businessSlug);
+  const pageUrl = businessSubdomainUrl || businessPathUrl;
 
   return (
     <div className="venue-page">
