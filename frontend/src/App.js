@@ -59,6 +59,28 @@ function AppRoutes() {
   const { user, loading: authLoading } = useSelector((state) => state.auth);
   const userDetails = user?.user;
 
+  // If we're on a business subdomain like grand-plaza-hotel.giftygen.com,
+  // show that business page instead of the generic landing page.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const { hostname, pathname } = window.location;
+
+    // Skip in local development
+    if (hostname === "localhost" || hostname === "127.0.0.1") return;
+
+    const parts = hostname.split(".");
+    if (parts.length <= 2) return; // No subdomain present
+
+    const subdomain = parts.slice(0, -2).join(".");
+    if (!subdomain || subdomain.toLowerCase() === "www") return;
+
+    // Only remap the root path so we don't interfere with other routes
+    if (pathname === "/" || pathname === "") {
+      window.history.replaceState(null, "", `/${subdomain}/giftcards`);
+    }
+  }, [location.pathname]);
+
   if (authLoading) {
     return null;
   }
