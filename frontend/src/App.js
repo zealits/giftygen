@@ -1,6 +1,6 @@
 import React, { useEffect, lazy, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { loadUser } from "./services/Actions/authActions.js";
 import { LoadingProvider } from "./context/LoadingContext";
 import "./App.css";
@@ -56,6 +56,7 @@ const SubscriptionManagement = safeLazy(() => import("./components/subscriptionM
 
 function AppRoutes() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useSelector((state) => state.auth);
   const userDetails = user?.user;
 
@@ -75,11 +76,11 @@ function AppRoutes() {
     const subdomain = parts.slice(0, -2).join(".");
     if (!subdomain || subdomain.toLowerCase() === "www") return;
 
-    // Only remap the root path so we don't interfere with other routes
+    // Only redirect from root path to business page
     if (pathname === "/" || pathname === "") {
-      window.history.replaceState(null, "", `/${subdomain}/giftcards`);
+      navigate(`/${subdomain}/giftcards`, { replace: true });
     }
-  }, [location.pathname]);
+  }, [location.pathname, navigate]);
 
   if (authLoading) {
     return null;
