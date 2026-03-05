@@ -1,6 +1,6 @@
 import React, { useEffect, lazy, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { loadUser } from "./services/Actions/authActions.js";
 import { LoadingProvider } from "./context/LoadingContext";
 import "./App.css";
@@ -56,31 +56,29 @@ const SubscriptionManagement = safeLazy(() => import("./components/subscriptionM
 
 function AppRoutes() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { user, loading: authLoading } = useSelector((state) => state.auth);
   const userDetails = user?.user;
 
-  // If we're on a business subdomain like grand-plaza-hotel.giftygen.com,
-  // show that business page instead of the generic landing page.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  // Check if we're on a business subdomain
+  const getSubdomainSlug = () => {
+    if (typeof window === "undefined") return null;
 
-    const { hostname, pathname } = window.location;
+    const { hostname } = window.location;
 
     // Skip in local development
-    if (hostname === "localhost" || hostname === "127.0.0.1") return;
+    if (hostname === "localhost" || hostname === "127.0.0.1") return null;
 
     const parts = hostname.split(".");
-    if (parts.length <= 2) return; // No subdomain present
+    if (parts.length <= 2) return null; // No subdomain present
 
     const subdomain = parts.slice(0, -2).join(".");
-    if (!subdomain || subdomain.toLowerCase() === "www") return;
+    if (!subdomain || subdomain.toLowerCase() === "www") return null;
 
-    // Only redirect from root path to business page
-    if (pathname === "/" || pathname === "") {
-      navigate(`/${subdomain}/giftcards`, { replace: true });
-    }
-  }, [location.pathname, navigate]);
+    return subdomain;
+  };
+
+  const subdomainSlug = getSubdomainSlug();
+  const isSubdomainRoot = subdomainSlug && (location.pathname === "/" || location.pathname === "");
 
   if (authLoading) {
     return null;
@@ -214,7 +212,16 @@ function AppRoutes() {
           </>
         )}
 
-        <Route path="/" element={<LandingPage />} />
+        <Route 
+          path="/" 
+          element={
+            isSubdomainRoot ? (
+              <BusinessPage businessSlug={subdomainSlug} />
+            ) : (
+              <LandingPage />
+            )
+          } 
+        />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/benefit/:benefitId" element={<BenefitDetail />} />

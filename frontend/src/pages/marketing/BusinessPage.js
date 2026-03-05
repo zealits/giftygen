@@ -21,8 +21,9 @@ const INDUSTRY_TAB_MAP = {
   "Seasonal Gifting": { id: "campaigns", label: "Campaigns" },
 };
 
-const BusinessPage = () => {
-  const { businessSlug } = useParams();
+const BusinessPage = ({ businessSlug: propBusinessSlug }) => {
+  const { businessSlug: paramBusinessSlug } = useParams();
+  const businessSlug = propBusinessSlug || paramBusinessSlug;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { business, loading: businessLoading } = useSelector((state) => state.business);

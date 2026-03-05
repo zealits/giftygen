@@ -306,7 +306,7 @@ app.get('/sitemap.xml', async (req, res) => {
         // New subdomain-based URL
         xml += `
     <url>
-        <loc>https://${slug}.giftygen.com/</loc>
+        <loc>https://${slug}.giftygen.com</loc>
         <lastmod>${lastmod}</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>

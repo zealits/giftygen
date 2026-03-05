@@ -173,7 +173,7 @@ const Settings = ({ section: sectionProp }) => {
     const parts = hostname.split(".");
     const baseDomain = parts.length > 2 ? parts.slice(-2).join(".") : hostname;
 
-    return `${protocol}//${slug}.${baseDomain}/`;
+    return `${protocol}//${slug}.${baseDomain}`;
   }, [form.businessSlug]);
 
   const toArray = (v) =>
