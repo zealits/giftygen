@@ -349,6 +349,28 @@ const validatePhone = (phone) => {
 
     let updatedFormData = { ...formData }; // Start with existing formData
 
+    // Detect orderSource based on current URL/domain
+    const currentUrl = window.location.href;
+    const currentHostname = window.location.hostname;
+    
+    // Check if it's a subdomain (direct) or path-based URL (marketplace)
+    let orderSource = "direct"; // default
+    
+    if (currentHostname.includes('.giftygen.com') && currentHostname !== 'giftygen.com') {
+      // This is a subdomain like grand-plaza-hotel.giftygen.com
+      orderSource = "direct";
+    } else if (currentUrl.includes('/giftcards') || currentUrl.includes(`/${businessSlug}/`)) {
+      // This is the marketplace page like giftygen.com/grand-plaza-hotel/giftcards
+      orderSource = "marketplace";
+    }
+
+    console.log("Detected orderSource:", orderSource);
+    console.log("Current URL:", currentUrl);
+    console.log("Current hostname:", currentHostname);
+    
+    // Add orderSource to the form data
+    updatedFormData.orderSource = orderSource;
+
     try {
       console.log("Started wallet pass generation...");
     
