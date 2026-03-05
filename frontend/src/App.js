@@ -25,7 +25,6 @@ const Register = safeLazy(() => import("./components/Register"), "Register");
 const ResetPassword = safeLazy(() => import("./components/Auth/ResetPassword"), "ResetPassword");
 const AdminDashboard = safeLazy(() => import("./pages/admin/AdminDashboard.js"), "AdminDashboard");
 const UserLanding = safeLazy(() => import("./pages/user/UserLanding.js"), "UserLanding");
-const UnderConstruction = safeLazy(() => import("./pages/user/UnderConstruction.js"), "UnderConstruction");
 const Explore = safeLazy(() => import("./pages/user/Explore.js"), "Explore");
 const ExploreCategory = safeLazy(() => import("./pages/user/ExploreCategory.js"), "ExploreCategory");
 const ExploreBrand = safeLazy(() => import("./pages/user/ExploreBrand.js"), "ExploreBrand");

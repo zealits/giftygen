@@ -138,7 +138,6 @@ const Settings = ({ section: sectionProp }) => {
   const [saving, setSaving] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState("");
   const [settingsMessage, setSettingsMessage] = useState("");
-  const [showToken, setShowToken] = useState(false);
   const [showRazorpayToken, setShowRazorpayToken] = useState(false);
   const [logoUrl, setLogoUrl] = useState(initial.logoUrl || "");
   const [galleryImages, setGalleryImages] = useState(initial.galleryImages || []);
@@ -424,7 +423,8 @@ const Settings = ({ section: sectionProp }) => {
   const removeMenuSectionImage = (sectionIndex) => updateMenuSection(sectionIndex, "imageUrl", "");
   const loadSampleMenu = () => setMenuSections(SAMPLE_MENU_SECTIONS.map((s) => ({ ...s, imageUrl: s.imageUrl || "" })));
 
-  const handleBusinessHoursChange = (day, field, value) => {
+  // Reserved for business hours UI; kept for future use
+  const _handleBusinessHoursChange = (day, field, value) => {
     const next = { ...(form.pageCustomization?.businessHours || {}) };
     if (!next[day]) next[day] = {};
     if (value === null || value === "") {
@@ -464,10 +464,12 @@ const Settings = ({ section: sectionProp }) => {
     const sub = INDUSTRY_CONFIG[form.industry]?.subtitleOptions || [];
     const known = INDUSTRY_CONFIG[form.industry]?.knownForOptions || [];
     return [...new Set([...sub, ...known])];
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- INDUSTRY_CONFIG is static
   }, [form.industry]);
 
   const photoFilterLabelOptions = useMemo(
     () => INDUSTRY_CONFIG[form.industry]?.photoFilterLabelOptions || [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- INDUSTRY_CONFIG is static
     [form.industry],
   );
 
@@ -485,7 +487,10 @@ const Settings = ({ section: sectionProp }) => {
     return [...photoFilterLabelOptions, ...customUsed];
   }, [photoFilterLabelOptions, photoLabels]);
 
-  const businessHours = form.pageCustomization?.businessHours || {};
+  const businessHours = useMemo(
+    () => form.pageCustomization?.businessHours || {},
+    [form.pageCustomization?.businessHours],
+  );
   const dynamicStatus = useMemo(() => getStatusFromBusinessHours(businessHours), [businessHours]);
 
   const handleMapLocationSelect = (lat, lng, address = null) => {
@@ -1564,7 +1569,7 @@ const Settings = ({ section: sectionProp }) => {
                   <div style={{ position: "relative", aspectRatio: "1", flex: 1, minHeight: 0 }}>
                     <img
                       src={photoUrl}
-                      alt={`Business photo ${index + 1}`}
+                      alt={`Gallery item ${index + 1}`}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -1863,6 +1868,7 @@ const Settings = ({ section: sectionProp }) => {
             {form.restaurantAddress.latitude && form.restaurantAddress.longitude && (
               <div className="map-preview" style={{ marginTop: "16px" }}>
                 <iframe
+                  title="Business location map"
                   width="100%"
                   height="300"
                   style={{ border: 0, borderRadius: "12px" }}
@@ -2008,9 +2014,8 @@ const Settings = ({ section: sectionProp }) => {
     </div>
   );
 
-  // SQUARE API COMMENTED OUT - Payment Configuration Section
-  {
-    /* <div className="settings-section">
+  /* SQUARE API COMMENTED OUT - Payment Configuration Section
+  <div className="settings-section">
           <div className="section-header">
             <div className="section-icon">💳</div>
             <div>
@@ -2102,7 +2107,6 @@ const Settings = ({ section: sectionProp }) => {
             </div>
           </div>
         </div> */
-  }
 
   return (
     <div className="settings-page">
