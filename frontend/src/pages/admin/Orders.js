@@ -22,7 +22,7 @@ const GiftCardSkeleton = () => {
 const BuyersSkeleton = () => {
   return (
     <tr>
-      <td colSpan="6" style={{...ordersStyles.td, textAlign: 'center', color: '#9ca3af'}}>
+      <td colSpan="7" style={{...ordersStyles.td, textAlign: 'center', color: '#9ca3af'}}>
         Loading buyers...
       </td>
     </tr>
@@ -182,7 +182,8 @@ const ordersStyles = {
 const Orders = () => {
   const [giftCards, setGiftCards] = useState([]);
   const [buyers, setBuyers] = useState([]);
-  const [view, setView] = useState("giftCards"); // Default view to 'giftCards'
+  const [view, setView] = useState("giftCards"); // Default view to 'giftCards' (all orders)
+  const [orderSource, setOrderSource] = useState("all"); // Track current order source filter
   const [modalName, setModalName] = useState("");
   const [selectedBuyer, setSelectedBuyer] = useState(null);
   const [giftCardSelectedBuyer, setGiftCardSelectedBuyer] = useState(null);
@@ -216,14 +217,20 @@ const Orders = () => {
 
   useEffect(() => {
     // Load gift cards for this business
-    fetchGiftCards();
-  }, [businessSlug]);
+    fetchGiftCards(orderSource);
+  }, [businessSlug, orderSource]);
 
-  const fetchGiftCards = async () => {
+  const fetchGiftCards = async (sourceFilter = "all") => {
     setIsLoading(true);
     try {
+      // Build the API URL with optional orderSource filter
+      let apiUrl = `/api/v1/admin/giftcards?businessSlug=${encodeURIComponent(businessSlug)}`;
+      if (sourceFilter && sourceFilter !== "all") {
+        apiUrl += `&orderSource=${sourceFilter}`;
+      }
+      
       // Fetch sold gift cards for this business
-      const response = await axios.get(`/api/v1/admin/giftcards?businessSlug=${encodeURIComponent(businessSlug)}`);
+      const response = await axios.get(apiUrl);
       setAllGiftCards(response.data.giftCards || []);
       setGiftCards(response.data.giftCards || []);
 
@@ -242,9 +249,12 @@ const Orders = () => {
   const fetchBuyers = async (cardId) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        `api/v1/admin/giftcards/${cardId}/buyers?businessSlug=${encodeURIComponent(businessSlug)}`
-      );
+      let apiUrl = `api/v1/admin/giftcards/${cardId}/buyers?businessSlug=${encodeURIComponent(businessSlug)}`;
+      if (orderSource && orderSource !== "all") {
+        apiUrl += `&orderSource=${orderSource}`;
+      }
+      
+      const response = await axios.get(apiUrl);
       setBuyers(response.data.buyers);
       setOriginalBuyers(response.data.buyers);
 
@@ -259,10 +269,15 @@ const Orders = () => {
     }
   };
 
-  const fetchUserBuyers = async () => {
+  const fetchUserBuyers = async (sourceFilter = "all") => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`api/v1/admin/buyers?businessSlug=${encodeURIComponent(businessSlug)}`);
+      let apiUrl = `api/v1/admin/buyers?businessSlug=${encodeURIComponent(businessSlug)}`;
+      if (sourceFilter && sourceFilter !== "all") {
+        apiUrl += `&orderSource=${sourceFilter}`;
+      }
+      
+      const response = await axios.get(apiUrl);
 
       setAllBuyers(response.data.buyers);
       setBuyers(response.data.buyers);
@@ -354,13 +369,29 @@ const Orders = () => {
 
   const handleGiftCardView = () => {
     setView("giftCards");
-    fetchGiftCards();
+    setOrderSource("all");
+    fetchGiftCards("all");
+    setPage(1);
+  };
+
+  const handleMarketplaceView = () => {
+    setView("marketplace");
+    setOrderSource("marketplace");
+    fetchUserBuyers("marketplace");
+    setPage(1);
+  };
+
+  const handleDirectView = () => {
+    setView("direct");
+    setOrderSource("direct");
+    fetchUserBuyers("direct");
     setPage(1);
   };
 
   const handleUserView = () => {
     setView("users");
-    fetchUserBuyers();
+    setOrderSource("all");
+    fetchUserBuyers("all");
     setPage(1);
   };
 
@@ -431,6 +462,21 @@ const Orders = () => {
     <div style={ordersStyles.container}>
       <div>
         <h1 style={ordersStyles.header}>Orders</h1>
+        {view === "marketplace" && (
+          <p style={{textAlign: 'center', color: '#6b7280', marginBottom: '20px'}}>
+            Showing orders from marketplace page: grand-plaza-hotel/giftcards
+          </p>
+        )}
+        {view === "direct" && (
+          <p style={{textAlign: 'center', color: '#6b7280', marginBottom: '20px'}}>
+            Showing orders from direct subdomain: grand-plaza-hotel.giftygen.com
+          </p>
+        )}
+        {view === "giftCards" && (
+          <p style={{textAlign: 'center', color: '#6b7280', marginBottom: '20px'}}>
+            Showing all gift card orders
+          </p>
+        )}
         <div style={ordersStyles.toggleButtons}>
           <button 
             onClick={handleGiftCardView} 
@@ -439,16 +485,25 @@ const Orders = () => {
               ...(view === "giftCards" ? ordersStyles.activeButton : ordersStyles.inactiveButton)
             }}
           >
-            Gift Card Orders
+            All Gift Cards
           </button>
           <button 
-            onClick={handleUserView} 
+            onClick={handleMarketplaceView} 
             style={{
               ...ordersStyles.button,
-              ...(view === "users" ? ordersStyles.activeButton : ordersStyles.inactiveButton)
+              ...(view === "marketplace" ? ordersStyles.activeButton : ordersStyles.inactiveButton)
             }}
           >
-            Customer Orders
+            Marketplace Orders
+          </button>
+          <button 
+            onClick={handleDirectView} 
+            style={{
+              ...ordersStyles.button,
+              ...(view === "direct" ? ordersStyles.activeButton : ordersStyles.inactiveButton)
+            }}
+          >
+            Direct Orders
           </button>
         </div>
 
@@ -503,13 +558,13 @@ const Orders = () => {
           </>
         )}
 
-        {/* User View */}
-        {view === "users" && (
+        {/* User View - includes marketplace, direct, and all user views */}
+        {(view === "users" || view === "marketplace" || view === "direct") && (
           <div>
             <div style={ordersStyles.searchContainer}>
               <input
                 type="search"
-                placeholder="Search buyers by name or email..."
+                placeholder={`Search ${view === "marketplace" ? "marketplace" : view === "direct" ? "direct" : ""} buyers by name or email...`}
                 value={buyerSearch}
                 onChange={(e) => setBuyerSearch(e.target.value)}
                 style={ordersStyles.searchInput}
@@ -522,6 +577,7 @@ const Orders = () => {
                   <th style={ordersStyles.th}>Name</th>
                   <th style={ordersStyles.th}>Email</th>
                   <th style={ordersStyles.th}>Gift Card</th>
+                  <th style={ordersStyles.th}>Order Source</th>
                   <th style={ordersStyles.th}>Redemption Progress</th>
                   <th style={ordersStyles.th}>Purchase Date</th>
                   <th style={ordersStyles.th}>Redemption History</th>
@@ -549,6 +605,18 @@ const Orders = () => {
                         <td style={ordersStyles.td}>{buyer.email}</td>
                         <td style={ordersStyles.td}>{buyer.giftCardName}</td>
                         <td style={ordersStyles.td}>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            backgroundColor: buyer.orderSource === 'marketplace' ? '#e3f2fd' : '#f3e5f5',
+                            color: buyer.orderSource === 'marketplace' ? '#1976d2' : '#7b1fa2'
+                          }}>
+                            {buyer.orderSource === 'marketplace' ? 'Marketplace' : 'Direct'}
+                          </span>
+                        </td>
+                        <td style={ordersStyles.td}>
                           <div style={ordersStyles.progressContainer}>
                             <div
                               style={{...ordersStyles.progressBar, width: `${fillPercentage}%`}}
@@ -574,7 +642,7 @@ const Orders = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="6" style={{...ordersStyles.td, textAlign: 'center', color: '#6b7280'}}>
+                    <td colSpan="7" style={{...ordersStyles.td, textAlign: 'center', color: '#6b7280'}}>
                       No matching buyers found.
                     </td>
                   </tr>

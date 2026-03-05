@@ -127,6 +127,11 @@ const giftCardSchema = new mongoose.Schema(
           type: Date,
           default: Date.now,
         },
+        orderSource: {
+          type: String,
+          enum: ["marketplace", "direct"],
+          default: "direct", // Default to direct for existing orders
+        },
         qrCode: {
           uniqueCode: {
             type: String,

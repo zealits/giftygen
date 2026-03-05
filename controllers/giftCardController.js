@@ -265,20 +265,35 @@ const getTotalGiftCardsSold = async (req, res) => {
 
 const getSoldGiftCards = async (req, res) => {
   try {
-    const { businessSlug } = req.query || {};
+    const { businessSlug, orderSource } = req.query || {};
     const filter = businessSlug ? { businessSlug } : {};
     // Fetch only gift cards with buyers (indicating they are sold)
     const soldGiftCards = await GiftCard.find({ ...filter, "buyers.0": { $exists: true } });
 
-    // Map gift cards to include only relevant details
-    const giftCards = soldGiftCards.map((card) => ({
-      id: card._id,
-      name: card.giftCardName,
-      tag: card.giftCardTag,
-      description: card.description,
-      image: card.giftCardImg,
-      totalBuyers: card.buyers.length, // Count of buyers
-    }));
+    // Map gift cards to include only relevant details and filter buyers by orderSource
+    const giftCards = soldGiftCards.map((card) => {
+      let filteredBuyers = card.buyers;
+      
+      // Filter buyers by orderSource if specified
+      if (orderSource && orderSource !== "all") {
+        filteredBuyers = card.buyers.filter(buyer => buyer.orderSource === orderSource);
+      }
+
+      // Only include cards that have buyers matching the filter
+      if (filteredBuyers.length === 0 && orderSource && orderSource !== "all") {
+        return null;
+      }
+
+      return {
+        id: card._id,
+        name: card.giftCardName,
+        tag: card.giftCardTag,
+        description: card.description,
+        image: card.giftCardImg,
+        totalBuyers: filteredBuyers.length, // Count of filtered buyers
+        orderSource: orderSource || "all",
+      };
+    }).filter(Boolean); // Remove null entries
 
     res.status(200).json({ giftCards });
   } catch (error) {
@@ -633,7 +648,7 @@ const deleteGiftCard = async (req, res) => {
 // In your controller where you generate and send the email
 const addBuyer = async (req, res) => {
   try {
-    const { id, purchaseType, selfInfo, giftInfo, paymentDetails, barcodeUnicode, walletUrl } = req.body;
+    const { id, purchaseType, selfInfo, giftInfo, paymentDetails, barcodeUnicode, walletUrl, orderSource } = req.body;
 
     console.log("bacode : ", barcodeUnicode);
     console.log("wallet url : ", walletUrl);
@@ -705,6 +720,7 @@ const addBuyer = async (req, res) => {
       },
       remainingBalance,
       walletUrl: walletUrl || null,
+      orderSource: orderSource || "direct", // Default to "direct" if not provided
     };
 
     // Add buyer to gift card
@@ -1392,7 +1408,7 @@ const fetchGiftCardById = async (req, res) => {
 const getGiftCardBuyers = async (req, res) => {
   try {
     const { id } = req.params; // Gift card ID
-    const { businessSlug } = req.query || {};
+    const { businessSlug, orderSource } = req.query || {};
     const giftCard = await GiftCard.findById(id);
 
     if (!giftCard) {
@@ -1404,8 +1420,14 @@ const getGiftCardBuyers = async (req, res) => {
       return res.status(403).json({ error: "Not authorized to view buyers for this gift card" });
     }
 
+    // Filter buyers by orderSource if specified
+    let filteredBuyers = giftCard.buyers;
+    if (orderSource && orderSource !== "all") {
+      filteredBuyers = giftCard.buyers.filter(buyer => buyer.orderSource === orderSource);
+    }
+
     // Sort buyers by purchase date and include remaining balance and redemption history
-    const sortedBuyers = giftCard.buyers
+    const sortedBuyers = filteredBuyers
       .sort((a, b) => new Date(a.purchaseDate) - new Date(b.purchaseDate))
       .map((buyer) => {
         const isGift = buyer.purchaseType === "gift";
@@ -1422,6 +1444,7 @@ const getGiftCardBuyers = async (req, res) => {
           remainingBalance: buyer.remainingBalance || 0,
           redemptionHistory: buyer.redemptionHistory || [],
           returnTime: buyer.purchaseDate,
+          orderSource: buyer.orderSource || "direct",
         };
       });
 
@@ -1434,26 +1457,35 @@ const getGiftCardBuyers = async (req, res) => {
 
 const getAllBuyers = async (req, res) => {
   try {
-    const { businessSlug } = req.query || {};
+    const { businessSlug, orderSource } = req.query || {};
     const filter = businessSlug ? { businessSlug } : {};
     const giftCards = await GiftCard.find(filter, "giftCardName buyers businessSlug"); // Only fetch fields needed
 
     // Extract buyers from filtered gift cards and sort them by purchaseDate
     const buyers = giftCards.flatMap((card) =>
-      card.buyers.map((buyer) => ({
-        buyerName: buyer.purchaseType === "self" ? buyer.selfInfo.name : buyer.giftInfo.senderName,
-        email: buyer.purchaseType === "self" ? buyer.selfInfo.email : buyer.giftInfo.senderEmail,
-        remainingBalance: buyer.remainingBalance,
-        giftCardName: card.giftCardName,
-        purchaseDate: buyer.purchaseDate,
-        usedAmount: buyer.usedAmount,
-        redemptionHistory: (buyer.redemptionHistory || []).map((entry) => ({
-          redeemedAmount: entry.redeemedAmount,
-          redemptionDate: entry.redemptionDate,
-          remainingAmount: entry.remainingAmount,
-          originalAmount: entry.originalAmount,
+      card.buyers
+        .filter((buyer) => {
+          // Filter by orderSource if specified
+          if (orderSource && orderSource !== "all") {
+            return buyer.orderSource === orderSource;
+          }
+          return true;
+        })
+        .map((buyer) => ({
+          buyerName: buyer.purchaseType === "self" ? buyer.selfInfo.name : buyer.giftInfo.senderName,
+          email: buyer.purchaseType === "self" ? buyer.selfInfo.email : buyer.giftInfo.senderEmail,
+          remainingBalance: buyer.remainingBalance,
+          giftCardName: card.giftCardName,
+          purchaseDate: buyer.purchaseDate,
+          usedAmount: buyer.usedAmount,
+          orderSource: buyer.orderSource || "direct",
+          redemptionHistory: (buyer.redemptionHistory || []).map((entry) => ({
+            redeemedAmount: entry.redeemedAmount,
+            redemptionDate: entry.redemptionDate,
+            remainingAmount: entry.remainingAmount,
+            originalAmount: entry.originalAmount,
+          })),
         })),
-      })),
     );
 
     // Sort buyers by purchaseDate in descending order (newest first)
