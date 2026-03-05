@@ -1,48 +1,182 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import "./Orders.css"; // Import the CSS file
+// Removed CSS import to fix ChunkLoadError
 
-// Skeleton component for gift cards
+// Simple loading components
 const GiftCardSkeleton = () => {
   return (
-    <div className="giftcard-item skeleton">
-      <div className="skeleton-title"></div>
-      <div className="skeleton-tag"></div>
-      <div className="skeleton-description"></div>
-      <div className="skeleton-image"></div>
-      <div className="skeleton-buyers"></div>
-      <div className="skeleton-button"></div>
+    <div style={{
+      ...ordersStyles.cardItem,
+      backgroundColor: '#f3f4f6',
+      color: '#9ca3af',
+      textAlign: 'center',
+      padding: '40px'
+    }}>
+      Loading gift card...
     </div>
   );
 };
 
-// Skeleton component for buyers table
+// Simple loading component for buyers table
 const BuyersSkeleton = () => {
   return (
-    <tr className="buyer-row-skeleton">
-      <td>
-        <div className="skeleton-cell skeleton-name"></div>
-      </td>
-      <td>
-        <div className="skeleton-cell skeleton-email"></div>
-      </td>
-      <td>
-        <div className="skeleton-cell skeleton-giftcard"></div>
-      </td>
-      <td>
-        <div className="skeleton-cell">
-          <div className="skeleton-progress-bar"></div>
-        </div>
-      </td>
-      <td>
-        <div className="skeleton-cell skeleton-date"></div>
-      </td>
-      <td>
-        <div className="skeleton-cell skeleton-button"></div>
+    <tr>
+      <td colSpan="6" style={{...ordersStyles.td, textAlign: 'center', color: '#9ca3af'}}>
+        Loading buyers...
       </td>
     </tr>
   );
+};
+
+// Simple inline styles to replace the CSS import
+const ordersStyles = {
+  container: {
+    padding: '20px',
+    minHeight: '100vh',
+    backgroundColor: '#f8fafc',
+    color: '#1f2937'
+  },
+  header: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    marginBottom: '20px',
+    textAlign: 'center'
+  },
+  toggleButtons: {
+    display: 'flex',
+    gap: '10px',
+    justifyContent: 'center',
+    marginBottom: '20px'
+  },
+  button: {
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: '500'
+  },
+  activeButton: {
+    backgroundColor: '#3b82f6',
+    color: 'white'
+  },
+  inactiveButton: {
+    backgroundColor: '#e5e7eb',
+    color: '#374151'
+  },
+  searchContainer: {
+    maxWidth: '600px',
+    margin: '0 auto 20px',
+    padding: '0 20px'
+  },
+  searchInput: {
+    width: '100%',
+    padding: '12px',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    fontSize: '16px'
+  },
+  cardsContainer: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gap: '20px',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '0 20px'
+  },
+  cardItem: {
+    border: '1px solid #e5e7eb',
+    borderRadius: '12px',
+    padding: '20px',
+    backgroundColor: 'white',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+  },
+  cardImage: {
+    width: '100%',
+    height: '200px',
+    objectFit: 'cover',
+    borderRadius: '8px',
+    marginBottom: '12px'
+  },
+  cardTitle: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    marginBottom: '8px'
+  },
+  cardButton: {
+    backgroundColor: '#3b82f6',
+    color: 'white',
+    border: 'none',
+    padding: '10px 16px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    width: '100%'
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    backgroundColor: 'white',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+  },
+  th: {
+    backgroundColor: '#f3f4f6',
+    padding: '12px',
+    textAlign: 'left',
+    fontWeight: '600',
+    borderBottom: '1px solid #e5e7eb'
+  },
+  td: {
+    padding: '12px',
+    borderBottom: '1px solid #e5e7eb'
+  },
+  modal: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '24px',
+    maxWidth: '600px',
+    width: '90%',
+    maxHeight: '80vh',
+    overflow: 'auto'
+  },
+  closeButton: {
+    position: 'absolute',
+    top: '10px',
+    right: '15px',
+    background: 'none',
+    border: 'none',
+    fontSize: '24px',
+    cursor: 'pointer'
+  },
+  progressContainer: {
+    display: 'flex',
+    width: '100px',
+    height: '20px',
+    backgroundColor: '#f3f4f6',
+    borderRadius: '4px',
+    overflow: 'hidden'
+  },
+  progressBar: {
+    backgroundColor: '#22c55e',
+    height: '100%'
+  },
+  progressEmpty: {
+    backgroundColor: '#e5e7eb',
+    height: '100%'
+  }
 };
 
 const Orders = () => {
@@ -294,31 +428,43 @@ const Orders = () => {
   };
 
   return (
-    <div className="orders-page-container">
-      <div className="sticky-header-container">
-        <h1 className="orders-page-header">Orders</h1>
-        <div className="view-toggle-buttons">
-          <button onClick={handleGiftCardView} className={view === "giftCards" ? "active-view-button" : "view-button"}>
+    <div style={ordersStyles.container}>
+      <div>
+        <h1 style={ordersStyles.header}>Orders</h1>
+        <div style={ordersStyles.toggleButtons}>
+          <button 
+            onClick={handleGiftCardView} 
+            style={{
+              ...ordersStyles.button,
+              ...(view === "giftCards" ? ordersStyles.activeButton : ordersStyles.inactiveButton)
+            }}
+          >
             Gift Card Orders
           </button>
-          <button onClick={handleUserView} className={view === "users" ? "active-view-button" : "view-button"}>
+          <button 
+            onClick={handleUserView} 
+            style={{
+              ...ordersStyles.button,
+              ...(view === "users" ? ordersStyles.activeButton : ordersStyles.inactiveButton)
+            }}
+          >
             Customer Orders
           </button>
         </div>
 
         {view === "giftCards" && (
           <>
-            <div className="giftcard-search-container">
+            <div style={ordersStyles.searchContainer}>
               <input
                 type="text"
                 placeholder="Search gift cards..."
                 value={giftCardSearch}
                 onChange={(e) => setGiftCardSearch(e.target.value)}
-                className="giftcard-search-input"
+                style={ordersStyles.searchInput}
               />
             </div>
 
-            <div className="giftcards-container">
+            <div style={ordersStyles.cardsContainer}>
               {isLoading && visibleGiftCards.length === 0 ? (
                 // Show skeletons for initial load
                 Array(6)
@@ -330,20 +476,20 @@ const Orders = () => {
                   const isLastElement = index === visibleGiftCards.length - 1;
 
                   return (
-                    <div key={card.id} className="giftcard-item" ref={isLastElement ? lastGiftCardElementRef : null}>
-                      <h3 className="giftcard-name">{card.name}</h3>
-                      <p className="giftcard-tag">Tag: {card.tag}</p>
-                      <p className="giftcard-description">{card.description}</p>
-                      <img className="giftcard-image" src={card.image} alt={card.name} loading="lazy" />
-                      <p className="total-buyers">Total Buyers: {card.totalBuyers}</p>
-                      <button onClick={() => handleViewBuyers(card.id)} className="view-buyers-button">
+                    <div key={card.id} style={ordersStyles.cardItem} ref={isLastElement ? lastGiftCardElementRef : null}>
+                      <h3 style={ordersStyles.cardTitle}>{card.name}</h3>
+                      <p style={{color: '#6b7280', marginBottom: '8px'}}>Tag: {card.tag}</p>
+                      <p style={{color: '#6b7280', marginBottom: '12px'}}>{card.description}</p>
+                      <img style={ordersStyles.cardImage} src={card.image} alt={card.name} loading="lazy" />
+                      <p style={{marginBottom: '12px', fontWeight: '500'}}>Total Buyers: {card.totalBuyers}</p>
+                      <button onClick={() => handleViewBuyers(card.id)} style={ordersStyles.cardButton}>
                         View Buyers
                       </button>
                     </div>
                   );
                 })
               ) : giftCardSearch ? (
-                <div className="no-results">No matching gift cards found</div>
+                <div style={{textAlign: 'center', padding: '40px', color: '#6b7280'}}>No matching gift cards found</div>
               ) : null}
 
               {/* Show skeletons when fetching more gift cards */}
@@ -359,26 +505,26 @@ const Orders = () => {
 
         {/* User View */}
         {view === "users" && (
-          <div className="users-container">
-            <div className="user-search-container">
+          <div>
+            <div style={ordersStyles.searchContainer}>
               <input
                 type="search"
                 placeholder="Search buyers by name or email..."
                 value={buyerSearch}
                 onChange={(e) => setBuyerSearch(e.target.value)}
-                className="user-search-input"
+                style={ordersStyles.searchInput}
               />
             </div>
 
-            <table className="buyers-table">
+            <table style={ordersStyles.table}>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Gift Card</th>
-                  <th>Redemption Progress</th>
-                  <th>Purchase Date</th>
-                  <th>Redemption History</th>
+                  <th style={ordersStyles.th}>Name</th>
+                  <th style={ordersStyles.th}>Email</th>
+                  <th style={ordersStyles.th}>Gift Card</th>
+                  <th style={ordersStyles.th}>Redemption Progress</th>
+                  <th style={ordersStyles.th}>Purchase Date</th>
+                  <th style={ordersStyles.th}>Redemption History</th>
                 </tr>
               </thead>
               <tbody>
@@ -399,30 +545,28 @@ const Orders = () => {
 
                     return (
                       <tr key={index} ref={isLastElement ? lastBuyerElementRef : null}>
-                        <td>{buyer.buyerName}</td>
-                        <td>{buyer.email}</td>
-                        <td>{buyer.giftCardName}</td>
-                        <td>
-                          <div className="progress-bar-container">
+                        <td style={ordersStyles.td}>{buyer.buyerName}</td>
+                        <td style={ordersStyles.td}>{buyer.email}</td>
+                        <td style={ordersStyles.td}>{buyer.giftCardName}</td>
+                        <td style={ordersStyles.td}>
+                          <div style={ordersStyles.progressContainer}>
                             <div
-                              className="progress-bar"
-                              style={{ width: `${fillPercentage}%` }}
+                              style={{...ordersStyles.progressBar, width: `${fillPercentage}%`}}
                               title={`Used: ${usedAmount}`}
                             ></div>
                             <div
-                              className="progress-bar-empty"
-                              style={{ width: `${100 - fillPercentage}%` }}
+                              style={{...ordersStyles.progressEmpty, width: `${100 - fillPercentage}%`}}
                               title={`Remaining: ${remainingBalance}`}
                             ></div>
                           </div>
                         </td>
-                        <td>{new Date(buyer.purchaseDate).toLocaleDateString()}</td>
-                        <td>
+                        <td style={ordersStyles.td}>{new Date(buyer.purchaseDate).toLocaleDateString()}</td>
+                        <td style={ordersStyles.td}>
                           <button
                             onClick={() => handleViewRedemptionHistory(buyer)}
-                            className="user-page-redemption-history"
+                            style={ordersStyles.cardButton}
                           >
-                            View Redemption History
+                            View History
                           </button>
                         </td>
                       </tr>
@@ -430,7 +574,7 @@ const Orders = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="6" className="no-results">
+                    <td colSpan="6" style={{...ordersStyles.td, textAlign: 'center', color: '#6b7280'}}>
                       No matching buyers found.
                     </td>
                   </tr>
@@ -449,17 +593,17 @@ const Orders = () => {
         )}
 
         {modalName === "buyersModal" && (
-          <div className="buyers-modal">
-            <div className="buyers-modal-content">
-              <button className="buyers-close-btn" onClick={closeModal}>
+          <div style={ordersStyles.modal}>
+            <div style={{...ordersStyles.modalContent, position: 'relative'}}>
+              <button style={ordersStyles.closeButton} onClick={closeModal}>
                 &times;
               </button>
-              <h3>Buyers List</h3>
+              <h3 style={{marginTop: '0', marginBottom: '20px', fontSize: '1.5rem', fontWeight: 'bold'}}>Buyers List</h3>
 
-              <div className="buyer-modal-search-container">
+              <div style={{marginBottom: '20px'}}>
                 <input
                   type="text"
-                  className="buyer-modal-search-input"
+                  style={ordersStyles.searchInput}
                   placeholder="Search buyers..."
                   onChange={(e) => {
                     const searchTerm = e.target.value.toLowerCase();
@@ -477,33 +621,38 @@ const Orders = () => {
                 />
               </div>
 
-              <ul>
+              <ul style={{listStyle: 'none', padding: 0, maxHeight: '400px', overflow: 'auto'}}>
                 {buyers.length > 0 ? (
                   buyers.map((buyer, index) => (
-                    <li key={index} className="buyer-item">
-                      <div className="buyer-info-compact">
-                        <span className="buyer-name">{buyer.name}</span>
-                        <span className="buyer-datetime">
-                          [ on: {new Date(buyer.purchaseDate).toLocaleDateString()}, at:{" "}
-                          {new Date(buyer.returnTime).toLocaleTimeString()} ]
+                    <li key={index} style={{
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '15px',
+                      marginBottom: '10px',
+                      backgroundColor: '#f9fafb'
+                    }}>
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+                        <span style={{fontWeight: 'bold', fontSize: '1.1rem'}}>{buyer.name}</span>
+                        <span style={{color: '#6b7280', fontSize: '0.9rem'}}>
+                          {new Date(buyer.purchaseDate).toLocaleDateString()}
                         </span>
                       </div>
 
-                      <div className="buyer-details">
-                        <span className="remaining-balance">
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <span style={{color: '#374151'}}>
                           <strong>Remaining Balance:</strong> {buyer.remainingBalance}
                         </span>
                         <button
                           onClick={() => handleViewRedemptionHistory(buyer)}
-                          className="view-redemption-history-button"
+                          style={{...ordersStyles.cardButton, width: 'auto', padding: '8px 16px'}}
                         >
-                          View Redemption History
+                          View History
                         </button>
                       </div>
                     </li>
                   ))
                 ) : (
-                  <li className="no-buyers">No buyers found.</li>
+                  <li style={{textAlign: 'center', padding: '20px', color: '#6b7280'}}>No buyers found.</li>
                 )}
               </ul>
             </div>
@@ -511,32 +660,39 @@ const Orders = () => {
         )}
 
         {modalName === "userRedemptionHistoryModal" && selectedBuyer && (
-          <div className="redemption-history-modal">
-            <div className="redemption-history-modal-content">
-              <h3 className="redemption-history-title">
+          <div style={ordersStyles.modal}>
+            <div style={{...ordersStyles.modalContent, position: 'relative'}}>
+              <button style={ordersStyles.closeButton} onClick={closeModal}>×</button>
+              <h3 style={{marginTop: '0', marginBottom: '20px', fontSize: '1.5rem', fontWeight: 'bold'}}>
                 Redemption History for {selectedBuyer.buyerName || "Unknown Buyer"}
               </h3>
               {selectedBuyer.redemptionHistory?.length > 0 ? (
-                <ul className="redemption-history-list">
+                <ul style={{listStyle: 'none', padding: 0, maxHeight: '300px', overflow: 'auto'}}>
                   {selectedBuyer.redemptionHistory.map((entry, index) => (
-                    <li key={index} className="redemption-history-entry">
-                      <strong className="entry-number">#{index + 1}</strong>
-                      <p className="redeemed-amount">
+                    <li key={index} style={{
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '15px',
+                      marginBottom: '10px',
+                      backgroundColor: '#f9fafb'
+                    }}>
+                      <strong style={{color: '#374151', marginBottom: '10px', display: 'block'}}>#{index + 1}</strong>
+                      <p style={{margin: '5px 0', color: '#374151'}}>
                         <strong>Redeemed Amount:</strong> ₹{entry.redeemedAmount}
                       </p>
-                      <p className="remaining-amount">
+                      <p style={{margin: '5px 0', color: '#374151'}}>
                         <strong>Remaining Amount:</strong> ₹{entry.remainingAmount}
                       </p>
-                      <p className="redemption-date">
+                      <p style={{margin: '5px 0', color: '#374151'}}>
                         <strong>Date:</strong> {new Date(entry.redemptionDate).toLocaleDateString()}
                       </p>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="no-redemption-history">No redemption history available.</p>
+                <p style={{textAlign: 'center', padding: '40px', color: '#6b7280'}}>No redemption history available.</p>
               )}
-              <button className="close-modal-button" onClick={closeModal}>
+              <button style={{...ordersStyles.cardButton, margin: '20px auto 0', display: 'block'}} onClick={closeModal}>
                 Close
               </button>
             </div>
@@ -545,32 +701,39 @@ const Orders = () => {
 
         {/* Gift Cards View Redemption History Modal */}
         {modalName === "giftCardRedemptionHistoryModal" && giftCardSelectedBuyer && (
-          <div className="redemption-history-modal">
-            <div className="redemption-history-modal-content">
-              <h3 className="redemption-history-title">
+          <div style={ordersStyles.modal}>
+            <div style={{...ordersStyles.modalContent, position: 'relative'}}>
+              <button style={ordersStyles.closeButton} onClick={closeModal}>×</button>
+              <h3 style={{marginTop: '0', marginBottom: '20px', fontSize: '1.5rem', fontWeight: 'bold'}}>
                 Redemption History for {giftCardSelectedBuyer.name || "Unknown Buyer"}
               </h3>
               {giftCardSelectedBuyer.redemptionHistory?.length > 0 ? (
-                <ul className="redemption-history-list">
+                <ul style={{listStyle: 'none', padding: 0, maxHeight: '300px', overflow: 'auto'}}>
                   {giftCardSelectedBuyer.redemptionHistory.map((entry, index) => (
-                    <li key={index} className="redemption-history-entry">
-                      <strong className="entry-number">#{index + 1}</strong>
-                      <p className="redeemed-amount">
+                    <li key={index} style={{
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '15px',
+                      marginBottom: '10px',
+                      backgroundColor: '#f9fafb'
+                    }}>
+                      <strong style={{color: '#374151', marginBottom: '10px', display: 'block'}}>#{index + 1}</strong>
+                      <p style={{margin: '5px 0', color: '#374151'}}>
                         <strong>Redeemed Amount:</strong> ₹{entry.redeemedAmount}
                       </p>
-                      <p className="remaining-amount">
+                      <p style={{margin: '5px 0', color: '#374151'}}>
                         <strong>Remaining Amount:</strong> ₹{entry.remainingAmount}
                       </p>
-                      <p className="redemption-date">
+                      <p style={{margin: '5px 0', color: '#374151'}}>
                         <strong>Date:</strong> {new Date(entry.redemptionDate).toLocaleDateString()}
                       </p>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="no-redemption-history">No redemption history available.</p>
+                <p style={{textAlign: 'center', padding: '40px', color: '#6b7280'}}>No redemption history available.</p>
               )}
-              <button className="close-modal-button" onClick={closeModal}>
+              <button style={{...ordersStyles.cardButton, margin: '20px auto 0', display: 'block'}} onClick={closeModal}>
                 Close
               </button>
             </div>

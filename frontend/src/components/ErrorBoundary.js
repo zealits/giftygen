@@ -19,24 +19,29 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      const is130 = this.state.error?.message?.includes("130") || this.state.error?.message?.includes("Element type is invalid");
+      const is130 =
+        this.state.error?.message?.includes("130") || this.state.error?.message?.includes("Element type is invalid");
       return (
-        <div style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-          fontFamily: "system-ui, sans-serif",
-          background: "#0f172a",
-          color: "#e2e8f0",
-          textAlign: "center",
-        }}>
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+            fontFamily: "system-ui, sans-serif",
+            background: "#0f172a",
+            color: "#e2e8f0",
+            textAlign: "center",
+          }}
+        >
           <h1 style={{ fontSize: "1.5rem", marginBottom: 8 }}>Something went wrong</h1>
           {is130 && (
             <p style={{ maxWidth: 420, marginBottom: 16, color: "#94a3b8" }}>
-              A component could not be loaded (invalid or missing export). This often happens when an import is undefined—check that every lazy-loaded or imported component uses a default export and that the path is correct.
+              A component could not be loaded (invalid or missing export). This often happens when an import is
+              undefined—check that every lazy-loaded or imported component uses a default export and that the path is
+              correct.
             </p>
           )}
           <p style={{ fontSize: "0.875rem", color: "#64748b", marginBottom: 24 }}>
