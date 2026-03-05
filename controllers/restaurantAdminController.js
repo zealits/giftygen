@@ -680,7 +680,8 @@ exports.generateQrPoster = catchAsyncErrors(async (req, res, next) => {
 
   const derivedBase = `${req.protocol}://${req.get("host")}`;
   const baseUrl = process.env.PUBLIC_BASE_URL || derivedBase;
-  const link = `${baseUrl}/${slug}/giftcards`;
+  // Use subdomain URL instead of marketplace URL for direct orders
+  const link = `https://${slug}.giftygen.com`;
 
   const businessName = admin.restaurantName || "Our Gift Cards";
 
