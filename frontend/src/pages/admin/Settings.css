@@ -4,6 +4,7 @@
 	margin: 0 auto;
 	background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 	min-height: 100vh;
+	position: relative;
 }
 
 .settings-header {
@@ -27,6 +28,22 @@
 	opacity: 0.8;
 	margin: 0;
 	color: #e2e8f0;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.header-industry-badge {
+	padding: 4px 12px;
+	background: linear-gradient(135deg, #10b981, #059669);
+	border-radius: 20px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: white;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
 }
 
 .settings-container {
@@ -1386,5 +1403,328 @@ select.contact-number-code {
 .photo-custom-label-input::placeholder {
 	color: #0f172a;
 	opacity: 1;
+}
+
+/* Step Progress Indicator */
+.settings-progress {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 24px 0 32px;
+	padding: 20px;
+	background: rgba(255, 255, 255, 0.03);
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	backdrop-filter: blur(10px);
+}
+
+.progress-step {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 0 16px;
+	position: relative;
+	transition: all 0.3s ease;
+}
+
+.progress-step:not(:last-child)::after {
+	content: '';
+	position: absolute;
+	top: 20px;
+	right: -20px;
+	width: 40px;
+	height: 2px;
+	background: rgba(255, 255, 255, 0.1);
+	transition: all 0.3s ease;
+}
+
+.progress-step.completed::after {
+	background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.progress-step.active::after {
+	background: linear-gradient(90deg, #6366f1, #8b5cf6);
+	opacity: 0.5;
+}
+
+.step-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.1rem;
+	font-weight: 600;
+	background: rgba(255, 255, 255, 0.1);
+	color: rgba(255, 255, 255, 0.5);
+	border: 2px solid rgba(255, 255, 255, 0.1);
+	transition: all 0.3s ease;
+}
+
+.progress-step.completed .step-icon {
+	background: linear-gradient(135deg, #10b981, #059669);
+	color: white;
+	border-color: #10b981;
+	transform: scale(1.1);
+}
+
+.progress-step.active .step-icon {
+	background: linear-gradient(135deg, #6366f1, #8b5cf6);
+	color: white;
+	border-color: #6366f1;
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.progress-step span {
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: rgba(255, 255, 255, 0.5);
+	text-align: center;
+	transition: color 0.3s ease;
+}
+
+.progress-step.completed span,
+.progress-step.active span {
+	color: #e2e8f0;
+}
+
+.progress-step.pending span {
+	color: rgba(255, 255, 255, 0.3);
+}
+
+/* Section Cards */
+.section-card {
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 20px;
+	padding: 24px;
+	margin-bottom: 24px;
+	backdrop-filter: blur(20px);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s ease;
+	position: relative;
+}
+
+.section-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+	border-color: rgba(99, 102, 241, 0.3);
+}
+
+.section-card .card-title {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 8px;
+}
+
+.title-icon {
+	font-size: 1.3rem;
+}
+
+.card-description {
+	font-size: 0.9rem;
+	color: #94a3b8;
+	margin-bottom: 20px;
+	line-height: 1.5;
+}
+
+.industry-badge {
+	margin-left: auto;
+	padding: 4px 12px;
+	background: linear-gradient(135deg, #6366f1, #8b5cf6);
+	border-radius: 20px;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: white;
+}
+
+/* Form Enhancements */
+.form_label.required::after {
+	content: ' *';
+	color: #ef4444;
+	font-weight: bold;
+}
+
+.form-input.readonly {
+	background: rgba(255, 255, 255, 0.04) !important;
+	color: rgba(203, 213, 225, 0.6) !important;
+	cursor: not-allowed !important;
+	border-style: dashed !important;
+}
+
+.form-hint.warning {
+	color: #fbbf24;
+	background: rgba(251, 191, 36, 0.1);
+	padding: 8px 12px;
+	border-radius: 8px;
+	border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.form-hint code {
+	background: rgba(99, 102, 241, 0.2);
+	color: #c7d2fe;
+	padding: 2px 6px;
+	border-radius: 4px;
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	font-size: 0.8em;
+}
+
+/* Page Customization Section */
+.page-customization-section {
+	margin-top: 24px;
+}
+
+.page-customization-section .section-card {
+	border: 2px solid rgba(99, 102, 241, 0.2);
+	background: rgba(99, 102, 241, 0.05);
+}
+
+/* Responsive Design Improvements */
+@media (max-width: 768px) {
+	.settings-progress {
+		flex-wrap: wrap;
+		gap: 16px;
+		padding: 16px;
+	}
+	
+	.progress-step {
+		min-width: 80px;
+		padding: 0 8px;
+	}
+	
+	.progress-step:not(:last-child)::after {
+		display: none;
+	}
+	
+	.section-card {
+		padding: 20px;
+		margin-bottom: 20px;
+	}
+	
+	.branding-row {
+		grid-template-columns: 1fr;
+		gap: 20px;
+	}
+}
+
+@media (max-width: 480px) {
+	.settings-progress {
+		flex-direction: column;
+		gap: 12px;
+	}
+	
+	.progress-step {
+		flex-direction: row;
+		gap: 12px;
+		width: 100%;
+		padding: 12px 16px;
+		background: rgba(255, 255, 255, 0.05);
+		border-radius: 12px;
+	}
+	
+	.step-icon {
+		width: 32px;
+		height: 32px;
+		font-size: 0.9rem;
+	}
+	
+	.progress-step span {
+		font-size: 0.85rem;
+		text-align: left;
+	}
+}
+
+/* Enhanced Hover States */
+.form-input:hover {
+	border-color: rgba(255, 255, 255, 0.2);
+}
+
+.form-input:focus {
+	border-color: #6366f1 !important;
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+select.form-input:focus {
+	border-color: #6366f1 !important;
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+textarea.form-input:focus {
+	border-color: #6366f1 !important;
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Industry-Specific Styling */
+.industry-restaurant-and-fine-dining .section-icon {
+	background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.industry-hotels---resorts .section-icon {
+	background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.industry-fitness-and-wellness-memberships .section-icon {
+	background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.industry-retail---e-commerce .section-icon {
+	background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.industry-beauty-and-personal-care .section-icon {
+	background: linear-gradient(135deg, #ec4899, #db2777);
+}
+
+.industry-seasonal-gifting .section-icon {
+	background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+/* Industry-specific page customization section styling */
+.industry-restaurant-and-fine-dining .page-customization-section .section-card {
+	border-color: rgba(245, 158, 11, 0.3);
+	background: rgba(245, 158, 11, 0.05);
+}
+
+.industry-hotels---resorts .page-customization-section .section-card {
+	border-color: rgba(59, 130, 246, 0.3);
+	background: rgba(59, 130, 246, 0.05);
+}
+
+.industry-fitness-and-wellness-memberships .page-customization-section .section-card {
+	border-color: rgba(16, 185, 129, 0.3);
+	background: rgba(16, 185, 129, 0.05);
+}
+
+.industry-retail---e-commerce .page-customization-section .section-card {
+	border-color: rgba(139, 92, 246, 0.3);
+	background: rgba(139, 92, 246, 0.05);
+}
+
+.industry-beauty-and-personal-care .page-customization-section .section-card {
+	border-color: rgba(236, 72, 153, 0.3);
+	background: rgba(236, 72, 153, 0.05);
+}
+
+.industry-seasonal-gifting .page-customization-section .section-card {
+	border-color: rgba(239, 68, 68, 0.3);
+	background: rgba(239, 68, 68, 0.05);
+}
+
+/* Success States */
+.form_group.completed {
+	position: relative;
+}
+
+.form_group.completed::after {
+	content: '✓';
+	position: absolute;
+	right: 12px;
+	top: 32px;
+	color: #10b981;
+	font-weight: bold;
+	font-size: 1.1rem;
 }
 

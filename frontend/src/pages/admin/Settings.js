@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import MapLocationPicker from "../../components/MapLocationPicker";
+import Tooltip, { FieldTooltip } from "../../components/Tooltip";
 import {
   INDUSTRY_PAGE_CONFIG,
   getStatusFromBusinessHours,
@@ -481,7 +482,6 @@ const Settings = ({ section: sectionProp }) => {
     const sub = INDUSTRY_CONFIG[form.industry]?.subtitleOptions || [];
     const known = INDUSTRY_CONFIG[form.industry]?.knownForOptions || [];
     return [...new Set([...sub, ...known])];
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- INDUSTRY_CONFIG is static
   }, [form.industry]);
 
   const photoFilterLabelOptions = useMemo(
@@ -896,7 +896,107 @@ const Settings = ({ section: sectionProp }) => {
     </div>
   );
 
-  const renderBusinessProfileSection = () => (
+  // Industry-specific tooltip content
+  const getTooltipContent = () => {
+    const tooltips = {
+      businessName: {
+        default: "Choose a memorable name that represents your brand. This appears on gift cards and your public page.",
+        "Restaurant And Fine Dining": "Your restaurant name as customers know it. This appears on gift cards and your public page.",
+        "Hotels & Resorts": "Your hotel or resort name. This appears on gift cards and booking pages.",
+        "Fitness and Wellness memberships": "Your gym, spa, or wellness center name. This helps customers identify your brand.",
+        "Retail & E-commerce": "Your store or brand name that customers recognize.",
+        "Beauty and Personal care": "Your salon, spa, or beauty brand name.",
+        "Seasonal Gifting": "Your business name for seasonal gift offerings."
+      },
+      industry: {
+        default: "Select your business category to customize form fields and options specific to your industry type."
+      },
+      businessDescription: {
+        default: "Describe what makes your business special. This helps customers understand your value proposition.",
+        "Restaurant And Fine Dining": "Describe your cuisine, ambiance, and what makes your restaurant unique. Mention signature dishes or dining experience.",
+        "Hotels & Resorts": "Highlight your amenities, location, and what makes your property special. Mention views, facilities, or unique features.",
+        "Fitness and Wellness memberships": "Describe your fitness programs, wellness services, and facilities available to members.",
+        "Retail & E-commerce": "Explain your product range, quality, and what sets your store apart from competitors.",
+        "Beauty and Personal care": "Detail your services, expertise, and the experience customers can expect.",
+        "Seasonal Gifting": "Describe your seasonal offerings and what makes your gifts special."
+      },
+      contactNumber: {
+        default: "Add phone numbers where customers can reach you. You can add multiple numbers for different purposes (main, reservations, support)."
+      },
+      businessHours: {
+        default: "Set your operating hours so customers know when you're open. The status updates automatically based on current time.",
+        "Restaurant And Fine Dining": "Set your restaurant's operating hours. Consider different hours for lunch and dinner service if applicable.",
+        "Hotels & Resorts": "Set reception hours or main service hours. Most hotels show 24/7 for reception.",
+        "Fitness and Wellness memberships": "Set your facility hours when members can access services and equipment."
+      },
+      knownFor: {
+        default: "Select tags that describe what your business is known for. This helps customers understand your specialties.",
+        "Restaurant And Fine Dining": "Choose cuisine types, specialties, and dining styles that describe your restaurant.",
+        "Hotels & Resorts": "Select amenities, location features, and services that make your property stand out.",
+        "Fitness and Wellness memberships": "Choose workout types, classes, and wellness services you offer."
+      }
+    };
+
+    return (field) => tooltips[field]?.[form.industry] || tooltips[field]?.default || "";
+  };
+
+  const getTooltip = getTooltipContent();
+
+  // Industry-specific form sections visibility
+  const getIndustryConfig = () => {
+    return {
+      showMenuContent: form.industry === "Restaurant And Fine Dining",
+      showRoomTypes: form.industry === "Hotels & Resorts",
+      showCustomTab: !["Restaurant And Fine Dining", "Hotels & Resorts"].includes(form.industry),
+      showGallery: true, // All industries can have photos
+      showBusinessHours: true, // All industries have operating hours
+      showAddress: true, // All industries should have address
+      placeholders: INDUSTRY_CONFIG[form.industry] || {}
+    };
+  };
+
+  const industryConfig = getIndustryConfig();
+
+  const renderBusinessProfileSection = () => {
+    const hasBasicInfo = Boolean(logoUrl && form.restaurantName?.trim());
+    const hasIndustry = Boolean(form.industry);
+    const hasContact = Boolean((form.phoneNumbers || []).some((entry) => (entry?.national || "").trim()));
+    const hasDescription = Boolean(form.businessDescription?.trim());
+    const hasBusinessHours = Boolean(
+      form.pageCustomization?.businessHours && Object.keys(form.pageCustomization.businessHours).length > 0,
+    );
+    const hasKnownFor = toArray(form.pageCustomization?.knownFor).length > 0;
+    const hasDisclaimer = Boolean(form.pageCustomization?.disclaimer?.trim());
+    const hasMenuSections = Boolean(
+      Array.isArray(form.pageCustomization?.menuSections) &&
+        form.pageCustomization.menuSections.some(
+          (section) =>
+            Boolean(section?.title?.trim()) ||
+            (Array.isArray(section?.items) && section.items.some((item) => Boolean(item?.trim()))),
+        ),
+    );
+    const hasCustomTabContent = Boolean(form.pageCustomization?.customTabContent?.trim());
+    const hasPageCustomization =
+      hasBusinessHours || hasKnownFor || hasDisclaimer || hasMenuSections || hasCustomTabContent;
+    const hasGallery = galleryImages.length > 0;
+    const hasAddress = Boolean(form.restaurantAddress?.street?.trim() && form.restaurantAddress?.city?.trim());
+
+    const progressFlags = [
+      hasBasicInfo,
+      hasIndustry,
+      hasContact,
+      hasDescription,
+      hasPageCustomization,
+      hasGallery,
+      hasAddress,
+    ];
+
+    const getStepClass = (index) => {
+      if (progressFlags[index]) return "completed";
+      return progressFlags.slice(0, index).every(Boolean) ? "active" : "pending";
+    };
+
+    return (
     <div className="settings-section">
       <div className="section-header">
         <div className="section-icon">🏢</div>
@@ -908,61 +1008,131 @@ const Settings = ({ section: sectionProp }) => {
 
       <div className="settings-card business-card">
         <div className="card-content">
-          <div className="profile-section">
-            <h3 className="card-title">Branding & Identity</h3>
+          {/* Step Progress Indicator */}
+          <div className="settings-progress">
+            <div className={`progress-step ${getStepClass(0)}`}>
+              <div className="step-icon">🏢</div>
+              <span>Basic Info</span>
+            </div>
+            <div className={`progress-step ${getStepClass(1)}`}>
+              <div className="step-icon">🎯</div>
+              <span>Industry</span>
+            </div>
+            <div className={`progress-step ${getStepClass(2)}`}>
+              <div className="step-icon">📞</div>
+              <span>Contact</span>
+            </div>
+            <div className={`progress-step ${getStepClass(3)}`}>
+              <div className="step-icon">📝</div>
+              <span>Description</span>
+            </div>
+            <div className={`progress-step ${getStepClass(4)}`}>
+              <div className="step-icon">🎨</div>
+              <span>Page Customization</span>
+            </div>
+            <div className={`progress-step ${getStepClass(5)}`}>
+              <div className="step-icon">📸</div>
+              <span>Photos</span>
+            </div>
+            <div className={`progress-step ${getStepClass(6)}`}>
+              <div className="step-icon">📍</div>
+              <span>Address</span>
+            </div>
+          </div>
 
-            <div className="branding-row">
-              <div className="logo-section branding-row-logo">
-                <label className="form_label">Business Logo</label>
-                <input type="file" accept="image/*" onChange={handleLogoFile} className="file-input" id="logo-upload" />
-                <div className="logo-box-wrap">
-                  {logoUrl ? (
-                    <div className="logo-preview logo-preview--has-image">
-                      <img src={logoUrl} alt="Business Logo" className="logo-image" />
-                      <label
-                        htmlFor="logo-upload"
-                        className={`logo-hover-overlay ${uploadingLogo ? "logo-hover-overlay--busy" : ""}`}
-                        style={uploadingLogo ? { pointerEvents: "none" } : {}}
-                      >
-                        <span className="logo-hover-icon">📷</span>
-                        <span>{uploadingLogo ? "Uploading..." : "Change logo"}</span>
+          <div className="profile-section">
+            <div className="section-card">
+              <h3 className="card-title">
+                <span className="title-icon">🏢</span>
+                Branding & Identity
+              </h3>
+              <p className="card-description">Set up your business branding and basic information that customers will see.</p>
+
+              <div className="branding-row">
+                <div className="logo-section branding-row-logo">
+                  <label className="form_label">
+                    Business Logo
+                    <FieldTooltip tooltip="Upload your business logo (recommended: square format, at least 200x200px). This appears on gift cards and your public page." />
+                  </label>
+                  <input type="file" accept="image/*" onChange={handleLogoFile} className="file-input" id="logo-upload" />
+                  <div className="logo-box-wrap">
+                    {logoUrl ? (
+                      <div className="logo-preview logo-preview--has-image">
+                        <img src={logoUrl} alt="Business Logo" className="logo-image" />
+                        <label
+                          htmlFor="logo-upload"
+                          className={`logo-hover-overlay ${uploadingLogo ? "logo-hover-overlay--busy" : ""}`}
+                          style={uploadingLogo ? { pointerEvents: "none" } : {}}
+                        >
+                          <span className="logo-hover-icon">📷</span>
+                          <span>{uploadingLogo ? "Uploading..." : "Change logo"}</span>
+                        </label>
+                      </div>
+                    ) : (
+                      <label htmlFor="logo-upload" className="logo-upload-empty">
+                        <span className="logo-upload-empty-icon">📷</span>
+                        <span className="logo-upload-empty-text">Upload logo</span>
+                        <span className="logo-upload-empty-sub">
+                          {uploadingLogo ? "Uploading..." : "Click to choose file"}
+                        </span>
                       </label>
-                    </div>
-                  ) : (
-                    <label htmlFor="logo-upload" className="logo-upload-empty">
-                      <span className="logo-upload-empty-icon">📷</span>
-                      <span className="logo-upload-empty-text">Upload logo</span>
-                      <span className="logo-upload-empty-sub">
-                        {uploadingLogo ? "Uploading..." : "Click to choose file"}
-                      </span>
-                    </label>
+                    )}
+                  </div>
+                </div>
+                <div className="form_group branding-row-name">
+                  <label className="form_label required">
+                    Business Name
+                    <FieldTooltip tooltip={getTooltip('businessName')} />
+                  </label>
+                  <input
+                    name="restaurantName"
+                    value={form.restaurantName}
+                    onChange={handleNameChange}
+                    placeholder="Enter your business name"
+                    className="form-input"
+                    required
+                  />
+                  {form.businessSlug && (
+                    <p className="form-hint">
+                      URL slug: <code>{form.businessSlug}</code>
+                    </p>
+                  )}
+                </div>
+                <div className="form_group branding-row-industry">
+                  <label className="form_label required">
+                    Industry
+                    <FieldTooltip tooltip={getTooltip('industry')} />
+                  </label>
+                  <select name="industry" value={form.industry} onChange={handleChange} className="form-input" required>
+                    <option value="">Select an industry</option>
+                    <option value="Restaurant And Fine Dining">🍽️ Restaurant And Fine Dining</option>
+                    <option value="Hotels & Resorts">🏨 Hotels & Resorts</option>
+                    <option value="Fitness and Wellness memberships">💪 Fitness and Wellness</option>
+                    <option value="Retail & E-commerce">🛍️ Retail & E-commerce</option>
+                    <option value="Beauty and Personal care">💅 Beauty and Personal Care</option>
+                    <option value="Seasonal Gifting">🎁 Seasonal Gifting</option>
+                  </select>
+                  {!form.industry && (
+                    <p className="form-hint warning">
+                      <strong>Please select an industry</strong> to unlock customized form fields and options.
+                    </p>
                   )}
                 </div>
               </div>
-              <div className="form_group branding-row-name">
-                <label className="form_label">Business Name</label>
-                <input
-                  name="restaurantName"
-                  value={form.restaurantName}
-                  onChange={handleNameChange}
-                  placeholder="Enter your business name"
-                  className="form-input"
-                />
-              </div>
-              <div className="form_group branding-row-industry">
-                <label className="form_label">Industry</label>
-                <select name="industry" value={form.industry} onChange={handleChange} className="form-input">
-                  <option value="">Select an industry</option>
-                  <option value="Restaurant And Fine Dining">Restaurant And Fine Dining</option>
-                  <option value="Hotels & Resorts">Hotels & Resorts</option>
-                  <option value="Fitness and Wellness memberships">Fitness and Wellness memberships</option>
-                  <option value="Retail & E-commerce">Retail & E-commerce</option>
-                  <option value="Beauty and Personal care">Beauty and Personal care</option>
-                  <option value="Seasonal Gifting">Seasonal Gifting</option>
-                </select>
-              </div>
-              <div className="form_group branding-row-phone">
-                <label className="form_label">Contact Number</label>
+            </div>
+
+            <div className="section-card">
+              <h3 className="card-title">
+                <span className="title-icon">📞</span>
+                Contact Information
+              </h3>
+              <p className="card-description">Add contact numbers where customers can reach you.</p>
+
+              <div className="form_group">
+                <label className="form_label required">
+                  Contact Numbers
+                  <FieldTooltip tooltip={getTooltip('contactNumber')} />
+                </label>
                 <div className="contact-numbers-list">
                   {(form.phoneNumbers || []).map((entry, index) => (
                     <div key={index} className="contact-number-row">
@@ -1042,33 +1212,58 @@ const Settings = ({ section: sectionProp }) => {
               </div>
             </div>
 
-            <div className="form_group" style={{ gridColumn: "1 / -1" }}>
-              <label className="form_label">Business Description</label>
-              <textarea
-                name="businessDescription"
-                value={form.businessDescription}
-                onChange={handleChange}
-                placeholder={
-                  form.industry && INDUSTRY_CONFIG[form.industry]?.businessDescriptionPlaceholder
-                    ? INDUSTRY_CONFIG[form.industry].businessDescriptionPlaceholder
-                    : "Describe your business..."
-                }
-                className="form-input"
-                rows="4"
-                style={{ resize: "vertical", minHeight: "100px" }}
-              />
+            <div className="section-card">
+              <h3 className="card-title">
+                <span className="title-icon">📝</span>
+                Business Description
+              </h3>
+              <p className="card-description">Tell customers what makes your business special and unique.</p>
+
+              <div className="form_group">
+                <label className="form_label">
+                  About Your Business
+                  <FieldTooltip tooltip={getTooltip('businessDescription')} />
+                </label>
+                <textarea
+                  name="businessDescription"
+                  value={form.businessDescription}
+                  onChange={handleChange}
+                  placeholder={
+                    form.industry && INDUSTRY_CONFIG[form.industry]?.businessDescriptionPlaceholder
+                      ? INDUSTRY_CONFIG[form.industry].businessDescriptionPlaceholder
+                      : "Describe what makes your business special, your values, and what customers can expect..."
+                  }
+                  className="form-input"
+                  rows="4"
+                  style={{ resize: "vertical", minHeight: "120px" }}
+                />
+                <p className="form-hint">
+                  {form.businessDescription.length}/500 characters
+                  {form.industry && (
+                    <> • Customized for {form.industry.toLowerCase()}</>
+                  )}
+                </p>
+              </div>
             </div>
           </div>
 
           {form.industry && (
-            <div className="page-customization-section" style={{ marginTop: "24px" }}>
-              <h3 className="card-title">Page Customization</h3>
-              <p className="form-hint" style={{ marginBottom: 16 }}>
-                Customize how your public business page displays. These fields appear on your gift cards page.
-              </p>
+            <div className="page-customization-section">
+                <div className="section-card">
+                  <h3 className="card-title">
+                    <span className="title-icon">🎨</span>
+                    Page Customization
+                    <span className="industry-badge">{form.industry}</span>
+                  </h3>
+                  <p className="card-description">
+                    Customize how your public business page displays. These settings are optimized for your industry type.
+                  </p>
               <div className="form-grid">
                 <div className="form_group page-customization-full">
-                  <label className="form_label">Business Hours</label>
+                  <label className="form_label">
+                    Business Hours
+                    <FieldTooltip tooltip={getTooltip('businessHours')} />
+                  </label>
                   <p className="form-hint" style={{ marginBottom: 10 }}>
                     Set hours for weekdays, then override Saturday/Sunday if different. Status updates automatically.
                   </p>
@@ -1262,10 +1457,12 @@ const Settings = ({ section: sectionProp }) => {
                 </div>
 
                 <div className="form_group page-customization-full">
-                  <label className="form_label">Known For / Highlights</label>
+                  <label className="form_label">
+                    Known For / Highlights
+                    <FieldTooltip tooltip={getTooltip('knownFor')} />
+                  </label>
                   <p className="form-hint" style={{ marginBottom: 8 }}>
-                    Select from options below or type your own and press Enter to add. Categories and highlights in one
-                    place.
+                    Select from industry-specific options or add your own custom tags. These help customers understand what you specialize in.
                   </p>
                   <div className="tag-options-wrap">
                     {knownForAllOptions.map((opt) => (
@@ -1320,7 +1517,7 @@ const Settings = ({ section: sectionProp }) => {
                     />
                   </div>
                 )}
-                {INDUSTRY_CONFIG[form.industry]?.hasStructuredRooms ? (
+                {industryConfig.showRoomTypes ? (
                   <div className="form_group page-customization-full settings-room-types-section">
                     <label className="form_label">Room types</label>
                     <p className="form-hint" style={{ marginBottom: 12 }}>
@@ -1432,7 +1629,7 @@ const Settings = ({ section: sectionProp }) => {
                       + Add room type
                     </button>
                   </div>
-                ) : form.industry === "Restaurant And Fine Dining" ? (
+                ) : industryConfig.showMenuContent ? (
                   <div className="form_group page-customization-full settings-menu-section-wrap">
                     <div className="settings-menu-section-header">
                       <label className="form_label">Menu Content</label>
@@ -1533,16 +1730,17 @@ const Settings = ({ section: sectionProp }) => {
                       + Add menu section
                     </button>
                   </div>
-                ) : (
+                ) : industryConfig.showCustomTab && (
                   <div className="form_group">
                     <label className="form_label">
-                      {INDUSTRY_CONFIG[form.industry]?.customTabLabel || "Custom Tab"} Content
+                      {industryConfig.placeholders?.customTabLabel || "Custom Content"} 
+                      <FieldTooltip tooltip={`Add custom content specific to your ${form.industry.toLowerCase()} business. This appears on a dedicated tab on your public page.`} />
                     </label>
                     <textarea
                       value={form.pageCustomization?.customTabContent || ""}
                       onChange={(e) => handlePageCustomizationChange("customTabContent", e.target.value)}
                       placeholder={
-                        INDUSTRY_CONFIG[form.industry]?.customTabPlaceholder || "Add content for your custom tab..."
+                        industryConfig.placeholders?.customTabPlaceholder || "Add content for your custom tab..."
                       }
                       className="form-input"
                       rows="4"
@@ -1550,13 +1748,19 @@ const Settings = ({ section: sectionProp }) => {
                     />
                   </div>
                 )}
+                </div>
               </div>
             </div>
           )}
 
-          <div className="gallery-section" style={{ marginTop: "24px" }}>
-            <h3 className="card-title">Business Photos Gallery</h3>
-            <p className="form-hint">Upload up to 10 photos to showcase your business</p>
+          <div className="section-card">
+            <h3 className="card-title">
+              <span className="title-icon">📸</span>
+              Business Photos Gallery
+            </h3>
+            <p className="card-description">
+              Upload up to 10 high-quality photos to showcase your business. Images help customers visualize your space and offerings.
+            </p>
 
             <div
               className="gallery-grid"
@@ -1773,82 +1977,100 @@ const Settings = ({ section: sectionProp }) => {
             </div>
           </div>
 
-          <div className="address-section">
-            <h3 className="card-title">Business Address</h3>
+          <div className="section-card">
+            <h3 className="card-title">
+              <span className="title-icon">📍</span>
+              Business Address
+            </h3>
+            <p className="card-description">
+              Add your business location so customers can find you. This appears on gift cards and your public page.
+            </p>
             <div className="form-grid">
               <div className="form_group" style={{ gridColumn: "1 / -1" }}>
-                <label className="form_label">Street Address</label>
+                <label className="form_label">
+                  Street Address
+                  <FieldTooltip tooltip="Your complete street address including building number, street name, and any suite/unit numbers." />
+                </label>
                 <input
                   name="street"
                   value={form.restaurantAddress.street}
                   onChange={handleAddressChange}
-                  placeholder="Enter street address"
+                  placeholder="e.g., 123 Main Street, Suite 100"
                   className="form-input"
                 />
               </div>
               <div className="form_group">
-                <label className="form_label">City</label>
+                <label className="form_label">
+                  City
+                  <FieldTooltip tooltip="The city where your business is located." />
+                </label>
                 <input
                   name="city"
                   value={form.restaurantAddress.city}
                   onChange={handleAddressChange}
-                  placeholder="Enter city"
+                  placeholder="e.g., New York"
                   className="form-input"
                 />
               </div>
               <div className="form_group">
-                <label className="form_label">State</label>
+                <label className="form_label">
+                  State
+                  <FieldTooltip tooltip="State or province where your business is located." />
+                </label>
                 <input
                   name="state"
                   value={form.restaurantAddress.state}
                   onChange={handleAddressChange}
-                  placeholder="Enter state"
+                  placeholder="e.g., NY or New York"
                   className="form-input"
                 />
               </div>
               <div className="form_group">
-                <label className="form_label">Zip Code</label>
+                <label className="form_label">
+                  Zip Code
+                  <FieldTooltip tooltip="Postal code for your business location." />
+                </label>
                 <input
                   name="zipCode"
                   value={form.restaurantAddress.zipCode}
                   onChange={handleAddressChange}
-                  placeholder="Enter zip code"
+                  placeholder="e.g., 10001"
                   className="form-input"
                 />
               </div>
               <div className="form_group">
-                <label className="form_label">Latitude</label>
+                <label className="form_label">
+                  Latitude
+                  <FieldTooltip tooltip="Geographic coordinate automatically set when you pick your location on the map below." />
+                </label>
                 <input
                   name="latitude"
                   type="text"
                   value={form.restaurantAddress.latitude !== null ? form.restaurantAddress.latitude : ""}
-                  placeholder="Not set"
-                  className="form-input"
+                  placeholder="Set via map picker"
+                  className="form-input readonly"
                   readOnly
-                  style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.04)",
-                    cursor: "not-allowed",
-                    color: "rgba(203, 213, 225, 0.6)",
-                  }}
                 />
-                <p className="form-hint">Set via map picker below</p>
+                <p className="form-hint">
+                  {form.restaurantAddress.latitude ? "✓ Coordinates set" : "Use map picker below to set location"}
+                </p>
               </div>
               <div className="form_group">
-                <label className="form_label">Longitude</label>
+                <label className="form_label">
+                  Longitude
+                  <FieldTooltip tooltip="Geographic coordinate automatically set when you pick your location on the map below." />
+                </label>
                 <input
                   name="longitude"
                   type="text"
                   value={form.restaurantAddress.longitude !== null ? form.restaurantAddress.longitude : ""}
-                  placeholder="Not set"
-                  className="form-input"
+                  placeholder="Set via map picker"
+                  className="form-input readonly"
                   readOnly
-                  style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.04)",
-                    cursor: "not-allowed",
-                    color: "rgba(203, 213, 225, 0.6)",
-                  }}
                 />
-                <p className="form-hint">Set via map picker below</p>
+                <p className="form-hint">
+                  {form.restaurantAddress.longitude ? "✓ Coordinates set" : "Use map picker below to set location"}
+                </p>
               </div>
             </div>
             <div style={{ marginTop: "16px", display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
@@ -1909,8 +2131,14 @@ const Settings = ({ section: sectionProp }) => {
           </div>
 
           {(publicSubdomainUrl || publicPathUrl) && (
-            <div className="url-section">
-              <h3 className="card-title">Public Access</h3>
+            <div className="section-card">
+              <h3 className="card-title">
+                <span className="title-icon">🔗</span>
+                Public Access
+              </h3>
+              <p className="card-description">
+                Share these URLs with customers so they can view and purchase your gift cards online.
+              </p>
               <div className="url-display">
                 {publicSubdomainUrl && (
                   <>
@@ -1964,6 +2192,7 @@ const Settings = ({ section: sectionProp }) => {
       </div>
     </div>
   );
+  };
 
   const renderPaymentSection = () => (
     <div className="settings-section">
@@ -2149,10 +2378,13 @@ const Settings = ({ section: sectionProp }) => {
         </div> */
 
   return (
-    <div className="settings-page">
+    <div className={`settings-page ${form.industry ? `industry-${form.industry.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : ''}`}>
       <div className="settings-header">
         <h1 className="settings-title">Settings</h1>
-        <p className="settings-subtitle">Manage your business profile, security, and payment settings</p>
+        <p className="settings-subtitle">
+          Manage your business profile, security, and payment settings
+          {form.industry && <span className="header-industry-badge">{form.industry}</span>}
+        </p>
       </div>
 
       <div className="settings-container">
