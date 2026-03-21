@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import "./GiftCards.css";
-import "./CreateGiftCard.css";
+import "./CreateGiftCardConsolidated.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { createGiftCard, getGiftCardDetails, updateGiftCard } from "../../services/Actions/giftCardActions";
 import { CREATE_GIFTCARD_RESET, UPDATE_GIFTCARD_RESET } from "../../services/Constants/giftCardConstants";
-import { Link2, Gift, X, Pencil, Sparkles } from "lucide-react";
+import { Link2, Gift, X, Pencil, Sparkles, HelpCircle, Info } from "lucide-react";
 import { formatCurrency } from "../../utils/currency";
 
 const CreateGiftCard = () => {
@@ -257,14 +256,64 @@ const CreateGiftCard = () => {
     setTags((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Enhanced validation with helpful error messages
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!formData.giftCardName?.trim()) {
+      errors.push("Gift card name is required");
+    }
+    
+    if (templateType !== "dailyFree" && (!formData.amount || formData.amount <= 0)) {
+      errors.push("Price must be greater than 0 for discount cards");
+    }
+    
+    if (!formData.expirationDate) {
+      errors.push("Expiry date is required");
+    }
+    
+    if (!formData.quantity || formData.quantity <= 0) {
+      errors.push("Quantity must be at least 1");
+    }
+    
+    const imageFile = selectedFile.file || aiGeneratedFile;
+    if (!editId && !imageFile && !formData.giftCardImg) {
+      errors.push("Please upload an image or generate one with AI");
+    }
+    
+    // Daily pass specific validation
+    if (templateType === "dailyFree") {
+      if (!dailyFreeConfig.dailyQuota || dailyFreeConfig.dailyQuota <= 0) {
+        errors.push("Daily quota must be at least 1");
+      }
+      if (!dailyFreeConfig.minCartValue || dailyFreeConfig.minCartValue <= 0) {
+        errors.push("Minimum cart value must be greater than 0");
+      }
+      if (dailyFreeConfig.rewardType === "PERCENT" && (!dailyFreeConfig.rewardPercent || dailyFreeConfig.rewardPercent <= 0)) {
+        errors.push("Reward percentage must be greater than 0");
+      }
+      if (dailyFreeConfig.rewardType === "FIXED" && (!dailyFreeConfig.rewardFixedAmount || dailyFreeConfig.rewardFixedAmount <= 0)) {
+        errors.push("Fixed reward amount must be greater than 0");
+      }
+      if (dailyFreeConfig.rewardType === "FREE_ITEM" && !dailyFreeConfig.rewardItemSku?.trim()) {
+        errors.push("Free item/SKU is required");
+      }
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const imageFile = selectedFile.file || aiGeneratedFile;
-    if (!editId && !imageFile) {
-      setAiImageError("Please upload an image or generate one with AI.");
+    
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setAiImageError(`Please fix the following issues:\n• ${validationErrors.join('\n• ')}`);
       return;
     }
+    
     setAiImageError("");
+    const imageFile = selectedFile.file || aiGeneratedFile;
     const formDataToSubmit = new FormData();
     formDataToSubmit.append("templateType", templateType);
     Object.keys(formData).forEach((key) => {
@@ -491,6 +540,31 @@ const CreateGiftCard = () => {
     }
   };
 
+  // Helper component for field tooltips
+  const FieldTooltip = ({ tooltip }) => (
+    <span 
+      className="field-help-icon" 
+      data-tooltip={tooltip}
+      title={tooltip}
+    >
+      ?
+    </span>
+  );
+
+  // Progress calculation for step indicator
+  const getFormProgress = () => {
+    let completed = 0;
+    const total = 5;
+    
+    if (formData.giftCardName?.trim()) completed++;
+    if (formData.amount && templateType !== "dailyFree") completed++;
+    if (formData.expirationDate) completed++;
+    if (formData.quantity !== "" && formData.quantity != null) completed++;
+    if (selectedFile.file || aiGeneratedFile || formData.giftCardImg) completed++;
+    
+    return Math.round((completed / total) * 100);
+  };
+
   const tagOptions = [
     { value: "🎂 Birthday Special", label: "Birthday Special" },
     { value: "💍 Anniversary Delight", label: "Anniversary Delight" },
@@ -535,11 +609,11 @@ const CreateGiftCard = () => {
   return (
     <div className="create-giftcard-page">
       <div className="main-content create-giftcard-form-wrapper">
-        <h1 className="heading">{editId ? "Edit Gift Card Template" : "Create a Gift Card Template"}</h1>
+        <h1 className="heading">{editId ? "Edit Gift Card Template" : "Create Your Gift Card Template"}</h1>
         <p className="page-subtitle">
           {editId
-            ? "Update details below. Same layout as creating."
-            : "Fill details manually or switch to AI mode to auto-generate content & images"}
+            ? "Update your gift card details below. All changes will be reflected in new purchases."
+            : "Create beautiful gift cards that customers love. Use the Manual mode for full control, or try AI-Assisted mode to generate content and images automatically. Follow the progress indicators above to complete all required steps."}
         </p>
         {editId && editCardLoading && !editPreFilled && (
           <p className="page-subtitle" style={{ color: "var(--dashboard-accent-light)" }}>Loading gift card...</p>
@@ -566,9 +640,12 @@ const CreateGiftCard = () => {
 
         <div className="create-giftcard-template-toggle create-giftcard-studio-card">
           <div className="create-giftcard-template-header">
-            <span className="create-giftcard-section-title">Template Type</span>
+            <span className="create-giftcard-section-title">
+              Template Type 
+              <FieldTooltip tooltip="Discount Card = customers buy now, use later (traditional gift card). Daily Pass = customers claim free, get limited-time offers." />
+            </span>
             <p className="create-giftcard-field-hint">
-              Choose between a prepaid Discount Card or a Daily Pass offer card.
+              Choose your gift card type. Each has different use cases and customer benefits.
             </p>
           </div>
           <div className="create-giftcard-template-pills">
@@ -577,21 +654,53 @@ const CreateGiftCard = () => {
               className={`template-pill ${templateType === "standard" ? "active" : ""}`}
               onClick={() => setTemplateType("standard")}
             >
-              Discount Card
+              💳 Discount Card
             </button>
             <button
               type="button"
               className={`template-pill ${templateType === "dailyFree" ? "active" : ""}`}
               onClick={() => setTemplateType("dailyFree")}
             >
-              Daily Pass
+              🎟️ Daily Pass
             </button>
           </div>
-          {templateType === "dailyFree" && (
+          {templateType === "standard" && (
             <p className="create-giftcard-field-hint">
-              Customers claim this pass for free and unlock an offer at checkout when minimum order conditions are met.
+              <strong>Discount Card:</strong> Customers purchase for a specific amount and can redeem the full value later. Perfect for gifts and prepaid credits.
             </p>
           )}
+          {templateType === "dailyFree" && (
+            <p className="create-giftcard-field-hint">
+              <strong>Daily Pass:</strong> Customers claim for free (limited daily quota) and unlock discounts when they meet minimum order requirements. Great for promotions and customer acquisition.
+            </p>
+          )}
+        </div>
+
+        {/* Progress Indicator */}
+        <div className="create-giftcard-step-indicator">
+          <div className={`step-item ${formData.giftCardName?.trim() ? 'completed' : 'current'}`}>
+            <div className="step-number">1</div>
+            <div className="step-label">Basic Info</div>
+          </div>
+          <div className={`step-item ${formData.amount && formData.expirationDate ? 'completed' : getFormProgress() > 40 ? 'current' : 'pending'}`}>
+            <div className="step-number">2</div>
+            <div className="step-label">Pricing</div>
+          </div>
+          <div className={`step-item ${(selectedFile.file || aiGeneratedFile || formData.giftCardImg) ? 'completed' : getFormProgress() > 60 ? 'current' : 'pending'}`}>
+            <div className="step-number">3</div>
+            <div className="step-label">Image</div>
+          </div>
+          <div className={`step-item ${getFormProgress() === 100 ? 'completed' : getFormProgress() > 80 ? 'current' : 'pending'}`}>
+            <div className="step-number">4</div>
+            <div className="step-label">Review</div>
+          </div>
+        </div>
+
+        <div className="create-giftcard-progress-bar">
+          <div 
+            className="create-giftcard-progress-fill" 
+            style={{ width: `${getFormProgress()}%` }}
+          />
         </div>
 
         <div className="create-giftcard-layout">
@@ -699,32 +808,41 @@ const CreateGiftCard = () => {
             <div className="create-giftcard-studio-card">
             <h2 className="create-giftcard-section-title">Basic Information</h2>
             <div className="giftcards-page-form-group">
-              <label htmlFor="giftCardName">Gift Card Name *</label>
+              <label htmlFor="giftCardName" className="required-field">
+                Gift Card Name 
+                <FieldTooltip tooltip="Choose a clear, appealing name that customers will recognize. This appears prominently on the card and in their wallets." />
+              </label>
               <input
                 type="text"
                 id="giftCardName"
                 name="giftCardName"
                 value={formData.giftCardName}
                 onChange={handleChange}
-                placeholder="e.g. Premium Wellness Gift Card"
+                placeholder="e.g. Premium Wellness Gift Card, Birthday Special, Holiday Treat"
                 required
               />
             </div>
             <div className="giftcards-page-form-group">
-              <label htmlFor="description">Description</label>
+              <label htmlFor="description" className="required-field">
+                Description 
+                <FieldTooltip tooltip="Explain what the gift card offers, how to use it, and any important terms. This helps customers understand the value." />
+              </label>
               <textarea
                 id="description"
                 name="description"
                 rows="4"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Describe what this gift card offers, how to redeem, terms..."
+                placeholder="Describe what this gift card offers, how to redeem, terms, and what makes it special..."
                 required
               />
             </div>
             <div className="giftcards-page-form-group">
-              <label>Tags</label>
-              <p className="create-giftcard-field-hint">Type a tag and press Enter.</p>
+              <label>
+                Tags 
+                <FieldTooltip tooltip="Add descriptive tags to help customers find this gift card. Examples: Birthday, Anniversary, Spa Day, Fine Dining. Press Enter after typing each tag." />
+              </label>
+              <p className="create-giftcard-field-hint">Add relevant tags to help customers discover this gift card. Type a tag and press Enter to add it.</p>
               <div className="create-giftcard-tags-wrap">
                 {tags.map((t, i) => (
                   <span key={i} className="create-giftcard-tag-chip">
@@ -779,8 +897,11 @@ const CreateGiftCard = () => {
             <h2 className="create-giftcard-section-title">Pricing & Availability</h2>
             <div className="create-giftcard-price-row">
             <div className="giftcards-page-form-group">
-              <label htmlFor="amount">
-                Price (₹) *
+              <label htmlFor="amount" className={templateType !== "dailyFree" ? "required-field" : ""}>
+                Price (₹)
+                <FieldTooltip tooltip={templateType === "dailyFree" 
+                  ? "Optional for Daily Pass cards. Leave empty if the pass is completely free to claim." 
+                  : "Set the face value of your gift card. This is what customers will pay and what they can redeem."} />
                 {templateType === "dailyFree" && (
                   <span className="create-giftcard-field-hint-inline"> Optional for Daily Pass.</span>
                 )}
@@ -800,7 +921,10 @@ const CreateGiftCard = () => {
               />
             </div>
             <div className="giftcards-page-form-group">
-              <label htmlFor="discount">Discount (%)</label>
+              <label htmlFor="discount">
+                Discount (%) 
+                <FieldTooltip tooltip="Optional promotional discount. For example, 20% off means customers pay ₹40 for a ₹50 gift card. Leave empty for no discount." />
+              </label>
               <input
                 type="number"
                 id="discount"
@@ -815,7 +939,10 @@ const CreateGiftCard = () => {
               />
             </div>
             <div className="giftcards-page-form-group">
-              <label htmlFor="quantity">Quantity *</label>
+              <label htmlFor="quantity" className="required-field">
+                Quantity 
+                <FieldTooltip tooltip="How many gift cards are available for sale? Once sold out, customers won't be able to purchase more. You can always create more later." />
+              </label>
               <input
                 type="number"
                 id="quantity"
@@ -830,7 +957,10 @@ const CreateGiftCard = () => {
             </div>
             </div>
             <div className="giftcards-page-form-group" style={{ marginTop: 16 }}>
-              <label htmlFor="expirationDate">Expiry Date *</label>
+              <label htmlFor="expirationDate" className="required-field">
+                Expiry Date 
+                <FieldTooltip tooltip="When should this gift card expire? Choose a date that gives customers enough time to use it, typically 1-2 years from now." />
+              </label>
               <input
                 type="date"
                 id="expirationDate"
@@ -842,7 +972,10 @@ const CreateGiftCard = () => {
               />
             </div>
             <div className="giftcards-page-form-group" style={{ marginTop: 16 }}>
-              <label htmlFor="walletColor">Google Wallet Card Color</label>
+              <label htmlFor="walletColor">
+                Google Wallet Color 
+                <FieldTooltip tooltip="Choose the background color for your gift card in Google Wallet. This helps customers identify your brand in their digital wallet." />
+              </label>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <input
                   type="color"
@@ -853,7 +986,7 @@ const CreateGiftCard = () => {
                   style={{ width: 40, height: 40, borderRadius: 8, border: "none", padding: 0, cursor: "pointer" }}
                 />
                 <span className="create-giftcard-field-hint">
-                  This color is used as the background for the Google Wallet pass.
+                  This color appears as the background in Google Wallet passes.
                 </span>
               </div>
             </div>
@@ -870,7 +1003,8 @@ const CreateGiftCard = () => {
                 <div className="create-giftcard-price-row">
                   <div className="giftcards-page-form-group">
                     <label htmlFor="dailyQuota">
-                      Daily quota
+                      Daily Quota 
+                      <FieldTooltip tooltip="Maximum number of free passes that can be claimed per calendar day. This helps control costs and creates urgency." />
                       <span className="create-giftcard-field-hint-inline"> Max free claims per calendar day.</span>
                     </label>
                     <input
@@ -887,7 +1021,8 @@ const CreateGiftCard = () => {
                   </div>
                   <div className="giftcards-page-form-group">
                     <label htmlFor="validDaysFromIssue">
-                      Validity after claim (days)
+                      Validity Period (days)
+                      <FieldTooltip tooltip="How many days after claiming should the pass remain valid? Shorter periods create urgency, longer periods offer convenience." />
                     </label>
                     <input
                       type="number"
@@ -903,7 +1038,8 @@ const CreateGiftCard = () => {
                   </div>
                   <div className="giftcards-page-form-group">
                     <label htmlFor="minCartValue">
-                      Minimum cart value (₹)
+                      Minimum Order Value (₹)
+                      <FieldTooltip tooltip="Customers must spend at least this amount to use the pass. This ensures profitability and prevents abuse of free offers." />
                     </label>
                     <input
                       type="number"
@@ -920,7 +1056,10 @@ const CreateGiftCard = () => {
                 </div>
 
                 <div className="giftcards-page-form-group">
-                  <label htmlFor="rewardType">Reward type</label>
+                  <label htmlFor="rewardType">
+                    Reward Type 
+                    <FieldTooltip tooltip="Choose how customers will save: percentage discount (% off), fixed amount (₹ off), or a free item added to their order." />
+                  </label>
                   <select
                     id="rewardType"
                     name="rewardType"
@@ -935,7 +1074,10 @@ const CreateGiftCard = () => {
 
                 {dailyFreeConfig.rewardType === "PERCENT" && (
                   <div className="giftcards-page-form-group">
-                    <label htmlFor="rewardPercent">Discount (%)</label>
+                    <label htmlFor="rewardPercent">
+                      Discount Percentage (%)
+                      <FieldTooltip tooltip="What percentage discount should customers get? For example, 15% off their total order when they meet the minimum spend." />
+                    </label>
                     <input
                       type="number"
                       id="rewardPercent"
@@ -953,7 +1095,10 @@ const CreateGiftCard = () => {
 
                 {dailyFreeConfig.rewardType === "FIXED" && (
                   <div className="giftcards-page-form-group">
-                    <label htmlFor="rewardFixedAmount">Amount off (₹)</label>
+                    <label htmlFor="rewardFixedAmount">
+                      Fixed Discount Amount (₹)
+                      <FieldTooltip tooltip="A fixed rupee amount to discount from their order. For example, ₹200 off when they meet the minimum spend." />
+                    </label>
                     <input
                       type="number"
                       id="rewardFixedAmount"
@@ -971,7 +1116,8 @@ const CreateGiftCard = () => {
                 {dailyFreeConfig.rewardType === "FREE_ITEM" && (
                   <div className="giftcards-page-form-group">
                     <label htmlFor="rewardItemSku">
-                      Free item / SKU
+                      Free Item/Product 
+                      <FieldTooltip tooltip="Specify the exact item customers get for free. Use your product SKU or a descriptive name. This item will be automatically added to their order." />
                       <span className="create-giftcard-field-hint-inline">
                         {" "}
                         This item will be added as a free line item when the pass is used.
@@ -983,14 +1129,17 @@ const CreateGiftCard = () => {
                       name="rewardItemSku"
                       value={dailyFreeConfig.rewardItemSku}
                       onChange={handleDailyFreeChange}
-                      placeholder="e.g. FREE-DESSERT or internal SKU"
+                      placeholder="e.g. FREE-DESSERT, APPETIZER-001, or Complimentary Drink"
                     />
                   </div>
                 )}
 
                 <div className="create-giftcard-price-row">
                   <div className="giftcards-page-form-group">
-                    <label htmlFor="customerSegment">Customer segment</label>
+                    <label htmlFor="customerSegment">
+                      Target Customers 
+                      <FieldTooltip tooltip="Choose who can claim this pass. 'All customers' = everyone, 'New customers' = first-time buyers, 'App users' = mobile app only." />
+                    </label>
                     <select
                       id="customerSegment"
                       name="customerSegment"
@@ -1003,7 +1152,10 @@ const CreateGiftCard = () => {
                     </select>
                   </div>
                   <div className="giftcards-page-form-group">
-                    <label htmlFor="startDate">Campaign start</label>
+                    <label htmlFor="startDate">
+                      Campaign Start Date 
+                      <FieldTooltip tooltip="When should this campaign begin? Leave empty to start immediately when published." />
+                    </label>
                     <input
                       type="date"
                       id="startDate"
@@ -1013,7 +1165,10 @@ const CreateGiftCard = () => {
                     />
                   </div>
                   <div className="giftcards-page-form-group">
-                    <label htmlFor="endDate">Campaign end</label>
+                    <label htmlFor="endDate">
+                      Campaign End Date 
+                      <FieldTooltip tooltip="When should this campaign stop? Leave empty to run indefinitely. You can always end it manually later." />
+                    </label>
                     <input
                       type="date"
                       id="endDate"
@@ -1425,10 +1580,11 @@ const CreateGiftCard = () => {
                 </p>
               )}
               <ul className="create-giftcard-checklist">
-                <li className={formData.giftCardName?.trim() ? "done" : ""}><span className="dot" />Gift card name</li>
-                <li className={formData.amount ? "done" : ""}><span className="dot" />Price set</li>
-                <li className={formData.expirationDate ? "done" : ""}><span className="dot" />Expiry date</li>
-                <li className={formData.quantity !== "" && formData.quantity != null ? "done" : ""}><span className="dot" />Quantity defined</li>
+                <li className={formData.giftCardName?.trim() ? "done" : ""}><span className="dot" />Gift card name added</li>
+                <li className={formData.amount || templateType === "dailyFree" ? "done" : ""}><span className="dot" />Pricing configured</li>
+                <li className={formData.expirationDate ? "done" : ""}><span className="dot" />Expiry date set</li>
+                <li className={formData.quantity !== "" && formData.quantity != null ? "done" : ""}><span className="dot" />Quantity specified</li>
+                <li className={(selectedFile.file || aiGeneratedFile || formData.giftCardImg) ? "done" : ""}><span className="dot" />Card image ready</li>
               </ul>
               <button type="submit" form="createGiftCardForm" className="create-giftcard-submit-btn" disabled={giftCardCreate.loading || giftCardUpdate.loading}>
                 🎁 {giftCardCreate.loading || giftCardUpdate.loading
