@@ -435,10 +435,22 @@
 
 .venue-gallery-single {
   grid-template-columns: 1fr;
+  height: auto;
+  grid-template-rows: auto;
 }
 
 .venue-gallery-single .venue-gallery-main {
   grid-row: 1;
+  max-height: none;
+  min-height: 0;
+}
+
+/* Keep first uploaded photo natural for single-image businesses. */
+.venue-gallery-single .venue-gallery-main img {
+  height: auto;
+  max-height: min(70vh, 560px);
+  object-fit: contain;
+  background: #f8fafc;
 }
 
 .venue-gallery-overlay {
