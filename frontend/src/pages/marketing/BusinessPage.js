@@ -6,6 +6,7 @@ import axios from "../../utils/axiosConfig";
 import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import { listGiftCards } from "../../services/Actions/giftCardActions";
 import { formatCurrency } from "../../utils/currency";
+import { isDailyPassCard, getDailyPassOfferText } from "../../utils/giftCardDisplay";
 import { getStatusFromBusinessHours, formatBusinessHoursGrouped } from "../../data/industryPageConfig";
 import SEO from "../../components/SEO";
 import GiftCardForm from "../user/GiftCardForm";
@@ -126,9 +127,16 @@ const BusinessPage = ({ businessSlug: propBusinessSlug }) => {
     scrollToMain();
   };
 
-  const handleBuyNow = (e, giftCardName, amount, discount, id) => {
+  const handleBuyNow = (e, card) => {
     e.stopPropagation();
-    setSelectedCard({ giftCardName, amount, discount, id });
+    setSelectedCard({
+      giftCardName: card.giftCardName,
+      amount: card.amount,
+      discount: card.discount,
+      id: card._id,
+      templateType: card.templateType,
+      dailyFreeConfig: card.dailyFreeConfig,
+    });
     setShowGiftCardForm(true);
   };
 
@@ -513,6 +521,9 @@ const BusinessPage = ({ businessSlug: propBusinessSlug }) => {
                           <div className="purchase-card-info modern-card-info">
                             <div className="price-section">
                               {(() => {
+                                if (isDailyPassCard(card)) {
+                                  return <span className="purchase-card-price modern-price">Daily Pass</span>;
+                                }
                                 const base = Number(card.amount) || 0;
                                 const disc = Number(card.discount) || 0;
                                 const hasDiscount = disc > 0 && disc < 100;
@@ -532,10 +543,10 @@ const BusinessPage = ({ businessSlug: propBusinessSlug }) => {
                                   <span className="purchase-card-price modern-price">{baseText}</span>
                                 );
                               })()}
-                              <span className="price-label">Gift value</span>
+                              <span className="price-label">{isDailyPassCard(card) ? getDailyPassOfferText(card) : "Gift value"}</span>
                             </div>
                             <div className="discount-section">
-                              {card.discount > 0 && (
+                              {!isDailyPassCard(card) && card.discount > 0 && (
                                 <span className="purchase-card-discount modern-discount">{card.discount}% OFF</span>
                               )}
                             </div>
@@ -543,7 +554,7 @@ const BusinessPage = ({ businessSlug: propBusinessSlug }) => {
                           <button
                             type="button"
                             className="purchase-card-button modern-card-button venue-buy-btn"
-                            onClick={(e) => handleBuyNow(e, card.giftCardName, card.amount, card.discount, card._id)}
+                            onClick={(e) => handleBuyNow(e, card)}
                           >
                             <Gift size={18} />
                             Buy now
@@ -818,6 +829,8 @@ const BusinessPage = ({ businessSlug: propBusinessSlug }) => {
           amount={selectedCard.amount}
           discount={selectedCard.discount}
           id={selectedCard.id}
+          templateType={selectedCard.templateType}
+          dailyFreeConfig={selectedCard.dailyFreeConfig}
           onClose={() => {
             setShowGiftCardForm(false);
             setSelectedCard(null);

@@ -7,6 +7,7 @@ import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import { useDispatch, useSelector } from "react-redux";
 import GiftCardLoader from "./GiftCardLoader";
 import { formatCurrency } from "../../utils/currency";
+import { isDailyPassCard, getDailyPassOfferText } from "../../utils/giftCardDisplay";
 import SEO from "../../components/SEO";
 import { getBreadcrumbSchema } from "../../utils/structuredData";
 import { useTranslation } from "react-i18next";
@@ -149,21 +150,6 @@ const UserLanding = () => {
   const navigate = useNavigate();
   const observer = useRef();
   const loadMoreRef = useRef(null);
-  const getDailyPassOfferText = (card) => {
-    const cfg = card?.dailyFreeConfig || {};
-    const minCart = Number(cfg.minCartValue) || 0;
-    if (cfg.rewardType === "PERCENT" && cfg.rewardPercent) {
-      return `${cfg.rewardPercent}% OFF on orders above ${formatCurrency(minCart, "INR")}`;
-    }
-    if (cfg.rewardType === "FIXED" && cfg.rewardFixedAmount) {
-      return `Flat ${formatCurrency(cfg.rewardFixedAmount, "INR")} OFF on orders above ${formatCurrency(minCart, "INR")}`;
-    }
-    if (cfg.rewardType === "FREE_ITEM" && cfg.rewardItemSku) {
-      return `Free ${cfg.rewardItemSku} on orders above ${formatCurrency(minCart, "INR")}`;
-    }
-    return "Daily Pass offer";
-  };
-
   const { giftCards, loading, error } = useSelector((state) => state.giftCardList);
   const { business, loading: businessLoading } = useSelector((state) => state.business);
   const { t, i18n } = useTranslation();
@@ -277,6 +263,12 @@ const UserLanding = () => {
       discount: card.discount,
       id: card._id,
       templateType: card.templateType,
+      dailyFreeConfig: card.dailyFreeConfig,
+      isFreeClaimable: card.isFreeClaimable,
+      claimPrice: card.claimPrice,
+      giftCardTag: card.giftCardTag,
+      tags: card.tags,
+      description: card.description,
     });
     setShowGiftCardForm(true);
   };
@@ -474,7 +466,7 @@ const UserLanding = () => {
                         const baseText = formatCurrency(base, "INR");
                         const finalText = formatCurrency(final, "INR");
 
-                        if (card.templateType === "dailyFree") {
+                        if (isDailyPassCard(card)) {
                           return <span className="purchase-card-price modern-price">Daily Pass</span>;
                         }
                         return hasDiscount ? (
@@ -490,10 +482,10 @@ const UserLanding = () => {
                           <span className="purchase-card-price modern-price">{baseText}</span>
                         );
                       })()}
-                      <span className="price-label">{card.templateType === "dailyFree" ? getDailyPassOfferText(card) : "Gift Value"}</span>
+                      <span className="price-label">{isDailyPassCard(card) ? getDailyPassOfferText(card) : "Gift Value"}</span>
                     </div>
                     <div className="discount-section">
-                      {card.templateType !== "dailyFree" && card.discount > 0 && (
+                      {!isDailyPassCard(card) && card.discount > 0 && (
                         <span className="purchase-card-discount modern-discount">{card.discount}% OFF</span>
                       )}
                     </div>
@@ -508,7 +500,7 @@ const UserLanding = () => {
                         disabled={outOfStock}
                       >
                         <Gift size={18} />
-                        <span>{outOfStock ? "Out of stock" : card.templateType === "dailyFree" ? "Claim Pass" : "Buy Now"}</span>
+                        <span>{outOfStock ? "Out of stock" : isDailyPassCard(card) ? "Claim Pass" : "Buy Now"}</span>
                       </button>
                     );
                   })()}

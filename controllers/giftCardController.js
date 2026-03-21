@@ -78,8 +78,10 @@ const createGiftCard = async (req, res) => {
       expirationDate,
       quantity,
       status: bodyStatus,
+      templateType: bodyTemplateType,
     } = req.body;
     const isDraft = bodyStatus === "draft";
+    const templateType = bodyTemplateType === "dailyFree" ? "dailyFree" : "standard";
 
     const nameTrimmed = typeof giftCardName === "string" ? giftCardName.trim() : "";
     if (!nameTrimmed) {
@@ -137,6 +139,44 @@ const createGiftCard = async (req, res) => {
         ? new Date(expirationDate)
         : undefined;
 
+    const parseOptionalNumber = (value, { min = null, max = null } = {}) => {
+      if (value === undefined || value === null || value === "") return undefined;
+      const n = Number(value);
+      if (!Number.isFinite(n)) return undefined;
+      if (min !== null && n < min) return undefined;
+      if (max !== null && n > max) return undefined;
+      return n;
+    };
+
+    const rewardType =
+      req.body.rewardType && ["PERCENT", "FIXED", "FREE_ITEM"].includes(req.body.rewardType)
+        ? req.body.rewardType
+        : undefined;
+    const dailyFreeConfig =
+      templateType === "dailyFree"
+        ? {
+            dailyQuota: parseOptionalNumber(req.body.dailyQuota, { min: 1 }),
+            validDaysFromIssue: parseOptionalNumber(req.body.validDaysFromIssue, { min: 1 }),
+            minCartValue: parseOptionalNumber(req.body.minCartValue, { min: 0 }),
+            rewardType,
+            rewardPercent: rewardType === "PERCENT" ? parseOptionalNumber(req.body.rewardPercent, { min: 0, max: 100 }) : undefined,
+            rewardFixedAmount: rewardType === "FIXED" ? parseOptionalNumber(req.body.rewardFixedAmount, { min: 0 }) : undefined,
+            rewardItemSku: rewardType === "FREE_ITEM" ? (req.body.rewardItemSku || "").trim() || undefined : undefined,
+            customerSegment:
+              req.body.customerSegment && ["ALL", "NEW_CUSTOMERS", "APP_ONLY"].includes(req.body.customerSegment)
+                ? req.body.customerSegment
+                : "ALL",
+            campaignStartDate:
+              req.body.campaignStartDate && !Number.isNaN(new Date(req.body.campaignStartDate).getTime())
+                ? new Date(req.body.campaignStartDate)
+                : undefined,
+            campaignEndDate:
+              req.body.campaignEndDate && !Number.isNaN(new Date(req.body.campaignEndDate).getTime())
+                ? new Date(req.body.campaignEndDate)
+                : undefined,
+          }
+        : undefined;
+
     const giftCard = new GiftCard({
       giftCardName: nameTrimmed,
       giftCardTag: giftCardTag || (tags.length ? tags[0] : undefined),
@@ -144,13 +184,17 @@ const createGiftCard = async (req, res) => {
       quantity: quantityNum,
       soldQuantity: 0,
       description: description || undefined,
-      amount: amountNum,
+      amount: templateType === "dailyFree" ? (amountNum !== undefined ? amountNum : undefined) : amountNum,
       discount: discountVal,
       expirationDate: expiryDate,
       giftCardImg: giftCardImgUrl,
       businessSlug: req.user?.businessSlug || req.body.businessSlug || undefined,
       walletColor: req.body.walletColor || undefined,
       status: isDraft ? "draft" : "active",
+      templateType,
+      isFreeClaimable: templateType === "dailyFree",
+      claimPrice: templateType === "dailyFree" ? 0 : amountNum || 0,
+      dailyFreeConfig,
     });
 
     const savedGiftCard = await giftCard.save();
@@ -555,6 +599,7 @@ const updateGiftCard = async (req, res) => {
     if (!Array.isArray(tags)) tags = [];
 
     const amountRaw = req.body.amount;
+    const bodyTemplateType = req.body.templateType;
     const amountNum =
       amountRaw !== undefined && amountRaw !== "" && amountRaw !== null
         ? (() => {
@@ -562,6 +607,10 @@ const updateGiftCard = async (req, res) => {
             return Number.isFinite(n) ? n : undefined;
           })()
         : undefined;
+    const templateType =
+      bodyTemplateType && ["standard", "dailyFree"].includes(bodyTemplateType)
+        ? bodyTemplateType
+        : existingGiftCard.templateType || "standard";
     const quantityRaw = req.body.quantity;
     const quantityNum =
       quantityRaw !== undefined && quantityRaw !== "" && quantityRaw !== null
@@ -600,7 +649,59 @@ const updateGiftCard = async (req, res) => {
       quantity: quantityNum,
       expirationDate,
       status: statusUpdate,
+      templateType,
+      isFreeClaimable: templateType === "dailyFree",
+      claimPrice: templateType === "dailyFree" ? 0 : amountNum,
     };
+    const parseOptionalNumber = (value, { min = null, max = null } = {}) => {
+      if (value === undefined || value === null || value === "") return undefined;
+      const n = Number(value);
+      if (!Number.isFinite(n)) return undefined;
+      if (min !== null && n < min) return undefined;
+      if (max !== null && n > max) return undefined;
+      return n;
+    };
+    if (templateType === "dailyFree") {
+      const rewardType =
+        req.body.rewardType && ["PERCENT", "FIXED", "FREE_ITEM"].includes(req.body.rewardType)
+          ? req.body.rewardType
+          : existingGiftCard.dailyFreeConfig?.rewardType;
+      updates.dailyFreeConfig = {
+        dailyQuota: parseOptionalNumber(req.body.dailyQuota, { min: 1 }) ?? existingGiftCard.dailyFreeConfig?.dailyQuota,
+        validDaysFromIssue:
+          parseOptionalNumber(req.body.validDaysFromIssue, { min: 1 }) ??
+          existingGiftCard.dailyFreeConfig?.validDaysFromIssue,
+        minCartValue:
+          parseOptionalNumber(req.body.minCartValue, { min: 0 }) ?? existingGiftCard.dailyFreeConfig?.minCartValue,
+        rewardType,
+        rewardPercent:
+          rewardType === "PERCENT"
+            ? parseOptionalNumber(req.body.rewardPercent, { min: 0, max: 100 }) ??
+              existingGiftCard.dailyFreeConfig?.rewardPercent
+            : undefined,
+        rewardFixedAmount:
+          rewardType === "FIXED"
+            ? parseOptionalNumber(req.body.rewardFixedAmount, { min: 0 }) ??
+              existingGiftCard.dailyFreeConfig?.rewardFixedAmount
+            : undefined,
+        rewardItemSku:
+          rewardType === "FREE_ITEM"
+            ? (req.body.rewardItemSku || "").trim() || existingGiftCard.dailyFreeConfig?.rewardItemSku
+            : undefined,
+        customerSegment:
+          req.body.customerSegment && ["ALL", "NEW_CUSTOMERS", "APP_ONLY"].includes(req.body.customerSegment)
+            ? req.body.customerSegment
+            : existingGiftCard.dailyFreeConfig?.customerSegment || "ALL",
+        campaignStartDate:
+          req.body.campaignStartDate && !Number.isNaN(new Date(req.body.campaignStartDate).getTime())
+            ? new Date(req.body.campaignStartDate)
+            : existingGiftCard.dailyFreeConfig?.campaignStartDate,
+        campaignEndDate:
+          req.body.campaignEndDate && !Number.isNaN(new Date(req.body.campaignEndDate).getTime())
+            ? new Date(req.body.campaignEndDate)
+            : existingGiftCard.dailyFreeConfig?.campaignEndDate,
+      };
+    }
     Object.keys(updates).forEach((k) => {
       if (updates[k] === undefined) delete updates[k];
     });
@@ -673,7 +774,7 @@ const addBuyer = async (req, res) => {
       return res.status(404).json({ error: "Gift card not found" });
     }
     console.log("giftcard amount checking : ", giftCardDetails.amount);
-    let remainingBalance = giftCardDetails.amount;
+    let remainingBalance = Number(giftCardDetails.amount) || 0;
 
     const quantity = giftCardDetails.quantity;
     const soldCount = giftCardDetails.soldQuantity ?? giftCardDetails.buyers?.length ?? 0;

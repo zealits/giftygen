@@ -30,6 +30,12 @@ const giftCardSchema = new mongoose.Schema(
     discount: {
       type: String,
     },
+    templateType: {
+      type: String,
+      enum: ["standard", "dailyFree"],
+      default: "standard",
+      index: true,
+    },
     currency: {
       type: String,
     },
@@ -59,6 +65,58 @@ const giftCardSchema = new mongoose.Schema(
     businessSlug: {
       type: String, // which business owns this gift card
       index: true,
+    },
+    // Configuration flags for campaigns that auto-issue free passes or run promotions
+    isFreeClaimable: {
+      // when true, this template can be used to issue zero-priced passes
+      type: Boolean,
+      default: false,
+    },
+    claimPrice: {
+      // amount charged when claiming; keep 0 for Daily Free Pass
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    dailyFreeConfig: {
+      dailyQuota: {
+        type: Number,
+        min: 1,
+      },
+      validDaysFromIssue: {
+        type: Number,
+        min: 1,
+      },
+      minCartValue: {
+        type: Number,
+        min: 0,
+      },
+      rewardType: {
+        type: String,
+        enum: ["PERCENT", "FIXED", "FREE_ITEM"],
+      },
+      rewardPercent: {
+        type: Number,
+        min: 0,
+        max: 100,
+      },
+      rewardFixedAmount: {
+        type: Number,
+        min: 0,
+      },
+      rewardItemSku: {
+        type: String,
+      },
+      customerSegment: {
+        type: String,
+        enum: ["ALL", "NEW_CUSTOMERS", "APP_ONLY"],
+      },
+      campaignStartDate: {
+        type: Date,
+      },
+      campaignEndDate: {
+        type: Date,
+      },
     },
     buyers: [
       {

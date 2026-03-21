@@ -3,6 +3,11 @@ const { GoogleAuth } = require("google-auth-library");
 const path = require("path");
 const GiftCard = require("../models/giftCardSchema");
 const credentials = require("../config/wallet-api-key.json");
+const {
+  isDailyPassGiftCard,
+  formatDailyPassOfferText,
+  mergeGiftCardForWalletPass,
+} = require("../utils/walletPassHelpers");
 
 const issuerId = process.env.GOOGLE_WALLET_ISSUER_ID;
 const baseUrl = "https://walletobjects.googleapis.com/walletobjects/v1";
@@ -118,13 +123,17 @@ async function generateWalletPass(req, res) {
       return res.status(404).json({ error: "Gift card not found" });
     }
 
-    const walletGiftCardName = giftCardDetails.giftCardName;
-    const expiryDate = giftCardDetails.expirationDate;
+    // Client sends templateType + dailyFreeConfig so passes work even if DB doc predates those fields
+    const mergedCard = mergeGiftCardForWalletPass(giftCardDetails, req.body);
+
+    const walletGiftCardName = mergedCard.giftCardName;
+    const expiryDate = mergedCard.expirationDate;
+    const isDailyPass = isDailyPassGiftCard(mergedCard);
 
     const userEmail = purchaseType === "self" ? selfInfo?.email : giftInfo?.recipientEmail || "default@example.com";
     const userName = purchaseType === "self" ? selfInfo?.name : giftInfo?.recipientName || "Gift Card Holder";
-    const amount = giftCardDetails.amount || 0;
-    const walletColor = giftCardDetails.walletColor || "#3B5BDB";
+    const amount = mergedCard.amount || 0;
+    const walletColor = mergedCard.walletColor || "#3B5BDB";
     // Default to INR for your deployment; will still honor an explicit currency sent in paymentDetails.
     const currency = (paymentDetails?.currency || "INR").toUpperCase();
 
@@ -134,6 +143,9 @@ async function generateWalletPass(req, res) {
       currency,
       userEmail,
       userName,
+      templateType: mergedCard.templateType,
+      isDailyPass,
+      clientHint: { templateType: req.body.templateType, hasDailyFreeConfig: !!req.body.dailyFreeConfig },
     });
 
     // Generate unique QR code
@@ -161,11 +173,11 @@ async function generateWalletPass(req, res) {
     const logoUrl =
       "https://res.cloudinary.com/dokdo82g5/image/upload/v1772544502/giftygen/giftgen_whitebg_logo_hqgneb.png";
     const optimizedLogo = logoUrl;
-    const optimizedHeroImage = optimizeImageForWallet(giftCardDetails.giftCardImg);
+    const optimizedHeroImage = optimizeImageForWallet(mergedCard.giftCardImg);
 
     console.log("Original Logo:", logoUrl);
     console.log("Optimized Logo:", optimizedLogo);
-    console.log("Original Hero:", giftCardDetails.giftCardImg);
+    console.log("Original Hero:", mergedCard.giftCardImg);
     console.log("Optimized Hero:", optimizedHeroImage);
 
     const expiryDisplay = expiryDate
@@ -175,6 +187,7 @@ async function generateWalletPass(req, res) {
           year: "numeric",
         })
       : "No Expiry";
+    const offerText = isDailyPass ? formatDailyPassOfferText(mergedCard.dailyFreeConfig) : null;
 
     // Build the gift card object
     let giftCardObject = {
@@ -184,10 +197,13 @@ async function generateWalletPass(req, res) {
       genericType: "GENERIC_TYPE_UNSPECIFIED",
       hexBackgroundColor: walletColor,
       cardTitle: {
-        defaultValue: { language: "en-US", value: walletGiftCardName },
+        defaultValue: { language: "en-US", value: isDailyPass ? "Daily Pass" : walletGiftCardName },
       },
       subheader: {
-        defaultValue: { language: "en-US", value: `${currency} ${amount} • Expires: ${expiryDisplay}` },
+        defaultValue: {
+          language: "en-US",
+          value: isDailyPass ? `${offerText} • Valid till: ${expiryDisplay}` : `${currency} ${amount} • Expires: ${expiryDisplay}`,
+        },
       },
       header: {
         defaultValue: { language: "en-US", value: userName },
@@ -198,8 +214,10 @@ async function generateWalletPass(req, res) {
       },
       textModulesData: [
         {
-          header: "Gift Card Details",
-          body: `Gift Value: ${currency} ${amount}\nScan QR code to redeem at the venue.`,
+          header: isDailyPass ? "Daily Pass Offer" : "Gift Card Details",
+          body: isDailyPass
+            ? `${offerText}\nScan QR code to redeem this pass at checkout.`
+            : `Gift Value: ${currency} ${amount}\nScan QR code to redeem at the venue.`,
           id: "giftcard_info",
         },
         {
@@ -230,7 +248,7 @@ async function generateWalletPass(req, res) {
         contentDescription: {
           defaultValue: {
             language: "en-US",
-            value: `${walletGiftCardName} Gift Card`,
+            value: isDailyPass ? `Daily Pass — ${walletGiftCardName}` : `${walletGiftCardName} Gift Card`,
           },
         },
       };
@@ -279,7 +297,7 @@ async function generateWalletPass(req, res) {
     const applePassId = uniqueCode;
     applePassStore.set(applePassId, {
       id,
-      giftCardDetails,
+      giftCardDetails: mergedCard,
       purchaseType,
       selfInfo,
       giftInfo,

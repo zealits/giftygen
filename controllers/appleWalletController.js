@@ -1,4 +1,8 @@
 const GiftCard = require("../models/giftCardSchema");
+const {
+  isDailyPassGiftCard,
+  formatDailyPassOfferText,
+} = require("../utils/walletPassHelpers");
 const fs = require("fs");
 const fsPromises = require("fs").promises;
 const path = require("path");
@@ -264,6 +268,13 @@ async function downloadApplePass(req, res) {
       currency: passData.currency,
     });
 
+    const giftCardDoc = passData.giftCardDetails;
+    const isDailyPass = isDailyPassGiftCard(giftCardDoc);
+    const dailyOfferLine = isDailyPass ? formatDailyPassOfferText(giftCardDoc?.dailyFreeConfig) : null;
+    const passPkDescription = isDailyPass
+      ? `Daily Pass — ${passData.walletGiftCardName || "Offer"}`
+      : passData.walletGiftCardName || "Gift Card";
+
     // Check if certificates exist (try multiple possible filenames)
     const certDir = path.join(__dirname, "../certs/apple");
 
@@ -377,7 +388,7 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
     console.log("📁 Pass model directory:", passModelDir);
     console.log("📋 Pass data:", {
       serialNumber: passData.uniqueCode,
-      description: passData.walletGiftCardName || "Gift Card",
+      description: passPkDescription,
       organizationName: process.env.APPLE_ORG_NAME || "GiftyGen",
       teamIdentifier: process.env.APPLE_TEAM_IDENTIFIER || process.env.APPLE_TEAM_ID || "PZZRSDZ86Z",
       passTypeIdentifier: process.env.APPLE_PASS_TYPE_IDENTIFIER || "pass.com.giftygen.giftcard",
@@ -399,7 +410,7 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
         {
           // Pass data
           serialNumber: passData.uniqueCode,
-          description: passData.walletGiftCardName || "Gift Card",
+          description: passPkDescription,
           organizationName: process.env.APPLE_ORG_NAME || "GiftyGen",
           teamIdentifier: process.env.APPLE_TEAM_IDENTIFIER || process.env.APPLE_TEAM_ID || "PZZRSDZ86Z",
           passTypeIdentifier: process.env.APPLE_PASS_TYPE_IDENTIFIER || "pass.com.giftygen.giftcard",
@@ -423,9 +434,14 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
     // Prepare dynamic values with proper formatting
     // Currency: If USD use $, otherwise default to ₹ (Indian Rupee)
     const currencySymbol = passData.currency === "INR" ? "₹" : "$";
-    const amountValue = `${currencySymbol} ${passData.amount || "0"}`;
+    const amountValue = isDailyPass
+      ? dailyOfferLine || "Daily Pass offer"
+      : `${currencySymbol} ${passData.amount ?? "0"}`;
+    const amountFieldLabel = isDailyPass ? "Offer" : "Amount";
     const recipientValue = passData.userName || "Recipient";
-    const giftCardTypeValue = passData.walletGiftCardName || "Gift Card";
+    const giftCardTypeValue = isDailyPass ? "Daily Pass" : passData.walletGiftCardName || "Gift Card";
+    const passHeaderTitle = isDailyPass ? "Daily Pass" : "Gift Card Purchase";
+    const passLogoText = isDailyPass ? "Daily Pass" : passData.walletGiftCardName || "Gift Card";
     
     // Format expiry date
     let validUntilValue = "No Expiry";
@@ -505,10 +521,11 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
       const auxAmountIndex = internalPass.storeCard.auxiliaryFields.findIndex((f) => f && f.key === "amount");
       if (auxAmountIndex >= 0) {
         internalPass.storeCard.auxiliaryFields[auxAmountIndex].value = amountValue;
+        internalPass.storeCard.auxiliaryFields[auxAmountIndex].label = amountFieldLabel;
       } else {
         internalPass.storeCard.auxiliaryFields.push({
           key: "amount",
-          label: "Amount",
+          label: amountFieldLabel,
           value: amountValue,
         });
       }
@@ -571,10 +588,11 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
     const auxAmountFieldIndex = pass.storeCard.auxiliaryFields.findIndex((f) => f && f.key === "amount");
     if (auxAmountFieldIndex >= 0) {
       pass.storeCard.auxiliaryFields[auxAmountFieldIndex].value = amountValue;
+      pass.storeCard.auxiliaryFields[auxAmountFieldIndex].label = amountFieldLabel;
     } else {
       pass.storeCard.auxiliaryFields.push({
         key: "amount",
-        label: "Amount",
+        label: amountFieldLabel,
         value: amountValue,
       });
     }
@@ -626,7 +644,7 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
         if (modifiedPassJson.storeCard.headerFields) {
           const titleField = modifiedPassJson.storeCard.headerFields.find((f) => f && f.key === "title");
           if (titleField) {
-            titleField.value = "Gift Card Purchase";
+            titleField.value = passHeaderTitle;
             console.log("✅ Updated template headerField title");
           }
         }
@@ -690,10 +708,11 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
           );
           if (templateAuxAmountIndex >= 0) {
             modifiedPassJson.storeCard.auxiliaryFields[templateAuxAmountIndex].value = amountValue;
+            modifiedPassJson.storeCard.auxiliaryFields[templateAuxAmountIndex].label = amountFieldLabel;
           } else {
             modifiedPassJson.storeCard.auxiliaryFields.push({
               key: "amount",
-              label: "Amount",
+              label: amountFieldLabel,
               value: amountValue,
             });
           }
@@ -763,7 +782,7 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
           },
           {
             serialNumber: passData.uniqueCode,
-            description: passData.walletGiftCardName || "Gift Card",
+            description: passPkDescription,
             organizationName: process.env.APPLE_ORG_NAME || "GiftyGen",
             teamIdentifier: process.env.APPLE_TEAM_IDENTIFIER || process.env.APPLE_TEAM_ID || "PZZRSDZ86Z",
             passTypeIdentifier: process.env.APPLE_PASS_TYPE_IDENTIFIER || "pass.com.giftygen.giftcard",
@@ -782,7 +801,7 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
         pass.backgroundColor = hexToRgbString(passData.giftCardDetails?.walletColor || "#4158D0");
         pass.foregroundColor = "rgb(255, 255, 255)";
         pass.labelColor = "rgb(255, 255, 255)";
-        pass.logoText = "Gift Card Purchase";
+        pass.logoText = passLogoText;
 
         console.log("✅ Recreated pass with dynamic template");
         passRecreated = true;
@@ -832,7 +851,7 @@ For more information, see: https://github.com/alexandercerutti/passkit-generator
       pass.backgroundColor = hexToRgbString(passData.giftCardDetails?.walletColor || "#4158D0");
       pass.foregroundColor = "rgb(255, 255, 255)";
       pass.labelColor = "rgb(255, 255, 255)";
-      pass.logoText = passData.walletGiftCardName || "Gift Card";
+      pass.logoText = passLogoText;
     }
 
     // Generate the .pkpass buffer

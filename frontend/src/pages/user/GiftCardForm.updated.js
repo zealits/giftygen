@@ -9,8 +9,18 @@ import { useDispatch, useSelector } from "react-redux";
 import RazorpayPaymentForm from "./RazorpayPaymentForm.js";
 import GoogleWalletIcon from "../../assets/paymenticons/google-wallet.png";
 import AppleWalletIcon from "../../assets/paymenticons/64px-Apple_Wallet_Icon.svg.png";
+import { isDailyPassCard } from "../../utils/giftCardDisplay";
 
-const GiftCardForm = ({ giftCardName, amount, discount, id, onClose, templateType }) => {
+const GiftCardForm = ({
+  giftCardName,
+  amount,
+  discount,
+  id,
+  onClose,
+  templateType,
+  dailyFreeConfig,
+  ...cardHints
+}) => {
   const { businessSlug } = useParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [purchaseType, setPurchaseType] = useState(null);
@@ -98,6 +108,19 @@ const GiftCardForm = ({ giftCardName, amount, discount, id, onClose, templateTyp
   });
 
   const totalSteps = 3;
+
+  const dailyPass = isDailyPassCard({
+    templateType,
+    dailyFreeConfig,
+    amount,
+    discount,
+    giftCardName,
+    ...cardHints,
+  });
+
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, id }));
+  }, [id]);
 
   const handlePurchaseTypeSelect = (type) => {
     setPurchaseType(type);
@@ -375,11 +398,16 @@ const validatePhone = (phone) => {
       console.log("Started wallet pass generation...");
     
 
-      // Step 1: Try to generate wallet pass
+      // Step 1: Try to generate wallet pass (include template hints — not all are on Mongo doc)
+      const walletPayload = {
+        ...formData,
+        templateType,
+        dailyFreeConfig,
+      };
       const response = await fetch("/api/wallet/generate-wallet-pass", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(walletPayload),
       });
 
 
@@ -864,7 +892,7 @@ const validatePhone = (phone) => {
                   {selectedPaymentGateway === "razorpay" && (
                     <RazorpayPaymentForm
                       amount={
-                        templateType === "dailyFree"
+                        dailyPass
                           ? 0
                           : parseFloat(discount ? (amount - (amount * discount) / 100).toFixed(2) : amount)
                       }

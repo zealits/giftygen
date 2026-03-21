@@ -32,6 +32,19 @@ const CreateGiftCard = () => {
     quantity: "",
     walletColor: "#3B5BDB",
   });
+  const [templateType, setTemplateType] = useState("standard"); // "standard" | "dailyFree"
+  const [dailyFreeConfig, setDailyFreeConfig] = useState({
+    dailyQuota: "",
+    validDaysFromIssue: "3",
+    minCartValue: "",
+    rewardType: "PERCENT",
+    rewardPercent: "",
+    rewardFixedAmount: "",
+    rewardItemSku: "",
+    customerSegment: "ALL",
+    startDate: "",
+    endDate: "",
+  });
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
   const [selectedFile, setSelectedFile] = useState({ file: null, name: "" });
@@ -64,6 +77,19 @@ const CreateGiftCard = () => {
   const [aiImagePanelOpen, setAiImagePanelOpen] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const getDailyPassOfferText = () => {
+    const minCart = Number(dailyFreeConfig.minCartValue) || 0;
+    if (dailyFreeConfig.rewardType === "PERCENT" && dailyFreeConfig.rewardPercent) {
+      return `${dailyFreeConfig.rewardPercent}% OFF on orders above ${formatCurrency(minCart, "INR")}`;
+    }
+    if (dailyFreeConfig.rewardType === "FIXED" && dailyFreeConfig.rewardFixedAmount) {
+      return `Flat ${formatCurrency(dailyFreeConfig.rewardFixedAmount, "INR")} OFF on orders above ${formatCurrency(minCart, "INR")}`;
+    }
+    if (dailyFreeConfig.rewardType === "FREE_ITEM" && dailyFreeConfig.rewardItemSku) {
+      return `Free ${dailyFreeConfig.rewardItemSku} on orders above ${formatCurrency(minCart, "INR")}`;
+    }
+    return `Offer unlocks above ${formatCurrency(minCart, "INR")}`;
+  };
 
   useEffect(() => {
     if (editId) {
@@ -101,6 +127,25 @@ const CreateGiftCard = () => {
     );
     setSelectedFile({ file: null, name: card.giftCardImg ? "Current image" : "" });
     setAiGeneratedFile(null);
+    setTemplateType(card.templateType === "dailyFree" ? "dailyFree" : "standard");
+    setDailyFreeConfig({
+      dailyQuota: card.dailyFreeConfig?.dailyQuota != null ? String(card.dailyFreeConfig.dailyQuota) : "",
+      validDaysFromIssue:
+        card.dailyFreeConfig?.validDaysFromIssue != null ? String(card.dailyFreeConfig.validDaysFromIssue) : "3",
+      minCartValue: card.dailyFreeConfig?.minCartValue != null ? String(card.dailyFreeConfig.minCartValue) : "",
+      rewardType: card.dailyFreeConfig?.rewardType || "PERCENT",
+      rewardPercent: card.dailyFreeConfig?.rewardPercent != null ? String(card.dailyFreeConfig.rewardPercent) : "",
+      rewardFixedAmount:
+        card.dailyFreeConfig?.rewardFixedAmount != null ? String(card.dailyFreeConfig.rewardFixedAmount) : "",
+      rewardItemSku: card.dailyFreeConfig?.rewardItemSku || "",
+      customerSegment: card.dailyFreeConfig?.customerSegment || "ALL",
+      startDate: card.dailyFreeConfig?.campaignStartDate
+        ? new Date(card.dailyFreeConfig.campaignStartDate).toISOString().split("T")[0]
+        : "",
+      endDate: card.dailyFreeConfig?.campaignEndDate
+        ? new Date(card.dailyFreeConfig.campaignEndDate).toISOString().split("T")[0]
+        : "",
+    });
     setEditPreFilled(true);
   }, [editId, editCard, editCardLoading, editPreFilled]);
 
@@ -129,6 +174,11 @@ const CreateGiftCard = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDailyFreeChange = (e) => {
+    const { name, value } = e.target;
+    setDailyFreeConfig((prev) => ({ ...prev, [name]: value }));
   };
 
   /** Clamp numeric fields to non-negative (and optional max). Prevents spinner/arrow key changes. */
@@ -216,6 +266,7 @@ const CreateGiftCard = () => {
     }
     setAiImageError("");
     const formDataToSubmit = new FormData();
+    formDataToSubmit.append("templateType", templateType);
     Object.keys(formData).forEach((key) => {
       if (key !== "image" && key !== "giftCardImg" && key !== "quantity") {
         const val = formData[key];
@@ -232,6 +283,23 @@ const CreateGiftCard = () => {
           })()
         : null;
     formDataToSubmit.append("quantity", quantityNum != null ? String(quantityNum) : "");
+    if (templateType === "dailyFree") {
+      formDataToSubmit.append("templateType", "dailyFree");
+      formDataToSubmit.append("dailyQuota", dailyFreeConfig.dailyQuota);
+      formDataToSubmit.append("validDaysFromIssue", dailyFreeConfig.validDaysFromIssue);
+      formDataToSubmit.append("minCartValue", dailyFreeConfig.minCartValue);
+      formDataToSubmit.append("rewardType", dailyFreeConfig.rewardType);
+      if (dailyFreeConfig.rewardType === "PERCENT") {
+        formDataToSubmit.append("rewardPercent", dailyFreeConfig.rewardPercent);
+      } else if (dailyFreeConfig.rewardType === "FIXED") {
+        formDataToSubmit.append("rewardFixedAmount", dailyFreeConfig.rewardFixedAmount);
+      } else if (dailyFreeConfig.rewardType === "FREE_ITEM") {
+        formDataToSubmit.append("rewardItemSku", dailyFreeConfig.rewardItemSku);
+      }
+      formDataToSubmit.append("customerSegment", dailyFreeConfig.customerSegment);
+      if (dailyFreeConfig.startDate) formDataToSubmit.append("campaignStartDate", dailyFreeConfig.startDate);
+      if (dailyFreeConfig.endDate) formDataToSubmit.append("campaignEndDate", dailyFreeConfig.endDate);
+    }
     if (imageFile) {
       formDataToSubmit.append("image", imageFile);
     }
@@ -356,6 +424,7 @@ const CreateGiftCard = () => {
     }
     setAiImageError("");
     const formDataToSubmit = new FormData();
+    formDataToSubmit.append("templateType", templateType);
     Object.keys(formData).forEach((key) => {
       if (key !== "image" && key !== "giftCardImg") {
         const val = formData[key];
@@ -373,6 +442,23 @@ const CreateGiftCard = () => {
         : null;
     formDataToSubmit.append("quantity", draftQuantityNum != null ? String(draftQuantityNum) : "");
     formDataToSubmit.append("status", "draft");
+    if (templateType === "dailyFree") {
+      formDataToSubmit.append("templateType", "dailyFree");
+      formDataToSubmit.append("dailyQuota", dailyFreeConfig.dailyQuota);
+      formDataToSubmit.append("validDaysFromIssue", dailyFreeConfig.validDaysFromIssue);
+      formDataToSubmit.append("minCartValue", dailyFreeConfig.minCartValue);
+      formDataToSubmit.append("rewardType", dailyFreeConfig.rewardType);
+      if (dailyFreeConfig.rewardType === "PERCENT") {
+        formDataToSubmit.append("rewardPercent", dailyFreeConfig.rewardPercent);
+      } else if (dailyFreeConfig.rewardType === "FIXED") {
+        formDataToSubmit.append("rewardFixedAmount", dailyFreeConfig.rewardFixedAmount);
+      } else if (dailyFreeConfig.rewardType === "FREE_ITEM") {
+        formDataToSubmit.append("rewardItemSku", dailyFreeConfig.rewardItemSku);
+      }
+      formDataToSubmit.append("customerSegment", dailyFreeConfig.customerSegment);
+      if (dailyFreeConfig.startDate) formDataToSubmit.append("campaignStartDate", dailyFreeConfig.startDate);
+      if (dailyFreeConfig.endDate) formDataToSubmit.append("campaignEndDate", dailyFreeConfig.endDate);
+    }
     const imageFile = selectedFile.file || aiGeneratedFile;
     if (imageFile) {
       formDataToSubmit.append("image", imageFile);
@@ -476,6 +562,36 @@ const CreateGiftCard = () => {
             <Sparkles size={18} />
             <span>AI-Assisted</span>
           </button>
+        </div>
+
+        <div className="create-giftcard-template-toggle create-giftcard-studio-card">
+          <div className="create-giftcard-template-header">
+            <span className="create-giftcard-section-title">Template Type</span>
+            <p className="create-giftcard-field-hint">
+              Choose between a prepaid Discount Card or a Daily Pass offer card.
+            </p>
+          </div>
+          <div className="create-giftcard-template-pills">
+            <button
+              type="button"
+              className={`template-pill ${templateType === "standard" ? "active" : ""}`}
+              onClick={() => setTemplateType("standard")}
+            >
+              Discount Card
+            </button>
+            <button
+              type="button"
+              className={`template-pill ${templateType === "dailyFree" ? "active" : ""}`}
+              onClick={() => setTemplateType("dailyFree")}
+            >
+              Daily Pass
+            </button>
+          </div>
+          {templateType === "dailyFree" && (
+            <p className="create-giftcard-field-hint">
+              Customers claim this pass for free and unlock an offer at checkout when minimum order conditions are met.
+            </p>
+          )}
         </div>
 
         <div className="create-giftcard-layout">
@@ -663,7 +779,12 @@ const CreateGiftCard = () => {
             <h2 className="create-giftcard-section-title">Pricing & Availability</h2>
             <div className="create-giftcard-price-row">
             <div className="giftcards-page-form-group">
-              <label htmlFor="amount">Price (₹) *</label>
+              <label htmlFor="amount">
+                Price (₹) *
+                {templateType === "dailyFree" && (
+                  <span className="create-giftcard-field-hint-inline"> Optional for Daily Pass.</span>
+                )}
+              </label>
               <input
                 type="number"
                 id="amount"
@@ -674,7 +795,7 @@ const CreateGiftCard = () => {
                 placeholder="50.00"
                 min="0"
                 step="0.01"
-                required
+                required={templateType !== "dailyFree"}
                 className="create-giftcard-number-input"
               />
             </div>
@@ -737,6 +858,173 @@ const CreateGiftCard = () => {
               </div>
             </div>
             </div>
+
+            {templateType === "dailyFree" && (
+              <div className="create-giftcard-studio-card">
+                <h2 className="create-giftcard-section-title">
+                  Daily Free Campaign Settings
+                </h2>
+                <p className="create-giftcard-field-hint">
+                  Configure how many free passes can be claimed per day, how long they stay valid, and what reward they unlock.
+                </p>
+                <div className="create-giftcard-price-row">
+                  <div className="giftcards-page-form-group">
+                    <label htmlFor="dailyQuota">
+                      Daily quota
+                      <span className="create-giftcard-field-hint-inline"> Max free claims per calendar day.</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="dailyQuota"
+                      name="dailyQuota"
+                      min="1"
+                      value={dailyFreeConfig.dailyQuota}
+                      onChange={handleDailyFreeChange}
+                      onKeyDown={preventArrowKeys}
+                      placeholder="e.g. 100"
+                      className="create-giftcard-number-input"
+                    />
+                  </div>
+                  <div className="giftcards-page-form-group">
+                    <label htmlFor="validDaysFromIssue">
+                      Validity after claim (days)
+                    </label>
+                    <input
+                      type="number"
+                      id="validDaysFromIssue"
+                      name="validDaysFromIssue"
+                      min="1"
+                      value={dailyFreeConfig.validDaysFromIssue}
+                      onChange={handleDailyFreeChange}
+                      onKeyDown={preventArrowKeys}
+                      placeholder="3"
+                      className="create-giftcard-number-input"
+                    />
+                  </div>
+                  <div className="giftcards-page-form-group">
+                    <label htmlFor="minCartValue">
+                      Minimum cart value (₹)
+                    </label>
+                    <input
+                      type="number"
+                      id="minCartValue"
+                      name="minCartValue"
+                      min="0"
+                      value={dailyFreeConfig.minCartValue}
+                      onChange={handleDailyFreeChange}
+                      onKeyDown={preventArrowKeys}
+                      placeholder="e.g. 799"
+                      className="create-giftcard-number-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="giftcards-page-form-group">
+                  <label htmlFor="rewardType">Reward type</label>
+                  <select
+                    id="rewardType"
+                    name="rewardType"
+                    value={dailyFreeConfig.rewardType}
+                    onChange={handleDailyFreeChange}
+                  >
+                    <option value="PERCENT">Percentage off</option>
+                    <option value="FIXED">Fixed amount off</option>
+                    <option value="FREE_ITEM">Free item</option>
+                  </select>
+                </div>
+
+                {dailyFreeConfig.rewardType === "PERCENT" && (
+                  <div className="giftcards-page-form-group">
+                    <label htmlFor="rewardPercent">Discount (%)</label>
+                    <input
+                      type="number"
+                      id="rewardPercent"
+                      name="rewardPercent"
+                      min="1"
+                      max="100"
+                      value={dailyFreeConfig.rewardPercent}
+                      onChange={handleDailyFreeChange}
+                      onKeyDown={preventArrowKeys}
+                      placeholder="e.g. 15"
+                      className="create-giftcard-number-input"
+                    />
+                  </div>
+                )}
+
+                {dailyFreeConfig.rewardType === "FIXED" && (
+                  <div className="giftcards-page-form-group">
+                    <label htmlFor="rewardFixedAmount">Amount off (₹)</label>
+                    <input
+                      type="number"
+                      id="rewardFixedAmount"
+                      name="rewardFixedAmount"
+                      min="1"
+                      value={dailyFreeConfig.rewardFixedAmount}
+                      onChange={handleDailyFreeChange}
+                      onKeyDown={preventArrowKeys}
+                      placeholder="e.g. 200"
+                      className="create-giftcard-number-input"
+                    />
+                  </div>
+                )}
+
+                {dailyFreeConfig.rewardType === "FREE_ITEM" && (
+                  <div className="giftcards-page-form-group">
+                    <label htmlFor="rewardItemSku">
+                      Free item / SKU
+                      <span className="create-giftcard-field-hint-inline">
+                        {" "}
+                        This item will be added as a free line item when the pass is used.
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      id="rewardItemSku"
+                      name="rewardItemSku"
+                      value={dailyFreeConfig.rewardItemSku}
+                      onChange={handleDailyFreeChange}
+                      placeholder="e.g. FREE-DESSERT or internal SKU"
+                    />
+                  </div>
+                )}
+
+                <div className="create-giftcard-price-row">
+                  <div className="giftcards-page-form-group">
+                    <label htmlFor="customerSegment">Customer segment</label>
+                    <select
+                      id="customerSegment"
+                      name="customerSegment"
+                      value={dailyFreeConfig.customerSegment}
+                      onChange={handleDailyFreeChange}
+                    >
+                      <option value="ALL">All customers</option>
+                      <option value="NEW_CUSTOMERS">New customers only</option>
+                      <option value="APP_ONLY">App users only</option>
+                    </select>
+                  </div>
+                  <div className="giftcards-page-form-group">
+                    <label htmlFor="startDate">Campaign start</label>
+                    <input
+                      type="date"
+                      id="startDate"
+                      name="startDate"
+                      value={dailyFreeConfig.startDate}
+                      onChange={handleDailyFreeChange}
+                    />
+                  </div>
+                  <div className="giftcards-page-form-group">
+                    <label htmlFor="endDate">Campaign end</label>
+                    <input
+                      type="date"
+                      id="endDate"
+                      name="endDate"
+                      value={dailyFreeConfig.endDate}
+                      onChange={handleDailyFreeChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="create-giftcard-studio-card">
             <h2 className="create-giftcard-section-title">Card Image</h2>
@@ -883,6 +1171,17 @@ const CreateGiftCard = () => {
                           const baseText = formatCurrency(base, "INR");
                           const finalText = formatCurrency(final, "INR");
 
+                          if (templateType === "dailyFree") {
+                            return (
+                              <>
+                                <span className="preview-dash-price preview-dash-price-final">Daily Pass</span>
+                                <span className="preview-dash-price-label-inline">
+                                  {getDailyPassOfferText()}
+                                </span>
+                              </>
+                            );
+                          }
+
                           return hasDiscount ? (
                             <>
                               <span className="preview-dash-price preview-dash-price-original">
@@ -896,7 +1195,9 @@ const CreateGiftCard = () => {
                             <span className="preview-dash-price">{baseText}</span>
                           );
                         })()}
-                        <span className="preview-dash-price-label">Gift Value</span>
+                        <span className="preview-dash-price-label">
+                          {templateType === "dailyFree" ? "Offer Pass" : "Gift Value"}
+                        </span>
                       </div>
                       <div className="preview-dash-discount-wrap">
                         {formData.discount ? (
@@ -935,6 +1236,22 @@ const CreateGiftCard = () => {
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 600, marginTop: 8 }}>
                       {(() => {
+                        if (templateType === "dailyFree") {
+                          const expiryLabel = formData.expirationDate
+                            ? (() => {
+                                const d = new Date(formData.expirationDate);
+                                if (Number.isNaN(d.getTime())) return "";
+                                return d.toLocaleDateString("en-IN", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                });
+                              })()
+                            : "";
+                          return expiryLabel
+                            ? `${getDailyPassOfferText()} • Valid till: ${expiryLabel}`
+                            : getDailyPassOfferText();
+                        }
                         const amount = formData.amount || "0";
                         const expiryLabel = formData.expirationDate
                           ? (() => {
@@ -1043,7 +1360,7 @@ const CreateGiftCard = () => {
                     </div>
                     {/* Amount shown as watermark-style text, not over the hero image */}
                     <div style={{ fontSize: 20, fontWeight: 600, marginTop: 10 }}>
-                      ₹ {formData.amount || "0"}
+                      {templateType === "dailyFree" ? "Daily Pass Offer" : `₹ ${formData.amount || "0"}`}
                     </div>
                     {/* QR placeholder */}
                     <div
@@ -1081,7 +1398,9 @@ const CreateGiftCard = () => {
                 <div className="create-giftcard-info-row">
                   <span className="create-giftcard-info-label">Final Price</span>
                   <span className="create-giftcard-info-value price-val">
-                    {formData.amount
+                    {templateType === "dailyFree"
+                      ? "Free to claim"
+                      : formData.amount
                       ? (() => {
                           const base = Number(formData.amount) || 0;
                           const disc = Number(formData.discount) || 0;

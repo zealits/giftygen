@@ -5,6 +5,7 @@ import { getGiftCardDetails, listGiftCards } from "../../services/Actions/giftCa
 import { fetchBusinessBySlug } from "../../services/Actions/authActions";
 import GiftCardForm from "./GiftCardForm";
 import { formatCurrency } from "../../utils/currency";
+import { isDailyPassCard, getDailyPassOfferText } from "../../utils/giftCardDisplay";
 import SEO from "../../components/SEO";
 import { getGiftCardProductSchema, getBreadcrumbSchema } from "../../utils/structuredData";
 import { Share2, MessageCircle } from "lucide-react";
@@ -78,24 +79,15 @@ const GiftCardDetails = () => {
       discount: giftCard.discount,
       id: giftCard._id,
       templateType: giftCard.templateType,
+      dailyFreeConfig: giftCard.dailyFreeConfig,
+      isFreeClaimable: giftCard.isFreeClaimable,
+      claimPrice: giftCard.claimPrice,
+      giftCardTag: giftCard.giftCardTag,
+      tags: giftCard.tags,
+      description: giftCard.description,
     });
     setShowGiftCardForm(true);
   };
-  const getDailyPassOfferText = (card) => {
-    const cfg = card?.dailyFreeConfig || {};
-    const minCart = Number(cfg.minCartValue) || 0;
-    if (cfg.rewardType === "PERCENT" && cfg.rewardPercent) {
-      return `${cfg.rewardPercent}% OFF on orders above ${formatCurrency(minCart, "INR")}`;
-    }
-    if (cfg.rewardType === "FIXED" && cfg.rewardFixedAmount) {
-      return `Flat ${formatCurrency(cfg.rewardFixedAmount, "INR")} OFF on orders above ${formatCurrency(minCart, "INR")}`;
-    }
-    if (cfg.rewardType === "FREE_ITEM" && cfg.rewardItemSku) {
-      return `Free ${cfg.rewardItemSku} on orders above ${formatCurrency(minCart, "INR")}`;
-    }
-    return "Daily Pass offer";
-  };
-
   // Handle parallax effect on image
   const handleMouseMove = (e) => {
     if (imageRef.current) {
@@ -326,7 +318,7 @@ if (loading) return (
           <div className="price-container fade-in-up delay-4">
             <div className="price">
               {(() => {
-                if (giftCard.templateType === "dailyFree") {
+                if (isDailyPassCard(giftCard)) {
                   return <span className="amount">Daily Pass</span>;
                 }
                 const base = Number(giftCard.amount) || 0;
@@ -344,11 +336,11 @@ if (loading) return (
                   <span className="amount">{baseText}</span>
                 );
               })()}
-              {giftCard.templateType !== "dailyFree" && giftCard.discount > 0 && (
+              {!isDailyPassCard(giftCard) && giftCard.discount > 0 && (
                 <span className="discount pulse-animation">{giftCard.discount}% Off</span>
               )}
             </div>
-            {giftCard.templateType === "dailyFree" ? (
+            {isDailyPassCard(giftCard) ? (
               <div className="saved-amount highlight-text">{getDailyPassOfferText(giftCard)}</div>
             ) : giftCard.discount > 0 ? (
               <div className="saved-amount highlight-text">
@@ -374,7 +366,7 @@ if (loading) return (
 
           <div className="action-buttons fade-in-up delay-6">
             <button className="buy-now-btn" onClick={handleBuyNow}>
-              <span className="btn-text">{giftCard.templateType === "dailyFree" ? "Claim Pass" : "Buy Now"}</span>
+              <span className="btn-text">{isDailyPassCard(giftCard) ? "Claim Pass" : "Buy Now"}</span>
               <span className="btn-icon">→</span>
               <div className="btn-background"></div>
             </button>
@@ -407,7 +399,7 @@ if (loading) return (
                 <div className="gift-details-other-card-body">
                   <h3 className="gift-details-other-card-title">{card.giftCardName}</h3>
                   <span className="gift-details-other-card-price">
-                    {card.templateType === "dailyFree"
+                    {isDailyPassCard(card)
                       ? getDailyPassOfferText(card)
                       : `${formatCurrency(card.amount, "INR")}${card.discount > 0 ? ` · ${card.discount}% Off` : ""}`}
                   </span>
